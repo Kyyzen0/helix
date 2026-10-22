@@ -26,15 +26,16 @@ Column {
     property real labelGap: 0
 
     width: parent ? parent.width : 0
-    spacing: 6
+    spacing: Theme.var.space8
 
     Text {
         visible: group.item && !group.item.labelHidden && !group.labelInline
         text: group.item ? group.item.label : ""
         color: Theme.var.textLabel
         font.family: Theme.var.fontSans
-        font.pixelSize: 10
+        font.pixelSize: Theme.var.textMicro
         font.weight: Font.Bold
+        font.letterSpacing: 1.1
         font.capitalization: Font.AllUppercase
     }
 

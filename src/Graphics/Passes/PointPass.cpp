@@ -5,7 +5,9 @@
 
 namespace enzo::gfx {
 
-PointPass::PointPass(Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants)
+PointPass::PointPass(
+    Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants, Diligent::Uint8 sampleCount
+)
 {
     // Corner buffer
     const std::vector<glm::vec2> corners = {{-0.5f, -0.5f}, {0.5f, -0.5f}, {-0.5f, 0.5f}, {0.5f, 0.5f}};
@@ -33,7 +35,7 @@ PointPass::PointPass(Diligent::IRenderDevice* device, Diligent::IBuffer* frameCo
         createShader(device, shaders::pointsSource, Diligent::SHADER_TYPE_PIXEL, "pixelMain");
     pipelineInfo.pVS = vertexShader;
     pipelineInfo.pPS = pixelShader;
-    pipeline_ = createPipeline(device, pipelineInfo, frameConstants);
+    pipeline_ = createPipeline(device, pipelineInfo, frameConstants, sampleCount);
 }
 
 void PointPass::upload(Diligent::IRenderDevice* device, const DisplayGeometry& geometry)

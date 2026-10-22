@@ -41,8 +41,9 @@ Item {
         text: divider.label
         color: Theme.var.textLabel
         font.family: Theme.var.fontSans
-        font.pixelSize: 10
+        font.pixelSize: Theme.var.textMicro
         font.weight: Font.Bold
+        font.letterSpacing: 1.1
         font.capitalization: Font.AllUppercase
     }
 

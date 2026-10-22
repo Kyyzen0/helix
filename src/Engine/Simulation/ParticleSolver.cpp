@@ -116,8 +116,10 @@ std::vector<Particle> simulateParticles(
 
     // The system is always run from the frame it starts on, so the state at a
     // frame does not depend on how the scene got there.
-    const intT frameCount = static_cast<intT>(std::floor(endFrame - startFrame + 1e-4f));
-    for (intT frameIndex = 0; frameIndex < frameCount; ++frameIndex)
+    const floatT frameCount = endFrame - startFrame;
+    const intT wholeFrames = static_cast<intT>(std::floor(frameCount + 1e-4f));
+
+    for (intT frameIndex = 0; frameIndex < wholeFrames; ++frameIndex)
     {
         const floatT frame = startFrame + static_cast<floatT>(frameIndex);
         const ParticleSettings settings =
@@ -125,6 +127,21 @@ std::vector<Particle> simulateParticles(
 
         for (intT stepIndex = 0; stepIndex < steps; ++stepIndex)
             solver.step(settings, stepTime);
+    }
+
+    // The frame the scene sits on may sit between two whole frames, so the run
+    // ends with a fraction of a frame. Without it, scrubbing to a half frame
+    // would give the state of the frame below it.
+    const floatT remainder = frameCount - static_cast<floatT>(wholeFrames);
+    if (remainder > 1e-4f)
+    {
+        const floatT frame = startFrame + static_cast<floatT>(wholeFrames);
+        const ParticleSettings settings =
+            settingsAtFrame ? settingsAtFrame(frame) : startSettings;
+
+        const floatT partialStepTime = stepTime * remainder;
+        for (intT stepIndex = 0; stepIndex < steps; ++stepIndex)
+            solver.step(settings, partialStepTime);
     }
 
     return solver.getParticles();

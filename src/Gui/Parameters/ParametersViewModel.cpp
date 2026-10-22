@@ -41,6 +41,7 @@ void ParametersViewModel::rebuild()
         nodeName_ = QString::fromStdString(node.getName());
         nodeType_ = QString::fromStdString(node.getType().getLabel());
         nodeIconUrl_ = QUrl::fromLocalFile(QString::fromStdString(node.getType().getIconFile().string()));
+        nodeFamily_ = QString::fromStdString(node.getType().typeNamespace);
         for (const prm::Template& prmTemplate : node.getTemplates())
             topLevel_.append(buildItem(prmTemplate, node));
     }
@@ -86,6 +87,7 @@ void ParametersViewModel::clear()
     nodeName_.clear();
     nodeType_.clear();
     nodeIconUrl_.clear();
+    nodeFamily_.clear();
 }
 
 } // namespace enzo::ui

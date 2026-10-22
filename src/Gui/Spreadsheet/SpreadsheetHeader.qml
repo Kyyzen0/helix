@@ -10,13 +10,13 @@ Rectangle {
     property var viewModel
     readonly property var path: root.viewModel.nodePath
 
-    color: Theme.var.surfaceHeader
+    color: Theme.spreadsheet.headerColor
 
     Rectangle {
         anchors.bottom: parent.bottom
         width: parent.width
         height: 1
-        color: Theme.var.borderSoft
+        color: Theme.spreadsheet.headerBorderColor
     }
 
     // Title, breadcrumb.

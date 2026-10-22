@@ -16,7 +16,10 @@ class MeshPass
     /// @brief Builds the pipelines that draw the mesh.
     ///
     /// @param frameConstants the buffer the renderer fills with the frame constants.
-    MeshPass(Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants);
+    /// @param sampleCount the number of samples the viewport targets hold.
+    MeshPass(
+        Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants, Diligent::Uint8 sampleCount
+    );
 
     /// @brief Replaces the drawn mesh with the geometry.
     void upload(Diligent::IRenderDevice* device, const DisplayGeometry& geometry);
@@ -28,6 +31,8 @@ class MeshPass
     /// @brief Draws the indexed vertices with the pipeline.
     void drawIndexed(Diligent::IDeviceContext* context, const Pipeline& pipeline, const GpuArray& indices);
 
+    /// @brief The pipeline that fills the depth of the mesh before it is shaded.
+    Pipeline depthPrepassPipeline_;
     Pipeline shadedTrianglePipeline_;
     Pipeline shadedLinePipeline_;
     Pipeline wireframePipeline_;

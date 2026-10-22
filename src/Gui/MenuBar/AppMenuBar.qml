@@ -5,6 +5,8 @@ import "../Settings"
 
 // The menu bar used at the top of the app.
 MenuBar {
+    brandText: "Helix"
+
     FileDialog {
         id: openDialog
         title: "Open Scene"

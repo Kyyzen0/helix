@@ -32,7 +32,9 @@ std::vector<glm::vec3> buildGridVertices()
 
 } // namespace
 
-GridPass::GridPass(Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants)
+GridPass::GridPass(
+    Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants, Diligent::Uint8 sampleCount
+)
 {
     // Vertex buffer
     vertices_ = createGpuArray(device, "Grid vertices", Diligent::BIND_VERTEX_BUFFER, buildGridVertices());
@@ -64,7 +66,7 @@ GridPass::GridPass(Diligent::IRenderDevice* device, Diligent::IBuffer* frameCons
         createShader(device, shaders::gridSource, Diligent::SHADER_TYPE_PIXEL, "pixelMain");
     pipelineInfo.pVS = vertexShader;
     pipelineInfo.pPS = pixelShader;
-    pipeline_ = createPipeline(device, pipelineInfo, frameConstants);
+    pipeline_ = createPipeline(device, pipelineInfo, frameConstants, sampleCount);
 }
 
 void GridPass::draw(Diligent::IDeviceContext* context)

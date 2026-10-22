@@ -70,6 +70,43 @@ foreach(tool IN ITEMS BISON_EXECUTABLE FLEX_EXECUTABLE)
     endif()
 endforeach()
 
+# daslang regenerates its parsers from a grammar during the build, and the
+# committed parsers were produced by bison 3.8.2. An older bison generates a
+# parser daslang cannot compile, and macOS ships bison 2.3.
+#
+# The version is checked here, where the toolchain of the host is still known,
+# rather than in the build of daslang, where a wrong bison shows up as a parse
+# error in a file of a third party project. The toolchain of the repository
+# carries a bison that is new enough, and the message points at it.
+if(APPLE)
+    if(NOT "$ENV{BISON_EXECUTABLE}" STREQUAL "")
+        set(enzo_bison "$ENV{BISON_EXECUTABLE}")
+    else()
+        find_program(enzo_bison NAMES bison)
+    endif()
+
+    if(NOT enzo_bison)
+        message(FATAL_ERROR
+            "daslang needs bison 3.8 or newer to regenerate its parsers, and none was found. "
+            "Run ./scripts/bootstrap-macos.sh and source toolchain/env.sh before configuring the build.")
+    endif()
+
+    execute_process(
+        COMMAND "${enzo_bison}" --version
+        OUTPUT_VARIABLE enzo_bison_version_output
+        ERROR_QUIET
+    )
+    string(REGEX MATCH "[0-9]+\\.[0-9]+(\\.[0-9]+)?" enzo_bison_version "${enzo_bison_version_output}")
+
+    if(enzo_bison_version VERSION_LESS "3.8")
+        message(FATAL_ERROR
+            "daslang needs bison 3.8 or newer to regenerate its parsers, and ${enzo_bison} is ${enzo_bison_version}. "
+            "Run ./scripts/bootstrap-macos.sh and source toolchain/env.sh before configuring the build.")
+    endif()
+
+    message(STATUS "The parsers of daslang are generated with bison ${enzo_bison_version}, at ${enzo_bison}")
+endif()
+
 # What every dependency is configured with.
 set(ENZO_DEP_CMAKE_ARGS
     ${ENZO_TOOLCHAIN_CMAKE_ARGS}

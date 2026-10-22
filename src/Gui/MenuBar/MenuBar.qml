@@ -7,9 +7,12 @@ import Enzo
 Item {
     id: bar
 
-    implicitHeight: 32
+    implicitHeight: 38
 
     property var menus: []
+
+    // The name shown at the leading edge of the bar, empty for none.
+    property string brandText: ""
 
     // Title whose menu is open, or -1 when the bar is closed.
     property int openIndex: -1
@@ -33,9 +36,51 @@ Item {
         color: Theme.menu.barColor
     }
 
-    Row {
+    // The line that separates the bar from the panes below it.
+    Rectangle {
+        anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.leftMargin: 8
+        anchors.right: parent.right
+        height: 1
+        color: Theme.menu.barBorderColor
+    }
+
+    Row {
+        id: brand
+
+        visible: bar.brandText !== ""
+        anchors.left: parent.left
+        anchors.leftMargin: Theme.var.space12
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: Theme.var.space8
+
+        // The mark that names the application.
+        Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 10
+            height: 10
+            radius: 2.5
+            color: Theme.var.accent
+            rotation: 45
+        }
+
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: bar.brandText
+            color: Theme.menu.brandColor
+            font.family: Theme.var.fontSans
+            font.pixelSize: Theme.var.textCaption
+            font.weight: Font.DemiBold
+            font.letterSpacing: 1.6
+            font.capitalization: Font.AllUppercase
+        }
+    }
+
+    Row {
+        id: titles
+
+        anchors.left: brand.right
+        anchors.leftMargin: brand.visible ? Theme.var.space16 : 0
         anchors.verticalCenter: parent.verticalCenter
         spacing: 2
 
@@ -50,18 +95,18 @@ Item {
 
                 readonly property bool open: bar.openIndex === index
 
-                width: label.implicitWidth + 18
-                height: 22
-                radius: 6
-                color: open || hover.hovered ? Theme.var.borderSoft : "transparent"
+                width: label.implicitWidth + Theme.var.space16
+                height: 24
+                radius: Theme.var.controlRadius
+                color: open || hover.hovered ? Theme.menu.itemHoverFill : "transparent"
 
                 Text {
                     id: label
                     anchors.centerIn: parent
                     text: title.modelData.title
-                    color: Theme.var.text
+                    color: title.open ? Theme.menu.itemHoverColor : Theme.menu.itemColor
                     font.family: Theme.var.fontSans
-                    font.pixelSize: 12
+                    font.pixelSize: Theme.var.textBody
                 }
 
                 HoverHandler {

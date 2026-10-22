@@ -13,13 +13,6 @@ namespace enzo::ui {
 
 namespace {
 
-// Stroke widths for a normal link, a hovered cut target, a rewire pickup preview,
-// and a link a node drop would wire.
-constexpr float kLinkWidth = 1;
-constexpr float kCutWidth = 1;
-constexpr float kRedirectWidth = 2;
-constexpr float kPreviewWidth = 2;
-
 // How long a cut link takes to dissolve, and how soft the dissolving edge is.
 constexpr qreal kFadeMs = 150;
 constexpr qreal kFadeSoftness = 0.2;
@@ -386,6 +379,26 @@ void NodeLinkLayer::clearHover() { setHover(-1, LinkHover::None); }
 
 NodeLinkLayer::LinkHover NodeLinkLayer::hoverKind() const { return hoverKind_; }
 
+qreal NodeLinkLayer::linkWidth() const { return linkWidth_; }
+
+void NodeLinkLayer::setLinkWidth(qreal width)
+{
+    if (qFuzzyCompare(linkWidth_, width)) return;
+    linkWidth_ = width;
+    Q_EMIT linkWidthChanged();
+    update();
+}
+
+qreal NodeLinkLayer::activeWidth() const { return activeWidth_; }
+
+void NodeLinkLayer::setActiveWidth(qreal width)
+{
+    if (qFuzzyCompare(activeWidth_, width)) return;
+    activeWidth_ = width;
+    Q_EMIT activeWidthChanged();
+    update();
+}
+
 bool NodeLinkLayer::floatingActive() const { return floatingActive_; }
 
 void NodeLinkLayer::setFloatingActive(bool active)
@@ -574,7 +587,7 @@ QSGNode* NodeLinkLayer::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
 
         const bool cutHovered = hoverKind_ == LinkHover::Cut && link.linkIndex == hoverLink_;
         const QColor& color = cutHovered ? cutColor_ : linkColor_;
-        const float width = cutHovered ? kCutWidth : kLinkWidth;
+        const float width = static_cast<float>(cutHovered ? linkWidth_ : linkWidth_);
         updateLinkNode(claimNode(), sampleLinkPath(link), color, width, QPointF(), -1);
 
         // The half a press would pick up draws tinted over the hovered link.
@@ -585,7 +598,14 @@ QSGNode* NodeLinkLayer::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
             const std::vector<QPointF> half = hoverAtOutputEnd_
                                                   ? std::vector<QPointF>(points.begin(), middle + 1)
                                                   : std::vector<QPointF>(middle, points.end());
-            updateLinkNode(claimNode(), half, redirectColor_, kRedirectWidth, QPointF(), -1);
+            updateLinkNode(
+                claimNode(),
+                half,
+                redirectColor_,
+                static_cast<float>(activeWidth_),
+                QPointF(),
+                -1
+            );
         }
     }
 
@@ -609,7 +629,7 @@ QSGNode* NodeLinkLayer::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
             claimNode(),
             sampleLinkPath(Link{*output, *input}),
             previewColor_,
-            kPreviewWidth,
+            static_cast<float>(activeWidth_),
             QPointF(),
             -1
         );
@@ -621,7 +641,7 @@ QSGNode* NodeLinkLayer::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
             claimNode(),
             sampleLinkPath(fade.link),
             cutColor_,
-            kLinkWidth,
+            static_cast<float>(linkWidth_),
             fade.cutPoint,
             fade.progress
         );

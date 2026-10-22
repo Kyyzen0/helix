@@ -18,7 +18,10 @@ class CameraPrimPass
     /// @brief Builds the frame shape and the pipeline that draws it.
     ///
     /// @param frameConstants the buffer the renderer fills with the frame constants.
-    CameraPrimPass(Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants);
+    /// @param sampleCount the number of samples the viewport targets hold.
+    CameraPrimPass(
+        Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants, Diligent::Uint8 sampleCount
+    );
 
     /// @brief Replaces the drawn cameras with the cameras of the geometry.
     void upload(Diligent::IRenderDevice* device, const DisplayGeometry& geometry);

@@ -27,7 +27,7 @@ Item {
             radius: 8
             anchors.verticalCenter: parent.verticalCenter
             x: (root.item && root.item.value) ? parent.width - width - 2 : 2
-            color: Theme.var.text
+            color: Theme.toggle.knobColor
             Behavior on x { NumberAnimation { duration: 90 } }
         }
 

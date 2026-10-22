@@ -32,6 +32,14 @@ variables:
   accent:       "#cba6f7"
   accentBright: "#b4befe"
 
+  # The signal palette, drawn from the Catppuccin accents.
+  signalBlue:   "#89b4fa"
+  signalTeal:   "#94e2d5"
+  signalGreen:  "#a6e3a1"
+  signalAmber:  "#fab387"
+  signalRose:   "#f5c2e7"
+  signalViolet: "#cba6f7"
+
   # Fill that marks a value, such as the bar in a slider
   valueFill: "#313244"
 

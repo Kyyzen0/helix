@@ -15,7 +15,7 @@ Column {
 
     // Horizontal padding each row carries around its content.
     property real contentInset: 0
-    spacing: 6
+    spacing: Theme.var.space8
 
     function remeasure() {
         let measured = 0

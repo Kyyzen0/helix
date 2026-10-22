@@ -86,7 +86,11 @@ build-super/enzo-build/helix.app/Contents/MacOS/helix
 
 daslang regenerates its parsers from a grammar during the build, with bison
 and flex. macOS ships bison 2.3, which generates a parser daslang cannot
-compile, and the build looks for a newer one.
+compile, and the build looks for a newer one. The committed parsers were
+produced by bison 3.8.2, and the build that was verified here used bison
+3.8.2 for all three grammars of daslang (`src/parser/ds_parser.ypp`,
+`src/parser/ds2_parser.ypp` and `utils/dasFormatter/ds_parser.ypp`) and flex
+2.6.4 for the two lexers.
 
 The toolchain therefore carries bison, flex and m4, all from the conda-forge
 channel, and the build runs them through a wrapper in
@@ -95,15 +99,46 @@ channel, and the build runs them through a wrapper in
 - runs bison without the C locale, which the conda build of bison does not
   survive. CMake asks a tool for its version in the C locale, so without this
   the build cannot even find bison.
-- points bison at `BISON_PKGDATADIR`, because the conda build has the folder
-  of the machine that built it baked in, and at the `M4` of the toolchain.
-  The macro processor of macOS is too old for bison and writes its temporary
-  file into a fixed folder, which a restricted host may not allow it to
-  remove.
+- points bison at `BISON_PKGDATADIR`, when the data files of bison are in the
+  toolchain, because the conda build has the folder of the machine that built
+  it baked in, and at the `M4` of the toolchain. The macro processor of macOS
+  is too old for bison and writes its temporary file into a fixed folder,
+  which a restricted host may not allow it to remove.
 
 `toolchain/env.sh` exports `BISON_EXECUTABLE` and `FLEX_EXECUTABLE` so that
 CMake finds the wrapper, and the superbuild passes both on to the build of
-Helix itself.
+Helix itself. It also puts `toolchain/bison/bin` on the `PATH`, so the bison
+of the toolchain comes before the one of the system.
+
+A bison that was built from the sources into `toolchain/bison` works as well:
+the bootstrap keeps a bison that is already in that folder instead of
+replacing it with the package, and the wrapper only points bison at the data
+files of the toolchain when they are there.
+
+The superbuild checks the version of bison while it configures, and stops
+with a message that names the toolchain, when the bison it would find is
+older than 3.8. Without that check the build goes on and regenerates the
+parsers of daslang with the bison of the system, which fails much later and
+far from the cause.
+
+## The noise the tools of the system print
+
+Every tool of Apple that goes through `xcrun` prints this on the error
+stream, before it does its work:
+
+```
+error: couldn't rename cache file '/var/folders/.../T/xcrun_db-XXXX' to '/var/folders/.../T/xcrun_db' (errno=Operation not permitted)
+```
+
+It is noise. The tool still runs and still ends with the exit code it should
+have, and the build is not affected by it. The cache of `xcrun` is a file it
+renames, and a host that refuses the rename makes it complain. Moving the
+temporary folder or setting `XCRUN_CACHE_PATH` does not silence it.
+
+The build prints the same complaint when `strip` and `install_name_tool` run,
+since they go through the same wrapper. A check of the build that reads the
+error stream of a tool has to know about it, or it will read the noise for a
+failure.
 
 ## The Vulkan driver
 
@@ -215,3 +250,21 @@ points that came up while porting the build:
   only in the metadata that never reaches the tree. Git itself is not
   affected: it reads the submodule list from its index, so
   `git submodule update --init` still works without the file on disk.
+- **Here documents fail.** A shell that writes a here document has to create a
+  temporary file for it, and a host that refuses that write stops the shell
+  with `cannot create temp file for here document: Operation not permitted`.
+  Every `configure` script of autoconf uses here documents inside, so a
+  dependency that is configured that way fails on such a host. `zsh` manages
+  the same script, and the toolchain of the repository builds its own
+  dependencies through CMake, which does not need a here document.
+- **The removal of a file can be refused.** A host that routes `rm` through a
+  helper refuses it for many paths, and autoconf cleans its `conftest.*`
+  files that way. The failure is usually harmless, but when the file it
+  removed was the one the compiler check wrote, the script reports `C
+  compiler cannot create executables`, which has nothing to do with the
+  compiler.
+
+Because of the last two points, a dependency that offers a CMake path is
+built through it rather than through autoconf. Every dependency of this
+project has such a path, and the build on a normal macOS machine is the same
+either way.

@@ -24,6 +24,13 @@ std::shared_ptr<prm::NodeParameter> findParameter(const KeyframeTarget& target)
     return nt::nm().getNode(target.nodeId).getParameter(target.parameter).lock();
 }
 
+// Tells the engine that a value no longer reads the scene time, so a scene
+// with no keyframes left stops being moved by the clock.
+void clearTimeDependency(const KeyframeTarget& target)
+{
+    nt::nm().graph().setTimeDependent(nt::Unit{target.nodeId, target.parameter, target.component}, false);
+}
+
 } // namespace
 
 KeyframeStore& KeyframeStore::instance()
@@ -120,6 +127,10 @@ void KeyframeStore::clearTrack(const KeyframeTarget& target)
     baseExpressions_.erase(target);
     tracks_.erase(found);
 
+    // The value no longer reads the time, so the engine does not have to move
+    // it when the scene moves.
+    clearTimeDependency(target);
+
     trackChanged(target);
     tracksChanged();
 }
@@ -134,6 +145,7 @@ void KeyframeStore::removeNode(nt::NodeId nodeId)
     {
         tracks_.erase(target);
         baseExpressions_.erase(target);
+        clearTimeDependency(target);
         trackChanged(target);
     }
     if (!removed.empty()) tracksChanged();
@@ -142,6 +154,9 @@ void KeyframeStore::removeNode(nt::NodeId nodeId)
 void KeyframeStore::clear()
 {
     if (tracks_.empty()) return;
+
+    for (const auto& [target, track] : tracks_) clearTimeDependency(target);
+
     tracks_.clear();
     baseExpressions_.clear();
     tracksChanged();

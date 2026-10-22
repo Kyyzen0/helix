@@ -7,9 +7,9 @@ import "."
 Rectangle {
     id: root
 
-    color: Theme.var.surface
-    radius: Theme.var.panelRadius
-    border.color: Theme.var.border
+    // The pane the canvas sits in draws the plate and the outline around it, so
+    // the canvas itself carries no background of its own.
+    color: "transparent"
     focus: true
     clip: true
 
@@ -123,6 +123,8 @@ Rectangle {
             cutColor: Theme.nodeLink.cutColor
             redirectColor: Theme.nodeLink.redirectColor
             previewColor: Theme.nodeLink.activeColor
+            linkWidth: Theme.nodeLink.width
+            activeWidth: Theme.nodeLink.activeWidth
             previewCutLinks: dropController.preview ? dropController.preview.cutLinks : []
             previewLinks: dropController.preview ? dropController.preview.newLinks : []
         }
@@ -142,6 +144,8 @@ Rectangle {
             floatingOutput: linkController.outputPoint
             floatingInput: linkController.inputPoint
             linkColor: Theme.nodeLink.activeColor
+            linkWidth: Theme.nodeLink.activeWidth
+            activeWidth: Theme.nodeLink.activeWidth
         }
 
         // The selection box draws over every node it covers.

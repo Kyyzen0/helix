@@ -32,6 +32,14 @@ variables:
   accent:       "#7aa2f7"
   accentBright: "#7dcfff"
 
+  # The signal palette, drawn from the Tokyo Night accents.
+  signalBlue:   "#7aa2f7"
+  signalTeal:   "#7dcfff"
+  signalGreen:  "#9ece6a"
+  signalAmber:  "#e0af68"
+  signalRose:   "#f7768e"
+  signalViolet: "#bb9af7"
+
   # Fill that marks a value, such as the bar in a slider
   valueFill: "#292e42"
 

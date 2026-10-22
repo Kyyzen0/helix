@@ -12,16 +12,22 @@ import "MenuBar"
 import "Timeline"
 
 // Root window of the QML application.
+//
+// The shell is three bands: the menu bar at the top, the workspace in the
+// middle, and the transport and the status strip along the bottom. The
+// workspace is split into the node graph, the viewport and the spreadsheet
+// down the middle, with the parameters of the primary node along the side.
 ApplicationWindow {
     id: window
 
-    width: 1280
-    height: 800
+    width: 1440
+    height: 900
+    minimumWidth: 1024
+    minimumHeight: 640
     visible: true
     visibility: Window.Maximized
-    title: "Helix"
+    title: scene.hasCurrentFile ? scene.currentFileName + " — Helix" : "Helix"
     color: Theme.var.background
-    property real marginSize: 8
 
     Shortcut {
         sequence: StandardKey.Undo
@@ -34,84 +40,134 @@ ApplicationWindow {
 
     menuBar: AppMenuBar {}
 
-    SplitView {
-        id: split
-
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.bottom: timelinePanel.top
-        anchors.margins: window.marginSize
-        orientation: Qt.Vertical
-
-        // Invisible handle that still accepts drags to resize the sections.
-        handle: Item {
-            implicitHeight: window.marginSize
-        }
-
-        // Top row splits the network and the viewport side by side.
-        SplitView {
-            id: topRow
-
-            SplitView.preferredHeight: Math.round(split.height * 0.7)
-            orientation: Qt.Horizontal
-
-            handle: Item {
-                implicitWidth: window.marginSize
-            }
-
-            Item {
-                SplitView.preferredWidth: Math.round(topRow.width * 0.63)
-
-                Panel {
-                    anchors.fill: parent
-
-                    Network {
-                        anchors.fill: parent
-                    }
-                }
-
-                // Parameters float over the network at its top right.
-                ParametersPanel {
-                    anchors.top: parent.top
-                    anchors.right: parent.right
-                    anchors.margins: 14
-                }
-            }
-
-            Panel {
-                Viewport {
-                    anchors.fill: parent
-                }
-            }
-        }
-
-        Panel {
-            Spreadsheet {
-                viewModel: spreadsheet
-                anchors.fill: parent
-            }
-        }
-    }
-
     EditDismisser {
         anchors.fill: parent
         z: 1000
     }
 
-    Panel {
-        id: timelinePanel
+    Column {
+        anchors.fill: parent
+        spacing: 0
 
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.margins: window.marginSize
-        height: timelineBar.implicitHeight + 2 * timelinePanel.borderWidth
+        // The workspace: the node graph, the viewport over the spreadsheet, and
+        // the parameters of the node being worked on.
+        SplitView {
+            id: workspace
 
-        Timeline {
-            id: timelineBar
+            orientation: Qt.Horizontal
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.leftMargin: Theme.var.space8
+            Layout.rightMargin: Theme.var.space8
+            Layout.topMargin: Theme.var.space8
 
-            anchors.fill: parent
+            handle: SplitterHandle {}
+
+            // The node graph.
+            PanelSurface {
+                id: networkPane
+
+                SplitView.minimumWidth: 340
+                SplitView.preferredWidth: 560
+
+                showHeader: true
+                title: "Network"
+
+                Network {
+                    anchors.fill: parent
+                }
+            }
+
+            // The viewport over the spreadsheet.
+            SplitView {
+                id: centreColumn
+
+                orientation: Qt.Vertical
+                SplitView.fillWidth: true
+                SplitView.minimumWidth: 320
+
+                handle: SplitterHandle {}
+
+                // The viewport.
+                PanelSurface {
+                    id: viewportPane
+
+                    SplitView.minimumHeight: 200
+                    SplitView.fillHeight: true
+
+                    showHeader: true
+                    title: "Viewport"
+
+                    Viewport {
+                        anchors.fill: parent
+                    }
+                }
+
+                // The geometry spreadsheet.
+                PanelSurface {
+                    id: spreadsheetPane
+
+                    SplitView.minimumHeight: 140
+                    SplitView.preferredHeight: 240
+
+                    contentInset: 0
+
+                    Spreadsheet {
+                        anchors.fill: parent
+                        viewModel: spreadsheet
+                    }
+                }
+            }
+
+            // The parameters of the primary node.
+            PanelSurface {
+                id: parametersPane
+
+                SplitView.minimumWidth: 280
+                SplitView.preferredWidth: 340
+
+                contentInset: 0
+
+                ParametersPanel {
+                    docked: true
+                }
+            }
+        }
+
+        // The transport along the bottom of the workspace.
+        PanelSurface {
+            id: timelinePane
+
+            Layout.fillWidth: true
+            Layout.leftMargin: Theme.var.space8
+            Layout.rightMargin: Theme.var.space8
+            Layout.bottomMargin: Theme.var.space8
+            Layout.preferredHeight: timelineBar.implicitHeight + Theme.var.space12
+
+            contentInset: 0
+
+            Timeline {
+                id: timelineBar
+
+                anchors.fill: parent
+            }
+        }
+
+        // What the application is doing right now.
+        StatusBar {
+            id: statusBar
+
+            Layout.fillWidth: true
+            Layout.preferredHeight: 26
+
+            cookState: network.cookState
+            frame: timeline.frame
+            startFrame: timeline.startFrame
+            endFrame: timeline.endFrame
+            fps: timeline.fps
+            nodeCount: network.nodeCount
+            selectedCount: network.selectedCount
+            sceneName: scene.hasCurrentFile ? scene.currentFileName : ""
         }
     }
 }

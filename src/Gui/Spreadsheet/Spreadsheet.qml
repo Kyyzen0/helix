@@ -12,9 +12,7 @@ Rectangle {
     readonly property real headerHeight: 46
     readonly property real sidebarWidth: 252
 
-    color: Theme.var.surface
-    radius: Theme.var.panelRadius
-    border.color: Theme.var.border
+    color: "transparent"
     clip: true
 
     SpreadsheetHeader {

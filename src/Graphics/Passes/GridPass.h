@@ -15,7 +15,10 @@ class GridPass
     /// @brief Builds the grid lines and the pipeline that draws them.
     ///
     /// @param frameConstants the buffer the renderer fills with the frame constants.
-    GridPass(Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants);
+    /// @param sampleCount the number of samples the viewport targets hold.
+    GridPass(
+        Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants, Diligent::Uint8 sampleCount
+    );
 
     /// @brief Draws the grid into the bound targets.
     void draw(Diligent::IDeviceContext* context);

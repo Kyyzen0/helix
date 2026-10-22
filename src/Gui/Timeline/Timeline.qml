@@ -9,6 +9,9 @@ Item {
 
     property bool playing: false
 
+    // Whether playback runs back to the start at the end of the range.
+    property bool looping: true
+
     // Where the chosen parameter sits in the list of parameters to keyframe.
     readonly property int keyframeParameterIndex: {
         const index = timeline.animatableParameters.indexOf(timeline.keyframeParameter);
@@ -23,11 +26,30 @@ Item {
         timeline.frame = value;
     }
 
-    // Steps forward, wrapping round to the start at the end of the range.
+    // Steps forward, wrapping round to the start at the end of the range when
+    // looping, and stopping at the end of the range when not.
     function advance(steps) {
         const span = timeline.endFrame - timeline.startFrame + 1;
         const offset = timeline.frame - timeline.startFrame + steps;
-        timeline.frame = timeline.startFrame + offset % span;
+
+        if (root.looping) {
+            // The second modulo keeps the result positive when the frame sits
+            // before the start of the range.
+            timeline.frame = timeline.startFrame + ((offset % span) + span) % span;
+            return;
+        }
+
+        const next = timeline.frame + steps;
+        if (next >= timeline.endFrame) {
+            root.playing = false;
+            timeline.frame = timeline.endFrame;
+            return;
+        }
+        if (next <= timeline.startFrame) {
+            timeline.frame = timeline.startFrame;
+            return;
+        }
+        timeline.frame = next;
     }
 
     // Advances the frame on each screen refresh while playing.
@@ -90,6 +112,15 @@ Item {
                 tooltip: "To end"
                 iconSize: 13
                 onClicked: root.scrubToFrame(timeline.endFrame)
+            }
+            TransportButton {
+                name: root.looping ? "repeat" : "repeat-off"
+                tooltip: root.looping ? "Looping" : "Not looping"
+                iconSize: 13
+                surfaceColor: root.looping ? Theme.timeline.playheadColor : "transparent"
+                hoverColor: Theme.timeline.playHoverColor
+                iconColor: root.looping ? Theme.var.textStrong : Theme.var.textLabel
+                onClicked: root.looping = !root.looping
             }
         }
 
@@ -161,12 +192,15 @@ Item {
             }
         }
 
-        // The parameter the keyframe buttons work on, and the button itself.
+        // The parameter the keyframe buttons work on, the component of it the
+        // keys belong to, and the button itself.
         Field {
             id: keyField
 
             visible: root.keyframeParameterIndex >= 0
-            width: keyPicker.width + keyButton.width + 22
+            width: keyLabel.width + keyPicker.width
+                + (componentPicker.visible ? componentPicker.width : 0)
+                + keyButton.width + 22
 
             FieldLabel {
                 id: keyLabel
@@ -187,10 +221,27 @@ Item {
                 onActivated: index => timeline.keyframeParameter = timeline.animatableParameters[index]
             }
 
+            // Which component of the parameter the keys belong to. A parameter
+            // holding a single value has no component to pick, so the picker
+            // stays out of the way.
+            Dropdown {
+                id: componentPicker
+
+                visible: timeline.keyframeComponentCount > 1
+                anchors.left: keyPicker.right
+                anchors.leftMargin: 3
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.max(34, implicitWidth)
+                height: parent.height
+                labels: timeline.keyframeComponentLabels
+                currentIndex: timeline.keyframeComponent
+                onActivated: index => timeline.keyframeComponent = index
+            }
+
             IconButton {
                 id: keyButton
 
-                anchors.left: keyPicker.right
+                anchors.left: (componentPicker.visible ? componentPicker : keyPicker).right
                 anchors.leftMargin: 3
                 anchors.verticalCenter: parent.verticalCenter
                 name: "diamond"

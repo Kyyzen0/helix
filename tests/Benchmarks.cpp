@@ -329,3 +329,7 @@ TEST_CASE_METHOD(NMReset, "Script attribute reads")
     benchmarkCode("Read the wrong type on every point", R"(@copy = pointAttr("Position", curPt()))");
     benchmarkCode("Read a missing attribute on every point", R"(@copy = pointAttr("missing", curPt()))");
 }
+
+// The performance measurements live in their own file, because the bench target
+// compiles this file alone and CMakeLists.txt belongs to the build owner.
+#include "PerfMeasurements.inc"

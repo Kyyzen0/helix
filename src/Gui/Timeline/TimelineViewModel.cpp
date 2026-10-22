@@ -4,6 +4,7 @@
 #include "Engine/Parameter/NodeParameter.h"
 #include "Engine/Simulation/KeyframeStore.h"
 #include <QVariantMap>
+#include <algorithm>
 
 namespace enzo::ui {
 
@@ -23,6 +24,16 @@ std::shared_ptr<prm::NodeParameter> findAnimatable(
     return found;
 }
 
+// The names the components of a parameter are given, one per axis. A
+// parameter holding a single value has no axes, so it is called the value.
+QStringList componentLabels(unsigned int componentCount)
+{
+    static const QStringList axisNames{QStringLiteral("X"), QStringLiteral("Y"), QStringLiteral("Z")};
+    if (componentCount <= 1) return {QStringLiteral("Value")};
+    if (componentCount <= axisNames.size()) return axisNames.mid(0, static_cast<int>(componentCount));
+    return axisNames;
+}
+
 } // namespace
 
 TimelineViewModel::TimelineViewModel(QObject* parent) : QObject(parent)
@@ -39,8 +50,10 @@ TimelineViewModel::TimelineViewModel(QObject* parent) : QObject(parent)
 
     // A different node means a different set of parameters to keyframe.
     primaryNodeSubscription_ = nt::nm().primaryNodeChanged.connect([this](std::optional<nt::NodeId>) {
+        clampKeyframeComponent_();
         Q_EMIT keyframesChanged();
         Q_EMIT keyframeParameterChanged();
+        Q_EMIT keyframeComponentChanged();
     });
 }
 
@@ -101,8 +114,56 @@ void TimelineViewModel::setKeyframeParameter(const QString& parameter)
 {
     if (keyframeParameter_ == parameter) return;
     keyframeParameter_ = parameter;
+
+    // The new parameter may hold fewer components than the old one, so the
+    // chosen component is brought back inside it.
+    clampKeyframeComponent_();
+
     Q_EMIT keyframeParameterChanged();
+    Q_EMIT keyframeComponentChanged();
     Q_EMIT keyframesChanged();
+}
+
+std::shared_ptr<prm::NodeParameter> TimelineViewModel::keyframeParameterValue() const
+{
+    return findAnimatable(keyframeNode(), keyframeParameter());
+}
+
+int TimelineViewModel::keyframeComponent() const { return keyframeComponent_; }
+
+void TimelineViewModel::setKeyframeComponent(int component)
+{
+    if (component < 0) component = 0;
+    if (component == keyframeComponent_) return;
+
+    keyframeComponent_ = component;
+    clampKeyframeComponent_();
+
+    Q_EMIT keyframeComponentChanged();
+    Q_EMIT keyframesChanged();
+}
+
+int TimelineViewModel::keyframeComponentCount() const
+{
+    const auto parameter = keyframeParameterValue();
+    if (!parameter) return 0;
+    return static_cast<int>(parameter->getVectorSize());
+}
+
+QStringList TimelineViewModel::keyframeComponentLabels() const
+{
+    return componentLabels(static_cast<unsigned int>(std::max(0, keyframeComponentCount())));
+}
+
+void TimelineViewModel::clampKeyframeComponent_()
+{
+    const int count = keyframeComponentCount();
+    if (count <= 0)
+    {
+        keyframeComponent_ = 0;
+        return;
+    }
+    if (keyframeComponent_ >= count) keyframeComponent_ = count - 1;
 }
 
 QVariantList TimelineViewModel::keyframes() const
@@ -112,7 +173,8 @@ QVariantList TimelineViewModel::keyframes() const
     const QString parameter = keyframeParameter();
     if (parameter.isEmpty()) return entries;
 
-    const sim::KeyframeTarget target{nodeId, parameter.toStdString(), 0};
+    const unsigned int component = static_cast<unsigned int>(keyframeComponent_);
+    const sim::KeyframeTarget target{nodeId, parameter.toStdString(), component};
     const sim::KeyframeTrack* track = sim::KeyframeStore::instance().getTrack(target);
     if (!track) return entries;
 
@@ -121,7 +183,7 @@ QVariantList TimelineViewModel::keyframes() const
         QVariantMap entry;
         entry.insert(QStringLiteral("frame"), static_cast<double>(key.frame));
         entry.insert(QStringLiteral("parameter"), parameter);
-        entry.insert(QStringLiteral("component"), 0);
+        entry.insert(QStringLiteral("component"), static_cast<int>(component));
         entry.insert(QStringLiteral("value"), static_cast<double>(key.value));
         entries.append(entry);
     }
@@ -134,13 +196,12 @@ bool TimelineViewModel::hasKeyframe() const
     const QString parameter = keyframeParameter();
     if (parameter.isEmpty()) return false;
 
-    const sim::KeyframeTarget target{nodeId, parameter.toStdString(), 0};
+    const unsigned int component = static_cast<unsigned int>(keyframeComponent());
+    const sim::KeyframeTarget target{nodeId, parameter.toStdString(), component};
     const sim::KeyframeTrack* track = sim::KeyframeStore::instance().getTrack(target);
     if (!track) return false;
     return track->hasKeyframe(static_cast<floatT>(frame()));
 }
-
-unsigned int TimelineViewModel::keyframeComponent() const { return 0; }
 
 void TimelineViewModel::toggleKeyframe()
 {
@@ -149,8 +210,9 @@ void TimelineViewModel::toggleKeyframe()
     auto target = findAnimatable(nodeId, parameter);
     if (!target) return;
 
+    const unsigned int component = static_cast<unsigned int>(keyframeComponent());
     const floatT atFrame = static_cast<floatT>(frame());
-    const sim::KeyframeTarget keyTarget{nodeId, parameter.toStdString(), 0};
+    const sim::KeyframeTarget keyTarget{nodeId, parameter.toStdString(), component};
 
     if (hasKeyframe())
     {
@@ -160,7 +222,7 @@ void TimelineViewModel::toggleKeyframe()
 
     // The key pins the value the parameter holds right now, which is the value
     // the track would give at this frame anyway.
-    const floatT value = target->evalFloat(0);
+    const floatT value = target->evalFloat(component);
     sim::KeyframeStore::instance().setKeyframe(keyTarget, atFrame, value);
 }
 
@@ -170,16 +232,15 @@ void TimelineViewModel::clearKeyframes()
     const QString parameter = keyframeParameter();
     if (parameter.isEmpty()) return;
 
-    sim::KeyframeStore::instance().clearTrack({nodeId, parameter.toStdString(), 0});
+    const unsigned int component = static_cast<unsigned int>(keyframeComponent());
+    sim::KeyframeStore::instance().clearTrack({nodeId, parameter.toStdString(), component});
 }
 
 double TimelineViewModel::keyframeValue() const
 {
-    const nt::NodeId nodeId = keyframeNode();
-    const QString parameter = keyframeParameter();
-    auto target = findAnimatable(nodeId, parameter);
+    auto target = keyframeParameterValue();
     if (!target) return 0.0;
-    return static_cast<double>(target->evalFloat(0));
+    return static_cast<double>(target->evalFloat(static_cast<unsigned int>(keyframeComponent())));
 }
 
 } // namespace enzo::ui

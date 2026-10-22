@@ -29,3 +29,7 @@ _git_*
 .!*
 *~
 *.orig
+# Scratch left by the probe scripts and by the CMake qmlcache.
+.tmpprobe*/
+qmlcache_test.cpp.*
+rn_a.txt

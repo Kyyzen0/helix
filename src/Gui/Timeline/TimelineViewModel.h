@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/Core/Types.h"
+#include "Engine/Parameter/NodeParameter.h"
 #include <QObject>
 #include <QStringList>
 #include <QVariantList>
@@ -31,7 +32,21 @@ class TimelineViewModel : public QObject
             keyframeParameterChanged
     )
 
-    // The keyframes of that parameter, one entry per key.
+    // Which component of that parameter the keyframe buttons work on. A
+    // parameter that holds one value has a single component.
+    Q_PROPERTY(
+        int keyframeComponent READ keyframeComponent WRITE setKeyframeComponent NOTIFY
+            keyframeComponentChanged
+    )
+
+    // How many components that parameter has, so the interface knows whether
+    // there is a component to pick.
+    Q_PROPERTY(int keyframeComponentCount READ keyframeComponentCount NOTIFY keyframesChanged)
+
+    // The names of the components, one per component of the parameter.
+    Q_PROPERTY(QStringList keyframeComponentLabels READ keyframeComponentLabels NOTIFY keyframesChanged)
+
+    // The keyframes of that parameter and component, one entry per key.
     Q_PROPERTY(QVariantList keyframes READ keyframes NOTIFY keyframesChanged)
 
     // Whether that parameter holds a key on the frame the scene sits on.
@@ -66,6 +81,18 @@ class TimelineViewModel : public QObject
     /// @brief Sets the parameter the keyframe buttons work on.
     void setKeyframeParameter(const QString& parameter);
 
+    /// @brief Returns which component of that parameter the buttons work on.
+    int keyframeComponent() const;
+
+    /// @brief Sets which component of that parameter the buttons work on.
+    void setKeyframeComponent(int component);
+
+    /// @brief Returns how many components that parameter has.
+    int keyframeComponentCount() const;
+
+    /// @brief Returns the names of the components of that parameter.
+    QStringList keyframeComponentLabels() const;
+
     /// @brief Returns the keyframes of that parameter, one entry per key.
     ///
     /// Each entry holds the frame, the parameter, the component, and the value
@@ -90,13 +117,17 @@ class TimelineViewModel : public QObject
     void fpsChanged();
     void keyframesChanged();
     void keyframeParameterChanged();
+    void keyframeComponentChanged();
 
   private:
     /// @brief Returns the node the keyframes belong to.
     enzo::nt::NodeId keyframeNode() const;
 
-    /// @brief Returns the component of the chosen parameter a key sits on.
-    unsigned int keyframeComponent() const;
+    /// @brief Returns the parameter the keyframe buttons work on.
+    std::shared_ptr<prm::NodeParameter> keyframeParameterValue() const;
+
+    /// @brief Brings the chosen component back inside the parameter it belongs to.
+    void clampKeyframeComponent_();
 
     boost::signals2::scoped_connection frameSubscription_;
     boost::signals2::scoped_connection frameRangeSubscription_;
@@ -106,6 +137,9 @@ class TimelineViewModel : public QObject
 
     // The parameter the keyframe buttons last worked on.
     QString keyframeParameter_;
+
+    // Which component of that parameter the buttons work on.
+    int keyframeComponent_ = 0;
 };
 
 } // namespace enzo::ui

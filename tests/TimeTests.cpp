@@ -272,3 +272,45 @@ TEST_CASE_METHOD(NMReset, "a keyframed parameter is marked as reading the time")
 
     REQUIRE(found);
 }
+
+TEST_CASE_METHOD(NMReset, "a node holding a keyframed parameter cooks again when the frame moves")
+{
+    enzo::nt::NodeLoader::loadNodes();
+    auto& nm = enzo::nt::nm();
+
+    enzo::nt::NodeId nodeId = nm.createNode("enzo::transform");
+    auto translate = nm.getNode(nodeId).getParameter("translate").lock();
+
+    auto& store = enzo::sim::KeyframeStore::instance();
+    store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
+    store.setKeyframe({nodeId, "translate", 0}, 11.f, 10.f);
+
+    nm.cook(nodeId);
+    REQUIRE_FALSE(nm.getNode(nodeId).isDirty());
+
+    // The value the keyframe pins depends on the frame, so moving the frame
+    // dirties the node that holds it.
+    nm.setFrame(6);
+    REQUIRE(nm.getNode(nodeId).isDirty());
+    REQUIRE(translate->evalFloat() == Catch::Approx(5.f));
+}
+
+TEST_CASE_METHOD(NMReset, "taking the keyframes away stops the node following the frame")
+{
+    enzo::nt::NodeLoader::loadNodes();
+    auto& nm = enzo::nt::nm();
+
+    enzo::nt::NodeId nodeId = nm.createNode("enzo::transform");
+
+    auto& store = enzo::sim::KeyframeStore::instance();
+    store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
+    store.clearTrack({nodeId, "translate", 0});
+
+    nm.cook(nodeId);
+    REQUIRE_FALSE(nm.getNode(nodeId).isDirty());
+
+    // Nothing reads the time any more, so the frame moving leaves the node
+    // alone.
+    nm.setFrame(20);
+    REQUIRE_FALSE(nm.getNode(nodeId).isDirty());
+}

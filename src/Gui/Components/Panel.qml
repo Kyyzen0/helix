@@ -1,8 +1,12 @@
 import QtQuick
-import QtQuick.Shapes
 import Enzo
+import "."
 
-/// Rounds and clips panel contents.
+// Rounds and clips panel contents.
+//
+// The chrome itself lives in PanelSurface, so every panel in the application is
+// drawn by the same code. This wrapper keeps the plain panel, without a header,
+// that the rest of the interface is written against.
 Item {
     id: root
 
@@ -11,54 +15,14 @@ Item {
     property color borderColor: Theme.var.border
 
     // Place content inside container
-    default property alias content: contentContainer.data
+    default property alias content: surface.content
 
-    Rectangle {
+    PanelSurface {
+        id: surface
+
         anchors.fill: parent
-        color: Theme.var.surface
         radius: root.radius
-    }
-
-    Item {
-        id: contentContainer
-        anchors.fill: parent
-        anchors.margins: root.borderWidth
-    }
-
-    // Overlays content with rounded outline.
-    Shape {
-        id: frame
-        anchors.fill: parent
-        preferredRendererType: Shape.CurveRenderer
-
-        // Page background fills the corners, hiding content past the radius.
-        ShapePath {
-            fillColor: Theme.var.background
-            strokeColor: "transparent"
-            fillRule: ShapePath.OddEvenFill
-            PathRectangle {
-                width: frame.width
-                height: frame.height
-            }
-            PathRectangle {
-                width: frame.width
-                height: frame.height
-                radius: root.radius
-            }
-        }
-
-        // Border tracing the rounded edge.
-        ShapePath {
-            fillColor: "transparent"
-            strokeColor: root.borderColor
-            strokeWidth: root.borderWidth
-            PathRectangle {
-                x: root.borderWidth / 2
-                y: root.borderWidth / 2
-                width: frame.width - root.borderWidth
-                height: frame.height - root.borderWidth
-                radius: root.radius
-            }
-        }
+        borderWidth: root.borderWidth
+        borderColor: root.borderColor
     }
 }

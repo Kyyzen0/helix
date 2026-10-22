@@ -3,8 +3,12 @@ import QtQuick.Effects
 import QtQuick.VectorImage
 import Enzo
 import "../Components"
+import "../Utils.js" as Utils
 
-// Floating panel showing the primary node's parameters.
+// The panel showing the parameters of the primary node.
+//
+// It fills the pane it sits in, and carries the name of the node it belongs to
+// in the same hue its card carries in the graph, so the two read as one thing.
 Item {
     id: panel
 
@@ -23,30 +27,51 @@ Item {
     readonly property real gripSize: 18
     readonly property real radius: Theme.var.panelRadius
 
-    width: defaultWidth
+    // Whether the panel fills the pane it sits in, rather than floating over the
+    // canvas with a size of its own.
+    property bool docked: false
+
+    width: panel.docked && parent ? parent.width : panel.defaultWidth
     visible: parameters.hasNode
 
     // Height follows the content until the user drags the resize grip, which
     // assigns an explicit size and takes over.
     implicitHeight: Math.max(defaultHeight, header.height + verticalMargin * 2 + scroller.contentHeight)
-    height: Math.min(implicitHeight, parent ? parent.height - maxHeightInset : implicitHeight)
+    height: panel.docked && parent
+        ? parent.height
+        : Math.min(implicitHeight, parent ? parent.height - maxHeightInset : implicitHeight)
 
-    // Lifts the panel off the network behind it, so its edges stay readable
-    // against a bright canvas.
+    // The hue the node's family is drawn in, the same one its card carries.
+    readonly property color signalColor: signalPalette[Utils.signalIndex(parameters.nodeFamily)]
+
+    // The hues a family can take.
+    readonly property var signalPalette: [
+        Theme.var.signalBlue,
+        Theme.var.signalTeal,
+        Theme.var.signalGreen,
+        Theme.var.signalAmber,
+        Theme.var.signalRose,
+        Theme.var.signalViolet
+    ]
+
+    // Lifts the panel off the canvas behind it, so its edges stay readable
+    // against a bright surface.
     Rectangle {
         id: shadowCaster
         anchors.fill: parent
         radius: panel.radius
         color: Theme.parameter.panelColor
+        visible: !panel.docked
     }
 
     MultiEffect {
         source: shadowCaster
         anchors.fill: shadowCaster
+        visible: !panel.docked
         shadowEnabled: true
         shadowBlur: 1.0
-        shadowOpacity: 0.55
-        shadowVerticalOffset: 6
+        shadowOpacity: Theme.panel.shadowOpacity
+        shadowVerticalOffset: Theme.panel.shadowOffset
     }
 
     // The panel body, clipped to the rounded outline.
@@ -56,7 +81,7 @@ Item {
         anchors.fill: parent
         clip: true
         radius: panel.radius
-        color: Theme.parameter.panelColor
+        color: panel.docked ? Theme.panel.surfaceColor : Theme.parameter.panelColor
 
         // Gives the panel keyboard focus on hover, without blocking clicks to its
         // controls or stealing focus from a field being edited. Swallows the
@@ -82,20 +107,31 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             height: headerRow.implicitHeight + panel.verticalMargin * 2
+            visible: parameters.hasNode
             topLeftRadius: panel.radius
             topRightRadius: panel.radius
-            color: Theme.var.surfaceRaised
+            color: Theme.panel.headerColor
+
+            // The bar down the leading edge, in the hue of the node's family.
+            Rectangle {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                width: Theme.node.spineWidth
+                height: parent.height - Theme.var.space16
+                radius: width / 2
+                color: panel.signalColor
+            }
 
             Row {
                 id: headerRow
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 anchors.leftMargin: panel.sideMargin
-                spacing: 10
+                spacing: Theme.var.space8
 
                 VectorImage {
-                    width: 22
-                    height: 22
+                    width: 20
+                    height: 20
                     anchors.verticalCenter: parent.verticalCenter
                     preferredRendererType: VectorImage.CurveRenderer
                     fillMode: VectorImage.PreserveAspectFit
@@ -103,17 +139,22 @@ Item {
                 }
 
                 Column {
+                    spacing: 1
+
                     Text {
                         text: parameters.nodeType
-                        color: Theme.var.textLabel
+                        color: panel.signalColor
                         font.family: Theme.var.fontSans
-                        font.pixelSize: 10
+                        font.pixelSize: Theme.var.textMicro
+                        font.weight: Font.DemiBold
+                        font.letterSpacing: 0.9
+                        font.capitalization: Font.AllUppercase
                     }
                     Text {
                         text: parameters.nodeName
-                        color: Theme.var.textStrong
+                        color: Theme.panel.titleColor
                         font.family: Theme.var.fontSans
-                        font.pixelSize: 13
+                        font.pixelSize: Theme.var.textTitle
                         font.weight: Font.DemiBold
                     }
                 }
@@ -125,7 +166,8 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             height: 1
-            color: Theme.var.borderSoft
+            color: Theme.panel.dividerColor
+            visible: parameters.hasNode
         }
 
         // Spans the full body width so the scrollbar sits in the side margin
@@ -155,15 +197,44 @@ Item {
             anchors.fill: parent
             radius: panel.radius
             color: "transparent"
-            border.color: Theme.var.borderSoft
+            border.color: Theme.panel.borderColor
+        }
+
+        // Shown when nothing is being worked on, so the pane is not blank.
+        Column {
+            anchors.centerIn: parent
+            width: parent.width - Theme.var.space32
+            spacing: Theme.var.space6
+            visible: !parameters.hasNode
+
+            Text {
+                width: parent.width
+                text: "No node selected"
+                color: Theme.var.textLabel
+                font.family: Theme.var.fontSans
+                font.pixelSize: Theme.var.textBody
+                font.weight: Font.DemiBold
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            Text {
+                width: parent.width
+                text: "Pick a node in the graph to see its parameters."
+                color: Theme.var.textMuted
+                font.family: Theme.var.fontSans
+                font.pixelSize: Theme.var.textCaption
+                wrapMode: Text.WordWrap
+                horizontalAlignment: Text.AlignHCenter
+            }
         }
     }
 
     // Drag the bottom left corner to resize. The top right stays pinned, so the
-    // panel grows left and down.
+    // panel grows left and down. Only the floating panel can be resized.
     MouseArea {
         id: grip
 
+        visible: !panel.docked
         width: panel.gripSize
         height: panel.gripSize
         anchors.left: parent.left

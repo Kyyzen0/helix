@@ -4,6 +4,8 @@
 #include "Gui/Network/NodeListModel.h"
 #include <QObject>
 #include <QRectF>
+#include <QString>
+#include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
 #include <boost/signals2/connection.hpp>
@@ -27,6 +29,16 @@ class NetworkViewModel : public QObject
     Q_PROPERTY(qreal nodeWidth READ getNodeWidth CONSTANT)
     Q_PROPERTY(qreal nodeHeight READ getNodeHeight CONSTANT)
 
+    // The state of the cook, read from the engine. The engine pushes a finished
+    // cook but not one that has started, so the state is polled.
+    Q_PROPERTY(bool cooking READ cooking NOTIFY cookStateChanged)
+    Q_PROPERTY(bool cookPending READ cookPending NOTIFY cookStateChanged)
+    Q_PROPERTY(QString cookState READ cookState NOTIFY cookStateChanged)
+
+    // How much of the graph holds nodes, and how many of them are picked.
+    Q_PROPERTY(int nodeCount READ nodeCount NOTIFY nodeCountChanged)
+    Q_PROPERTY(int selectedCount READ selectedCount NOTIFY selectedCountChanged)
+
   public:
     explicit NetworkViewModel(QObject* parent = nullptr);
 
@@ -39,6 +51,21 @@ class NetworkViewModel : public QObject
 
     /// @brief Returns the node card height.
     qreal getNodeHeight() const;
+
+    /// @brief Returns whether a worker is inside a cook right now.
+    bool cooking() const;
+
+    /// @brief Returns whether a cook is running or waiting to start.
+    bool cookPending() const;
+
+    /// @brief Returns the state of the cook, one of idle, pending or cooking.
+    QString cookState() const;
+
+    /// @brief Returns how many nodes the graph holds.
+    int nodeCount() const { return nodes_.rowCount(); }
+
+    /// @brief Returns how many of the nodes are picked.
+    int selectedCount() const { return selectedCount_; }
 
     /// @brief Returns every node type the tab menu can create, each a {label, name} map.
     QVariantList getNodeTypes() const;
@@ -115,6 +142,16 @@ class NetworkViewModel : public QObject
     /// @brief Clears the selection.
     Q_INVOKABLE void clearSelection();
 
+  Q_SIGNALS:
+    /// @brief Emitted when the state of the cook changes.
+    void cookStateChanged();
+
+    /// @brief Emitted when a node is added to the graph or taken out of it.
+    void nodeCountChanged();
+
+    /// @brief Emitted when the picked nodes change.
+    void selectedCountChanged();
+
   private:
     /// @brief Selects a set of nodes and their primary as one undo step.
     ///
@@ -134,6 +171,9 @@ class NetworkViewModel : public QObject
     /// on to what that node fed.
     QVariantMap getBypassPreview() const;
 
+    /// @brief Reads the cook state from the engine and reports it when it changed.
+    void refreshCookState();
+
     NodeListModel nodes_;
     NodeLinkListModel nodeLinks_;
     boost::signals2::scoped_connection nodeCreatedSubscription_;
@@ -145,6 +185,14 @@ class NetworkViewModel : public QObject
     boost::signals2::scoped_connection nodePositionSubscription_;
     boost::signals2::scoped_connection nodeLinkCreatedSubscription_;
     boost::signals2::scoped_connection nodeLinkRemovedSubscription_;
+
+    // The cook state is read from the engine on a timer, since the engine
+    // announces a finished cook but not one that has started.
+    QTimer cookStateTimer_;
+    QString lastCookState_;
+
+    // How many of the nodes are picked.
+    int selectedCount_ = 0;
 };
 
 } // namespace enzo::ui

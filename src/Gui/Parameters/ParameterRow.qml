@@ -1,16 +1,25 @@
 import QtQuick
 import Enzo
 import "../Style"
+import "../Components"
 
 // One parameter, picking the control for its kind. Groups and dividers span the
 // full width, every other kind sits beside its label.
+//
+// Every row carries a chip naming the kind of the parameter, so a column of
+// them says what it holds before any of the labels are read.
 Item {
     id: row
 
     // Layout constants.
     readonly property real parameterHeight: Constants.parameterHeight
-    readonly property real labelGap: 25
-    readonly property real labelFontSize: 12
+    readonly property real labelGap: Theme.var.space16
+    readonly property real labelFontSize: Theme.var.textBody
+
+    // The width of the chip that names the kind of the parameter.
+    readonly property real badgeWidth: 15
+    // The space between the chip and the label.
+    readonly property real badgeGap: Theme.var.space6
 
     required property var item
 
@@ -38,12 +47,35 @@ Item {
     // Whether this row shows a label beside its control.
     readonly property bool hasLabel: item && !unlabeledKinds.includes(item.kind) && !isStacked && !item.hidden && !item.labelHidden
 
+    // The kind the chip names, which is the kind of the parameter and not
+    // always the kind the control is drawn from. A vector of floats and a
+    // formula both arrive as ordinary strings.
+    readonly property string badgeKind: {
+        if (!item)
+            return "";
+        if (item.kind === "float")
+            return item.vectorSize > 1 ? "vector" : "float";
+        if (item.kind === "string") {
+            if (item.style === "code")
+                return "code";
+            if (item.style === "attribute")
+                return "attribute";
+            return "string";
+        }
+        if (item.kind === "bool" || item.kind === "toggle")
+            return "bool";
+        return item.kind;
+    }
+
+    // The width the chip and the gap beside it take in the label column.
+    readonly property real badgeColumnWidth: row.hasLabel ? row.badgeWidth + row.badgeGap : 0
+
     // Width this row wants for its label, 0 when it shows none. A group reports
     // its nested rows so the column can span them.
     readonly property real implicitLabelWidth: {
         if (item && item.kind === "group")
             return groupLoader.item ? groupLoader.item.implicitLabelWidth : 0;
-        return hasLabel ? Math.ceil(labelMetrics.advanceWidth) : 0;
+        return hasLabel ? Math.ceil(badgeColumnWidth + labelMetrics.advanceWidth) : 0;
     }
 
     // Width the row asks for, 0 when its control stretches to whatever width it
@@ -110,16 +142,31 @@ Item {
             width: parent.width
             spacing: row.hasLabel ? row.labelGap : 0
 
-            Text {
+            // The chip naming the kind of the parameter, and its label.
+            Item {
                 visible: row.hasLabel
                 width: row.hasLabel ? row.labelColumnWidth : 0
                 height: row.parameterHeight
-                verticalAlignment: Text.AlignVCenter
-                text: row.item.label
-                color: Theme.var.text
-                font.family: Theme.var.fontSans
-                font.pixelSize: row.labelFontSize
-                elide: Text.ElideRight
+
+                TypeBadge {
+                    id: badge
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: row.hasLabel
+                    kind: row.badgeKind
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: badge.right
+                    anchors.leftMargin: row.badgeGap
+                    width: parent.width - badge.width - row.badgeGap
+                    text: row.item.label
+                    color: Theme.parameter.labelColor
+                    font.family: Theme.var.fontSans
+                    font.pixelSize: row.labelFontSize
+                    elide: Text.ElideRight
+                }
             }
 
             Loader {

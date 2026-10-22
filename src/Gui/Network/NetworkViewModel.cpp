@@ -49,19 +49,30 @@ NetworkViewModel::NetworkViewModel(QObject* parent) : QObject(parent)
     auto& network = nt::nm();
 
     nodeCreatedSubscription_ =
-        network.nodeCreated.connect([this](nt::NodeId nodeId) { nodes_.addNode(nodeId); });
+        network.nodeCreated.connect([this](nt::NodeId nodeId) {
+            nodes_.addNode(nodeId);
+            Q_EMIT nodeCountChanged();
+        });
 
     nodeRemovedSubscription_ =
-        network.nodeRemoved.connect([this](nt::NodeId nodeId) { nodes_.removeNode(nodeId); });
+        network.nodeRemoved.connect([this](nt::NodeId nodeId) {
+            nodes_.removeNode(nodeId);
+            Q_EMIT nodeCountChanged();
+        });
 
     networkClearedSubscription_ = network.networkCleared.connect([this]() {
         nodes_.clear();
         nodeLinks_.clear();
+        selectedCount_ = 0;
+        Q_EMIT nodeCountChanged();
+        Q_EMIT selectedCountChanged();
     });
 
     selectedNodesSubscription_ =
         network.selectedNodesChanged.connect([this](std::vector<nt::NodeId> selectedNodeIds) {
             nodes_.setSelection(selectedNodeIds);
+            selectedCount_ = static_cast<int>(selectedNodeIds.size());
+            Q_EMIT selectedCountChanged();
         });
 
     primaryNodeSubscription_ =
@@ -92,6 +103,13 @@ NetworkViewModel::NetworkViewModel(QObject* parent) : QObject(parent)
     // Catches any graph state that already exists before the subscriptions are live.
     nodes_.resetFromNetwork();
     nodeLinks_.resetFromNetwork();
+
+    // The engine announces a cook that has finished but not one that has
+    // started, so the state is read on a timer instead.
+    lastCookState_ = cookState();
+    cookStateTimer_.setInterval(100);
+    connect(&cookStateTimer_, &QTimer::timeout, this, &NetworkViewModel::refreshCookState);
+    cookStateTimer_.start();
 }
 
 QAbstractListModel* NetworkViewModel::nodes() { return &nodes_; }
@@ -99,8 +117,26 @@ QAbstractListModel* NetworkViewModel::nodes() { return &nodes_; }
 QAbstractListModel* NetworkViewModel::nodeLinks() { return &nodeLinks_; }
 
 qreal NetworkViewModel::getNodeWidth() const { return NodeListModel::nodeWidth; }
-
 qreal NetworkViewModel::getNodeHeight() const { return NodeListModel::nodeHeight; }
+
+bool NetworkViewModel::cooking() const { return nt::nm().isCooking(); }
+
+bool NetworkViewModel::cookPending() const { return nt::nm().isCookBusy(); }
+
+QString NetworkViewModel::cookState() const
+{
+    if (nt::nm().isCooking()) return QStringLiteral("cooking");
+    if (nt::nm().isCookBusy()) return QStringLiteral("pending");
+    return QStringLiteral("idle");
+}
+
+void NetworkViewModel::refreshCookState()
+{
+    const QString state = cookState();
+    if (state == lastCookState_) return;
+    lastCookState_ = state;
+    Q_EMIT cookStateChanged();
+}
 
 QVariantList NetworkViewModel::getNodeTypes() const
 {

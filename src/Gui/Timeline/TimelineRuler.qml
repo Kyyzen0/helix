@@ -14,8 +14,9 @@ Item {
 
     readonly property real baselineY: height - 3
 
-    // Frames between the two ends, never zero so a one frame range still draws.
-    readonly property int frameSpan: Math.max(1, root.endFrame - root.startFrame)
+    // Frames between the two ends, counting the end frame itself, so every
+    // frame of the range has a slot of its own on the scale.
+    readonly property int frameSpan: Math.max(1, root.endFrame - root.startFrame + 1)
 
     signal frameRequested(int frame)
 
@@ -63,7 +64,10 @@ Item {
     }
 
     function getFrameAtX(x) {
-        return Math.round(root.startFrame + x / root.width * root.frameSpan);
+        // The frame under the pointer, kept inside the range so a click past
+        // the last tick lands on the last frame rather than past it.
+        const frame = Math.round(root.startFrame + x / root.width * root.frameSpan);
+        return Math.max(root.startFrame, Math.min(root.endFrame, frame));
     }
 
     Rectangle {

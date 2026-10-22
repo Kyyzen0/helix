@@ -11,6 +11,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/matrix.hpp>
 #include <glm/vec4.hpp>
+#include <stdexcept>
 
 namespace enzo::gfx {
 
@@ -82,6 +83,32 @@ Diligent::RefCntAutoPtr<Diligent::ITexture> createTargetTexture(
     return texture;
 }
 
+/// @brief Returns the texture the frame is copied back into before the host reads it.
+Diligent::RefCntAutoPtr<Diligent::ITexture> createReadbackTexture(
+    Diligent::IRenderDevice* device, glm::uvec2 size
+)
+{
+    Diligent::TextureDesc textureDesc;
+    textureDesc.Name = "Viewport readback";
+    textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
+    textureDesc.Width = size.x;
+    textureDesc.Height = size.y;
+    textureDesc.Format = colorFormat;
+    textureDesc.Usage = Diligent::USAGE_STAGING;
+    textureDesc.BindFlags = Diligent::BIND_NONE;
+    textureDesc.CPUAccessFlags = Diligent::CPU_ACCESS_READ;
+
+    Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+    device->CreateTexture(textureDesc, nullptr, &texture);
+    return texture;
+}
+
+/// @brief Returns whether a message of the engine names a device that was lost.
+bool isDeviceLostMessage(const std::string& message)
+{
+    return message.find("DEVICE_LOST") != std::string::npos;
+}
+
 } // namespace
 
 struct ViewportRenderer::DiligentObjects
@@ -97,28 +124,110 @@ struct ViewportRenderer::DiligentObjects
     Diligent::RefCntAutoPtr<Diligent::ITexture> depthTexture;
     /// @brief The single sample texture the host samples.
     Diligent::RefCntAutoPtr<Diligent::ITexture> colorTexture;
+    /// @brief The texture the frame is copied back into before the host reads the pixels.
+    Diligent::RefCntAutoPtr<Diligent::ITexture> readbackTexture;
+    /// @brief The number of samples the targets hold.
+    Diligent::Uint8 sampleCount = 1;
 };
 
 ViewportRenderer::ViewportRenderer(GraphicsDevice& device) : device_(device)
 {
     Diligent::IRenderDevice* renderDevice = device.getDiligentObjects().device;
     Diligent::RefCntAutoPtr<Diligent::IBuffer> frameConstants = createFrameConstantsBuffer(renderDevice);
+
+    // A device that does not offer multisampled textures draws into a single sample, and
+    // the pipelines have to be built for the sample count the targets hold.
+    const Diligent::Uint8 sampleCount = chooseSampleCount(renderDevice);
+
     diligent_ = std::make_unique<DiligentObjects>(DiligentObjects{
         frameConstants,
-        GridPass(renderDevice, frameConstants),
-        MeshPass(renderDevice, frameConstants),
-        PointPass(renderDevice, frameConstants),
-        CameraPrimPass(renderDevice, frameConstants),
+        GridPass(renderDevice, frameConstants, sampleCount),
+        MeshPass(renderDevice, frameConstants, sampleCount),
+        PointPass(renderDevice, frameConstants, sampleCount),
+        CameraPrimPass(renderDevice, frameConstants, sampleCount),
     });
+    diligent_->sampleCount = sampleCount;
 }
 
 ViewportRenderer::~ViewportRenderer() = default;
 
-VulkanImage ViewportRenderer::render(const FrameState& frame)
+void ViewportRenderer::resizeTargets(const FrameState& frame)
+{
+    Diligent::IRenderDevice* device = device_.getDiligentObjects().device;
+
+    diligent_->multisampleTexture = createTargetTexture(
+        device,
+        frame.pixelSize,
+        colorFormat,
+        diligent_->sampleCount,
+        Diligent::BIND_RENDER_TARGET,
+        "Viewport multisample colour"
+    );
+    diligent_->depthTexture = createTargetTexture(
+        device,
+        frame.pixelSize,
+        depthFormat,
+        diligent_->sampleCount,
+        Diligent::BIND_DEPTH_STENCIL,
+        "Viewport depth"
+    );
+    diligent_->colorTexture = createTargetTexture(
+        device,
+        frame.pixelSize,
+        colorFormat,
+        1,
+        Diligent::BIND_RENDER_TARGET | Diligent::BIND_SHADER_RESOURCE,
+        "Viewport colour"
+    );
+}
+
+VulkanImage ViewportRenderer::render(const FrameState& frame) { return draw(frame, false); }
+
+PresentedFrame ViewportRenderer::renderToPixels(const FrameState& frame)
+{
+    PresentedFrame presented;
+    presented.image = draw(frame, true);
+    presented.size = frame.pixelSize;
+    presented.pixelRatio = frame.pixelRatio;
+    presented.pixels = std::move(readPixels_);
+    readPixels_.clear();
+    return presented;
+}
+
+VulkanImage ViewportRenderer::draw(const FrameState& frame, bool readPixels)
+{
+    GraphicsDevice::clearLastEngineError();
+    // The pixels of the last frame are of no use to the next one.
+    readPixels_.clear();
+    try
+    {
+        return drawFrame(frame, readPixels);
+    }
+    catch (const std::exception& error)
+    {
+        // The engine holds back some of its errors rather than throwing them, so the last
+        // one it reported is the reason of the failure.
+        const std::string reason = error.what();
+        const std::string lastError = GraphicsDevice::getLastEngineError();
+        if (isDeviceLostMessage(reason) || isDeviceLostMessage(lastError))
+        {
+            device_.markDeviceLost();
+            throw std::runtime_error(
+                "The graphics device was lost: " + (lastError.empty() ? reason : lastError)
+            );
+        }
+        throw std::runtime_error("The viewport could not be drawn: " + reason);
+    }
+}
+
+VulkanImage ViewportRenderer::drawFrame(const FrameState& frame, bool readPixels)
 {
     GraphicsDevice::DiligentObjects& deviceObjects = device_.getDiligentObjects();
     Diligent::IRenderDevice* device = deviceObjects.device;
     Diligent::IDeviceContext* context = deviceObjects.context;
+
+    // A frame with no pixels has nothing to draw into.
+    if (frame.pixelSize.x == 0 || frame.pixelSize.y == 0) return {};
 
     const bool hasTexture = diligent_->colorTexture != nullptr;
     const bool sizeChanged = hasTexture &&
@@ -126,25 +235,8 @@ VulkanImage ViewportRenderer::render(const FrameState& frame)
                               diligent_->colorTexture->GetDesc().Height != frame.pixelSize.y);
     if (!hasTexture || sizeChanged)
     {
-        diligent_->multisampleTexture = createTargetTexture(
-            device,
-            frame.pixelSize,
-            colorFormat,
-            sampleCount,
-            Diligent::BIND_RENDER_TARGET,
-            "Viewport multisample colour"
-        );
-        diligent_->depthTexture = createTargetTexture(
-            device, frame.pixelSize, depthFormat, sampleCount, Diligent::BIND_DEPTH_STENCIL, "Viewport depth"
-        );
-        diligent_->colorTexture = createTargetTexture(
-            device,
-            frame.pixelSize,
-            colorFormat,
-            1,
-            Diligent::BIND_RENDER_TARGET | Diligent::BIND_SHADER_RESOURCE,
-            "Viewport colour"
-        );
+        resizeTargets(frame);
+        diligent_->readbackTexture = createReadbackTexture(device, frame.pixelSize);
     }
 
     if (frame.geometry != uploadedGeometry_)
@@ -195,6 +287,18 @@ VulkanImage ViewportRenderer::render(const FrameState& frame)
         diligent_->multisampleTexture, diligent_->colorTexture, resolveAttribs
     );
 
+    // Copies the frame into the texture the host reads, before the colour is left for the
+    // host to sample.
+    if (readPixels && diligent_->readbackTexture)
+    {
+        Diligent::CopyTextureAttribs copyAttribs;
+        copyAttribs.pSrcTexture = diligent_->colorTexture;
+        copyAttribs.SrcTextureTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION;
+        copyAttribs.pDstTexture = diligent_->readbackTexture;
+        copyAttribs.DstTextureTransitionMode = Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION;
+        context->CopyTexture(copyAttribs);
+    }
+
     // Leaves the image ready for the host to sample.
     Diligent::StateTransitionDesc toShaderResource{
         diligent_->colorTexture,
@@ -206,6 +310,14 @@ VulkanImage ViewportRenderer::render(const FrameState& frame)
 
     // Ends the frame here, since no swap chain does it.
     context->Flush();
+
+    // Waits for the copy, since the host reads the pixels of the frame.
+    if (readPixels && diligent_->readbackTexture)
+    {
+        device->IdleGPU();
+        readBack(frame);
+    }
+
     context->FinishFrame();
     device->ReleaseStaleResources();
 
@@ -217,6 +329,42 @@ VulkanImage ViewportRenderer::render(const FrameState& frame)
     image.layout = vulkanTexture->GetLayout();
     image.size = frame.pixelSize;
     return image;
+}
+
+void ViewportRenderer::readBack(const FrameState& frame)
+{
+    Diligent::IDeviceContext* context = device_.getDiligentObjects().context;
+
+    Diligent::MappedTextureSubresource mapped;
+    context->MapTextureSubresource(
+        diligent_->readbackTexture,
+        0,
+        0,
+        Diligent::MAP_READ,
+        Diligent::MAP_FLAG_DO_NOT_WAIT,
+        nullptr,
+        mapped
+    );
+    if (!mapped.pData)
+    {
+        context->UnmapTextureSubresource(diligent_->readbackTexture, 0, 0);
+        throw std::runtime_error("The viewport frame could not be read back from the device");
+    }
+
+    // The rows of the texture are padded to the alignment of the device, so each row is
+    // copied on its own.
+    const std::size_t rowBytes = std::size_t(frame.pixelSize.x) * 4;
+    std::vector<std::uint8_t> pixels(rowBytes * frame.pixelSize.y);
+    copyFrameRows(
+        pixels.data(),
+        static_cast<const std::uint8_t*>(mapped.pData),
+        std::size_t(mapped.Stride),
+        frame.pixelSize.x,
+        frame.pixelSize.y
+    );
+    context->UnmapTextureSubresource(diligent_->readbackTexture, 0, 0);
+
+    readPixels_ = std::move(pixels);
 }
 
 } // namespace enzo::gfx

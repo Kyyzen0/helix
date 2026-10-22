@@ -27,7 +27,9 @@ Diligent::RefCntAutoPtr<Diligent::IShader> createShader(
 Pipeline createPipeline(
     Diligent::IRenderDevice* device,
     Diligent::GraphicsPipelineStateCreateInfo pipelineInfo,
-    Diligent::IBuffer* frameConstants
+    Diligent::IBuffer* frameConstants,
+    Diligent::Uint8 sampleCount,
+    bool depthOnly
 )
 {
     pipelineInfo.PSODesc.PipelineType = Diligent::PIPELINE_TYPE_GRAPHICS;
@@ -36,6 +38,10 @@ Pipeline createPipeline(
     graphics.RTVFormats[0] = colorFormat;
     graphics.DSVFormat = depthFormat;
     graphics.SmplDesc.Count = sampleCount;
+
+    // A depth prepass draws no colour, which leaves the colour of the frame to the
+    // passes that follow it.
+    if (depthOnly) pipelineInfo.pPS = nullptr;
 
     Pipeline pipeline;
     device->CreateGraphicsPipelineState(pipelineInfo, &pipeline.state);

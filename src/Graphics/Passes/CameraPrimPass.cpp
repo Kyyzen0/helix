@@ -22,7 +22,9 @@ std::vector<glm::vec3> buildFrameVertices()
 
 } // namespace
 
-CameraPrimPass::CameraPrimPass(Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants)
+CameraPrimPass::CameraPrimPass(
+    Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants, Diligent::Uint8 sampleCount
+)
 {
     // Frame vertex buffer
     frameVertices_ =
@@ -54,7 +56,7 @@ CameraPrimPass::CameraPrimPass(Diligent::IRenderDevice* device, Diligent::IBuffe
         createShader(device, shaders::cameraPrimSource, Diligent::SHADER_TYPE_PIXEL, "pixelMain");
     pipelineInfo.pVS = vertexShader;
     pipelineInfo.pPS = pixelShader;
-    pipeline_ = createPipeline(device, pipelineInfo, frameConstants);
+    pipeline_ = createPipeline(device, pipelineInfo, frameConstants, sampleCount);
 }
 
 void CameraPrimPass::upload(Diligent::IRenderDevice* device, const DisplayGeometry& geometry)

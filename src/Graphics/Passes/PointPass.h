@@ -16,7 +16,10 @@ class PointPass
     /// @brief Builds the disc shape and the pipeline that draws it.
     ///
     /// @param frameConstants the buffer the renderer fills with the frame constants.
-    PointPass(Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants);
+    /// @param sampleCount the number of samples the viewport targets hold.
+    PointPass(
+        Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants, Diligent::Uint8 sampleCount
+    );
 
     /// @brief Replaces the drawn points with the points of the geometry.
     void upload(Diligent::IRenderDevice* device, const DisplayGeometry& geometry);

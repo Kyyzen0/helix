@@ -28,6 +28,13 @@ palette:
   Accent:
     accent:       Accent
     accentBright: Accent, bright
+  Signals:
+    signalBlue:   Node signal, blue
+    signalTeal:   Node signal, teal
+    signalGreen:  Node signal, green
+    signalAmber:  Node signal, amber
+    signalRose:   Node signal, rose
+    signalViolet: Node signal, violet
   Feedback:
     danger:        Danger
     success:       Success
@@ -73,7 +80,7 @@ variables:
   lineBright: "#59596b"
 
   # The dots across the network canvas
-  gridDot: $borderSoft
+  gridDot: "#262633"
 
   # Text, brightest to dimmest
   textStrong: "#f6f6f9"
@@ -91,6 +98,36 @@ variables:
   accentBright: "#a78bfa"
   accentDim:    $accent @ 0.15
   accentLine:   $accent @ 0.45
+
+  # The signal palette. One hue marks each family of node in the graph, so a
+  # wiring diagram reads as a wiring diagram. The hues are kept apart in
+  # lightness as well as in hue, so they stay tellable apart on a dark ground.
+  signalBlue:   "#4a9eff"
+  signalTeal:   "#2fbfa8"
+  signalGreen:  "#57c96b"
+  signalAmber:  "#d9a441"
+  signalRose:   "#e0629b"
+  signalViolet: "#9b7cf0"
+
+  # The type scale, in pixels. Every label in the interface picks one of these
+  # rather than a size of its own.
+  textMicro:   10
+  textCaption: 11
+  textBody:    12
+  textTitle:   13
+  textDisplay: 15
+
+  # The spacing scale, on a four pixel grid. Gaps between related things are
+  # small, gaps between separate things are large.
+  space2:  2
+  space4:  4
+  space6:  6
+  space8:  8
+  space12: 12
+  space16: 16
+  space20: 20
+  space24: 24
+  space32: 32
 
   # Fill that marks a value, such as the bar in a slider
   valueFill: "#2e2e38"
@@ -124,6 +161,40 @@ variables:
 components:
   menu:
     barColor: $surfaceHeader
+    # The strip the menus sit in, and the plate behind an open menu.
+    barBorderColor: $borderSoft
+    itemColor: $text
+    itemHoverColor: $textStrong
+    itemHoverFill: $borderSoft
+    # The application name in the corner of the bar.
+    brandColor: $textStrong
+  panel:
+    # The plate a panel is drawn on, its header strip and its outline.
+    surfaceColor:  $surface
+    headerColor:   $surfaceHeader
+    borderColor:   $borderSoft
+    dividerColor:  $borderSoft
+    titleColor:    $textStrong
+    subtitleColor: $textMuted
+    # The shadow a panel lifts itself off the ground with.
+    shadowOpacity: 0.5
+    shadowOffset:  4
+  statusBar:
+    surfaceColor: $surfaceHeader
+    borderColor:  $borderSoft
+    labelColor:   $textMuted
+    valueColor:   $text
+    # The states a cook can be reported in.
+    readyColor:   $success
+    busyColor:    $accentBright
+    errorColor:   $danger
+  splitter:
+    # The strip between two panes, and the line that shows it can be dragged.
+    handleColor: $background
+    hoverColor:  $accentLine
+    activeColor: $accent
+    # How wide the strip is, in pixels.
+    thickness: 6
   network:
     dotColor: $gridDot
     # The box dragged across the canvas to select nodes.
@@ -136,21 +207,54 @@ components:
     portColor:   $line
     # Marks the node the viewport draws.
     displayFlagColor: "#4ea1ff"
+    # The plate under a node card, brighter than the canvas it sits on.
+    cardColor:        $surfaceRaised
+    titleColor:       $textStrong
+    typeColor:        $textMuted
+    # The outline a hovered node takes.
+    hoverBorderColor: $lineBright
+    # The bar down the leading edge, in the hue of the node's family.
+    spineWidth:       3
+    # The size of a port mark, in pixels.
+    portSize:         7
+    # The shadow a card lifts off the canvas with.
+    shadowOpacity:    0.5
   nodeLink:
     inactiveColor: $line
     activeColor:   $lineBright
     cutColor:      "#f5685f"
     redirectColor: $lineBright
-  spreadsheet:
-    backgroundColor:  $fieldSurface
-    lineColor:        $border
-    selectedRowColor: $selectedFill
+    # The width a wire is drawn at, in pixels.
+    width:       1.6
+    activeWidth: 2.2
   parameter:
     # The floating panel container, translucent over the network behind it.
     panelColor:      $surfaceRaised
     # The inset fields inside it, such as sliders and text boxes.
     backgroundColor: $fieldSurface
     lineColor:       $border
+    # The label beside a control, and the chip naming the kind of parameter.
+    labelColor: $text
+    badgeColor: $textMuted
+  parameterType:
+    # The hue of the chip that names the kind of a parameter, so a row says
+    # what it holds before its label is read.
+    floatColor:     $signalBlue
+    intColor:       $signalTeal
+    boolColor:      $signalGreen
+    stringColor:    $signalAmber
+    dropdownColor:  $signalRose
+    vectorColor:    $signalViolet
+    rampColor:      $signalViolet
+    codeColor:      $signalGreen
+    attributeColor: $signalAmber
+  spreadsheet:
+    backgroundColor:  $fieldSurface
+    lineColor:        $border
+    selectedRowColor: $selectedFill
+    # The strip naming the sheet, and the divider under it.
+    headerColor:      $surfaceHeader
+    headerBorderColor: $borderSoft
   slider:
     fillColor: $valueFill
   rangeDial:
@@ -204,7 +308,9 @@ components:
     # The marker on the current frame
     playheadColor: $accent
   toggle:
-    onColor: $valueFill
+    # The track of a switch that is on, and the knob that rides on it.
+    onColor: $accent
+    knobColor: $textStrong
   popup:
     highlightColor: $accentDim
   tooltip:

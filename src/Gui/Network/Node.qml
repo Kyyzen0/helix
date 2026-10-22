@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.VectorImage
 import Enzo
+import "../Utils.js" as Utils
 
 Item {
     id: root
@@ -16,20 +17,23 @@ Item {
     x: modelX - width / 2
     y: modelY - height / 2
 
-    property color fillColor: Theme.node.bodyColor
+    property color fillColor: Theme.node.cardColor
     property color borderColor: Theme.node.borderColor
 
     property var nodeId
     property string label: "Grid"
     property string typeLabel
     property url iconUrl
-    property real radius: 5
+    property real radius: 8
     property real viewZoom: 1
     property bool selected: false
     property bool primary: false
     property bool display: false
     property int inputPortCount: 0
     property int outputPortCount: 0
+
+    // The family of the node, the namespace its type was published under.
+    property string family: ""
 
     // Whether the last input port takes any number of inputs.
     property bool multiInput: false
@@ -44,6 +48,20 @@ Item {
 
     // The primary and selected nodes both carry an accent outline.
     readonly property bool highlighted: selected || primary
+
+    // The hue the node's family is drawn in, so a graph reads as a set of
+    // colour coded groups rather than a field of unrelated cards.
+    readonly property color signalColor: signalPalette[Utils.signalIndex(root.family)]
+
+    // The hues a family can take.
+    readonly property var signalPalette: [
+        Theme.var.signalBlue,
+        Theme.var.signalTeal,
+        Theme.var.signalGreen,
+        Theme.var.signalAmber,
+        Theme.var.signalRose,
+        Theme.var.signalViolet
+    ]
 
     // Emitted when the display flag is clicked, to show this node's geometry.
     signal displayToggled
@@ -68,9 +86,12 @@ Item {
 
         // Drag logic
         MouseArea {
+            id: mouseArea
+
             anchors.fill: parent
             enabled: !root.linking
             acceptedButtons: Qt.LeftButton
+            hoverEnabled: true
             property real dragStartX: 0
             property real dragStartY: 0
             property bool dragged: false
@@ -100,7 +121,7 @@ Item {
             id: dropShadowRect
             anchors.fill: parent
             radius: root.radius
-            color: root.borderColor
+            color: root.fillColor
         }
         MultiEffect {
             id: shadow
@@ -108,7 +129,7 @@ Item {
             anchors.fill: dropShadowRect
             shadowEnabled: true
             shadowBlur: 0.7
-            shadowOpacity: 0.55
+            shadowOpacity: Theme.node.shadowOpacity
             shadowVerticalOffset: 3
         }
 
@@ -120,8 +141,75 @@ Item {
             radius: root.radius
             antialiasing: true
             border.pixelAligned: false
-            border.color: root.highlighted ? Theme.var.accent : root.borderColor
-            border.width: (root.highlighted ? 1.5 : 0.8) / root.viewZoom
+            border.color: root.primary ? Theme.var.accentBright : (root.highlighted ? Theme.var.accent : (mouseArea.containsMouse ? Theme.node.hoverBorderColor : root.borderColor))
+            border.width: (root.primary ? 2 : (root.highlighted ? 1.5 : 1)) / root.viewZoom
+        }
+
+        // The bar down the leading edge, in the hue of the node's family.
+        Rectangle {
+            id: spine
+
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            width: Theme.node.spineWidth
+            height: parent.height - Theme.var.space16
+            radius: width / 2
+            color: root.signalColor
+            opacity: root.highlighted ? 1 : 0.85
+        }
+
+        // The chip the icon sits in, in the hue of the node's family.
+        Rectangle {
+            id: iconChip
+
+            anchors.verticalCenter: parent.verticalCenter
+            x: Theme.var.space12
+            width: 20
+            height: 20
+            radius: 5
+            color: Qt.rgba(root.signalColor.r, root.signalColor.g, root.signalColor.b, 0.16)
+        }
+
+        VectorImage {
+            id: icon
+
+            width: 13
+            height: 13
+            anchors.centerIn: iconChip
+            preferredRendererType: VectorImage.CurveRenderer
+            fillMode: VectorImage.PreserveAspectFit
+            source: root.iconUrl
+        }
+
+        Column {
+            anchors.verticalCenter: parent.verticalCenter
+            x: iconChip.x + iconChip.width + Theme.var.space8
+            width: parent.width - x - Theme.var.space8
+            spacing: 1
+
+            // The kind of node, in the hue of the family it belongs to.
+            Text {
+                width: parent.width
+                text: root.typeLabel
+                color: root.signalColor
+                font.family: Theme.var.fontSans
+                font.pixelSize: Theme.var.textMicro
+                font.weight: Font.DemiBold
+                font.letterSpacing: 0.5
+                font.capitalization: Font.AllUppercase
+                elide: Text.ElideRight
+            }
+
+            // The name this node was given.
+            Text {
+                width: parent.width
+                text: root.label
+                color: Theme.node.titleColor
+                font.family: Theme.var.fontSans
+                font.pixelSize: Theme.var.textBody
+                font.weight: Font.DemiBold
+                elide: Text.ElideRight
+            }
         }
 
         // Display flag inside the right edge, marking which node feeds the viewport.
@@ -130,29 +218,27 @@ Item {
 
             property real rightMargin: 3
 
-            width: 6
-            height: parent.height * 0.7
-            radius: 2
+            width: 5
+            height: parent.height * 0.55
+            radius: 2.5
             anchors.verticalCenter: parent.verticalCenter
             x: parent.width - rightMargin - width
 
             // Dim at rest, the flag brightens on hover and lights up when active.
-            color: Theme.node.portColor
-            opacity: 0.4
+            color: Theme.node.displayFlagColor
+            opacity: 0.35
             states: [
                 State {
                     name: "hovered"
                     when: flagMouse.containsMouse && !root.display
                     PropertyChanges {
-                        displayTab.color: Theme.node.displayFlagColor
-                        displayTab.opacity: 0.7
+                        displayTab.opacity: 0.75
                     }
                 },
                 State {
                     name: "active"
                     when: root.display
                     PropertyChanges {
-                        displayTab.color: Theme.node.displayFlagColor
                         displayTab.opacity: 1
                     }
                 }
@@ -169,37 +255,6 @@ Item {
                 anchors.margins: -4
                 hoverEnabled: true
                 onClicked: root.displayToggled()
-            }
-        }
-
-        VectorImage {
-            width: 14
-            height: 14
-            anchors.verticalCenter: parent.verticalCenter
-            x: 8
-            preferredRendererType: VectorImage.CurveRenderer
-            fillMode: VectorImage.PreserveAspectFit
-            source: root.iconUrl
-        }
-
-        Column {
-            anchors.verticalCenter: parent.verticalCenter
-            x: 28
-            width: displayTab.x - x - 6
-
-            Text {
-                width: parent.width
-                text: root.typeLabel
-                color: Theme.var.textLabel
-                font.pointSize: 3.5
-                elide: Text.ElideRight
-            }
-            Text {
-                width: parent.width
-                text: root.label
-                color: Theme.var.textStrong
-                font.pointSize: 5
-                elide: Text.ElideRight
             }
         }
     }
@@ -223,15 +278,15 @@ Item {
 
         Rectangle {
             // A multi input port fills the edge it covers, a single port marks its center.
-            width: portDot.multiInput ? portDot.box.width : 7
-            height: 4
-            radius: 1.5
+            width: portDot.multiInput ? portDot.box.width : Theme.node.portSize
+            height: portDot.multiInput ? 4 : Theme.node.portSize
+            radius: portDot.multiInput ? 2 : 2.5
             x: -width / 2
             y: -height / 2
 
-            // The dot grows and brightens once it is the closest port, to invite a drag.
-            color: portDot.active ? Qt.lighter(Theme.node.portColor, 1.6) : Theme.node.portColor
-            scale: portDot.active && !portDot.multiInput ? 1.5 : 1
+            // The socket brightens once it is the closest port, to invite a drag.
+            color: portDot.active ? Theme.var.accent : Theme.node.portColor
+            scale: portDot.active && !portDot.multiInput ? 1.25 : 1
             Behavior on color {
                 ColorAnimation {
                     duration: 90

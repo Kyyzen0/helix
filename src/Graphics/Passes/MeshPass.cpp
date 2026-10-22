@@ -20,7 +20,9 @@ Pipeline createMeshPipeline(
     Diligent::IRenderDevice* device,
     Diligent::IBuffer* frameConstants,
     Diligent::IShader* vertexShader,
-    const PipelineSettings& settings
+    Diligent::Uint8 sampleCount,
+    const PipelineSettings& settings,
+    bool depthOnly = false
 )
 {
     Diligent::GraphicsPipelineStateCreateInfo pipelineInfo;
@@ -46,12 +48,14 @@ Pipeline createMeshPipeline(
 
     pipelineInfo.pVS = vertexShader;
     pipelineInfo.pPS = settings.pixelShader;
-    return createPipeline(device, pipelineInfo, frameConstants);
+    return createPipeline(device, pipelineInfo, frameConstants, sampleCount, depthOnly);
 }
 
 } // namespace
 
-MeshPass::MeshPass(Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants)
+MeshPass::MeshPass(
+    Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants, Diligent::Uint8 sampleCount
+)
 {
     Diligent::RefCntAutoPtr<Diligent::IShader> vertexShader =
         createShader(device, shaders::meshSource, Diligent::SHADER_TYPE_VERTEX, "vertexMain");
@@ -60,22 +64,36 @@ MeshPass::MeshPass(Diligent::IRenderDevice* device, Diligent::IBuffer* frameCons
     Diligent::RefCntAutoPtr<Diligent::IShader> wireframePixelShader =
         createShader(device, shaders::meshSource, Diligent::SHADER_TYPE_PIXEL, "wireframePixelMain");
 
+    // The prepass fills the depth of the mesh before it is shaded, so that the pixels a
+    // face hides are never shaded at all. It takes the same depth bias as the faces, so
+    // that the depth it writes is the depth the faces are drawn at.
+    depthPrepassPipeline_ = createMeshPipeline(
+        device,
+        frameConstants,
+        vertexShader,
+        sampleCount,
+        {"Mesh depth prepass", Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, nullptr, true},
+        /*depthOnly = */ true
+    );
     shadedTrianglePipeline_ = createMeshPipeline(
         device,
         frameConstants,
         vertexShader,
+        sampleCount,
         {"Mesh faces", Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shadedPixelShader, true}
     );
     shadedLinePipeline_ = createMeshPipeline(
         device,
         frameConstants,
         vertexShader,
+        sampleCount,
         {"Mesh open faces", Diligent::PRIMITIVE_TOPOLOGY_LINE_LIST, shadedPixelShader, false}
     );
     wireframePipeline_ = createMeshPipeline(
         device,
         frameConstants,
         vertexShader,
+        sampleCount,
         {"Mesh wireframe", Diligent::PRIMITIVE_TOPOLOGY_LINE_LIST, wireframePixelShader, false}
     );
 }
@@ -98,6 +116,9 @@ void MeshPass::draw(Diligent::IDeviceContext* context, bool wireframeVisible)
 
     setVertexBuffers(context, {positions_.buffer, normals_.buffer});
 
+    // The depth of the mesh is filled first, so that the pixels a face hides are not
+    // shaded.
+    drawIndexed(context, depthPrepassPipeline_, triangleIndices_);
     drawIndexed(context, shadedTrianglePipeline_, triangleIndices_);
     drawIndexed(context, shadedLinePipeline_, lineIndices_);
     if (wireframeVisible) drawIndexed(context, wireframePipeline_, edgeIndices_);

@@ -280,9 +280,24 @@ install_bison_flex() {
     mkdir -p "${dir}"
     # The packages share a bin and lib folder, so they are merged into one
     # prefix rather than kept apart.
-    for folder in bin lib share include; do
-        [[ -d "${stage}/${folder}" ]] && cp -R "${stage}/${folder}" "${dir}/"
+    #
+    # A file that is already in the prefix is kept. A bison that was built
+    # from the sources into this prefix comes with its own data files, and
+    # replacing either of them with the ones of the package would mix two
+    # different builds.
+    for folder in bin lib include; do
+        [[ -d "${stage}/${folder}" ]] || continue
+        mkdir -p "${dir}/${folder}"
+        local item
+        while IFS= read -r item; do
+            [[ -e "${dir}/${folder}/$(basename "${item}")" ]] && continue
+            cp -R "${item}" "${dir}/${folder}/"
+        done < <(find "${stage}/${folder}" -mindepth 1 -maxdepth 1)
     done
+    if [[ -d "${stage}/share" && ! -e "${dir}/share/bison" ]]; then
+        mkdir -p "${dir}/share"
+        cp -R "${stage}/share/." "${dir}/share/"
+    fi
     # The packages carry their own libiconv, which the binaries reach through a
     # relative rpath, so the prefix has to stay together.
     chmod +x "${dir}/bin/bison" "${dir}/bin/flex" "${dir}/bin/m4"
@@ -305,11 +320,19 @@ install_bison_shim() {
         '# Runs the bison of the toolchain without the C locale, which the' \
         '# conda build of bison does not survive. cmake asks a tool for its' \
         '# version in the C locale, so without this the build cannot even' \
-        '# find bison. The data files of bison are pointed at as well, because' \
-        '# the conda build has the folder of the machine that built it baked in.' \
-        '# The m4 of the toolchain is named too, so the macros are expanded by a' \
-        '# build that can write its cache.' \
-        'exec env -u LC_ALL -u LC_CTYPE BISON_PKGDATADIR="'"${TOOLCHAIN_DIR}"'/bison/share/bison" M4="'"${TOOLCHAIN_DIR}"'/bison/bin/m4" "'"${TOOLCHAIN_DIR}"'/bison/bin/bison" "$@"' \
+        '# find bison. The data files of bison are pointed at as well, but' \
+        '# only when they are in the toolchain, because the package has the' \
+        '# folder of the machine that built it baked in. A bison that was' \
+        '# built from the sources into the same prefix brings its own data' \
+        '# files, and pointing it at the ones of the package would mix two' \
+        '# builds. The m4 of the toolchain is named too, so the macros are' \
+        '# expanded by a build that can write its cache.' \
+        'data_dir="'"${TOOLCHAIN_DIR}"'/bison/share/bison"' \
+        'if [ -d "${data_dir}" ]; then' \
+        '    BISON_PKGDATADIR="${data_dir}"' \
+        '    export BISON_PKGDATADIR' \
+        'fi' \
+        'exec env -u LC_ALL -u LC_CTYPE M4="'"${TOOLCHAIN_DIR}"'/bison/bin/m4" "'"${TOOLCHAIN_DIR}"'/bison/bin/bison" "$@"' \
         > "${shim_dir}/bison"
     chmod +x "${shim_dir}/bison"
 }

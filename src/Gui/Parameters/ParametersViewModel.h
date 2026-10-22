@@ -31,6 +31,7 @@ class ParametersViewModel : public QObject
     Q_PROPERTY(QString nodeName READ nodeName NOTIFY parametersChanged)
     Q_PROPERTY(QString nodeType READ nodeType NOTIFY parametersChanged)
     Q_PROPERTY(QUrl nodeIconUrl READ nodeIconUrl NOTIFY parametersChanged)
+    Q_PROPERTY(QString nodeFamily READ nodeFamily NOTIFY parametersChanged)
 
   public:
     explicit ParametersViewModel(QObject* parent = nullptr);
@@ -40,6 +41,10 @@ class ParametersViewModel : public QObject
     QString nodeName() const { return nodeName_; }
     QString nodeType() const { return nodeType_; }
     QUrl nodeIconUrl() const { return nodeIconUrl_; }
+
+    /// @brief Returns the namespace the node's type was published under, the
+    /// family it belongs to. The interface colours a family as one group.
+    QString nodeFamily() const { return nodeFamily_; }
 
   Q_SIGNALS:
     void parametersChanged();
@@ -68,6 +73,7 @@ class ParametersViewModel : public QObject
     QString nodeName_;
     QString nodeType_;
     QUrl nodeIconUrl_;
+    QString nodeFamily_;
 
     boost::signals2::scoped_connection primaryNodeSubscription_;
     boost::signals2::scoped_connection parameterChangedSubscription_;

@@ -26,6 +26,11 @@ class NodeLinkLayer : public QQuickItem
     Q_PROPERTY(QAbstractListModel* links READ links WRITE setLinks NOTIFY linksChanged)
     Q_PROPERTY(QColor linkColor MEMBER linkColor_ NOTIFY linkColorChanged)
 
+    // The width a wire is drawn at, and the width the ones being picked up or
+    // previewed take.
+    Q_PROPERTY(qreal linkWidth READ linkWidth WRITE setLinkWidth NOTIFY linkWidthChanged)
+    Q_PROPERTY(qreal activeWidth READ activeWidth WRITE setActiveWidth NOTIFY activeWidthChanged)
+
     // Colors for the cut and rewire pickup hover previews.
     Q_PROPERTY(QColor cutColor MEMBER cutColor_ NOTIFY cutColorChanged)
     Q_PROPERTY(QColor redirectColor MEMBER redirectColor_ NOTIFY redirectColorChanged)
@@ -98,6 +103,14 @@ class NodeLinkLayer : public QQuickItem
 
     LinkHover hoverKind() const;
 
+    /// @brief Returns the width a wire is drawn at.
+    qreal linkWidth() const;
+    void setLinkWidth(qreal width);
+
+    /// @brief Returns the width a wire being picked up or previewed is drawn at.
+    qreal activeWidth() const;
+    void setActiveWidth(qreal width);
+
     NodeListModel* nodes() const;
     void setNodes(NodeListModel* model);
 
@@ -123,6 +136,8 @@ class NodeLinkLayer : public QQuickItem
     void nodesChanged();
     void linksChanged();
     void linkColorChanged();
+    void linkWidthChanged();
+    void activeWidthChanged();
     void cutColorChanged();
     void redirectColorChanged();
     void hoverChanged();
@@ -151,6 +166,8 @@ class NodeLinkLayer : public QQuickItem
     NodeListModel* nodes_ = nullptr;
     QAbstractListModel* links_ = nullptr;
     QColor linkColor_;
+    qreal linkWidth_ = 1.6;
+    qreal activeWidth_ = 2.2;
     QColor cutColor_;
     QColor redirectColor_;
     int hoverLink_ = -1;

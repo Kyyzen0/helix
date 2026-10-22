@@ -1,8 +1,11 @@
 import QtQuick
 import Enzo
 
-// A drag selection box for nodes. Its outline and corners scale back with the
-// zoom so they keep the same weight on screen.
+// A drag selection box for nodes.
+//
+// The box is a wash of the accent over the nodes it covers, with a bracket at
+// each corner. The brackets keep the weight of the outline off the nodes
+// themselves while still showing exactly where the box reaches.
 Rectangle {
     id: root
 
@@ -23,6 +26,10 @@ Rectangle {
     // The canvas points the box spans, the press anchor and the cursor.
     property point anchor
     property point cursor
+
+    // The weight of the brackets, which scales back with the zoom so they keep
+    // the same size on screen.
+    readonly property real weight: 1 / root.viewZoom
 
     // Anchors the box at the press point.
     function press(canvasPoint, pressAdditive) {
@@ -65,6 +72,85 @@ Rectangle {
     radius: Theme.network.selectionRadius / viewZoom
     color: Theme.network.selectionColor
     border.color: Theme.network.selectionBorderColor
-    border.width: 1 / viewZoom
+    border.width: root.weight
     antialiasing: true
+
+    // One bracket, drawn in the corner it belongs to.
+    component Bracket: Item {
+        id: bracket
+
+        // How long each arm of the bracket reaches, in pixels.
+        property real arm: 10 / root.viewZoom
+
+        // The thickness of the arms.
+        property real weight: 1 / root.viewZoom
+
+        // The corner the bracket sits in.
+        property int corner: 0
+
+        // Which arms reach away from the corner.
+        readonly property bool reachesRight: corner === 0 || corner === 3
+        readonly property bool reachesDown: corner === 0 || corner === 1
+
+        Rectangle {
+            height: bracket.weight
+            width: bracket.arm
+            color: Theme.network.selectionBorderColor
+            anchors.top: parent.top
+            anchors.left: parent.left
+            visible: bracket.reachesRight
+        }
+
+        Rectangle {
+            height: bracket.arm
+            width: bracket.weight
+            color: Theme.network.selectionBorderColor
+            anchors.top: parent.top
+            anchors.left: parent.left
+            visible: bracket.reachesDown
+        }
+
+        Rectangle {
+            height: bracket.weight
+            width: bracket.arm
+            color: Theme.network.selectionBorderColor
+            anchors.top: parent.top
+            anchors.right: parent.right
+            visible: !bracket.reachesRight
+        }
+
+        Rectangle {
+            height: bracket.arm
+            width: bracket.weight
+            color: Theme.network.selectionBorderColor
+            anchors.top: parent.top
+            anchors.right: parent.right
+            visible: !bracket.reachesDown
+        }
+    }
+
+    // The brackets, one in each corner of the box.
+    Bracket {
+        corner: 0
+        anchors.top: parent.top
+        anchors.left: parent.left
+    }
+
+    Bracket {
+        corner: 1
+        anchors.top: parent.top
+        anchors.right: parent.right
+    }
+
+    Bracket {
+        corner: 2
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+    }
+
+    Bracket {
+        corner: 3
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+    }
 }

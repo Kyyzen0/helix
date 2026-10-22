@@ -25,8 +25,11 @@ class NodeListModel : public QAbstractListModel
 
   public:
     /// The node card dimensions, the single source for the port geometry and the card.
-    static constexpr qreal nodeWidth = 90;
-    static constexpr qreal nodeHeight = 25;
+    ///
+    /// The card is wide enough for an icon, a type label and a node name to sit
+    /// side by side in two lines, which is what makes a graph readable at a glance.
+    static constexpr qreal nodeWidth = 148;
+    static constexpr qreal nodeHeight = 46;
 
     explicit NodeListModel(QObject* parent = nullptr);
 
@@ -104,6 +107,9 @@ class NodeListModel : public QAbstractListModel
         nt::NodeId nodeId;
         QString name;
         QString type;
+        /// The namespace the node's type was published under, the family it
+        /// belongs to. The interface colours a family as one group.
+        QString family;
         QUrl iconUrl;
         float x;
         float y;

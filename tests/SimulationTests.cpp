@@ -3,9 +3,11 @@
 #include "Engine/Network/Node.h"
 #include "Engine/Network/NodeLoader.h"
 #include "Engine/Network/NodePacket.h"
+#include "Engine/Network/NodeTypeTable.h"
 #include "Engine/NetworkGraph/NetworkGraph.h"
 #include "Engine/Parameter/NodeParameter.h"
 #include "Engine/Primitives/Mesh.h"
+#include "Engine/Serializer/Serializer.h"
 #include "Engine/Simulation/KeyframeStore.h"
 #include "Engine/Simulation/ParticleSolver.h"
 #include "Engine/Simulation/SpringSolver.h"
@@ -47,6 +49,15 @@ std::shared_ptr<const geo::Mesh> getMesh(nt::Node& node, unsigned int outputInde
         std::dynamic_pointer_cast<const geo::Mesh>(node.getOutputPacket(outputIndex)->getPrimitive(0));
     REQUIRE(mesh != nullptr);
     return mesh;
+}
+
+// Returns whether the scene holds a value that reads the time.
+bool readsTime(nt::NodeId nodeId, const char* parameter, unsigned int component)
+{
+    const nt::Unit expected{nodeId, parameter, component};
+    for (const nt::Unit& unit : nt::nm().graph().getTimeDependents())
+        if (unit == expected) return true;
+    return false;
 }
 
 } // namespace
@@ -148,6 +159,43 @@ TEST_CASE_METHOD(SimulationReset, "A keyframed parameter takes the value its tra
     REQUIRE(translate->evalFloat() == Catch::Approx(0.f));
 }
 
+TEST_CASE_METHOD(SimulationReset, "The components of a parameter animate on their own")
+{
+    auto& nm = nt::nm();
+    const nt::NodeId nodeId = addNode("enzo::transform");
+    auto translate = nm.getNode(nodeId).getParameter("translate").lock();
+
+    auto& store = sim::KeyframeStore::instance();
+    store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
+    store.setKeyframe({nodeId, "translate", 0}, 11.f, 10.f);
+    store.setKeyframe({nodeId, "translate", 1}, 1.f, 100.f);
+    store.setKeyframe({nodeId, "translate", 1}, 11.f, 200.f);
+
+    nm.setFrame(6);
+
+    // The two components move on their own tracks, and the third keeps the
+    // value it holds.
+    REQUIRE(translate->evalFloat(0) == Catch::Approx(5.f));
+    REQUIRE(translate->evalFloat(1) == Catch::Approx(150.f));
+    REQUIRE(translate->evalFloat(2) == Catch::Approx(0.f));
+}
+
+TEST_CASE_METHOD(SimulationReset, "Taking the keys off one component leaves the others alone")
+{
+    auto& nm = nt::nm();
+    const nt::NodeId nodeId = addNode("enzo::transform");
+
+    auto& store = sim::KeyframeStore::instance();
+    store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
+    store.setKeyframe({nodeId, "translate", 0}, 11.f, 10.f);
+    store.setKeyframe({nodeId, "translate", 1}, 1.f, 100.f);
+
+    store.clearTrack({nodeId, "translate", 0});
+
+    REQUIRE_FALSE(store.hasTrack({nodeId, "translate", 0}));
+    REQUIRE(store.hasTrack({nodeId, "translate", 1}));
+}
+
 TEST_CASE_METHOD(SimulationReset, "A keyframed parameter is marked as reading the time")
 {
     auto& nm = nt::nm();
@@ -156,11 +204,22 @@ TEST_CASE_METHOD(SimulationReset, "A keyframed parameter is marked as reading th
     auto& store = sim::KeyframeStore::instance();
     store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
 
-    const nt::Unit expected{nodeId, "translate", 0};
-    bool found = false;
-    for (const nt::Unit& unit : nm.graph().getTimeDependents())
-        if (unit == expected) found = true;
-    REQUIRE(found);
+    REQUIRE(readsTime(nodeId, "translate", 0));
+}
+
+TEST_CASE_METHOD(SimulationReset, "Taking the keyframes away stops the value reading the time")
+{
+    auto& nm = nt::nm();
+    const nt::NodeId nodeId = addNode("enzo::transform");
+
+    auto& store = sim::KeyframeStore::instance();
+    store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
+    REQUIRE(readsTime(nodeId, "translate", 0));
+
+    // With no keyframes left there is nothing to move, so the value is no
+    // longer held by the clock.
+    store.clearTrack({nodeId, "translate", 0});
+    REQUIRE_FALSE(readsTime(nodeId, "translate", 0));
 }
 
 TEST_CASE_METHOD(SimulationReset, "Taking the keyframes away puts the old value back")
@@ -231,6 +290,26 @@ TEST_CASE_METHOD(SimulationReset, "The particles start in the same places every 
         REQUIRE(first.getParticles()[index].position.isApprox(second.getParticles()[index].position));
 }
 
+TEST_CASE_METHOD(SimulationReset, "A different seed starts the particles in different places")
+{
+    sim::ParticleSettings settings;
+    settings.count = 16;
+
+    sim::ParticleSolver first;
+    first.reset(settings);
+
+    settings.seed = 2;
+    sim::ParticleSolver second;
+    second.reset(settings);
+
+    bool anyDifferent = false;
+    for (std::size_t index = 0; index < first.size(); ++index)
+        if (!first.getParticles()[index].position.isApprox(second.getParticles()[index].position))
+            anyDifferent = true;
+
+    REQUIRE(anyDifferent);
+}
+
 TEST_CASE_METHOD(SimulationReset, "The particles are the same however the frames were reached")
 {
     sim::ParticleSettings settings;
@@ -258,6 +337,60 @@ TEST_CASE_METHOD(SimulationReset, "The particles are the same however the frames
     REQUIRE(straight.size() == stepped.size());
     for (std::size_t index = 0; index < straight.size(); ++index)
         REQUIRE(straight[index].position.isApprox(stepped[index].position));
+}
+
+TEST_CASE_METHOD(SimulationReset, "The particles run twice give the same answer")
+{
+    sim::ParticleSettings settings;
+    settings.count = 32;
+    settings.gravity = Vector3(0.f, -9.81f, 0.f);
+    settings.swirl = 2.5f;
+
+    const auto run = [&settings]() {
+        return sim::simulateParticles(
+            settings,
+            [settings](floatT) { return settings; },
+            1.f,
+            20.f,
+            24.f,
+            2
+        );
+    };
+
+    const auto first = run();
+    const auto second = run();
+
+    REQUIRE(first.size() == second.size());
+    for (std::size_t index = 0; index < first.size(); ++index)
+        REQUIRE(first[index].position.isApprox(second[index].position));
+}
+
+TEST_CASE_METHOD(SimulationReset, "A scene sitting between two frames sits between them")
+{
+    sim::ParticleSettings settings;
+    settings.count = 1;
+    settings.gravity = Vector3(0.f, -10.f, 0.f);
+    settings.drag = 0.f;
+
+    const auto at = [&settings](floatT frame) {
+        return sim::simulateParticles(
+            settings,
+            [settings](floatT) { return settings; },
+            1.f,
+            frame,
+            24.f,
+            1
+        );
+    };
+
+    const auto whole = at(3.f);
+    const auto half = at(3.5f);
+    const auto next = at(4.f);
+
+    // The half frame has moved further than the whole frame below it and less
+    // far than the whole frame above it.
+    REQUIRE(half[0].position.y() < whole[0].position.y());
+    REQUIRE(half[0].position.y() > next[0].position.y());
 }
 
 TEST_CASE_METHOD(SimulationReset, "A spring sheet hangs from its top row")
@@ -306,6 +439,32 @@ TEST_CASE_METHOD(SimulationReset, "The spring sheet is the same however the fram
     REQUIRE(straight.size() == stepped.size());
     for (std::size_t index = 0; index < straight.size(); ++index)
         REQUIRE(straight[index].isApprox(stepped[index]));
+}
+
+TEST_CASE_METHOD(SimulationReset, "The spring sheet run twice gives the same answer")
+{
+    sim::SpringSettings settings;
+    settings.columns = 5;
+    settings.rows = 4;
+    settings.gravity = Vector3(0.f, -9.81f, 0.f);
+
+    const auto run = [&settings]() {
+        return sim::simulateSprings(
+            settings,
+            [settings](floatT) { return settings; },
+            1.f,
+            15.f,
+            24.f,
+            2
+        );
+    };
+
+    const auto first = run();
+    const auto second = run();
+
+    REQUIRE(first.size() == second.size());
+    for (std::size_t index = 0; index < first.size(); ++index)
+        REQUIRE(first[index].isApprox(second[index]));
 }
 
 TEST_CASE_METHOD(SimulationReset, "The simulation node makes as many particles as it says")
@@ -395,4 +554,90 @@ TEST_CASE_METHOD(SimulationReset, "The simulation node gives the same points twi
     REQUIRE(first->getNumPoints() == second->getNumPoints());
     for (int pointIndex = 0; pointIndex < static_cast<int>(first->getNumPoints()); ++pointIndex)
         REQUIRE(first->getPointPos(pointIndex).isApprox(second->getPointPos(pointIndex)));
+}
+
+TEST_CASE_METHOD(SimulationReset, "The scene and its keyframes travel together through a save")
+{
+    auto& nm = nt::nm();
+    const nt::NodeId nodeId = addNode("enzo::transform");
+    nm.getNode(nodeId).setPath("/keyframed_transform");
+
+    auto& store = sim::KeyframeStore::instance();
+    store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
+    store.setKeyframe({nodeId, "translate", 0}, 11.f, 10.f);
+
+    nm.setStartFrame(5);
+    nm.setEndFrame(60);
+    nm.setFps(30);
+
+    const std::string path = "/tmp/enzo_simulation_keyframes_roundtrip.json";
+    nt::Serializer serializer;
+    serializer.save(nm, path);
+
+    nm._reset();
+    store.clear();
+    serializer.load(nm, path);
+
+    // The playback range and the rate come back with the scene.
+    REQUIRE(nm.getStartFrame() == 5);
+    REQUIRE(nm.getEndFrame() == 60);
+    REQUIRE(nm.getFps() == Catch::Approx(30.f));
+
+    // The keyframes come back too, and they belong to the node that was
+    // saved, which is found by its path.
+    nt::NodeId restored = nt::nullNode;
+    for (auto [candidateId, node] : nm.nodes())
+        if (node.getPath().getString() == "/keyframed_transform") restored = candidateId;
+
+    REQUIRE(restored != nt::nullNode);
+    REQUIRE(store.hasTrack({restored, "translate", 0}));
+    REQUIRE(store.evaluate({restored, "translate", 0}, 6.f).value() == Catch::Approx(5.f));
+}
+
+TEST_CASE_METHOD(SimulationReset, "The focused particles node makes as many particles as it says")
+{
+    if (!nt::NodeTypeTable::getNodeType("enzo::particles"))
+        SKIP("the focused simulation nodes need the node loader to find nested node folders");
+
+    auto& nm = nt::nm();
+    const nt::NodeId nodeId = addNode("enzo::particles");
+
+    nm.getNode(nodeId).getParameter("count").lock()->setInt(9);
+    nm.cook(nodeId);
+
+    const auto mesh = getMesh(nm.getNode(nodeId), 0);
+    REQUIRE(mesh->getNumPoints() == 9);
+}
+
+TEST_CASE_METHOD(SimulationReset, "The focused springs node makes a sheet of the size it says")
+{
+    if (!nt::NodeTypeTable::getNodeType("enzo::springs"))
+        SKIP("the focused simulation nodes need the node loader to find nested node folders");
+
+    auto& nm = nt::nm();
+    const nt::NodeId nodeId = addNode("enzo::springs");
+
+    nm.getNode(nodeId).getParameter("columns").lock()->setInt(6);
+    nm.getNode(nodeId).getParameter("rows").lock()->setInt(4);
+    nm.cook(nodeId);
+
+    const auto mesh = getMesh(nm.getNode(nodeId), 0);
+    REQUIRE(mesh->getNumPoints() == 24);
+}
+
+TEST_CASE_METHOD(SimulationReset, "The focused particles node cooks again when the frame moves")
+{
+    if (!nt::NodeTypeTable::getNodeType("enzo::particles"))
+        SKIP("the focused simulation nodes need the node loader to find nested node folders");
+
+    auto& nm = nt::nm();
+    const nt::NodeId nodeId = addNode("enzo::particles");
+
+    nm.getNode(nodeId).getParameter("count").lock()->setInt(4);
+    nm.setFrame(1);
+    nm.cook(nodeId);
+    REQUIRE_FALSE(nm.getNode(nodeId).isDirty());
+
+    nm.setFrame(20);
+    REQUIRE(nm.getNode(nodeId).isDirty());
 }

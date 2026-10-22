@@ -30,10 +30,15 @@ Diligent::RefCntAutoPtr<Diligent::IShader> createShader(
 ///
 /// @param pipelineInfo the settings of the pass, which leave the target formats and sample count unset.
 /// @param frameConstants the buffer the renderer fills with the frame constants.
+/// @param sampleCount the number of samples the viewport targets hold.
+/// @param depthOnly whether the pipeline writes the depth and nothing else, which is what a
+/// depth prepass draws with.
 Pipeline createPipeline(
     Diligent::IRenderDevice* device,
     Diligent::GraphicsPipelineStateCreateInfo pipelineInfo,
-    Diligent::IBuffer* frameConstants
+    Diligent::IBuffer* frameConstants,
+    Diligent::Uint8 sampleCount,
+    bool depthOnly = false
 );
 
 /// @brief Binds the vertex buffers to slots 0 onward in order and unbinds the rest.

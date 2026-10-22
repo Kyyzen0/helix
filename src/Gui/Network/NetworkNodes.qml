@@ -49,6 +49,7 @@ Repeater {
         nodeId: model.nodeId
         label: model.name
         typeLabel: model.type
+        family: model.family
         iconUrl: model.iconUrl
         selected: model.selected
         primary: model.primary

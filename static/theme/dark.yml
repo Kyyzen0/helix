@@ -27,6 +27,15 @@ variables:
   textMuted:  "#646464"
   textFaint:  "#3b3b3b"
 
+  # The signal palette. Muted here, so the theme stays close to pure grey while
+  # the node families stay tellable apart.
+  signalBlue:   "#6f8fa8"
+  signalTeal:   "#5f9c94"
+  signalGreen:  "#7f9c6f"
+  signalAmber:  "#a8935f"
+  signalRose:   "#a8788f"
+  signalViolet: "#8a7fa8"
+
   # Fill that marks a value, such as the bar in a slider
   valueFill: "#2f2f2f"
 
