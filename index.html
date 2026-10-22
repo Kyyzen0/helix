@@ -170,6 +170,7 @@ Linux</h3>
 <h2><a class="anchor" id="autotoc_md10"></a>
 Status</h2>
 <p>Helix is a work in progress, and so is the application it is based on. The macOS port builds and installs, the CI job runs the superbuild on a <code>macos-15</code> runner, and the features listed above are implemented in the tree. Expect rough edges, and expect the interface to still be moving.</p>
+<p>The 3D view is not presented on macOS yet. The scene graph of Qt runs on Metal there and cannot adopt the Vulkan device of the graphics engine, so the viewport stays empty while the rest of the application works. build-macos.md says what the port still needs.</p>
 <p>The internal C++ namespace is still <code>enzo::</code>, and the scene format keeps the <code>.enzo</code> extension so that files stay interchangeable with the upstream project. Renaming those is a separate mechanical refactor.</p>
 <p><b>ROADMAP.md</b> states where the work goes next, and why in that order. Helix is a procedural modeling tool <em>and</em> an animation tool, so the roadmap has a shared foundation and two tracks that build on it.</p>
 <hr  />
