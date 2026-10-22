@@ -18,13 +18,13 @@ trap 'rm -rf "$APPDIR"' EXIT
 
 cp -a "$PREFIX/." "$APPDIR/"
 
-cp "$APPDIR/share/applications/com.enzo3d.Enzo.desktop" "$APPDIR/"
-cp "$APPDIR/share/icons/hicolor/scalable/apps/com.enzo3d.Enzo.svg" "$APPDIR/"
+cp "$APPDIR/share/applications/com.helix3d.Helix.desktop" "$APPDIR/"
+cp "$APPDIR/share/icons/hicolor/scalable/apps/com.helix3d.Helix.svg" "$APPDIR/"
 
 cat > "$APPDIR/AppRun" <<'RUN'
 #!/usr/bin/env bash
 HERE=$(dirname "$(readlink -f "$0")")
-exec "$HERE/enzo/bin/enzo" "$@"
+exec "$HERE/helix/bin/helix" "$@"
 RUN
 chmod +x "$APPDIR/AppRun"
 

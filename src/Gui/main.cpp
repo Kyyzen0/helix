@@ -155,7 +155,13 @@ int main(int argc, char** argv)
     keepFreedMemory();
     const QString scenePath = parseCommandLine(argc, argv);
 
+#ifndef __APPLE__
+    // The scene graph draws with the device of the graphics engine, which is
+    // a Vulkan device, so it needs the Vulkan backend of the render interface.
+    // The official binaries of Qt for macOS do not carry it, and their scene
+    // graph runs on Metal there.
     QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
+#endif
 
     // Icons recolour their SVG markup through a local file XMLHttpRequest.
     qputenv("QML_XHR_ALLOW_FILE_READ", "1");
@@ -225,12 +231,20 @@ int main(int argc, char** argv)
     }
     catch (const std::exception& error)
     {
+#ifdef __APPLE__
+        // macOS has no Vulkan driver of its own, and the device needs one.
+        // The application starts without it, since the viewport cannot be
+        // presented there anyway, and every other part of it works.
+        std::cerr << "no graphics device on this host: " << error.what() << "\n";
+#else
         std::cerr << "could not start the graphics device: " << error.what() << "\n";
         return 1;
+#endif
     }
 
     QQmlApplicationEngine engine;
 
+#ifndef __APPLE__
     // Hands the device to each root window the engine loads, before it first renders.
     // Other windows keep their own device, since each window renders on its own thread
     // and two threads cannot submit to one queue.
@@ -242,6 +256,7 @@ int main(int argc, char** argv)
             if (auto* window = qobject_cast<QQuickWindow*>(root)) graphicsBridge->adoptDevice(window);
         }
     );
+#endif
     engine.rootContext()->setContextProperty("spreadsheet", &spreadsheet);
     engine.rootContext()->setContextProperty("network", &network);
     engine.rootContext()->setContextProperty("viewport", &viewport);

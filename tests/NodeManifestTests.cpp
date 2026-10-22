@@ -34,6 +34,23 @@ implementation:
   type: enzo::attributeNoise
 )";
 
+// The smallest user node manifest that parses. The source's file name is the
+// only thing the implementation needs, so the library and the constructor keep
+// their defaults.
+const std::string kUserNodeManifest = R"(
+version: 1
+name: myWiggle
+namespace: user
+label: My Wiggle
+tags: [user]
+inputs:
+  - label: Geometry
+outputs: 1
+implementation:
+  kind: script
+  source: source.das
+)";
+
 // A node for kAliasManifest to stand in for, with one parameter of each kind an
 // alias can set and a multiparm it cannot.
 const std::string kAliasedManifest = R"(
@@ -893,6 +910,44 @@ TEST_CASE("Style options without a style are rejected")
 TEST_CASE("A missing manifest file is reported by its path")
 {
     REQUIRE_THROWS_AS(nt::NodeManifest::loadFromFile("nowhere/node.yaml"), std::runtime_error);
+}
+
+// User authored nodes
+
+TEST_CASE("A script implementation names the source the node runs")
+{
+    const nt::NodeManifest manifest = nt::NodeManifest::loadFromString(kUserNodeManifest);
+    const nt::ScriptImplementation& implementation =
+        std::get<nt::ScriptImplementation>(manifest.getImplementation());
+
+    REQUIRE(implementation.source == "source.das");
+    REQUIRE(implementation.library == "enzoOps");
+    REQUIRE(implementation.constructor == "userNode");
+}
+
+TEST_CASE("A script implementation without a source is refused")
+{
+    const std::string manifest = R"(
+version: 1
+name: myWiggle
+namespace: user
+implementation:
+  kind: script
+)";
+
+    REQUIRE_THROWS_AS(nt::NodeManifest::loadFromString(manifest), std::runtime_error);
+}
+
+TEST_CASE("A user node's manifest gives it a name, a label, and a port")
+{
+    const nt::NodeManifest manifest = nt::NodeManifest::loadFromString(kUserNodeManifest);
+    const nt::NodeType& nodeType = manifest.getNodeType();
+
+    REQUIRE(nodeType.getFullName() == "user::myWiggle");
+    REQUIRE(nodeType.getLabel() == "My Wiggle");
+    REQUIRE(nodeType.inputPorts.size() == 1);
+    REQUIRE(nodeType.inputPorts.at(0).label == "Geometry");
+    REQUIRE(nodeType.inputPorts.at(0).optional == false);
 }
 
 // The shipped nodes

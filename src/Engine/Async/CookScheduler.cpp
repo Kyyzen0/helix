@@ -10,7 +10,11 @@ namespace {
 unsigned int defaultThreadCount()
 {
     const unsigned int cores = std::thread::hardware_concurrency();
-    if (cores <= 1) return 1;
+
+    // Two workers at least, so the network always has more than one place to
+    // cook, however small the machine is.
+    if (cores <= 2) return 2;
+
     // Leave a core for the interface, which stays responsive while a cook runs.
     return std::min(cores - 1, 8u);
 }
@@ -56,6 +60,8 @@ CookGeneration CookScheduler::requestCook(
 
         generation_ += 1;
         job->generation = generation_;
+        jobSerial_ += 1;
+        job->serial = jobSerial_;
         job->levels = std::move(levels);
         job->levelStates.resize(job->levels.size());
         job->cookNode = std::move(cookNode);
@@ -81,6 +87,12 @@ void CookScheduler::cancel()
         hasJob_ = false;
     }
     cv_.notify_all();
+}
+
+void CookScheduler::waitForIdle()
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    idleCv_.wait(lock, [this] { return activeWorkers_.load(std::memory_order_acquire) == 0; });
 }
 
 bool CookScheduler::isBusy() const
@@ -133,6 +145,15 @@ void CookScheduler::runJob_(const std::shared_ptr<JobState>& job)
 {
     activeWorkers_.fetch_add(1, std::memory_order_acq_rel);
 
+    // Wait until no node of an older cook is still being cooked. A node is
+    // never cooked by two workers at once, so a newer cook always starts on
+    // the finished geometry of the nodes it depends on, and a node the older
+    // cook was part way through is cooked again by the newer one.
+    {
+        std::unique_lock<std::mutex> lock(mutex_);
+        jobCv_.wait(lock, [&] { return !olderCookRunning_(job->serial); });
+    }
+
     for (size_t levelIndex = 0; levelIndex < job->levels.size(); ++levelIndex)
     {
         const std::vector<nt::NodeId>& level = job->levels[levelIndex];
@@ -142,15 +163,28 @@ void CookScheduler::runJob_(const std::shared_ptr<JobState>& job)
         // next one, so the work spreads over the pool.
         for (;;)
         {
-            if (job->token.isCancelled()) break;
+            std::size_t index = 0;
+            {
+                // The token and the take happen together, so a cook that was
+                // abandoned never hands out a node after the fact.
+                std::lock_guard<std::mutex> lock(mutex_);
+                if (job->token.isCancelled()) break;
 
-            const size_t index = state.nextIndex.fetch_add(1, std::memory_order_relaxed);
-            if (index >= level.size()) break;
+                index = state.nextIndex.fetch_add(1, std::memory_order_relaxed);
+                if (index >= level.size()) break;
 
-            // The cook may have been abandoned between the check and the take.
-            if (job->token.isCancelled()) break;
+                // The node is in flight now, so a newer cook waits for it.
+                activeCooks_.insert(job->serial);
+            }
 
             job->cookNode(level[index], job->token);
+
+            {
+                std::lock_guard<std::mutex> lock(mutex_);
+                auto active = activeCooks_.find(job->serial);
+                if (active != activeCooks_.end()) activeCooks_.erase(active);
+            }
+            jobCv_.notify_all();
 
             state.completed.fetch_add(1, std::memory_order_release);
             // Wake the workers waiting on this level, so they look again.
@@ -172,6 +206,9 @@ void CookScheduler::runJob_(const std::shared_ptr<JobState>& job)
     }
 
     activeWorkers_.fetch_sub(1, std::memory_order_acq_rel);
+    // Wake anything waiting for the pool to go quiet.
+    { std::lock_guard<std::mutex> lock(mutex_); }
+    idleCv_.notify_all();
 
     // The cook is over once every worker has left it.
     const size_t workersDone = job->workersDone.fetch_add(1, std::memory_order_acq_rel) + 1;
@@ -191,6 +228,13 @@ void CookScheduler::runJob_(const std::shared_ptr<JobState>& job)
     }
 
     if (cookFinishedFn) cookFinishedFn(generation, status);
+}
+
+bool CookScheduler::olderCookRunning_(std::uint64_t serial) const
+{
+    for (std::uint64_t active : activeCooks_)
+        if (active < serial) return true;
+    return false;
 }
 
 } // namespace enzo::async

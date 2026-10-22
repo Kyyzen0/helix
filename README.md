@@ -109,9 +109,18 @@ builds and installs, the CI job runs the superbuild on a `macos-15` runner, and 
 features listed above are implemented in the tree. Expect rough edges, and expect the
 interface to still be moving.
 
+The 3D view is not presented on macOS yet. The scene graph of Qt runs on Metal there
+and cannot adopt the Vulkan device of the graphics engine, so the viewport stays empty
+while the rest of the application works. [build-macos.md](build-macos.md) says what the
+port still needs.
+
 The internal C++ namespace is still `enzo::`, and the scene format keeps the `.enzo`
 extension so that files stay interchangeable with the upstream project. Renaming those
 is a separate mechanical refactor.
+
+**[ROADMAP.md](ROADMAP.md)** states where the work goes next, and why in that order.
+Helix is a procedural modeling tool *and* an animation tool, so the roadmap has a
+shared foundation and two tracks that build on it.
 
 ---
 

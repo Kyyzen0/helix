@@ -8,7 +8,7 @@ MenuBar {
     FileDialog {
         id: openDialog
         title: "Open Scene"
-        nameFilters: ["Enzo files (*.enzo)", "All files (*)"]
+        nameFilters: ["Helix files (*.enzo)", "All files (*)"]
         onAccepted: scene.open(selectedFile)
     }
     FileDialog {
@@ -16,7 +16,7 @@ MenuBar {
         title: "Save Scene As"
         fileMode: FileDialog.SaveFile
         defaultSuffix: "enzo"
-        nameFilters: ["Enzo files (*.enzo)", "All files (*)"]
+        nameFilters: ["Helix files (*.enzo)", "All files (*)"]
         onAccepted: scene.saveAs(selectedFile)
     }
     PlaceholderDialog {
@@ -111,7 +111,7 @@ MenuBar {
                         action: () => placeholder.show("Examples")
                     },
                     {
-                        text: "About Enzo",
+                        text: "About Helix",
                         enabled: false
                     },
                 ]

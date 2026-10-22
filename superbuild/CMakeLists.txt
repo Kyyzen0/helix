@@ -8,6 +8,11 @@ set(ENZO_DEPS_PREFIX "${CMAKE_BINARY_DIR}/deps"
 
 set_directory_properties(PROPERTIES EP_BASE ${CMAKE_BINARY_DIR}/superbuild)
 
+# Where the dependency sources live. A dependency whose source is already in
+# this folder is built from there, instead of being extracted again from its
+# archive.
+set(ENZO_SOURCE_ROOT "${CMAKE_BINARY_DIR}/superbuild/Source")
+
 # Collects each dependency as it is added, so enzo can depend on the whole set.
 set(ENZO_DEPS)
 
@@ -30,8 +35,12 @@ set(ENZO_TOOLCHAIN_CMAKE_ARGS
 # The oldest macOS the whole tree is built for. Every dependency and enzo
 # itself take the same value, so no library ends up asking for a system
 # release the host does not have.
+#
+# The floor is 13.3, because the standard library of the current Xcode pulls
+# the formatting header in through the stream header, and the conversion of a
+# floating point number it uses there was only added to the system in 13.3.
 if(APPLE)
-    set(ENZO_OSX_DEPLOYMENT_TARGET "12.0")
+    set(ENZO_OSX_DEPLOYMENT_TARGET "13.3")
     list(APPEND ENZO_TOOLCHAIN_CMAKE_ARGS
         -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${ENZO_OSX_DEPLOYMENT_TARGET})
 endif()
@@ -49,6 +58,15 @@ foreach(setting IN ITEMS
     CMAKE_SHARED_LINKER_FLAGS)
     if(NOT "${${setting}}" STREQUAL "")
         list(APPEND ENZO_TOOLCHAIN_CMAKE_ARGS "-D${setting}:STRING=${${setting}}")
+    endif()
+endforeach()
+
+# The tools that the host provides through the environment, such as the bison
+# the daslang parsers are generated with. The environment is not a cmake
+# variable, so these are read from it directly.
+foreach(tool IN ITEMS BISON_EXECUTABLE FLEX_EXECUTABLE)
+    if(NOT "$ENV{${tool}}" STREQUAL "")
+        list(APPEND ENZO_TOOLCHAIN_CMAKE_ARGS "-D${tool}:STRING=$ENV{${tool}}")
     endif()
 endforeach()
 
@@ -71,6 +89,7 @@ elseif(UNIX)
     list(APPEND ENZO_DEP_CMAKE_ARGS -DCMAKE_INSTALL_RPATH:STRING=$ORIGIN)
 endif()
 
+include(deps/archive.cmake)
 include(deps/tbb.cmake)
 include(deps/boost.cmake)
 include(deps/manifold.cmake)

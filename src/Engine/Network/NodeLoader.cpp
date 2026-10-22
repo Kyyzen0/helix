@@ -4,9 +4,14 @@
 #include "Engine/Network/NodeRegistry.h"
 #include "Engine/Network/NodeType.h"
 #include "Engine/Network/NodeTypeTable.h"
+#include "Engine/Script/PointScript.h"
+#include "Engine/Script/ScriptEngine.h"
 #include <boost/dll/shared_library.hpp>
+#include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <map>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <variant>
@@ -62,15 +67,14 @@ boost::dll::shared_library& openLibrary(const std::string& libraryName)
 }
 
 // Returns a node's constructor from the library its manifest names.
-nodeConstructor getConstructor(const CppImplementation& implementation)
+nodeConstructor getConstructor(const std::string& libraryName, const std::string& constructorName)
 {
-    boost::dll::shared_library& library = openLibrary(implementation.library);
-    const std::string symbol = nodeConstructorSymbol(implementation.constructor);
+    boost::dll::shared_library& library = openLibrary(libraryName);
+    const std::string symbol = nodeConstructorSymbol(constructorName);
 
     if (!library.has(symbol))
         throw std::runtime_error(
-            "library " + implementation.library + " exports no constructor named " +
-            implementation.constructor
+            "library " + libraryName + " exports no constructor named " + constructorName
         );
 
     return &library.get<NodeImpl*(Node&, CookContext&)>(symbol);
@@ -118,6 +122,34 @@ std::vector<NodeFolder> readNodeFolders()
     return nodeFolders;
 }
 
+// The compiled source behind each user node, held against the folder the node
+// was loaded from.
+std::map<std::filesystem::path, std::shared_ptr<const script::PointScript>>& userScripts()
+{
+    static std::map<std::filesystem::path, std::shared_ptr<const script::PointScript>> scripts;
+    return scripts;
+}
+
+// Returns the directory the user's own data lives in.
+std::filesystem::path getUserDataDirectory()
+{
+#if defined(__APPLE__)
+    const char* home = std::getenv("HOME");
+    if (home && *home) return std::filesystem::path(home) / "Library" / "Application Support" / "Helix";
+    return std::filesystem::temp_directory_path() / "Helix";
+#elif defined(_WIN32)
+    const char* appData = std::getenv("APPDATA");
+    if (appData && *appData) return std::filesystem::path(appData) / "Helix";
+    return std::filesystem::temp_directory_path() / "Helix";
+#else
+    const char* dataHome = std::getenv("XDG_DATA_HOME");
+    if (dataHome && *dataHome) return std::filesystem::path(dataHome) / "helix";
+    const char* home = std::getenv("HOME");
+    if (home && *home) return std::filesystem::path(home) / ".local" / "share" / "helix";
+    return std::filesystem::temp_directory_path() / "helix";
+#endif
+}
+
 } // namespace
 
 std::filesystem::path NodeLoader::getNodesDirectory()
@@ -132,6 +164,87 @@ std::filesystem::path NodeLoader::getNodesDirectory()
         "Couldn't find a nodes directory, tried " + installed.string() + " and " +
         development.string()
     );
+}
+
+std::filesystem::path NodeLoader::getUserNodesDirectory()
+{
+    // The environment variable lets a test and a development run keep their
+    // nodes somewhere else.
+    if (const char* override = std::getenv("ENZO_USER_NODES_DIR"))
+        if (*override) return std::filesystem::path(override);
+
+    return getUserDataDirectory() / "nodes";
+}
+
+bool NodeLoader::registerUserNode(const std::filesystem::path& folder, std::string& error)
+{
+    error.clear();
+
+    try
+    {
+        const NodeManifest manifest = NodeManifest::loadFromFile(folder / kManifestName);
+
+        const auto* implementation =
+            std::get_if<ScriptImplementation>(&manifest.getImplementation());
+        if (!implementation)
+        {
+            error = "the node in " + folder.string() + " is not a user node";
+            return false;
+        }
+
+        // The source sits beside the manifest, named by the manifest.
+        const std::filesystem::path sourcePath = folder / implementation->source;
+        std::ifstream sourceFile(sourcePath);
+        if (!sourceFile)
+        {
+            error = "Couldn't read the source " + sourcePath.string();
+            return false;
+        }
+
+        std::stringstream source;
+        source << sourceFile.rdbuf();
+
+        // A source that does not compile leaves the node out, rather than taking
+        // the application down with it.
+        String compileError;
+        const std::shared_ptr<const script::PointScript> script =
+            script::ScriptEngine::instance().compile(source.str(), compileError);
+        if (!script)
+        {
+            error = compileError.empty() ? "the source did not compile" : compileError;
+            return false;
+        }
+
+        NodeType nodeType = manifest.getNodeType();
+        nodeType.folder = folder;
+        nodeType.ctorFunc = getConstructor(implementation->library, implementation->constructor);
+
+        // The source is held against the folder, where the node finds it when
+        // it cooks.
+        userScripts()[folder] = script;
+
+        // A node of that name is already registered, so its source is replaced
+        // rather than a second node of that name being added. The parameters of
+        // a node are fixed when it is first registered.
+        if (NodeTypeTable::getNodeType(nodeType.getFullName())) return true;
+
+        NodeTypeTable::addNodeType(std::move(nodeType));
+        return true;
+    }
+    catch (const std::exception& caught)
+    {
+        error = caught.what();
+        return false;
+    }
+}
+
+std::shared_ptr<const script::PointScript> NodeLoader::getUserScript(
+    const std::filesystem::path& folder
+)
+{
+    const auto found = userScripts().find(folder);
+    if (found == userScripts().end()) return nullptr;
+    return found->second;
 }
 
 void NodeLoader::loadNodes()
@@ -153,7 +266,7 @@ void NodeLoader::loadNodes()
         {
             NodeType nodeType = nodeFolder.manifest.getNodeType();
             nodeType.folder = nodeFolder.path;
-            nodeType.ctorFunc = getConstructor(*implementation);
+            nodeType.ctorFunc = getConstructor(implementation->library, implementation->constructor);
             NodeTypeTable::addNodeType(std::move(nodeType));
         }
         catch (const std::exception& error)
@@ -179,6 +292,22 @@ void NodeLoader::loadNodes()
         {
             reportSkippedNode(nodeFolder.path, error);
         }
+    }
+
+    // The user's own nodes, read the same way as the shipped ones. A node that
+    // cannot be read is reported and left out, so a broken user node never
+    // stops the application from starting.
+    const std::filesystem::path userDirectory = getUserNodesDirectory();
+    if (!std::filesystem::is_directory(userDirectory)) return;
+
+    for (const auto& entry : std::filesystem::directory_iterator(userDirectory))
+    {
+        if (!entry.is_directory()) continue;
+        if (!std::filesystem::exists(entry.path() / kManifestName)) continue;
+
+        std::string error;
+        if (!registerUserNode(entry.path(), error))
+            reportSkippedNode(entry.path(), std::runtime_error(error));
     }
 }
 

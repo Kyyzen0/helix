@@ -50,8 +50,14 @@ endif()
 
 # The oldest macOS the bundle claims to run on. Every dependency is built for
 # it too, so the tree stays free of a library the host cannot load.
+#
+# The floor is 13.3, because the standard library of the current Xcode pulls
+# the formatting header in through the stream header, and the conversion of a
+# floating point number it uses there was only added to the system in 13.3.
+# Eigen reaches the stream header, so every file that includes it needs a
+# release that has the conversion.
 if(APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Oldest macOS the build supports")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3" CACHE STRING "Oldest macOS the build supports")
 endif()
 
 set(ENZO_DEV_LIB_DIR "${CMAKE_BINARY_DIR}/nodes/")
@@ -95,6 +101,13 @@ set(ENGINE_SOURCES
     src/Engine/Parameter/PrmName.cpp
     src/Engine/Network/NetworkManager.cpp
     src/Engine/Network/UpdateLock.cpp
+    src/Engine/Async/CookPlan.cpp
+    src/Engine/Async/CookResult.cpp
+    src/Engine/Async/CookScheduler.cpp
+    src/Engine/Async/CookSnapshot.cpp
+    src/Engine/Simulation/KeyframeStore.cpp
+    src/Engine/Simulation/ParticleSolver.cpp
+    src/Engine/Simulation/SpringSolver.cpp
     src/Engine/UndoRedo/UndoStack.cpp
     src/Engine/Serializer/Serializer.cpp
     src/Engine/Selection/Selection.cpp
@@ -119,6 +132,10 @@ set(ENGINE_INCLUDE_DIRECTORIES
 
 
 # qt
+#
+# The Vulkan classes of Qt live in its Gui module, and the official binaries
+# of macOS are built without them, since their scene graph runs on Metal.
+# The graphics bridge leaves the instance of the device out there.
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets SvgWidgets Quick Qml QuickControls2 ShaderTools)
 qt_standard_project_setup()
 ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
@@ -190,6 +207,19 @@ set(DAS_SQLITE_DISABLED ON CACHE BOOL "" FORCE)
 add_compile_definitions(DAS_NO_GLOBAL_NEW_AND_DELETE)
 
 add_subdirectory(${DASLANG_DIR} ${CMAKE_BINARY_DIR}/daslang EXCLUDE_FROM_ALL)
+
+# daslang writes its static libraries into its own source tree. The archive
+# tools remove the previous library before they write the new one, so a build
+# that keeps them there cannot replace a library from an earlier build, and it
+# leaves the checkout changed. The libraries go into the build tree instead.
+get_property(daslang_targets DIRECTORY ${DASLANG_DIR} PROPERTY BUILDSYSTEM_TARGETS)
+foreach(daslang_target IN LISTS daslang_targets)
+    get_target_property(daslang_target_type ${daslang_target} TYPE)
+    if(daslang_target_type STREQUAL "STATIC_LIBRARY")
+        set_target_properties(${daslang_target} PROPERTIES
+            ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/daslang/lib")
+    endif()
+endforeach()
 
 # daslang exposes its public headers only as a private requirement, so the
 # include path is added by hand.
@@ -443,9 +473,23 @@ if(APPLE)
     # A macOS build produces a real application bundle, which is what the
     # system expects to find when the application is launched from the
     # desktop or from a bundle aware installer.
+    #
+    # The values of the bundle description are filled in here rather than left
+    # to the bundle target, which leaves the placeholders of a description it
+    # has already read empty.
+    set(MACOSX_BUNDLE_EXECUTABLE_NAME ${AppExec})
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.helix3d.Helix")
+    set(MACOSX_BUNDLE_BUNDLE_NAME "Helix")
+    set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Info.plist.in"
+        "${CMAKE_BINARY_DIR}/Info.plist"
+        @ONLY
+    )
     set_target_properties(${AppExec} PROPERTIES
         MACOSX_BUNDLE ON
-        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Info.plist.in"
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_BINARY_DIR}/Info.plist"
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.helix3d.Helix"
         MACOSX_BUNDLE_BUNDLE_NAME "Helix"
         MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
@@ -458,6 +502,8 @@ else()
     )
 endif()
 
+# The Vulkan classes of Qt live in its Gui module, which the quick module
+# brings in, so nothing else has to be linked for them.
 target_link_libraries(${AppExec} PRIVATE enzoEngine enzoGraphics argparse::argparse Qt6::Quick Qt6::QuickControls2 Vulkan::Headers)
 target_include_directories(${AppExec} PRIVATE
     ${ENGINE_INCLUDE_DIRECTORIES}
@@ -566,6 +612,8 @@ if(ENZO_BUILD_TESTS)
         tests/ViewportCameraTests.cpp
         tests/DisplayGeometryTests.cpp
         tests/ViewportRendererTests.cpp
+        tests/AsyncCookTests.cpp
+        tests/SimulationTests.cpp
         src/Gui/Parameters/ParameterItem.cpp
     )
     set_target_properties(${TestExec} PROPERTIES AUTOMOC ON)

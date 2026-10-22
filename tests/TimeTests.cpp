@@ -4,13 +4,24 @@
 #include "Engine/Network/NodeLoader.h"
 #include "Engine/NetworkGraph/NetworkGraph.h"
 #include "Engine/Parameter/NodeParameter.h"
+#include "Engine/Simulation/KeyframeStore.h"
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 struct NMReset
 {
-    NMReset() { enzo::nt::nm()._reset(); }
-    ~NMReset() { enzo::nt::nm()._reset(); }
+    NMReset()
+    {
+        enzo::nt::nm()._reset();
+        // The keyframes of one test must not reach the next, since the node
+        // ids are handed out again from the start.
+        enzo::sim::KeyframeStore::instance().clear();
+    }
+    ~NMReset()
+    {
+        enzo::sim::KeyframeStore::instance().clear();
+        enzo::nt::nm()._reset();
+    }
 };
 
 TEST_CASE_METHOD(NMReset, "the scene opens on frame one of a twenty four frames per second range")
@@ -223,4 +234,41 @@ TEST_CASE_METHOD(NMReset, "a cook that no longer reads the frame stops being tim
     nm.cook(nodeId);
 
     REQUIRE(nm.graph().getTimeDependents().empty());
+}
+
+TEST_CASE_METHOD(NMReset, "a keyframed parameter takes the value its track holds at the frame")
+{
+    enzo::nt::NodeLoader::loadNodes();
+    auto& nm = enzo::nt::nm();
+
+    enzo::nt::NodeId nodeId = nm.createNode("enzo::transform");
+    auto translate = nm.getNode(nodeId).getParameter("translate").lock();
+
+    auto& store = enzo::sim::KeyframeStore::instance();
+    store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
+    store.setKeyframe({nodeId, "translate", 0}, 11.f, 10.f);
+
+    nm.setFrame(6);
+    REQUIRE(translate->evalFloat() == Catch::Approx(5.f));
+
+    nm.setFrame(11);
+    REQUIRE(translate->evalFloat() == Catch::Approx(10.f));
+}
+
+TEST_CASE_METHOD(NMReset, "a keyframed parameter is marked as reading the time")
+{
+    enzo::nt::NodeLoader::loadNodes();
+    auto& nm = enzo::nt::nm();
+
+    enzo::nt::NodeId nodeId = nm.createNode("enzo::transform");
+
+    auto& store = enzo::sim::KeyframeStore::instance();
+    store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
+
+    const enzo::nt::Unit expected{nodeId, "translate", 0};
+    bool found = false;
+    for (const enzo::nt::Unit& unit : nm.graph().getTimeDependents())
+        if (unit == expected) found = true;
+
+    REQUIRE(found);
 }

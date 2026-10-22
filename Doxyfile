@@ -1817,8 +1817,11 @@ FORMULA_MACROFILE      =
 # to it using the MATHJAX_RELPATH option.
 # The default value is: NO.
 # This tag requires that the tag GENERATE_HTML is set to YES.
+#
+# The formulas are drawn by the browser rather than by TeX, so the build of the
+# manual does not need a TeX installation.
 
-USE_MATHJAX            = NO
+USE_MATHJAX            = YES
 
 # With MATHJAX_VERSION it is possible to specify the MathJax version to be used.
 # Note that the different versions of MathJax have different requirements with
@@ -1977,8 +1980,12 @@ EXTRA_SEARCH_MAPPINGS  =
 
 # If the GENERATE_LATEX tag is set to YES, Doxygen will generate LaTeX output.
 # The default value is: YES.
+#
+# The manual is only read as HTML, so the LaTeX output is not generated. It
+# also cannot be generated where the build runs, because Doxygen asks TeX to
+# turn the images of the pages into PDF, and TeX is not installed there.
 
-GENERATE_LATEX         = YES
+GENERATE_LATEX         = NO
 
 # The LATEX_OUTPUT tag is used to specify where the LaTeX docs will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of

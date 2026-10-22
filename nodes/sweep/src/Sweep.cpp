@@ -77,6 +77,11 @@ void Sweep::cook()
         return;
     }
     const Profile profile = buildProfile();
+    if (profile.points.size() < 2)
+    {
+        throwError("Sweep needs a profile of at least two points.");
+        return;
+    }
 
     for (auto prim : packet.getPrimitives())
     {
@@ -124,12 +129,141 @@ Profile Sweep::buildProfile()
 
 using namespace enzo;
 
+/// @brief Returns the direction of a vector, or the fallback when it has no length.
+Vector3 safeNormalized(const Vector3& vector, const Vector3& fallback)
+{
+    const float length = vector.norm();
+    if (length < 1e-9f) return fallback;
+    return vector / length;
+}
+
+/// @brief Turns a vector about an axis by an angle.
+Vector3 rotateVector(const Vector3& vector, const Vector3& axis, float angle)
+{
+    const float cosAngle = std::cos(angle);
+    const float sinAngle = std::sin(angle);
+    return vector * cosAngle + axis.cross(vector) * sinAngle +
+           axis * (axis.dot(vector) * (1.0f - cosAngle));
+}
+
+/**
+ * @brief The directions a curve runs in along its length.
+ *
+ * The tangent at a point is the average of the directions the curve arrives and
+ * leaves in, which is the direction the profile faces. The across direction is
+ * square to the tangent and is carried along the curve, so the profile keeps a
+ * steady roll instead of spinning as the curve turns.
+ */
+struct CurveFrame
+{
+    std::vector<Vector3> tangents;
+    std::vector<Vector3> onward;
+    std::vector<Vector3> across;
+};
+
+/**
+ * @brief Builds the frame the profile rides in along one curve.
+ *
+ * A curve that has a plane of its own starts with the across direction in that
+ * plane, so a planar curve keeps a flat profile flat. A straight curve has no
+ * plane, so the world axis least in line with its tangent sets the roll.
+ */
+CurveFrame buildCurveFrame(const geo::Mesh& mesh, Offset curveFace)
+{
+    const std::span<const intT> facePoints = mesh.getFacePoints(curveFace);
+    const int pointCount = static_cast<int>(facePoints.size());
+    const bool closed = mesh.isClosed(curveFace);
+
+    std::vector<Vector3> positions;
+    positions.reserve(pointCount);
+    for (intT pointOffset : facePoints) positions.push_back(mesh.getPointPos(pointOffset));
+
+    CurveFrame frame;
+    frame.tangents.reserve(pointCount);
+    frame.onward.reserve(pointCount);
+    frame.across.reserve(pointCount);
+
+    // The direction the curve leaves each point in. An open end has nothing
+    // ahead of it, so it reuses the segment arriving into it.
+    for (int pointIndex = 0; pointIndex < pointCount; ++pointIndex)
+    {
+        if (pointIndex + 1 < pointCount)
+            frame.onward.push_back(safeNormalized(positions[pointIndex + 1] - positions[pointIndex],
+                                                  Vector3(0, 0, 1)));
+        else if (closed)
+            frame.onward.push_back(safeNormalized(positions[0] - positions[pointIndex], Vector3(0, 0, 1)));
+        else
+            frame.onward.push_back(safeNormalized(positions[pointIndex] - positions[pointIndex - 1],
+                                                  Vector3(0, 0, 1)));
+    }
+
+    for (int pointIndex = 0; pointIndex < pointCount; ++pointIndex)
+    {
+        const Vector3 incoming =
+            pointIndex > 0 ? safeNormalized(positions[pointIndex] - positions[pointIndex - 1],
+                                            frame.onward[pointIndex])
+                            : frame.onward[0];
+
+        // The average of the two directions faces along the turn. A curve that
+        // doubles back has no average, so the onward direction stands in.
+        Vector3 tangent = incoming + frame.onward[pointIndex];
+        if (tangent.norm() < 1e-4f) tangent = frame.onward[pointIndex];
+        frame.tangents.push_back(safeNormalized(tangent, frame.onward[pointIndex]));
+    }
+
+    // The first across direction, in the curve's own plane when it has one.
+    Vector3 across = Vector3(0, 0, 0);
+    const Vector3 planeNormal = utils::polygonNormal(mesh.pointPosSpan(), facePoints);
+    if (planeNormal.norm() > 1e-4f) across = planeNormal.cross(frame.tangents[0]);
+    if (across.norm() < 1e-6f)
+    {
+        const Vector3 axes[] = {{0, 0, 1}, {0, 1, 0}, {1, 0, 0}};
+        const Vector3& tangent = frame.tangents[0];
+        const Vector3* leastAligned = &axes[0];
+        float alignment = std::abs(tangent.dot(axes[0]));
+        for (const Vector3& axis : axes)
+        {
+            const float axisAlignment = std::abs(tangent.dot(axis));
+            if (axisAlignment < alignment)
+            {
+                alignment = axisAlignment;
+                leastAligned = &axis;
+            }
+        }
+        across = *leastAligned - tangent * leastAligned->dot(tangent);
+    }
+    frame.across.push_back(safeNormalized(across, Vector3(1, 0, 0)));
+
+    // Carry the across direction along the curve, turning it by as much as the
+    // tangent turns so the profile keeps its orientation.
+    for (int pointIndex = 1; pointIndex < pointCount; ++pointIndex)
+    {
+        const Vector3& previousTangent = frame.tangents[pointIndex - 1];
+        const Vector3& tangent = frame.tangents[pointIndex];
+        const Vector3 axis = previousTangent.cross(tangent);
+        const float sinAngle = axis.norm();
+
+        Vector3 next = frame.across[pointIndex - 1];
+        if (sinAngle > 1e-6f)
+            next = rotateVector(next, axis / sinAngle,
+                                std::atan2(sinAngle, previousTangent.dot(tangent)));
+        else if (previousTangent.dot(tangent) < 0.0f)
+            next = -next;
+
+        // Keep the across direction square to the tangent.
+        next = next - tangent * next.dot(tangent);
+        frame.across.push_back(safeNormalized(next, frame.across[pointIndex - 1]));
+    }
+
+    return frame;
+}
+
 /**
  * @brief Builds a closed unit circle profile in the XY plane.
  *
- * The circle's normal runs along local Z so lookAt can aim it down a curve
- * tangent. Points stop one short of a full turn so the last wraps back onto
- * the first.
+ * The circle's normal runs along local Z so the frame can aim it down a curve
+ * tangent. The points wind counter clockwise seen from that normal, the same
+ * way the square profile winds, so the swept faces turn outward.
  */
 std::vector<Vector3> buildCircleProfile(int columns)
 {
@@ -138,7 +272,7 @@ std::vector<Vector3> buildCircleProfile(int columns)
     for (int columnIndex = 0; columnIndex < columns; ++columnIndex)
     {
         const float angle = static_cast<float>(columnIndex) / columns * 2 * std::numbers::pi;
-        profile.push_back({std::sin(angle), std::cos(angle), 0});
+        profile.push_back({std::cos(angle), std::sin(angle), 0});
     }
     return profile;
 }
@@ -191,6 +325,9 @@ std::vector<Vector3> buildRibbonProfile(int columns)
 /**
  * @brief Builds a profile from the first curve of the second input.
  *
+ * The profile is centred on its own middle, so the curve runs through the
+ * middle of the shape rather than past one corner of it.
+ *
  * @return The first mesh face's points and its open or closed state, empty when
  * the input carries no usable face.
  */
@@ -203,8 +340,14 @@ Profile buildProfileFromInput(NodePacket& packet)
 
         Profile profile;
         profile.closed = mesh->isClosed(0);
-        for (intT pointOffset : mesh->getFacePoints(0))
-            profile.points.push_back(mesh->getPointPos(pointOffset));
+
+        Vector3 centre = Vector3(0, 0, 0);
+        const std::span<const intT> facePoints = mesh->getFacePoints(0);
+        for (intT pointOffset : facePoints) centre += mesh->getPointPos(pointOffset);
+        if (!facePoints.empty()) centre /= static_cast<float>(facePoints.size());
+
+        for (intT pointOffset : facePoints)
+            profile.points.push_back(mesh->getPointPos(pointOffset) - centre);
         return profile;
     }
     return {};
@@ -221,8 +364,7 @@ class Sweeper
   public:
     Sweeper(geo::Mesh& mesh, const Profile& profile, const SweepSettings& settings)
         : mesh_(mesh), profile_(profile),
-          profilePointCount_(static_cast<int>(profile.points.size())), settings_(settings),
-          faceTangents_(mesh, utils::TangentMode::TwoPoint), faceNormals_(mesh.getFaceNormal())
+          profilePointCount_(static_cast<int>(profile.points.size())), settings_(settings)
     {
     }
 
@@ -271,29 +413,33 @@ class Sweeper
     void addRings(Offset curveFace)
     {
         const int curvePointCount = mesh_.getFacePointCount(curveFace);
-        const std::span<const Vector3> tangents = faceTangents_(curveFace);
-        const std::span<const intT> facePoints = mesh_.getFacePoints(curveFace);
-        const Vector3 normal = faceNormals_[curveFace];
+        const bool closed = mesh_.isClosed(curveFace);
+        const CurveFrame frame = buildCurveFrame(mesh_, curveFace);
 
         for (int relPointNum = 0; relPointNum < curvePointCount; ++relPointNum)
         {
-            const Vector3 pointPos = mesh_.getPointPos(facePoints[relPointNum]);
+            const Vector3 pointPos = mesh_.getPointPos(mesh_.getFacePoints(curveFace)[relPointNum]);
 
             // The ramp reads how far along the curve the point sits to set the
-            // radius. With scaling off the profile keeps its full size.
-            const float curveU = static_cast<float>(relPointNum) / (curvePointCount - 1);
+            // radius. With scaling off the profile keeps its full size. A closed
+            // curve runs the whole ramp over one turn of the loop.
+            const float curveU =
+                settings_.applyScale
+                    ? static_cast<float>(relPointNum) / (closed ? curvePointCount : curvePointCount - 1)
+                    : 0.0f;
             const float radius = settings_.applyScale ? settings_.scaleRamp.sample(curveU) : 1.0f;
 
-            // Local X already lines up across the turn, so only X grows to keep
-            // the tube from pinching there.
+            // The across direction follows the curve, so it lines up across the
+            // turn and only the width across it grows to keep the tube from
+            // pinching there.
             const float stretchX =
-                settings_.stretchTurns
-                    ? calculateStretch(curveFace, relPointNum, tangents[relPointNum])
-                    : 1.0f;
+                settings_.stretchTurns ? calculateStretch(frame, relPointNum) : 1.0f;
 
             // The scale runs first so it sizes the profile before the orientation
             // turns it.
-            Transform transform = Transform::lookAt(pointPos, tangents[relPointNum], normal);
+            const Vector3 tangent = frame.tangents[relPointNum];
+            const Vector3 binormal = tangent.cross(frame.across[relPointNum]);
+            Transform transform = Transform::lookAt(pointPos, tangent, binormal);
             transform.scale(Vector3(radius * stretchX, radius, radius));
 
             for (const Vector3& profilePos : profile_.points)
@@ -302,29 +448,15 @@ class Sweeper
     }
 
     /// @brief Returns how much to widen the profile across a turn so the tube keeps its width.
-    float calculateStretch(Offset curveFace, int relPointNum, const Vector3& tangent)
+    float calculateStretch(const CurveFrame& frame, int relPointNum)
     {
         // The widening is capped so a near fold cannot run away.
         constexpr float maxStretch = 8.0f;
 
-        const std::span<const intT> facePoints = mesh_.getFacePoints(curveFace);
-        const int curvePointCount = static_cast<int>(facePoints.size());
-        const Vector3 pointPos = mesh_.getPointPos(facePoints[relPointNum]);
-
-        // The way the curve heads on from this point. An open end has nothing
-        // ahead, so it reuses the segment arriving into it.
-        Vector3 onwardDirection;
-        if (relPointNum + 1 < curvePointCount)
-            onwardDirection = mesh_.getPointPos(facePoints[relPointNum + 1]) - pointPos;
-        else if (mesh_.isClosed(curveFace))
-            onwardDirection = mesh_.getPointPos(facePoints[0]) - pointPos;
-        else
-            onwardDirection = pointPos - mesh_.getPointPos(facePoints[relPointNum - 1]);
-
         // The profile faces along the average of the turn, so the sharper the
         // turn the more it leans away from each segment and the wider it grows.
-        const float bendLean = tangent.dot(onwardDirection.normalized());
-        if (bendLean <= 1e-3f) return 1.0f;
+        const float bendLean = frame.tangents[relPointNum].dot(frame.onward[relPointNum]);
+        if (bendLean <= 1e-3f) return maxStretch;
 
         return std::min(1.0f / bendLean, maxStretch);
     }
@@ -381,8 +513,6 @@ class Sweeper
     const Profile& profile_;
     int profilePointCount_;
     const SweepSettings& settings_;
-    utils::FaceTangents faceTangents_;
-    geo::FaceNormalHandle faceNormals_;
 
     std::vector<Vector3> ringPositions_;
     std::vector<Offset> ringPoints_;

@@ -22,3 +22,10 @@ dist/
 build-probe*/
 # The symlink the build agent points at its own build tree.
 build-macos
+# Logs and scratch files a tool leaves in the tree.
+*.log
+_git_*
+# Editor lock files.
+.!*
+*~
+*.orig

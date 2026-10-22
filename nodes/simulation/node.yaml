@@ -1,0 +1,166 @@
+version: 1
+
+name: simulation
+namespace: enzo
+label: Simulation
+tags: [simulation, particles, spring, animation]
+
+outputs: 2
+
+implementation:
+  kind: cpp
+  library: enzoOps
+  constructor: simulation
+
+icon: icon.svg
+
+parameters:
+  - name: time_divider
+    label: Time
+    type: divider
+    icon: clock
+
+  - name: start_frame
+    label: Start Frame
+    type: int
+    default: 1
+    range: {min: 1, max: 100000, minLocked: true}
+    tooltip: >
+      The frame the simulation starts on. The system is always worked out from
+      this frame, so scrubbing back and forth gives the same result as playing
+      forwards.
+
+  - name: sub_steps
+    label: Sub Steps
+    type: int
+    default: 1
+    range: {min: 1, max: 16, minLocked: true}
+    tooltip: >
+      How many steps each frame is broken into. More steps make a stiff system
+      hold together better, at the cost of more work.
+
+  - name: particle_divider
+    label: Particles
+    type: divider
+    icon: sparkles
+
+  - name: particle_count
+    label: Count
+    type: int
+    default: 64
+    range: {min: 1, max: 4096, minLocked: true}
+
+  - name: particle_origin
+    label: Origin
+    type: float
+    size: 3
+    default: 0
+    style: xyz
+    tooltip: Where the particles start.
+
+  - name: particle_extent
+    label: Extent
+    type: float
+    size: 3
+    default: 1
+    style: xyz
+    tooltip: The size of the box the particles start in.
+
+  - name: particle_gravity
+    label: Gravity
+    type: float
+    size: 3
+    default: [0, -9.81, 0]
+    style: xyz
+    tooltip: The pull the particles feel.
+
+  - name: particle_drag
+    label: Drag
+    type: float
+    default: 0.02
+    range: {min: 0, max: 1}
+    tooltip: The fraction of a particle's speed lost every step.
+
+  - name: particle_swirl
+    label: Swirl
+    type: float
+    default: 0
+    range: {min: 0, max: 100}
+    tooltip: How hard the vortex around the origin pushes the particles.
+
+  - name: particle_seed
+    label: Seed
+    type: int
+    default: 1
+    tooltip: >
+      The seed the starting positions come from. The same seed always starts
+      the particles in the same places.
+
+  - name: spring_divider
+    label: Springs
+    type: divider
+    icon: wind
+
+  - name: spring_columns
+    label: Columns
+    type: int
+    default: 8
+    range: {min: 2, max: 64, minLocked: true}
+
+  - name: spring_rows
+    label: Rows
+    type: int
+    default: 8
+    range: {min: 2, max: 64, minLocked: true}
+
+  - name: spring_spacing
+    label: Spacing
+    type: float
+    default: 1
+    range: {min: 0.01, max: 10}
+    tooltip: How far apart the points sit when the sheet is at rest.
+
+  - name: spring_origin
+    label: Origin
+    type: float
+    size: 3
+    default: 0
+    style: xyz
+    tooltip: Where the sheet hangs from.
+
+  - name: spring_gravity
+    label: Gravity
+    type: float
+    size: 3
+    default: [0, -9.81, 0]
+    style: xyz
+    tooltip: The pull the sheet feels.
+
+  - name: spring_stiffness
+    label: Stiffness
+    type: float
+    default: 0.5
+    range: {min: 0, max: 1}
+    tooltip: How hard a spring pulls its two ends back together.
+
+  - name: spring_damping
+    label: Damping
+    type: float
+    default: 0.98
+    range: {min: 0, max: 1}
+    tooltip: How much of the movement a step keeps.
+
+  - name: spring_iterations
+    label: Iterations
+    type: int
+    default: 4
+    range: {min: 1, max: 32, minLocked: true}
+    tooltip: How many times the springs are pulled back together in a step.
+
+  - name: spring_seed
+    label: Seed
+    type: int
+    default: 1
+    tooltip: >
+      The seed the sheet starts from. The same seed always starts the sheet in
+      the same shape.

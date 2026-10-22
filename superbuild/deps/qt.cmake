@@ -3,6 +3,9 @@
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 # The Qt modules that sit outside the base install.
+#
+# The Vulkan part of Qt is part of the base package on the platforms that
+# publish it. macOS has none, so it is not asked for there.
 set(ENZO_QT_MODULES qtshadertools)
 
 set(ENZO_AQT_VENV ${CMAKE_BINARY_DIR}/aqt-venv)
@@ -61,9 +64,11 @@ else()
         COMMAND
             ${CMAKE_COMMAND}
             -DENZO_AQT_PYTHON=${ENZO_AQT_PYTHON}
+            -DENZO_AQT_RUNNER=${CMAKE_CURRENT_LIST_DIR}/aqt-run.py
             -DENZO_AQT_SETTINGS=${CMAKE_CURRENT_LIST_DIR}/aqt-settings.ini
             -DENZO_QT_HOST=${ENZO_QT_HOST}
             -DENZO_QT_VERSION=${ENZO_QT_VERSION}
+        -DENZO_QT_DIR=${ENZO_QT_DIR}
             -DENZO_QT_ROOT=${ENZO_QT_ROOT}
             -DENZO_QT_ARCHS=${ENZO_QT_ARCH_LIST}
             -DENZO_QT_MODULES=${ENZO_QT_MODULES}

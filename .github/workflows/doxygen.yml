@@ -7,10 +7,18 @@ on:
 jobs:
   doxygen:
     runs-on: ubuntu-latest
+    # The manual is published to a branch of the repository, which the token of
+    # the workflow needs the right to write to.
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
+          # The publishing action pushes a commit, and it needs the whole
+          # history to put it on the branch it publishes to.
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Generate Doxygen docs
         uses: mattnotmitt/doxygen-action@v1.12.0

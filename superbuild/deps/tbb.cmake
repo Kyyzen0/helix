@@ -1,9 +1,8 @@
 # TBB is the parallel backend for both enzo and manifold, so the two share this
 # one copy of the scheduler.
-ExternalProject_Add(tbb
+enzo_add_archive_dependency(tbb
     URL ${ENZO_TBB_URL}
     URL_HASH SHA256=${ENZO_TBB_SHA256}
-    LIST_SEPARATOR |
     CMAKE_ARGS
         ${ENZO_DEP_CMAKE_ARGS}
         -DTBB_TEST:BOOL=OFF

@@ -273,6 +273,15 @@ NodeImplementation readImplementation(const YAML::Node& implementation, const st
             .aliasedType = requireString(implementation, "type", "alias implementation"),
         };
 
+    if (kind == "script")
+        return ScriptImplementation{
+            // A user node runs the shared script implementation, so the library
+            // and the constructor only need naming when they differ.
+            .library = readString(implementation, "library", "enzoOps"),
+            .constructor = readString(implementation, "constructor", "userNode"),
+            .source = requireString(implementation, "source", "script implementation"),
+        };
+
     throw std::runtime_error("implementation kind " + kind + " is not supported yet");
 }
 

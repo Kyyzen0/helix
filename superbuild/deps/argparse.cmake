@@ -1,8 +1,7 @@
 # Argparse is header only, and gives the gui executable its command line.
-ExternalProject_Add(argparse
+enzo_add_archive_dependency(argparse
     URL ${ENZO_ARGPARSE_URL}
     URL_HASH SHA256=${ENZO_ARGPARSE_SHA256}
-    LIST_SEPARATOR |
     CMAKE_ARGS
         ${ENZO_DEP_CMAKE_ARGS}
         -DARGPARSE_BUILD_TESTS:BOOL=OFF

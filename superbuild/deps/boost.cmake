@@ -6,10 +6,15 @@
 set(ENZO_BOOST_LIBRARIES algorithm container_hash dll filesystem signals2 system)
 list(JOIN ENZO_BOOST_LIBRARIES | ENZO_BOOST_LIBRARY_ARG)
 
-ExternalProject_Add(boost
+# The Boost archive carries git and editor metadata that a sandbox may refuse
+# to write, which makes the automatic extraction fail on the first such file.
+#
+# The tree can instead be prepared ahead of time with
+# scripts/prepare-sources.sh, which leaves those files out. When that has
+# happened, the source directory is used as it is and no extraction runs.
+enzo_add_archive_dependency(boost
     URL ${ENZO_BOOST_URL}
     URL_HASH SHA256=${ENZO_BOOST_SHA256}
-    LIST_SEPARATOR |
     CMAKE_ARGS
         ${ENZO_DEP_CMAKE_ARGS}
         -DBOOST_INCLUDE_LIBRARIES:STRING=${ENZO_BOOST_LIBRARY_ARG}

@@ -6,6 +6,7 @@
 #include "Engine/Parameter/Parameter.h"
 #include "Engine/Serializer/NetworkSerializable.h"
 #include "Engine/Serializer/ParameterSerializable.h"
+#include "Engine/Simulation/KeyframeStore.h"
 #include "Engine/UndoRedo/UndoDisabler.h"
 #include <algorithm>
 #include <cereal/archives/binary.hpp>
@@ -164,6 +165,10 @@ void Serializer::save(NetworkManager& networkManager, std::string filePath)
     networkModel.timeline.frame = networkManager.getFrame();
 
     save(CEREAL_NVP(networkModel));
+
+    // The keyframes are stored next to the network. They name their node by
+    // path, so they survive the new node ids a load hands out.
+    save(CEREAL_NVP(sim::KeyframeStore::instance()));
 }
 
 void Serializer::load(NetworkManager& networkManager, std::string filePath)
@@ -217,6 +222,10 @@ void Serializer::load(NetworkManager& networkManager, std::string filePath)
             nodeLink.outputSocketIndex
         );
     }
+
+    // The keyframes come after the nodes, because they name their node by
+    // path and are bound to it once it exists.
+    load(sim::KeyframeStore::instance());
 }
 
 } // namespace enzo::nt

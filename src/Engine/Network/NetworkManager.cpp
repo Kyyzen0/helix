@@ -1,10 +1,16 @@
 #include "Engine/Network/NetworkManager.h"
+#include "Engine/Async/CookPlan.h"
+#include "Engine/Async/CookResult.h"
+#include "Engine/Async/CookSnapshot.h"
+#include "Engine/Async/CookTypes.h"
 #include "Engine/Core/Types.h"
 #include "Engine/Network/NetworkPath.h"
 #include "Engine/Network/Node.h"
 #include "Engine/Network/NodeType.h"
 #include "Engine/Network/NodeTypeTable.h"
 #include "Engine/Network/UpdateLock.h"
+#include "Engine/Parameter/NodeParameter.h"
+#include "Engine/Parameter/Ramp.h"
 #include "Engine/Serializer/ParameterSerializable.h"
 #include "Engine/UndoRedo/ChangeNodeLinkCommand.h"
 #include "Engine/UndoRedo/CreateNodeCommand.h"
@@ -15,6 +21,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace enzo {
@@ -60,6 +67,14 @@ void nt::NetworkManager::moveNode(NodeId nodeId, Vector2 newPos, bool skipUndo)
 void nt::NetworkManager::deleteNode(NodeId nodeId)
 {
     if (!isValidNode(nodeId)) return;
+
+    // A worker may be cooking this node, so the cook is abandoned and the
+    // workers are given a moment to leave before the node goes away.
+    if (cookSchedulerPtr_)
+    {
+        cookSchedulerPtr_->cancel();
+        waitForCookIdle_();
+    }
 
     auto updateLock = lockUpdates();
 
@@ -143,6 +158,15 @@ void nt::NetworkManager::setDisplayNode(NodeId nodeId)
 {
     displayNode_ = nodeId;
 
+    if (asyncCookingEnabled_)
+    {
+        // The geometry arrives when the cook is published, so the interface
+        // keeps showing what it has until then.
+        requestCook({nodeId});
+        displayNodeChanged(nodeId);
+        return;
+    }
+
     cook(nodeId);
 
     nt::Node& displayNode = getNode(nodeId);
@@ -162,6 +186,13 @@ std::optional<nt::NodeId> nt::NetworkManager::getPrimaryNode() { return primaryN
 void nt::NetworkManager::setPrimaryNode(NodeId nodeId)
 {
     primaryNode_ = nodeId;
+
+    if (asyncCookingEnabled_)
+    {
+        requestCook({nodeId});
+        primaryNodeChanged(nodeId);
+        return;
+    }
 
     cook(nodeId);
 
@@ -237,7 +268,8 @@ void nt::NetworkManager::setSelectedNode(NodeId nodeId, bool selected, bool add)
             // skip if value is already in selected nodes
             if (idIter != selectedNodes_.end()) return;
             selectedNodes_.push_back(nodeId);
-            cook(nodeId);
+            if (asyncCookingEnabled_) requestCook({nodeId});
+            else cook(nodeId);
         }
         else
         {
@@ -252,7 +284,8 @@ void nt::NetworkManager::setSelectedNode(NodeId nodeId, bool selected, bool add)
         {
             selectedNodes_.clear();
             selectedNodes_.push_back(nodeId);
-            cook(nodeId);
+            if (asyncCookingEnabled_) requestCook({nodeId});
+            else cook(nodeId);
         }
         else
         {
@@ -266,6 +299,21 @@ nt::UpdateLock nt::NetworkManager::lockUpdates() { return UpdateLock(); }
 
 void nt::NetworkManager::update()
 {
+    // The nodes whose geometry the interface shows.
+    std::vector<nt::NodeId> targets;
+    if (displayNode_) targets.push_back(*displayNode_);
+    if (primaryNode_) targets.push_back(*primaryNode_);
+    for (nt::NodeId selectedId : selectedNodes_) targets.push_back(selectedId);
+
+    if (asyncCookingEnabled_)
+    {
+        // The cook runs in the background and the geometry is put on screen
+        // when it is done, so the interface keeps showing the last result.
+        if (!targets.empty()) requestCook(targets);
+        processPendingCooks();
+        return;
+    }
+
     // cook display node
     if (getDisplayNode().has_value())
     {
@@ -306,7 +354,8 @@ void nt::NetworkManager::setSelectedNodes(std::vector<nt::NodeId> nodeIds)
         if (isValidNode(nodeId))
         {
             selectedNodes_.push_back(nodeId);
-            cook(nodeId);
+            if (asyncCookingEnabled_) requestCook({nodeId});
+            else cook(nodeId);
         }
     }
     selectedNodesChanged(selectedNodes_);
@@ -340,6 +389,313 @@ void nt::NetworkManager::cook(nt::NodeId nodeId)
             node.cook(context);
         }
     }
+}
+
+async::CookScheduler& nt::NetworkManager::cookScheduler()
+{
+    if (!cookSchedulerPtr_)
+    {
+        cookSchedulerPtr_ = std::make_unique<async::CookScheduler>();
+
+        // The pool finishes a cook on a worker thread, so the result is left
+        // for the interface to pick up rather than published there.
+        cookSchedulerPtr_->setCookFinishedFn(
+            [this](async::CookGeneration generation, async::CookStatus status) {
+                std::lock_guard<std::mutex> lock(cookMutex_);
+                finishedCooks_.emplace_back(generation, status);
+            }
+        );
+    }
+
+    return *cookSchedulerPtr_;
+}
+
+void nt::NetworkManager::requestCook(const std::vector<enzo::nt::NodeId>& targets)
+{
+    {
+        std::lock_guard<std::mutex> lock(cookMutex_);
+
+        // Only the newest request survives, so a burst of edits leaves one cook
+        // behind rather than a queue of them.
+        requestedCookTargets_ = targets;
+        cookRequested_ = true;
+
+        // The cook that is running is about to be abandoned. The nodes it has
+        // touched were cooked with the values as they were before the edit, so
+        // the cook that follows cooks them again. A cook that already finished
+        // is left alone, since its geometry is still right.
+        const bool liveCookIsRunning = cookScheduler().generation() == activeCookGeneration_;
+        if (liveCookIsRunning && activeCookResult_)
+            for (nt::NodeId nodeId : activeCookResult_->cookedNodes())
+                nodesToRecook_.insert(nodeId);
+    }
+
+    // The cook that is running is abandoned rather than queued behind. The pool
+    // takes the new cook as soon as a worker is free.
+    cookScheduler().cancel();
+
+    startPendingCook_();
+}
+
+void nt::NetworkManager::cancelCook()
+{
+    {
+        std::lock_guard<std::mutex> lock(cookMutex_);
+        cookRequested_ = false;
+        requestedCookTargets_.clear();
+    }
+
+    cookScheduler().cancel();
+}
+
+bool nt::NetworkManager::isCookBusy() const
+{
+    if (!cookSchedulerPtr_) return false;
+    return cookSchedulerPtr_->isBusy();
+}
+
+bool nt::NetworkManager::isCooking() const
+{
+    if (!cookSchedulerPtr_) return false;
+    return cookSchedulerPtr_->isCooking();
+}
+
+async::CookGeneration nt::NetworkManager::getCookGeneration() const
+{
+    if (!cookSchedulerPtr_) return async::kNoGeneration;
+    return cookSchedulerPtr_->generation();
+}
+
+void nt::NetworkManager::processPendingCooks()
+{
+    // A cook that was asked for but could not start yet gets its turn.
+    startPendingCook_();
+
+    // The cooks that finished since the last time round.
+    std::vector<std::pair<async::CookGeneration, async::CookStatus>> finished;
+    {
+        std::lock_guard<std::mutex> lock(cookMutex_);
+        finished.swap(finishedCooks_);
+    }
+
+    for (const auto& [generation, status] : finished)
+    {
+        // A cook that was replaced by a newer one has nothing to publish.
+        if (status != async::CookStatus::Success) continue;
+        if (generation != activeCookGeneration_) continue;
+
+        publishCookResult_(activeCookResult_);
+    }
+}
+
+void nt::NetworkManager::startPendingCook_()
+{
+    std::vector<nt::NodeId> targets;
+    {
+        std::lock_guard<std::mutex> lock(cookMutex_);
+        if (!cookRequested_) return;
+        targets = requestedCookTargets_;
+        cookRequested_ = false;
+    }
+
+    startCook_(targets);
+}
+
+void nt::NetworkManager::startCook_(const std::vector<nt::NodeId>& targets)
+{
+    if (targets.empty()) return;
+
+    // The plan covers the targets and everything feeding them. It is built here,
+    // on the thread that owns the network, so the workers never read the graph.
+    async::CookPlan plan = async::CookPlan::build(
+        targets,
+        [this](nt::NodeId nodeId) { return graph().getInputs(nodeId); },
+        [this](nt::NodeId nodeId) { return getInputCount(nodeId); }
+    );
+
+    // Only the dirty nodes need cooking. A clean node keeps the geometry it has.
+    // A node an abandoned cook touched is cooked again, since that cook used the
+    // values as they were before the edit.
+    std::vector<std::vector<nt::NodeId>> levels;
+    std::unordered_map<nt::NodeId, nt::Node*> nodesById;
+    for (const std::vector<nt::NodeId>& level : plan.levels())
+    {
+        std::vector<nt::NodeId> dirtyInLevel;
+        for (nt::NodeId nodeId : level)
+        {
+            nt::Node& node = getNode(nodeId);
+            if (!node.isDirty() && !nodesToRecook_.count(nodeId)) continue;
+            dirtyInLevel.push_back(nodeId);
+            nodesById.emplace(nodeId, &node);
+        }
+        if (!dirtyInLevel.empty()) levels.push_back(std::move(dirtyInLevel));
+    }
+
+    // The nodes this cook covers are taken off the list. The ones it does not
+    // cover stay on it, so they are cooked the next time the cook reaches them.
+    for (const std::vector<nt::NodeId>& level : levels)
+        for (nt::NodeId nodeId : level) nodesToRecook_.erase(nodeId);
+
+    // Take the picture the cook reads, so it never reads the live network.
+    auto snapshot = std::make_shared<async::CookSnapshot>();
+    auto result = std::make_shared<async::CookResult>();
+    buildSnapshot_(plan, *snapshot, *result);
+
+    auto planPtr = std::make_shared<async::CookPlan>(std::move(plan));
+
+    activeCookResult_ = result;
+    activeCookGeneration_ = cookScheduler().requestCook(
+        levels,
+        [this, snapshot, planPtr, result, nodesById](
+            nt::NodeId nodeId,
+            const async::CookCancelToken& cancelToken
+        ) {
+            auto node = nodesById.find(nodeId);
+            if (node == nodesById.end()) return;
+            cookNodeAsync_(
+                nodeId, node->second, cancelToken, *snapshot, *planPtr, *result
+            );
+        }
+    );
+}
+
+void nt::NetworkManager::buildSnapshot_(
+    const async::CookPlan& plan,
+    async::CookSnapshot& snapshot,
+    async::CookResult& result
+)
+{
+    snapshot.setTime(getFrame(), getTime());
+
+    for (nt::NodeId nodeId : plan.nodes())
+    {
+        nt::Node& node = getNode(nodeId);
+
+        async::CookSnapshot::NodeState state;
+        state.nodeId = nodeId;
+        state.inputCount = getInputCount(nodeId);
+        snapshot.setNode(state);
+
+        // A clean node keeps the geometry it has, so the cook that reads it
+        // finds it waiting in the result.
+        if (!node.isDirty())
+        {
+            for (unsigned int outputIndex = 0; outputIndex < node.getMaxOutputs(); ++outputIndex)
+                result.setOutput(nodeId, outputIndex, node.getOutputPacket(outputIndex));
+            continue;
+        }
+
+        // Take the parameters the cook will read. Each component is read in
+        // all three forms, because a parameter can be read as any of them and
+        // one driven by an expression gives a different answer each time it
+        // runs.
+        for (const std::weak_ptr<prm::NodeParameter>& weakParameter : node.getParameters())
+        {
+            std::shared_ptr<prm::NodeParameter> parameter = weakParameter.lock();
+            if (!parameter) continue;
+
+            async::CookParameterValue value;
+            value.valueType = parameter->getValueType();
+
+            const unsigned int componentCount = parameter->getVectorSize();
+            for (unsigned int component = 0; component < componentCount; ++component)
+            {
+                value.floats.push_back(parameter->evalFloat(component));
+                value.ints.push_back(parameter->evalInt(component));
+                value.strings.push_back(parameter->evalString(component));
+            }
+
+            if (parameter->getType() == prm::Type::RAMP) value.ramp = prm::Ramp(*parameter);
+
+            snapshot.setParameter(nodeId, parameter->getName(), std::move(value));
+        }
+    }
+}
+
+void nt::NetworkManager::cookNodeAsync_(
+    nt::NodeId nodeId,
+    nt::Node* node,
+    const async::CookCancelToken& cancelToken,
+    const async::CookSnapshot& snapshot,
+    const async::CookPlan& plan,
+    async::CookResult& result
+)
+{
+    if (!node) return;
+    if (cancelToken.isCancelled()) return;
+
+    // The node is noted as touched before it cooks, so a cook that is
+    // abandoned is known to have been part way through this node.
+    result.markCooked(nodeId);
+
+    {
+        nt::CookContext context(nodeId, *this, snapshot, plan, result, cancelToken);
+        node->cook(context);
+    }
+
+    // A cook that was abandoned leaves the node dirty, so the cook that comes
+    // after it cooks the node again with the values as they are by then.
+    if (cancelToken.isCancelled()) node->dirtyNode(false);
+
+    // File away what the node produced.
+    for (unsigned int outputIndex = 0; outputIndex < node->getMaxOutputs(); ++outputIndex)
+        result.setOutput(nodeId, outputIndex, node->getOutputPacket(outputIndex));
+}
+
+void nt::NetworkManager::publishCookResult_(
+    const std::shared_ptr<const async::CookResult>& result
+)
+{
+    if (!result) return;
+
+    // The graph belongs to this thread, so the notes the cook made about the
+    // scene time are applied here rather than on the worker that made them.
+    for (nt::NodeId nodeId : result->cookedNodes())
+        graph().setTimeDependent(nt::Unit{nodeId}, false);
+    for (nt::NodeId nodeId : result->timeDependentNodes())
+        graph().setTimeDependent(nt::Unit{nodeId}, true);
+
+    {
+        std::lock_guard<std::mutex> lock(cookMutex_);
+        publishedCookResult_ = result;
+    }
+
+    // Tell the interface about the new geometry. The whole cook is put on
+    // screen at once, so what is shown is never half of one cook.
+    if (displayNode_) displayGeoChanged(getPublishedOutputPacket(*displayNode_, 0));
+    if (primaryNode_) primaryGeoChanged(getPublishedOutputPacket(*primaryNode_, 0));
+    for (nt::NodeId selectedId : selectedNodes_)
+        selectedGeoChanged(getPublishedOutputPacket(selectedId, 0));
+}
+
+std::shared_ptr<const async::CookResult> nt::NetworkManager::getPublishedCookResult() const
+{
+    std::lock_guard<std::mutex> lock(cookMutex_);
+    return publishedCookResult_;
+}
+
+std::shared_ptr<const enzo::NodePacket> nt::NetworkManager::getPublishedOutputPacket(
+    enzo::nt::NodeId nodeId,
+    unsigned int outputIndex
+)
+{
+    {
+        std::lock_guard<std::mutex> lock(cookMutex_);
+        if (publishedCookResult_)
+        {
+            std::shared_ptr<const NodePacket> packet =
+                publishedCookResult_->getOutput(nodeId, outputIndex);
+            if (packet) return packet;
+        }
+    }
+
+    return getNode(nodeId).getOutputPacket(outputIndex);
+}
+
+void nt::NetworkManager::waitForCookIdle_()
+{
+    if (!cookSchedulerPtr_) return;
+    cookSchedulerPtr_->waitForIdle();
 }
 
 unsigned int nt::NetworkManager::getInputCount(NodeId nodeId)
@@ -495,6 +851,24 @@ void nt::NetworkManager::onNodeDirtied(nt::NodeId nodeId, bool dirtyDependents)
 void nt::NetworkManager::_reset()
 {
     std::cout << "resetting network manager\n";
+
+    // The network is about to change shape, so no worker may be inside it.
+    if (cookSchedulerPtr_)
+    {
+        cookSchedulerPtr_->cancel();
+        waitForCookIdle_();
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(cookMutex_);
+        cookRequested_ = false;
+        requestedCookTargets_.clear();
+        finishedCooks_.clear();
+        nodesToRecook_.clear();
+        activeCookResult_.reset();
+        activeCookGeneration_ = async::kNoGeneration;
+        publishedCookResult_.reset();
+    }
 
     network_.clear();
     displayNode_.reset();

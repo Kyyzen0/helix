@@ -38,7 +38,7 @@ Window {
     height: 720
     minimumWidth: 720
     minimumHeight: 460
-    title: "Enzo Settings"
+    title: "Helix Settings"
     color: Theme.var.background
 
     // The list of pages.

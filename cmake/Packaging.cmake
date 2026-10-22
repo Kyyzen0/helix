@@ -17,11 +17,11 @@ set(CPACK_PACKAGE_VENDOR "Enzo Software")
 set(CPACK_PACKAGE_CONTACT "Parker Britt <parker@parkerbritt.com>")
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/Kyyzen0/helix")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Node based procedural 3D modeling framework")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "Enzo")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "Helix")
 # The WiX generator only accepts a licence with a .txt or .rtf extension.
 configure_file(${CMAKE_SOURCE_DIR}/LICENSE ${CMAKE_BINARY_DIR}/LICENSE.txt COPYONLY)
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_BINARY_DIR}/LICENSE.txt)
-set(CPACK_PACKAGE_EXECUTABLES ${AppExec} "Enzo 3D")
+set(CPACK_PACKAGE_EXECUTABLES ${AppExec} "Helix")
 set(CPACK_STRIP_FILES ON)
 
 # Names the archive and package files after the platform they were built for,
@@ -182,15 +182,15 @@ endif()
 
 # Installs the desktop entry, metadata and icon Linux desktops read.
 if(UNIX)
-    install(FILES flatpak/com.enzo3d.Enzo.desktop
+    install(FILES flatpak/com.helix3d.Helix.desktop
         DESTINATION share/applications
     )
-    install(FILES flatpak/com.enzo3d.Enzo.metainfo.xml
+    install(FILES flatpak/com.helix3d.Helix.metainfo.xml
         DESTINATION share/metainfo
     )
     install(FILES static/icons/icon-main-white-square.svg
         DESTINATION share/icons/hicolor/scalable/apps
-        RENAME com.enzo3d.Enzo.svg
+        RENAME com.helix3d.Helix.svg
     )
 endif()
 
@@ -212,4 +212,17 @@ install(DIRECTORY static/
 install(DIRECTORY ${DAS_DASLIB_DIR}/
     DESTINATION ${ENZO_APP_DIR}daslib
 )
+
+# Signs the bundle, once every file in it is in place.
+#
+# The Qt deployment rewrites the frameworks and the plugins it copies, and
+# that breaks the signatures they carry. macOS refuses to load a library whose
+# signature no longer matches, so the application would be killed before it
+# opens a window.
+if(APPLE)
+    install(CODE "
+        set(bundle \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${ENZO_BUNDLE_DIR}/${CMAKE_PROJECT_NAME}.app\")
+        include(\"${CMAKE_CURRENT_SOURCE_DIR}/cmake/SignBundle.cmake\")
+    ")
+endif()
 

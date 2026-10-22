@@ -12,6 +12,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -488,7 +489,7 @@ class NetworkManager
     void publishCookResult_(const std::shared_ptr<const async::CookResult>& result);
 
     /// @brief Returns the pool the cooks run on, building it the first time it is asked for.
-    async::CookScheduler& cookScheduler_();
+    async::CookScheduler& cookScheduler();
 
     /// @brief Waits until no worker is inside a cook.
     /// @note Used before the network changes shape, so a worker never holds a
@@ -513,7 +514,7 @@ class NetworkManager
     UndoStack undoStack_;
 
     // The pool the background cooks run on, built the first time it is needed.
-    std::unique_ptr<async::CookScheduler> cookScheduler_;
+    std::unique_ptr<async::CookScheduler> cookSchedulerPtr_;
 
     // The result of the cook that is running, and the generation it belongs to.
     std::shared_ptr<async::CookResult> activeCookResult_;
@@ -531,6 +532,11 @@ class NetworkManager
     // What the next cook has to cover, and whether it was asked for.
     std::vector<nt::NodeId> requestedCookTargets_;
     bool cookRequested_ = false;
+
+    // The nodes an abandoned cook touched. They were cooked with the values as
+    // they were before the edit, so the cook that follows cooks them again.
+    // @note Only the thread that owns the network touches this.
+    std::unordered_set<nt::NodeId> nodesToRecook_;
 
     // Whether cooks run in the background.
     bool asyncCookingEnabled_ = false;

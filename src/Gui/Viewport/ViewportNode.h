@@ -1,6 +1,7 @@
 #pragma once
 #include "Graphics/FrameState.h"
 #include "Graphics/ViewportRenderer.h"
+#include <optional>
 #include <QObject>
 #include <QSGSimpleTextureNode>
 
@@ -23,7 +24,11 @@ class ViewportNode : public QObject, public QSGSimpleTextureNode
     void render();
 
     QQuickWindow* window_;
-    gfx::ViewportRenderer renderer_;
+    /// @brief The renderer, which draws with the graphics device.
+    ///
+    /// The scene graph of macOS runs on Metal and cannot show what the device
+    /// draws, so there is no renderer there and the node stays empty.
+    std::optional<gfx::ViewportRenderer> renderer_;
     gfx::FrameState pendingFrame_;
     gfx::FrameState renderedFrame_;
     void* shownImage_ = nullptr;

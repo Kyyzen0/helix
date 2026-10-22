@@ -5,74 +5,11 @@
 #include "Engine/Network/NodeImpl.h"
 #include "Engine/Network/NodeRegistry.h"
 #include "Engine/Primitives/Mesh.h"
+#include "RunOverPoints.h"
 #include <memory>
-#include <mutex>
-#include <tbb/enumerable_thread_specific.h>
-#include <tbb/parallel_for.h>
+#include <string>
 
 namespace {
-
-// The number of points one thread takes at a time. A whole multiple of 64 keeps
-// two threads off the same word of a bool attribute.
-constexpr enzo::Offset pointsPerChunk = 1024;
-
-static_assert(pointsPerChunk % 64 == 0);
-
-/// @brief Runs a compiled script over every point of every mesh in the context's input, in parallel.
-///
-/// @note The output needs to start as a copy of the input.
-/// @return The first error a mesh or a point produced, or an empty string.
-enzo::String runOverPoints(
-    const enzo::script::PointScript& script,
-    const enzo::script::ScriptContext& context,
-    enzo::NodePacket& output
-)
-{
-    using namespace enzo;
-
-    // Clones the script for each thread, since one script runs a single point at a time.
-    tbb::enumerable_thread_specific<std::shared_ptr<script::PointScript>> threadScripts(
-        [&script] { return script.clone(); }
-    );
-
-    std::mutex errorMutex;
-    String error;
-
-    for (size_t primitiveIndex = 0; primitiveIndex < output.getPrimitives().size(); ++primitiveIndex)
-    {
-        const std::shared_ptr<geo::Primitive> outputPrim = output.getPrimitive(primitiveIndex);
-        if (outputPrim->getType() != geo::PrimType::MESH) continue;
-        const auto outputMesh = std::static_pointer_cast<geo::Mesh>(outputPrim);
-
-        if (!script.addWrittenAttributes(*outputMesh, error)) return error;
-
-        const Offset offsetCount = outputMesh->getNumPoints();
-        const Offset chunkCount = (offsetCount + pointsPerChunk - 1) / pointsPerChunk;
-
-        tbb::parallel_for(Offset(0), chunkCount, [&](const Offset chunk) {
-            const std::shared_ptr<script::PointScript>& threadScript = threadScripts.local();
-
-            String chunkError;
-            if (!threadScript)
-                chunkError = "The script's globals failed to initialise.";
-            else
-            {
-                const Offset begin = chunk * pointsPerChunk;
-                const Offset end = std::min(begin + pointsPerChunk, offsetCount);
-                threadScript->run(context, primitiveIndex, *outputMesh, begin, end, chunkError);
-            }
-
-            if (chunkError.empty()) return;
-
-            std::lock_guard lock(errorMutex);
-            if (error.empty()) error = chunkError;
-        });
-
-        if (!error.empty()) return error;
-    }
-
-    return error;
-}
 
 class Script : public enzo::nt::NodeImpl
 {

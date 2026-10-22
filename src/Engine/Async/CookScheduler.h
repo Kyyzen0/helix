@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <thread>
 #include <vector>
 
@@ -70,6 +71,16 @@ class CookScheduler
     /// @brief Abandons the running cook and drops the pending one.
     void cancel();
 
+    /**
+     * @brief Waits until no worker is inside a cook.
+     *
+     * The workers stop as soon as they see a cook was abandoned, so this waits
+     * no longer than the node that is cooking. It is used before the network
+     * changes shape, so a worker never holds a pointer to a node that is being
+     * taken away.
+     */
+    void waitForIdle();
+
     /// @brief Returns whether a cook is wanted, running or waiting to start.
     bool isBusy() const;
 
@@ -102,6 +113,8 @@ class CookScheduler
     struct JobState
     {
         CookGeneration generation = kNoGeneration;
+        // The number that says which cook is the newer one.
+        std::uint64_t serial = 0;
         std::vector<std::vector<nt::NodeId>> levels;
         // A deque, because a level holds a lock and cannot be moved.
         std::deque<LevelState> levelStates;
@@ -117,9 +130,16 @@ class CookScheduler
     /// @brief Takes part in one cook, from its first level to its last.
     void runJob_(const std::shared_ptr<JobState>& job);
 
+    /// @brief Returns whether a cook older than @p serial has a node in flight.
+    bool olderCookRunning_(std::uint64_t serial) const;
+
     // Guards the members below.
     mutable std::mutex mutex_;
     std::condition_variable cv_;
+    // Woken when a worker leaves a cook, so a waiter can notice the pool is idle.
+    std::condition_variable idleCv_;
+    // Woken when a node finishes cooking, so a newer cook can take over.
+    std::condition_variable jobCv_;
 
     // Whether the workers should stop.
     bool stop_ = false;
@@ -136,6 +156,14 @@ class CookScheduler
 
     // How many workers are inside a cook right now.
     std::atomic<size_t> activeWorkers_{0};
+
+    // The number that says which cook is the newer one.
+    std::uint64_t jobSerial_ = 0;
+
+    // The cooks whose nodes are being cooked right now, one entry per node.
+    // A newer cook waits until the older ones have nothing in flight, so a
+    // node is never cooked by two workers at once.
+    std::multiset<std::uint64_t> activeCooks_;
 
     // Called once when a cook finishes.
     CookFinishedFn cookFinishedFn_;

@@ -1,11 +1,10 @@
 # Manifold provides the mesh boolean. Enzo includes only manifold.h, so the 2D
 # cross section and the Clipper2 it needs are left out.
 
-ExternalProject_Add(manifold
+enzo_add_archive_dependency(manifold
     URL ${ENZO_MANIFOLD_URL}
     URL_HASH SHA256=${ENZO_MANIFOLD_SHA256}
     DEPENDS tbb
-    LIST_SEPARATOR |
     CMAKE_ARGS
         ${ENZO_DEP_CMAKE_ARGS}
         -DMANIFOLD_CROSS_SECTION:BOOL=OFF

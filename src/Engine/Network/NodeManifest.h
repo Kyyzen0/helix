@@ -24,8 +24,22 @@ struct AliasImplementation
     std::string aliasedType;
 };
 
+/// @brief Where a user authored node's behaviour comes from.
+struct ScriptImplementation
+{
+    /// @brief The shared library holding the node's constructor.
+    std::string library;
+
+    /// @brief The name of the constructor the library exports.
+    std::string constructor;
+
+    /// @brief The file holding the node's source, named beside the manifest.
+    std::string source;
+};
+
 /// @brief Where a node's behaviour comes from.
-using NodeImplementation = std::variant<CppImplementation, AliasImplementation>;
+using NodeImplementation =
+    std::variant<CppImplementation, AliasImplementation, ScriptImplementation>;
 
 /**
  * @brief The in memory form of one node's manifest file.

@@ -9,6 +9,9 @@ Item {
     property int endFrame: 240
     property real frame: 1
 
+    // The keyframes of the parameter being animated, one entry per key.
+    property var keyframes: []
+
     readonly property real baselineY: height - 3
 
     // Frames between the two ends, never zero so a one frame range still draws.
@@ -117,6 +120,31 @@ Item {
         }
     }
 
+    // A marker on every keyframe of the animated parameter.
+    Repeater {
+        model: root.keyframes
+
+        delegate: Rectangle {
+            id: marker
+
+            required property var modelData
+
+            readonly property real keyFrame: modelData.frame
+
+            x: root.getFrameX(keyFrame)
+            y: root.baselineY - 3
+
+            width: 6
+            height: 6
+            radius: 1
+            // A diamond, so a key reads as a key rather than as a tick.
+            rotation: 45
+            color: Theme.timeline.playheadColor
+            border.color: Theme.var.fieldSurface
+            border.width: 0.5
+        }
+    }
+
     Item {
         x: root.getFrameX(root.frame)
 
@@ -151,8 +179,15 @@ Item {
 
     // Sets the frame from the pointer on click and on drag.
     MouseArea {
+        id: scrubber
+
         anchors.fill: parent
         onPressed: mouse => root.frameRequested(root.getFrameAtX(mouse.x))
-        onPositionChanged: mouse => root.frameRequested(root.getFrameAtX(mouse.x))
+        // Only a held button moves the playhead, so passing the pointer over
+        // the scale does not scrub it.
+        onPositionChanged: mouse => {
+            if (scrubber.pressed)
+                root.frameRequested(root.getFrameAtX(mouse.x));
+        }
     }
 }

@@ -9,6 +9,12 @@ Item {
 
     property bool playing: false
 
+    // Where the chosen parameter sits in the list of parameters to keyframe.
+    readonly property int keyframeParameterIndex: {
+        const index = timeline.animatableParameters.indexOf(timeline.keyframeParameter);
+        return index >= 0 ? index : -1;
+    }
+
     implicitHeight: 38
 
     // Moves the playhead and stops playback.
@@ -154,6 +160,51 @@ Item {
                 }
             }
         }
+
+        // The parameter the keyframe buttons work on, and the button itself.
+        Field {
+            id: keyField
+
+            visible: root.keyframeParameterIndex >= 0
+            width: keyPicker.width + keyButton.width + 22
+
+            FieldLabel {
+                id: keyLabel
+
+                text: "Key"
+            }
+
+            Dropdown {
+                id: keyPicker
+
+                anchors.left: keyLabel.right
+                anchors.leftMargin: 5
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.max(90, implicitWidth)
+                height: parent.height
+                labels: timeline.animatableParameters
+                currentIndex: root.keyframeParameterIndex
+                onActivated: index => timeline.keyframeParameter = timeline.animatableParameters[index]
+            }
+
+            IconButton {
+                id: keyButton
+
+                anchors.left: keyPicker.right
+                anchors.leftMargin: 3
+                anchors.verticalCenter: parent.verticalCenter
+                name: "diamond"
+                tooltip: timeline.hasKeyframe ? "Remove the key on this frame" : "Add a key on this frame"
+                width: 22
+                height: 22
+                radius: 6
+                iconSize: 12
+                surfaceColor: timeline.hasKeyframe ? Theme.timeline.playheadColor : "transparent"
+                hoverColor: Theme.timeline.playHoverColor
+                iconColor: timeline.hasKeyframe ? Theme.var.textStrong : Theme.var.textLabel
+                onClicked: timeline.toggleKeyframe()
+            }
+        }
     }
 
     TimelineRuler {
@@ -165,6 +216,7 @@ Item {
         startFrame: timeline.startFrame
         endFrame: timeline.endFrame
         frame: timeline.frame
+        keyframes: timeline.keyframes
         onFrameRequested: value => root.scrubToFrame(value)
     }
 

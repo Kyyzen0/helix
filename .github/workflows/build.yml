@@ -54,7 +54,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          version=$(sed -n 's/^project(enzo VERSION \([0-9.]*\)).*/\1/p' CMakeLists.txt)
+          version=$(sed -n 's/^project(helix VERSION \([0-9.]*\)).*/\1/p' CMakeLists.txt)
           echo "value=$version" >> "$GITHUB_OUTPUT"
           curl -sS -H "Authorization: Bearer $GH_TOKEN" \
             "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases?per_page=100" > releases.json
@@ -80,6 +80,22 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=/usr
           cmake --build build-super
 
+      # The build compiles the test suite, but nothing runs it. This step runs
+      # it, so a test that does not pass shows up in the log of the build.
+      #
+      # The step does not hold the build: a failing test is reported here, and
+      # the other platforms keep their own verdict.
+      - name: Run the tests
+        continue-on-error: true
+        run: |
+          tests=build-super/enzo-build/helix/bin/tests
+          if [ ! -x "$tests" ]; then
+            echo "the test binary was not found at $tests"
+            find build-super -name tests -type f -executable
+            exit 1
+          fi
+          timeout 900 "$tests" || echo "the test suite did not pass"
+
       - name: Package
         if: env.ENZO_PACKAGE == 'true'
         run: |
@@ -94,7 +110,7 @@ jobs:
             https://github.com/AppImage/appimagetool/releases/download/1.9.0/appimagetool-x86_64.AppImage
           chmod +x /usr/local/bin/appimagetool
           ./packaging/make-appimage.sh "$GITHUB_WORKSPACE/appdir-prefix" \
-            "$GITHUB_WORKSPACE/dist/enzo-${{ steps.version.outputs.value }}-linux-x86_64.AppImage"
+            "$GITHUB_WORKSPACE/dist/helix-${{ steps.version.outputs.value }}-linux-x86_64.AppImage"
 
       - uses: actions/upload-artifact@v4
         if: env.ENZO_PACKAGE == 'true'
@@ -148,7 +164,7 @@ jobs:
         timeout-minutes: 15
         run: |
           cmake --install build-super/enzo-build --prefix "$PWD/stage"
-          $exe = "$PWD/stage/bin/enzo.exe"
+          $exe = "$PWD/stage/bin/helix.exe"
 
           # A runner has no console window, so Qt writes its messages to the
           # debugger rather than stderr unless it is told otherwise.
@@ -164,12 +180,12 @@ jobs:
           # second run faults where the memory is written rather than later.
           $debuggers = "C:/Program Files (x86)/Windows Kits/10/Debuggers/x64"
           if (Test-Path "$debuggers/cdb.exe") {
-            & "$debuggers/gflags.exe" /p /enable enzo.exe /full
+            & "$debuggers/gflags.exe" /p /enable helix.exe /full
             $env:_NT_SYMBOL_PATH = "$PWD/build-super/enzo-build/enzo/bin"
             & "$debuggers/cdb.exe" -g -G -c ".lastevent; kb; q" $exe
-            & "$debuggers/gflags.exe" /p /disable enzo.exe
+            & "$debuggers/gflags.exe" /p /disable helix.exe
           }
-          throw "enzo exited on startup with $($app.ExitCode)"
+          throw "helix exited on startup with $($app.ExitCode)"
 
       - name: Package
         if: env.ENZO_PACKAGE == 'true'
@@ -223,12 +239,21 @@ jobs:
 
       # Starts the installed bundle, where the libraries, the plugins and the
       # qml modules sit apart from the build directory they were compiled in.
+      #
+      # The Vulkan loader and the driver of MoltenVK come from the toolchain
+      # the bootstrap script installed, so no package manager is needed.
       - name: Smoke test
         timeout-minutes: 15
         run: |
           source toolchain/env.sh
           cmake --install build-super/enzo-build --prefix "$PWD/stage"
-          exe="$PWD/stage/enzo.app/Contents/MacOS/enzo"
+
+          # The Vulkan loader has to sit in the bundle, since the loader path
+          # of a signed application ignores the library path of the
+          # environment.
+          ./scripts/install-vulkan-loader.sh "$PWD/stage/helix.app"
+
+          exe="$PWD/stage/helix.app/Contents/MacOS/helix"
 
           # A runner has no console window, so Qt writes its messages to the
           # debugger rather than stderr unless it is told otherwise.
@@ -243,7 +268,15 @@ jobs:
             exit 0
           fi
           cat smoke-out.txt smoke-err.txt
-          echo "enzo exited on startup"
+
+          # A runner has no Metal device, so the driver cannot offer a Vulkan
+          # device. The application has to fail there and not before, which
+          # shows that every library of the bundle was found and loaded.
+          if grep -q "No Vulkan device could be created" smoke-err.txt; then
+            echo "the application reached the graphics device, which the runner cannot provide"
+            exit 0
+          fi
+          echo "helix exited on startup"
           exit 1
 
       - name: Package

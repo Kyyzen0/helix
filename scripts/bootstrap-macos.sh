@@ -29,6 +29,10 @@ NINJA_VERSION="1.12.1"
 AQTINSTALL_VERSION="3.3.0"
 MOLTENVK_VERSION="1.4.2"
 
+# The archive of the Vulkan loader for macOS on Apple silicon. It is the build
+# of the loader of the Vulkan SDK, packaged for macOS.
+VULKAN_LOADER_BOTTLE="4b99cecb4fe7115a6faf770cfa9e8f14426c24baa6e4566e2473fe5beedad5af"
+
 # The Qt version cmake/versions.cmake pins.
 QT_VERSION="6.10.3"
 
@@ -138,6 +142,48 @@ install_moltenvk() {
     [[ -f "${dir}/MoltenVK_icd.json" ]] || die "MoltenVK archive did not contain ${dir}"
 }
 
+# --------------------------------------------------------- vulkan loader ----
+
+# The Diligent engine asks the Vulkan loader for the portability enumeration
+# extension on macOS, which the driver of MoltenVK does not offer. The loader
+# itself has the extension, so the application needs it beside MoltenVK.
+#
+# The loader is fetched as a prebuilt archive, the way every other tool here
+# is, so that a build does not need a package manager for it.
+install_vulkan_loader() {
+    local dir="${TOOLCHAIN_DIR}/vulkan/loader"
+    if [[ -f "${dir}/lib/libvulkan.1.dylib" ]]; then
+        log "Vulkan loader already installed"
+        return 0
+    fi
+
+    local venv="${TOOLCHAIN_DIR}/aqt-venv"
+    [[ -x "${venv}/bin/python" ]] || install_aqt
+
+    # The archive lives in a registry, which hands out a token for reading it.
+    local token
+    token="$(curl -fsSL "https://ghcr.io/token?scope=repository:homebrew/core/vulkan-loader:pull&service=ghcr.io" \
+        | "${venv}/bin/python" -c 'import json,sys; print(json.load(sys.stdin)["token"])')"
+    [[ -n "${token}" ]] || die "the registry did not hand out a token for the Vulkan loader"
+
+    local archive="${TOOLCHAIN_DIR}/downloads/vulkan-loader.tar.gz"
+    if [[ ! -s "${archive}" ]]; then
+        log "downloading the Vulkan loader"
+        curl -fsSL --retry 3 --retry-delay 2 \
+            -H "Authorization: Bearer ${token}" \
+            -o "${archive}" \
+            "https://ghcr.io/v2/homebrew/core/vulkan-loader/blobs/sha256:${VULKAN_LOADER_BOTTLE}"
+    fi
+
+    log "unpacking the Vulkan loader"
+    local stage="${TOOLCHAIN_DIR}/downloads/loader-stage"
+    mkdir -p "${stage}"
+    tar -xzf "${archive}" -C "${stage}"
+    mkdir -p "${dir}"
+    cp -R "${stage}"/vulkan-loader/*/lib "${dir}/"
+    [[ -f "${dir}/lib/libvulkan.1.dylib" ]] || die "the Vulkan loader archive did not contain libvulkan.1.dylib"
+}
+
 # ------------------------------------------------------------------- qt ----
 
 # Downloads the Qt build the project pins, so the superbuild finds it without
@@ -181,8 +227,8 @@ install_qt() {
 # macOS, so a build does not need a package manager to have a new enough bison.
 install_bison_flex() {
     local dir="${TOOLCHAIN_DIR}/bison"
-    if [[ -x "${dir}/bin/bison" && -x "${dir}/bin/flex" ]]; then
-        log "bison and flex already installed"
+    if [[ -x "${dir}/bin/bison" && -x "${dir}/bin/flex" && -x "${dir}/bin/m4" ]]; then
+        log "bison, flex and m4 already installed"
         return 0
     fi
 
@@ -205,6 +251,19 @@ install_bison_flex() {
         "https://conda.anaconda.org/conda-forge/${conda_arch}/flex-2.6.4-h1474e2a_1004.tar.bz2" \
         "${flex_pkg}"
 
+    # Bison calls m4 to expand its macros. The m4 of the host writes a cache
+    # file next to its other temporary files, which a sandboxed or otherwise
+    # restricted host refuses, so the toolchain carries its own m4.
+    local m4_build
+    case "${conda_arch}" in
+        osx-arm64) m4_build="m4-1.4.21-h84a0fba_0.conda" ;;
+        *)         m4_build="m4-1.4.21-hf3981d6_0.conda" ;;
+    esac
+    local m4_pkg="${TOOLCHAIN_DIR}/downloads/${m4_build}"
+    fetch \
+        "https://conda.anaconda.org/conda-forge/${conda_arch}/${m4_build}" \
+        "${m4_pkg}"
+
     local venv="${TOOLCHAIN_DIR}/aqt-venv"
     [[ -x "${venv}/bin/python" ]] || install_aqt
     "${venv}/bin/python" -m pip install --quiet --disable-pip-version-check zstandard
@@ -215,23 +274,29 @@ install_bison_flex() {
     "${venv}/bin/python" "${SCRIPT_DIR}/extract-conda.py" "${pkg}" "${stage}"
     log "unpacking flex"
     "${venv}/bin/python" "${SCRIPT_DIR}/extract-conda.py" "${flex_pkg}" "${stage}"
+    log "unpacking m4"
+    "${venv}/bin/python" "${SCRIPT_DIR}/extract-conda.py" "${m4_pkg}" "${stage}"
 
     mkdir -p "${dir}"
-    # The two packages share a bin and lib folder, so they are merged into one
+    # The packages share a bin and lib folder, so they are merged into one
     # prefix rather than kept apart.
     for folder in bin lib share include; do
         [[ -d "${stage}/${folder}" ]] && cp -R "${stage}/${folder}" "${dir}/"
     done
     # The packages carry their own libiconv, which the binaries reach through a
     # relative rpath, so the prefix has to stay together.
-    chmod +x "${dir}/bin/bison" "${dir}/bin/flex"
+    chmod +x "${dir}/bin/bison" "${dir}/bin/flex" "${dir}/bin/m4"
     [[ -x "${dir}/bin/bison" ]] || die "bison did not unpack to ${dir}/bin"
-    log "bison $("${dir}/bin/bison" --version 2>/dev/null | head -1), flex $("${dir}/bin/flex" --version 2>/dev/null | head -1)"
+    log "bison $("${dir}/bin/bison" --version 2>/dev/null | head -1), flex $("${dir}/bin/flex" --version 2>/dev/null | head -1), m4 $("${dir}/bin/m4" --version 2>/dev/null | head -1)"
 }
 
 # The conda build of bison crashes when the locale is the C locale, which is
 # the locale cmake asks a tool for its version in. The shim runs the bison of
 # the toolchain without that locale, so the build finds a working one.
+#
+# The same build has the folder of its data files baked in, because the
+# package was compiled on the machine that built it. The shim points bison at
+# the data files of the toolchain, which is where the package unpacked them.
 install_bison_shim() {
     local shim_dir="${TOOLCHAIN_DIR}/bison/shim"
     mkdir -p "${shim_dir}"
@@ -240,8 +305,11 @@ install_bison_shim() {
         '# Runs the bison of the toolchain without the C locale, which the' \
         '# conda build of bison does not survive. cmake asks a tool for its' \
         '# version in the C locale, so without this the build cannot even' \
-        '# find bison.' \
-        'exec env -u LC_ALL -u LC_CTYPE "'"${TOOLCHAIN_DIR}"'/bison/bin/bison" "$@"' \
+        '# find bison. The data files of bison are pointed at as well, because' \
+        '# the conda build has the folder of the machine that built it baked in.' \
+        '# The m4 of the toolchain is named too, so the macros are expanded by a' \
+        '# build that can write its cache.' \
+        'exec env -u LC_ALL -u LC_CTYPE BISON_PKGDATADIR="'"${TOOLCHAIN_DIR}"'/bison/share/bison" M4="'"${TOOLCHAIN_DIR}"'/bison/bin/m4" "'"${TOOLCHAIN_DIR}"'/bison/bin/bison" "$@"' \
         > "${shim_dir}/bison"
     chmod +x "${shim_dir}/bison"
 }
@@ -264,13 +332,16 @@ write_env() {
         'export PATH="${ENZO_TOOLCHAIN_DIR}/cmake/CMake.app/Contents/bin:${ENZO_TOOLCHAIN_DIR}/ninja:${ENZO_TOOLCHAIN_DIR}/bison/shim:${ENZO_TOOLCHAIN_DIR}/bison/bin:${PATH}"' \
         'export BISON_EXECUTABLE="${ENZO_TOOLCHAIN_DIR}/bison/shim/bison"' \
         'export FLEX_EXECUTABLE="${ENZO_TOOLCHAIN_DIR}/bison/bin/flex"' \
+        'export BISON_PKGDATADIR="${ENZO_TOOLCHAIN_DIR}/bison/share/bison"' \
+        'export M4="${ENZO_TOOLCHAIN_DIR}/bison/bin/m4"' \
         'export CMAKE_PREFIX_PATH="${ENZO_TOOLCHAIN_DIR}/qt/'"${QT_VERSION}"'/macos:${CMAKE_PREFIX_PATH:-}"' \
         'export QT_DIR="${ENZO_TOOLCHAIN_DIR}/qt/'"${QT_VERSION}"'/macos"' \
         'export QT_VERSION="'"${QT_VERSION}"'"' \
         'export MOLTENVK_DIR="${ENZO_TOOLCHAIN_DIR}/vulkan/MoltenVK/MoltenVK/dynamic/dylib/macOS"' \
+        'export VULKAN_LOADER_DIR="${ENZO_TOOLCHAIN_DIR}/vulkan/loader/lib"' \
         'export VK_ICD_FILENAMES="${MOLTENVK_DIR}/MoltenVK_icd.json"' \
         'export VK_DRIVER_FILES="${VK_ICD_FILENAMES}"' \
-        'export DYLD_LIBRARY_PATH="${MOLTENVK_DIR}:${DYLD_LIBRARY_PATH:-}"' \
+        'export DYLD_LIBRARY_PATH="${VULKAN_LOADER_DIR}:${MOLTENVK_DIR}:${DYLD_LIBRARY_PATH:-}"' \
         > "${TOOLCHAIN_DIR}/env.sh"
 }
 
@@ -288,6 +359,7 @@ main() {
     install_ninja
     install_aqt
     install_moltenvk
+    install_vulkan_loader
     install_bison_flex
     install_bison_shim
     if [[ "${with_qt}" -eq 1 ]]; then
