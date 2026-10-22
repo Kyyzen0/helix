@@ -1,4 +1,7 @@
 #pragma once
+#include "Engine/Async/CookResult.h"
+#include "Engine/Async/CookScheduler.h"
+#include "Engine/Async/CookSnapshot.h"
 #include "Engine/Core/Types.h"
 #include "Engine/Network/Network.h"
 #include "Engine/Network/Node.h"
@@ -6,7 +9,10 @@
 #include "Engine/Network/UpdateLock.h"
 #include "Engine/NetworkGraph/NetworkGraph.h"
 #include "Engine/UndoRedo/UndoStack.h"
+#include <memory>
+#include <mutex>
 #include <optional>
+#include <utility>
 #include <vector>
 
 namespace enzo {
@@ -244,6 +250,80 @@ class NetworkManager
      */
     void cook(enzo::nt::NodeId nodeId);
 
+    /** @name Background cooking
+     *
+     * A background cook evaluates the network on a pool of worker threads. The
+     * network is read once, before the cook starts, so the workers never read
+     * it and the interface stays free to change it while they work.
+     *
+     * Only one background cook runs at a time. Asking for another abandons the
+     * one that is running rather than queueing behind it, and asking again
+     * before that leaves one cook behind rather than a queue of them.
+     *
+     * The geometry of the last cook that finished stays on screen while the
+     * next one runs. It is replaced in one go when the cook is done, so what
+     * is shown is never half of one cook and half of another.
+     *
+     * @{
+     */
+
+    /**
+     * @brief Asks for a cook of the given nodes and everything feeding them.
+     *
+     * The cook runs in the background. The geometry it produces is published
+     * by processPendingCooks, so the interface has to call that to see it.
+     *
+     * @param targets The nodes to cook. The display, primary and selected nodes
+     * are the ones the interface shows, so those are the ones worth asking for.
+     */
+    void requestCook(const std::vector<enzo::nt::NodeId>& targets);
+
+    /// @brief Abandons the cook that is running and drops the one that was asked for.
+    void cancelCook();
+
+    /// @brief Returns whether a cook is running or waiting to start.
+    bool isCookBusy() const;
+
+    /// @brief Returns whether a worker is inside a cook right now.
+    bool isCooking() const;
+
+    /// @brief Returns the generation of the newest cook that was asked for.
+    async::CookGeneration getCookGeneration() const;
+
+    /**
+     * @brief Starts the cook that was asked for and publishes the one that finished.
+     *
+     * The interface calls this once a frame, so a finished cook is put on
+     * screen and a cook that was asked for gets going.
+     */
+    void processPendingCooks();
+
+    /// @brief Turns background cooking on or off.
+    /// @note Background cooking is off by default, so the network keeps cooking
+    /// the way it always has until something asks for it.
+    void setAsyncCookingEnabled(bool enabled) { asyncCookingEnabled_ = enabled; }
+
+    /// @brief Returns whether background cooking is on.
+    bool isAsyncCookingEnabled() const { return asyncCookingEnabled_; }
+
+    /// @brief Returns the result of the last cook that was published.
+    std::shared_ptr<const async::CookResult> getPublishedCookResult() const;
+
+    /**
+     * @brief Returns the published geometry of one node output.
+     *
+     * This is the safe way to read a node's geometry while a background cook
+     * is running, since the node itself is being written to as the cook goes.
+     * It falls back to the node's own geometry when nothing has been published
+     * for it.
+     */
+    std::shared_ptr<const enzo::NodePacket> getPublishedOutputPacket(
+        enzo::nt::NodeId nodeId,
+        unsigned int outputIndex
+    );
+
+    /** @} */
+
     /// @brief Returns the graph that owns the network's wiring and dependencies.
     nt::NetworkGraph& graph() { return network_.graph(); }
 
@@ -377,6 +457,44 @@ class NetworkManager
     /// @brief Puts the frame, the playback range, and the rate back to their defaults.
     void resetTime_();
 
+    /// @brief Starts the cook that was asked for, if there is one.
+    void startPendingCook_();
+
+    /// @brief Builds the plan and the picture a cook reads, then hands it to the pool.
+    /// @param targets The nodes to cook and everything feeding them.
+    void startCook_(const std::vector<nt::NodeId>& targets);
+
+    /// @brief Cooks one node on a worker thread and files away what it produced.
+    void cookNodeAsync_(
+        nt::NodeId nodeId,
+        nt::Node* node,
+        const async::CookCancelToken& cancelToken,
+        const async::CookSnapshot& snapshot,
+        const async::CookPlan& plan,
+        async::CookResult& result
+    );
+
+    /// @brief Takes the values a cook reads, so the cook never reads the live network.
+    /// @param plan The nodes the cook covers.
+    /// @param snapshot The picture the cook reads, filled in here.
+    /// @param result The result the cook writes, seeded with the geometry it keeps.
+    void buildSnapshot_(
+        const async::CookPlan& plan,
+        async::CookSnapshot& snapshot,
+        async::CookResult& result
+    );
+
+    /// @brief Puts a finished cook on screen and tells the interface about it.
+    void publishCookResult_(const std::shared_ptr<const async::CookResult>& result);
+
+    /// @brief Returns the pool the cooks run on, building it the first time it is asked for.
+    async::CookScheduler& cookScheduler_();
+
+    /// @brief Waits until no worker is inside a cook.
+    /// @note Used before the network changes shape, so a worker never holds a
+    /// pointer to a node that is being taken away.
+    void waitForCookIdle_();
+
     // variables
     // every node, its wiring, and the scopes they live in
     nt::Network network_;
@@ -393,6 +511,29 @@ class NetworkManager
     floatT fps_ = 24;
 
     UndoStack undoStack_;
+
+    // The pool the background cooks run on, built the first time it is needed.
+    std::unique_ptr<async::CookScheduler> cookScheduler_;
+
+    // The result of the cook that is running, and the generation it belongs to.
+    std::shared_ptr<async::CookResult> activeCookResult_;
+    async::CookGeneration activeCookGeneration_ = async::kNoGeneration;
+
+    // The result of the last cook that was published.
+    std::shared_ptr<const async::CookResult> publishedCookResult_;
+
+    // The cooks that have finished and are waiting to be published. The pool
+    // writes this from a worker thread and the interface reads it from its
+    // own, so it keeps a lock.
+    std::vector<std::pair<async::CookGeneration, async::CookStatus>> finishedCooks_;
+    mutable std::mutex cookMutex_;
+
+    // What the next cook has to cover, and whether it was asked for.
+    std::vector<nt::NodeId> requestedCookTargets_;
+    bool cookRequested_ = false;
+
+    // Whether cooks run in the background.
+    bool asyncCookingEnabled_ = false;
 };
 
 inline enzo::nt::NetworkManager& nm() { return enzo::nt::NetworkManager::getInstance(); }

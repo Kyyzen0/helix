@@ -34,7 +34,25 @@ endif()
 
 # The installed libraries sit in one directory, so they find each other next to
 # themselves. The executable overrides this, since it sits in bin.
-set(CMAKE_INSTALL_RPATH "$ORIGIN")
+#
+# macOS has no $ORIGIN. The loader path keyword names the directory of the
+# binary that carries the path, so a library next to itself is reached the
+# same way on every platform.
+if(APPLE)
+    # A library sits next to the libraries it shares a folder with and reaches
+    # the frameworks one folder up, which is where the bundle keeps them.
+    set(CMAKE_INSTALL_RPATH "@loader_path;@loader_path/../Frameworks")
+elseif(UNIX)
+    set(CMAKE_INSTALL_RPATH "$ORIGIN")
+else()
+    set(CMAKE_INSTALL_RPATH "")
+endif()
+
+# The oldest macOS the bundle claims to run on. Every dependency is built for
+# it too, so the tree stays free of a library the host cannot load.
+if(APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Oldest macOS the build supports")
+endif()
 
 set(ENZO_DEV_LIB_DIR "${CMAKE_BINARY_DIR}/nodes/")
 set(ENZO_DEV_NODES_DIR "${CMAKE_SOURCE_DIR}/nodes")
@@ -182,7 +200,13 @@ list(APPEND ENGINE_INCLUDE_DIRECTORIES ${DASLANG_DIR}/include)
 set(DAS_DASLIB_DIR "${DASLANG_DIR}/daslib")
 
 # Dev builds stage into build/enzo so the layout mirrors the installed package.
-set(ENZO_DEV_STAGE_DIR "${CMAKE_BINARY_DIR}/enzo")
+# A macOS build stages into the bundle instead, since the runtime reads its
+# content from the folder holding the executable.
+if(APPLE)
+    set(ENZO_DEV_STAGE_DIR "${CMAKE_BINARY_DIR}/enzo.app/Contents")
+else()
+    set(ENZO_DEV_STAGE_DIR "${CMAKE_BINARY_DIR}/enzo")
+endif()
 
 # daslib sits beside the staged bin directory so daslang resolves its standard
 # library the same way it does from an install.
@@ -415,9 +439,24 @@ target_compile_definitions(${AppExec} PRIVATE
 
 target_compile_definitions(${AppExec} PRIVATE ENZO_VERSION="${PROJECT_VERSION}")
 
-set_target_properties(${AppExec} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${ENZO_DEV_STAGE_DIR}/bin"
-)
+if(APPLE)
+    # A macOS build produces a real application bundle, which is what the
+    # system expects to find when the application is launched from the
+    # desktop or from a bundle aware installer.
+    set_target_properties(${AppExec} PROPERTIES
+        MACOSX_BUNDLE ON
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Info.plist.in"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.enzo3d.Enzo"
+        MACOSX_BUNDLE_BUNDLE_NAME "Enzo"
+        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+    )
+else()
+    set_target_properties(${AppExec} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${ENZO_DEV_STAGE_DIR}/bin"
+    )
+endif()
 
 target_link_libraries(${AppExec} PRIVATE enzoEngine enzoGraphics argparse::argparse Qt6::Quick Qt6::QuickControls2 Vulkan::Headers)
 target_include_directories(${AppExec} PRIVATE
@@ -434,8 +473,11 @@ target_include_directories(${AppExec} PRIVATE
 
 # Groups the install tree under enzo/ on Linux, so the bundled Qt stays out of
 # the system lib folder. Windows installs straight into its own Enzo folder.
+# A macOS install is a bundle, so its content sits inside the bundle.
 if(WIN32)
     set(ENZO_APP_DIR "")
+elseif(APPLE)
+    set(ENZO_APP_DIR "${CMAKE_PROJECT_NAME}.app/Contents/")
 else()
     set(ENZO_APP_DIR "${CMAKE_PROJECT_NAME}/")
 endif()
@@ -444,6 +486,13 @@ endif()
 set(ENZO_BIN_DIR ${ENZO_APP_DIR}bin CACHE STRING "Binary install directory")
 set(ENZO_LIB_DIR ${ENZO_APP_DIR}lib CACHE STRING "Library install directory")
 set(ENZO_NODES_DIR ${ENZO_APP_DIR}nodes CACHE STRING "Node folder install directory")
+
+# A bundle carries its own executable, so the binary directory is the one the
+# bundle keeps it in and the bundle itself lands at the root of the install.
+if(APPLE)
+    set(ENZO_BIN_DIR "${CMAKE_PROJECT_NAME}.app/Contents/MacOS")
+    set(ENZO_BUNDLE_DIR "." CACHE STRING "Folder the application bundle is installed into")
+endif()
 
 # compile nodes
 add_subdirectory(nodes)

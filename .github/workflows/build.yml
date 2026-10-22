@@ -191,8 +191,76 @@ jobs:
           if-no-files-found: error
           path: dist
 
+  macos:
+    runs-on: macos-15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # The pinned versions of cmake, ninja and MoltenVK land inside the
+      # repository, so the build does not depend on what the runner carries and
+      # a sandboxed host can run it without a package manager.
+      - name: Bootstrap the toolchain
+        run: ./scripts/bootstrap-macos.sh
+
+      - name: Cache dependency prefix
+        uses: actions/cache@v4
+        with:
+          path: |
+            build-super/deps
+            build-super/superbuild/Stamp
+          key: macos-deps-v1-${{ hashFiles('cmake/versions.cmake') }}
+
+      - name: Build
+        run: |
+          source toolchain/env.sh
+          cmake -S . -B build-super -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DENZO_SUPERBUILD=ON
+          cmake --build build-super
+
+      # Starts the installed bundle, where the libraries, the plugins and the
+      # qml modules sit apart from the build directory they were compiled in.
+      - name: Smoke test
+        timeout-minutes: 15
+        run: |
+          source toolchain/env.sh
+          cmake --install build-super/enzo-build --prefix "$PWD/stage"
+          exe="$PWD/stage/enzo.app/Contents/MacOS/enzo"
+
+          # A runner has no console window, so Qt writes its messages to the
+          # debugger rather than stderr unless it is told otherwise.
+          export QT_FORCE_STDERR_LOGGING=1
+
+          "$exe" > smoke-out.txt 2> smoke-err.txt &
+          pid=$!
+          sleep 60
+          if kill -0 "$pid" 2>/dev/null; then
+            kill "$pid"
+            cat smoke-out.txt smoke-err.txt
+            exit 0
+          fi
+          cat smoke-out.txt smoke-err.txt
+          echo "enzo exited on startup"
+          exit 1
+
+      - name: Package
+        if: env.ENZO_PACKAGE == 'true'
+        run: |
+          cd build-super/enzo-build
+          cpack -G TGZ -B "$GITHUB_WORKSPACE/dist"
+
+      - uses: actions/upload-artifact@v4
+        if: env.ENZO_PACKAGE == 'true'
+        with:
+          name: macos-packages
+          if-no-files-found: error
+          path: dist
+
   release:
-    needs: [linux, windows]
+    needs: [linux, windows, macos]
     if: github.ref == 'refs/heads/main' && needs.linux.outputs.published != 'true'
     runs-on: ubuntu-latest
     permissions:

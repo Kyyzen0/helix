@@ -6,6 +6,8 @@ set(CPACK_PROJECT_CONFIG_FILE ${CMAKE_SOURCE_DIR}/cmake/CPackProjectConfig.cmake
 
 if(WIN32)
     set(CPACK_GENERATOR "WIX;NSIS;ZIP")
+elseif(APPLE)
+    set(CPACK_GENERATOR "TGZ")
 else()
     set(CPACK_GENERATOR "RPM;DEB;TGZ")
 endif()
@@ -26,6 +28,8 @@ set(CPACK_STRIP_FILES ON)
 # so artifacts from every job can sit in one release.
 if(WIN32)
     set(CPACK_SYSTEM_NAME windows-${CMAKE_SYSTEM_PROCESSOR})
+elseif(APPLE)
+    set(CPACK_SYSTEM_NAME macos-${CMAKE_SYSTEM_PROCESSOR})
 else()
     set(CPACK_SYSTEM_NAME linux-${CMAKE_SYSTEM_PROCESSOR})
 endif()
@@ -65,9 +69,19 @@ if(WIN32)
     set(CPACK_WIX_EXTRA_SOURCES "${ENZO_WINDOWS_PACKAGING_DIR}/EnzoUI.wxs")
 endif()
 
-set_target_properties(${AppExec} PROPERTIES
-    INSTALL_RPATH "$ORIGIN/../lib;$ORIGIN/../../lib"
-)
+# The executable sits one folder deeper than the libraries, so it reaches them
+# through the folder above it.
+if(APPLE)
+    # A bundle keeps its executable in MacOS and its libraries in Frameworks and
+    # lib, both of which sit next to MacOS inside Contents.
+    set_target_properties(${AppExec} PROPERTIES
+        INSTALL_RPATH "@loader_path/../Frameworks;@loader_path/../lib"
+    )
+else()
+    set_target_properties(${AppExec} PROPERTIES
+        INSTALL_RPATH "$ORIGIN/../lib;$ORIGIN/../../lib"
+    )
+endif()
 
 include(CPack)
 
@@ -80,24 +94,48 @@ qt_generate_deploy_qml_app_script(
 
 # Sets the destinations in the install script itself, since Qt reads them when
 # the deployment runs rather than when it is generated.
-install(CODE "
-    set(QT_DEPLOY_BIN_DIR \"${ENZO_BIN_DIR}\")
-    set(QT_DEPLOY_LIB_DIR \"${ENZO_LIB_DIR}\")
-    set(QT_DEPLOY_LIBEXEC_DIR \"${ENZO_APP_DIR}libexec\")
-    set(QT_DEPLOY_PLUGINS_DIR \"${ENZO_APP_DIR}plugins\")
-    set(QT_DEPLOY_QML_DIR \"${ENZO_APP_DIR}qml\")
-    set(QT_DEPLOY_TRANSLATIONS_DIR \"${ENZO_APP_DIR}translations\")
-")
+if(APPLE)
+    # A bundle keeps its frameworks, plugins and resources in the folders the
+    # system expects to find them in.
+    install(CODE "
+        set(QT_DEPLOY_BIN_DIR \"${ENZO_BIN_DIR}\")
+        set(QT_DEPLOY_LIB_DIR \"${ENZO_APP_DIR}Frameworks\")
+        set(QT_DEPLOY_LIBEXEC_DIR \"${ENZO_APP_DIR}Helpers\")
+        set(QT_DEPLOY_PLUGINS_DIR \"${ENZO_APP_DIR}PlugIns\")
+        set(QT_DEPLOY_QML_DIR \"${ENZO_APP_DIR}Resources/qml\")
+        set(QT_DEPLOY_TRANSLATIONS_DIR \"${ENZO_APP_DIR}Resources/translations\")
+    ")
+else()
+    install(CODE "
+        set(QT_DEPLOY_BIN_DIR \"${ENZO_BIN_DIR}\")
+        set(QT_DEPLOY_LIB_DIR \"${ENZO_LIB_DIR}\")
+        set(QT_DEPLOY_LIBEXEC_DIR \"${ENZO_APP_DIR}libexec\")
+        set(QT_DEPLOY_PLUGINS_DIR \"${ENZO_APP_DIR}plugins\")
+        set(QT_DEPLOY_QML_DIR \"${ENZO_APP_DIR}qml\")
+        set(QT_DEPLOY_TRANSLATIONS_DIR \"${ENZO_APP_DIR}translations\")
+    ")
+endif()
 install(SCRIPT ${ENZO_QT_DEPLOY_SCRIPT})
 
 # Installs enzo's own binaries after the Qt deployment, so they land with their
 # install runpath.
-install(TARGETS ${AppExec} enzoEngine
-    RUNTIME_DEPENDENCY_SET enzoRuntime
-    RUNTIME DESTINATION ${ENZO_BIN_DIR}
-    LIBRARY DESTINATION ${ENZO_LIB_DIR}
-    ARCHIVE DESTINATION ${ENZO_LIB_DIR}
-)
+if(APPLE)
+    # The bundle carries the executable, so it is installed as a whole into the
+    # folder the bundle belongs in.
+    install(TARGETS ${AppExec} enzoEngine
+        RUNTIME_DEPENDENCY_SET enzoRuntime
+        BUNDLE DESTINATION ${ENZO_BUNDLE_DIR}
+        LIBRARY DESTINATION ${ENZO_LIB_DIR}
+        ARCHIVE DESTINATION ${ENZO_LIB_DIR}
+    )
+else()
+    install(TARGETS ${AppExec} enzoEngine
+        RUNTIME_DEPENDENCY_SET enzoRuntime
+        RUNTIME DESTINATION ${ENZO_BIN_DIR}
+        LIBRARY DESTINATION ${ENZO_LIB_DIR}
+        ARCHIVE DESTINATION ${ENZO_LIB_DIR}
+    )
+endif()
 
 # Installs the remaining shared dependencies by reading the imports of the
 # installed binaries, since windeployqt brings only Qt.
@@ -115,6 +153,19 @@ if(WIN32)
         POST_EXCLUDE_REGEXES "[Ss]ystem32"
         RUNTIME DESTINATION ${ENZO_BIN_DIR}
     )
+elseif(APPLE)
+    # The shared libraries the dependencies built, so the bundle carries them
+    # and the loader finds them next to the libraries enzo itself installed.
+    #
+    # The Qt libraries are left out, since the Qt deployment copies them into
+    # the bundle's own framework folder.
+    set(ENZO_DEP_LIB_FILES "")
+    if(ENZO_DEPS_PREFIX)
+        file(GLOB ENZO_DEP_LIB_FILES "${ENZO_DEPS_PREFIX}/lib/*.dylib")
+    endif()
+    if(ENZO_DEP_LIB_FILES)
+        install(FILES ${ENZO_DEP_LIB_FILES} DESTINATION ${ENZO_LIB_DIR})
+    endif()
 endif()
 
 

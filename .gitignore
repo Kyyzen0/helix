@@ -8,3 +8,17 @@ artifacts
 # Flatpak
 repo
 build-super
+
+# macOS
+# The toolchain the bootstrap script installs. It is a few gigabytes of
+# downloaded binaries, and the script rebuilds it from pinned archives.
+toolchain/
+# The bundle the installer stages.
+stage/
+dist/
+# Scratch files from a build or a probe.
+*.tmp
+.probe-*
+build-probe*/
+# The symlink the build agent points at its own build tree.
+build-macos

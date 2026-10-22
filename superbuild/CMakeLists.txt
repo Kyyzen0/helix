@@ -27,6 +27,15 @@ set(ENZO_TOOLCHAIN_CMAKE_ARGS
     -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
 )
 
+# The oldest macOS the whole tree is built for. Every dependency and enzo
+# itself take the same value, so no library ends up asking for a system
+# release the host does not have.
+if(APPLE)
+    set(ENZO_OSX_DEPLOYMENT_TARGET "12.0")
+    list(APPEND ENZO_TOOLCHAIN_CMAKE_ARGS
+        -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${ENZO_OSX_DEPLOYMENT_TARGET})
+endif()
+
 # Forwards the toolchain settings that were actually chosen.
 foreach(setting IN ITEMS
     CMAKE_BUILD_TYPE
@@ -52,7 +61,13 @@ set(ENZO_DEP_CMAKE_ARGS
 
 # The libraries end up beside each other in the packaged tree, so they look for
 # their siblings next to themselves rather than in the prefix they were built in.
-if(UNIX)
+#
+# macOS has no $ORIGIN. The loader path keyword names the directory of the
+# binary that carries the path, so a library next to itself is reached the same
+# way on every platform.
+if(APPLE)
+    list(APPEND ENZO_DEP_CMAKE_ARGS -DCMAKE_INSTALL_RPATH:STRING=@loader_path)
+elseif(UNIX)
     list(APPEND ENZO_DEP_CMAKE_ARGS -DCMAKE_INSTALL_RPATH:STRING=$ORIGIN)
 endif()
 
@@ -75,6 +90,9 @@ ExternalProject_Add(enzo
         ${ENZO_TOOLCHAIN_CMAKE_ARGS}
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
         -DENZO_SUPERBUILD:BOOL=OFF
+        # enzo copies the shared libraries the dependencies built into its own
+        # tree, so it needs to know where they are.
+        -DENZO_DEPS_PREFIX:PATH=${ENZO_DEPS_PREFIX}
     BUILD_ALWAYS ON
     INSTALL_COMMAND ""
     USES_TERMINAL_CONFIGURE ON
