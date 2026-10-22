@@ -72,9 +72,13 @@ install_cmake() {
     mkdir -p "${TOOLCHAIN_DIR}/cmake"
     # The macOS archive holds a bundle, so the tools sit inside the app.
     #
-    # It is unpacked with the leading components dropped rather than moved
+    # It is unpacked with the leading component dropped rather than moved
     # afterwards, because a sandboxed macOS host refuses to rename a folder.
-    tar -xzf "${tarball}" -C "${TOOLCHAIN_DIR}/cmake" --strip-components=2
+    #
+    # Only the versioned root folder is dropped. The archive holds the bundle
+    # itself below it, so dropping two would land the tools in Contents/
+    # instead of in CMake.app/Contents/.
+    tar -xzf "${tarball}" -C "${TOOLCHAIN_DIR}/cmake" --strip-components=1
     [[ -x "${TOOLCHAIN_DIR}/cmake/CMake.app/Contents/bin/cmake" ]] \
         || die "cmake did not unpack to the expected bundle layout"
 }
@@ -154,8 +158,10 @@ install_qt() {
     local archs=("clang_64" "macos")
     for arch in "${archs[@]}"; do
         log "downloading Qt ${QT_VERSION} (${arch})"
+        # The archives are kept, because a host that refuses to delete a file
+        # would otherwise fail the download over the cleanup.
         if "${venv}/bin/python" -m aqt install-qt mac desktop "${QT_VERSION}" "${arch}" \
-            --modules qtshadertools --outputdir "${root}" ; then
+            --modules qtshadertools --outputdir "${root}" --keep ; then
             log "Qt ${QT_VERSION} installed as ${arch}"
             return 0
         fi
@@ -223,6 +229,23 @@ install_bison_flex() {
     log "bison $("${dir}/bin/bison" --version 2>/dev/null | head -1), flex $("${dir}/bin/flex" --version 2>/dev/null | head -1)"
 }
 
+# The conda build of bison crashes when the locale is the C locale, which is
+# the locale cmake asks a tool for its version in. The shim runs the bison of
+# the toolchain without that locale, so the build finds a working one.
+install_bison_shim() {
+    local shim_dir="${TOOLCHAIN_DIR}/bison/shim"
+    mkdir -p "${shim_dir}"
+    printf '%s\n' \
+        '#!/bin/sh' \
+        '# Runs the bison of the toolchain without the C locale, which the' \
+        '# conda build of bison does not survive. cmake asks a tool for its' \
+        '# version in the C locale, so without this the build cannot even' \
+        '# find bison.' \
+        'exec env -u LC_ALL -u LC_CTYPE "'"${TOOLCHAIN_DIR}"'/bison/bin/bison" "$@"' \
+        > "${shim_dir}/bison"
+    chmod +x "${shim_dir}/bison"
+}
+
 # ------------------------------------------------------------------ env ----
 
 write_env() {
@@ -238,8 +261,8 @@ write_env() {
         '# The MoltenVK manifest tells the Vulkan loader which driver to use, because' \
         '# macOS has no native Vulkan driver.' \
         'export ENZO_TOOLCHAIN_DIR="${ENZO_TOOLCHAIN_DIR:-'"${TOOLCHAIN_DIR}"'}"' \
-        'export PATH="${ENZO_TOOLCHAIN_DIR}/cmake/CMake.app/Contents/bin:${ENZO_TOOLCHAIN_DIR}/ninja:${ENZO_TOOLCHAIN_DIR}/bison/bin:${PATH}"' \
-        'export BISON_EXECUTABLE="${ENZO_TOOLCHAIN_DIR}/bison/bin/bison"' \
+        'export PATH="${ENZO_TOOLCHAIN_DIR}/cmake/CMake.app/Contents/bin:${ENZO_TOOLCHAIN_DIR}/ninja:${ENZO_TOOLCHAIN_DIR}/bison/shim:${ENZO_TOOLCHAIN_DIR}/bison/bin:${PATH}"' \
+        'export BISON_EXECUTABLE="${ENZO_TOOLCHAIN_DIR}/bison/shim/bison"' \
         'export FLEX_EXECUTABLE="${ENZO_TOOLCHAIN_DIR}/bison/bin/flex"' \
         'export CMAKE_PREFIX_PATH="${ENZO_TOOLCHAIN_DIR}/qt/'"${QT_VERSION}"'/macos:${CMAKE_PREFIX_PATH:-}"' \
         'export QT_DIR="${ENZO_TOOLCHAIN_DIR}/qt/'"${QT_VERSION}"'/macos"' \
@@ -266,6 +289,7 @@ main() {
     install_aqt
     install_moltenvk
     install_bison_flex
+    install_bison_shim
     if [[ "${with_qt}" -eq 1 ]]; then
         install_qt
     else
