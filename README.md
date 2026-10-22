@@ -1,78 +1,123 @@
+<div align="center">
 
+# Helix
 
-<!-- <img align="right" src="https://cards.parkerbritt.com/jenkins_badge?job=enzo"> -->
-<div align="left">
-<img src="https://cards.parkerbritt.com/badge?label=C%2B%2B&icon=cplusplus&color=00599C">
-<img src="https://cards.parkerbritt.com/badge?label=opengl&icon=opengl&color=5586A4">
-<img src="https://cards.parkerbritt.com/badge?label=qt&icon=qt&color=41CD52">
-<img align="right" src="https://cards.parkerbritt.com/badge?label=0.6.0&color=8023CC">
+**A 3D software for procedural modeling and animation, on macOS.**
+
+<img src="https://github.com/user-attachments/assets/7bbae453-31f6-4a3b-a39b-c0efb4488834" width="380" alt="Helix">
+
 </div>
 
-<div  align="center">
-  <img width=380 src="https://github.com/user-attachments/assets/7bbae453-31f6-4a3b-a39b-c0efb4488834">
-</div>
+---
 
-<div align="justify">
-  <div align="center">
-    
-  Enzo is an open source 3D software for **procedural modeling** in VFX or animation.<br><br>
-  </div>
+## Credits and origin
 
-  <!-- docs + website buttons -->
-  <div align="center"> 
-    <a href="https://parkerbritt.github.io/enzo/annotated.html"><img src="https://cards.parkerbritt.com/button?label=Docs&icon=book"></a>
-    <a href="https://enzo3d.com"><img src="https://cards.parkerbritt.com/button?label=Website&icon=house"></a>
-  </div>
+**Helix is a fork of [enzo](https://github.com/parkerbritt/enzo), by [ParkerBritt](https://github.com/ParkerBritt).**
 
-  <video src="https://github.com/user-attachments/assets/1e5a4322-b54f-43da-bf35-691ed7a9511b"></video>
+Enzo is an open source 3D software for procedural modeling in VFX or animation, inspired by
+industry standard tools like Houdini. Its engine architecture, node system, data model and
+user interface were designed and written by ParkerBritt, who develops it in his free time.
 
-  ## About
-  Enzo is inspired by industry standard tools like Houdini. The goal is to utilize the best features of these tools (attributes, parameterized editing, powerful nodes) and change or improve what could be better (expensive licensing, fragmented contexts, quality of life).
-  
-  This is a hobby project and early work in progess. While I hope it's useful to you now or in the future, I develop this in my free time which can be slow.
+Helix is not a rewrite. It is a continuation: the same MIT licensed codebase, carried to
+macOS and extended. All of the original work — the decoupled engine and UI, the attribute
+based data model, the powerful node graph, the parameter system — is ParkerBritt's, and
+the original project remains the reference for anything Helix has not touched.
 
-  ## Features
-  **Free and Open Source** - 
-  Enzo's open source licensing (MIT) makes it free for commercial or personal projects and allows developers to expand the software and make it their own, for any use case.
-  
-  *No expensive licensing or getting locked out of your own work.*
-  
-  **Modular Engine** -
-  From the start Enzo has been designed with a decoupled engine and UI. This allows developers to build the engine into their own projects, create their own UIs, or use it headlessly.<br>
+- Upstream project: <https://github.com/parkerbritt/enzo>
+- Upstream documentation: <https://parkerbritt.github.io/enzo/>
+- Upstream website: <https://enzo3d.com>
 
-  **Light Weight** -
-  Thanks to a lack of bloat built up over decades, Enzo is small and lightweight, with the UI able to launch in under one second.<br>
+Both projects are MIT licensed. See [LICENSE](LICENSE) for the terms, and
+[NOTICE](NOTICE) for the attribution notice.
 
-  **Unified Context** - Enzo's data system is built around primitives and attributes, it unifies these under a single context.
-  Ever wanted to copy cameras to points, control a lights brightness with attribute noise, or see and modify every voxel's value in a spreadsheet?
-</div>
+---
 
-## Dependencies
-```
-cmake
-ninja-build
-gcc-c++
-boost-devel
-eigen3-devel
-tbb-devel
-cgal-devel
-polyclipping2-devel
-glm-devel
-qt6-qtbase-devel
-qt6-qttools-devel
-qt6-qtsvg-devel
-qt6-qtshadertools-devel
-qt6-qtwayland-devel
-manifold-devel
-argparse-devel
-```
+## What Helix adds
 
-### installed with daslang
-```
-flex
-bison
+| | |
+| --- | --- |
+| **macOS arm64** | A native Apple silicon build, with a real `.app` bundle, a DMG installer, a CI job on `macos-15`, and a toolchain script that needs no package manager. |
+| **Async cooking** | The graph cooks on a worker pool instead of the UI thread. Edits cancel the cook in flight and coalesce, so the viewport keeps showing the last finished result while a new one is computed. |
+| **Sweep node** | The sweep node is finished and covered by tests, so a profile can be swept along a path. |
+| **Vulkan viewport** | The viewport runs on DiligentCore's Vulkan backend, tuned for Apple silicon, where Vulkan is provided by MoltenVK translating onto Metal. |
+| **Timeline** | Playback, scrubbing, looping and a frame range, driving frame dependent evaluation through the engine's existing time mechanism. |
+| **Simulation nodes** | A family of solver nodes — particles, springs, soft bodies — that integrate over time and can be keyframed from the timeline. |
+| **User node authoring** | Users can define their own node types at runtime from script or expression source, reuse the existing daslang and expression machinery, and save them with the project. |
+| **GUI rewrite** | The QML interface is redesigned around one spacing and type scale, a unified panel system, a node editor that reads like a professional tool, and a status bar that shows cook state and the current frame. |
+
+The engine stays decoupled from the interface, as in the original: it can be embedded in
+another project, driven headlessly, or given a different interface entirely.
+
+---
+
+## Building
+
+### macOS (Apple silicon)
+
+The build needs no package manager. The bootstrap script downloads a pinned cmake, ninja,
+aqtinstall, MoltenVK, bison and flex into `toolchain/`, then the superbuild fetches and
+builds every other dependency at its pinned version.
+
+```sh
+git clone --recurse-submodules https://github.com/Kyyzen0/helix
+cd helix
+./scripts/bootstrap-macos.sh
+source toolchain/env.sh
+
+cmake -S . -B build-super -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DENZO_SUPERBUILD=ON
+cmake --build build-super
 ```
 
+The result is `build-super/helix.app`.
 
-## Documentation
-Doxygen documentation is generated automatically and can be accessed [here.](https://parkerbritt.github.io/enzo/)
+Two things are specific to macOS and are worth knowing about:
+
+- **Vulkan comes from MoltenVK.** macOS has no native Vulkan driver. MoltenVK translates
+  Vulkan onto Metal, and the viewport uses it through DiligentCore. The script installs it
+  and `toolchain/env.sh` points the loader at it.
+- **bison has to be new enough.** daslang regenerates its parser from a bison grammar
+  during the build, and the committed parser was produced by bison 3.8.2. macOS ships
+  bison 2.3, which generates a parser that does not compile. The bootstrap script
+  installs bison 3.8.2 for exactly this reason.
+
+### Linux
+
+The dependencies are the same as the upstream list, plus bison and flex for daslang:
+
+```
+cmake ninja-build gcc-c++ boost-devel eigen3-devel tbb-devel cgal-devel
+polyclipping2-devel glm-devel qt6-qtbase-devel qt6-qttools-devel
+qt6-qtsvg-devel qt6-qtshadertools-devel qt6-qtwayland-devel
+manifold-devel argparse-devel flex bison
+```
+
+Then the usual two commands:
+
+```sh
+cmake -S . -B build-super -G Ninja -DCMAKE_BUILD_TYPE=Release -DENZO_SUPERBUILD=ON
+cmake --build build-super
+```
+
+---
+
+## Status
+
+Helix is a work in progress, and so is the application it is based on. The macOS port
+builds and installs, the CI job runs the superbuild on a `macos-15` runner, and the
+features listed above are implemented in the tree. Expect rough edges, and expect the
+interface to still be moving.
+
+The internal C++ namespace is still `enzo::`, and the scene format keeps the `.enzo`
+extension so that files stay interchangeable with the upstream project. Renaming those
+is a separate mechanical refactor.
+
+---
+
+## License
+
+MIT, inherited from the original project. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+Enzo is free and open source. No expensive licensing, and no getting locked out of your
+own work.

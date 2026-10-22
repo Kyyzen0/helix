@@ -1,0 +1,34 @@
+Helix
+Copyright (c) 2026 The Helix contributors
+
+This product is a fork of enzo, an open source 3D software for procedural
+modeling in VFX or animation.
+
+  Upstream project: https://github.com/parkerbritt/enzo
+  Upstream author:  ParkerBritt
+  Upstream website: https://enzo3d.com
+  Upstream docs:    https://parkerbritt.github.io/enzo/
+
+The original enzo source code, its engine architecture, node system, data model,
+parameter system, user interface and documentation are the work of ParkerBritt
+and are used here under the terms of the MIT license reproduced in the LICENSE
+file at the root of this repository.
+
+The macOS port, the asynchronous cooking scheduler, the timeline, the simulation
+node family, the user node authoring support, the viewport work and the interface
+redesign were carried out for this fork by the Helix contributors.
+
+The scene format is unchanged, so files saved by Helix open in enzo and the other
+way round.
+
+---
+
+This product bundles or depends on third party software, each under its own
+license:
+
+  daslang (daScript)   https://github.com/GaijinEntertainment/daScript
+  DiligentCore         https://github.com/DiligentGraphics/DiligentCore
+  MoltenVK             https://github.com/KhronosGroup/MoltenVK
+  Qt                   https://www.qt.io
+  TBB, Boost, Eigen, GLM, Manifold, argparse, yaml-cpp, Catch2, cereal,
+  icecream-cpp, FastNoise2

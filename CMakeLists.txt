@@ -4,19 +4,19 @@ cmake_minimum_required(VERSION 3.26)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 # set exec names
-set(AppExec enzo)
+set(AppExec helix)
 set(TestExec tests)
 set(BenchExec bench)
 set(CMAKE_AUTORCC ON)
 
 # setup project
-project(enzo VERSION 0.6.0)
+project(helix VERSION 0.7.0)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/versions.cmake)
 
 # Builds the pinned dependencies first, then configures this same project again
 # against them.
-option(ENZO_SUPERBUILD "Build the pinned dependencies, then enzo against them" ON)
+option(ENZO_SUPERBUILD "Build the pinned dependencies, then helix against them" ON)
 if(ENZO_SUPERBUILD)
     add_subdirectory(superbuild)
     return()
@@ -199,13 +199,13 @@ list(APPEND ENGINE_INCLUDE_DIRECTORIES ${DASLANG_DIR}/include)
 # directory of the running executable.
 set(DAS_DASLIB_DIR "${DASLANG_DIR}/daslib")
 
-# Dev builds stage into build/enzo so the layout mirrors the installed package.
+# Dev builds stage into build/helix so the layout mirrors the installed package.
 # A macOS build stages into the bundle instead, since the runtime reads its
 # content from the folder holding the executable.
 if(APPLE)
-    set(ENZO_DEV_STAGE_DIR "${CMAKE_BINARY_DIR}/enzo.app/Contents")
+    set(ENZO_DEV_STAGE_DIR "${CMAKE_BINARY_DIR}/helix.app/Contents")
 else()
-    set(ENZO_DEV_STAGE_DIR "${CMAKE_BINARY_DIR}/enzo")
+    set(ENZO_DEV_STAGE_DIR "${CMAKE_BINARY_DIR}/helix")
 endif()
 
 # daslib sits beside the staged bin directory so daslang resolves its standard
@@ -446,8 +446,8 @@ if(APPLE)
     set_target_properties(${AppExec} PROPERTIES
         MACOSX_BUNDLE ON
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Info.plist.in"
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.enzo3d.Enzo"
-        MACOSX_BUNDLE_BUNDLE_NAME "Enzo"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.helix3d.Helix"
+        MACOSX_BUNDLE_BUNDLE_NAME "Helix"
         MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
@@ -471,7 +471,7 @@ target_include_directories(${AppExec} PRIVATE
 )
 
 
-# Groups the install tree under enzo/ on Linux, so the bundled Qt stays out of
+# Groups the install tree under helix/ on Linux, so the bundled Qt stays out of
 # the system lib folder. Windows installs straight into its own Enzo folder.
 # A macOS install is a bundle, so its content sits inside the bundle.
 if(WIN32)

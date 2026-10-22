@@ -12,10 +12,10 @@ else()
     set(CPACK_GENERATOR "RPM;DEB;TGZ")
 endif()
 
-set(CPACK_PACKAGE_NAME enzo)
+set(CPACK_PACKAGE_NAME Helix)
 set(CPACK_PACKAGE_VENDOR "Enzo Software")
 set(CPACK_PACKAGE_CONTACT "Parker Britt <parker@parkerbritt.com>")
-set(CPACK_PACKAGE_HOMEPAGE_URL "https://enzo3d.com")
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/Kyyzen0/helix")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Node based procedural 3D modeling framework")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "Enzo")
 # The WiX generator only accepts a licence with a .txt or .rtf extension.

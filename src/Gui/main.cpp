@@ -85,7 +85,7 @@ namespace {
 /// before any of the interface is built.
 QString parseCommandLine(int argc, char** argv)
 {
-    argparse::ArgumentParser parser("enzo", ENZO_VERSION);
+    argparse::ArgumentParser parser("helix", ENZO_VERSION);
     parser.add_description("Procedural 3D modelling.");
     parser.add_argument("scene")
         .help("an .enzo scene to open on startup")
@@ -174,8 +174,8 @@ int main(int argc, char** argv)
     QSurfaceFormat::setDefaultFormat(format);
 
     QGuiApplication app(argc, argv);
-    app.setOrganizationName("Enzo");
-    app.setApplicationName("Enzo");
+    app.setOrganizationName("Helix");
+    app.setApplicationName("Helix");
 
     const QStringList fontFamilies = loadFonts();
     QQuickStyle::setStyle("Basic");

@@ -19,7 +19,7 @@ ApplicationWindow {
     height: 800
     visible: true
     visibility: Window.Maximized
-    title: "Enzo"
+    title: "Helix"
     color: Theme.var.background
     property real marginSize: 8
 
