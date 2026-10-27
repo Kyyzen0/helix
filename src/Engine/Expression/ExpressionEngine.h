@@ -1,6 +1,9 @@
 #pragma once
 #include "Engine/Core/Types.h"
+#include <array>
 #include <memory>
+#include <mutex>
+#include <thread>
 #include <unordered_map>
 
 namespace helix::daslang {
@@ -18,7 +21,10 @@ class ExpressionContext;
  * daslang::Runtime, and run to produce a parameter value.
  *
  * @note Compiled expressions are cached so repeated evaluation during cooking
- * stays cheap.
+ * stays cheap. The engine is safe to call from several threads at once, e.g.
+ * cook workers and the interface: a daslang context runs one function at a time,
+ * so every thread evaluates on its own clone of the compiled program, and only
+ * compiling and cloning (a cache miss) take the engine's lock.
  */
 class ExpressionEngine
 {
@@ -60,9 +66,39 @@ class ExpressionEngine
 
   private:
     ExpressionEngine() = default;
-    std::shared_ptr<daslang::CompiledProgram> compileCached_(const String& source, String& error);
 
-    std::unordered_map<String, std::shared_ptr<daslang::CompiledProgram>> cache_;
+    enum class ReturnType : size_t
+    {
+        Float,
+        Int,
+        String,
+        Count
+    };
+
+    using ProgramMap = std::unordered_map<String, std::shared_ptr<daslang::CompiledProgram>>;
+    using ProgramMaps = std::array<ProgramMap, size_t(ReturnType::Count)>;
+
+    /// @brief Programs one thread evaluates on, only ever touched by that thread.
+    struct ThreadCache
+    {
+        ProgramMaps programs;
+    };
+
+    /// @brief Returns the calling thread's own cache, registering it on first use.
+    ThreadCache& threadCache_();
+
+    /// @brief Returns the calling thread's clone of the program for an expression.
+    /// @return The program, or null with @p error set when it fails to compile.
+    /// @note A hit costs one lookup keyed by the raw expression, with no lock and
+    /// without rebuilding the wrapped source.
+    daslang::CompiledProgram* program_(ReturnType type, const String& expression, String& error);
+
+    // Guards the masters and the registry of thread caches. Evaluation never holds it.
+    std::mutex mutex_;
+    // One compiled program per expression and return type, cloned for each thread.
+    ProgramMaps masters_;
+    // Owns the thread caches, so no clone is destroyed while another thread runs daslang.
+    std::unordered_map<std::thread::id, std::unique_ptr<ThreadCache>> threadCaches_;
 };
 
 } // namespace helix::expr
