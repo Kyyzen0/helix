@@ -7,12 +7,14 @@
 #include "Engine/Script/PointScript.h"
 #include "Engine/Script/ScriptEngine.h"
 #include <boost/dll/shared_library.hpp>
+#include <cxxabi.h>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <stdexcept>
+#include <typeinfo>
 #include <string>
 #include <variant>
 #include <vector>
@@ -222,6 +224,15 @@ bool NodeLoader::registerUserNode(const std::filesystem::path& folder, std::stri
     catch (const std::exception& caught)
     {
         error = caught.what();
+        return false;
+    }
+    catch (...)
+    {
+        // A node that fails to load leaves only itself out, whatever was thrown.
+        // The type is named so a throw that is not a std::exception can be found.
+        const std::type_info* thrown = abi::__cxa_current_exception_type();
+        error = std::string("unexpected exception of type ") + (thrown ? thrown->name() : "unknown");
+        std::cerr << "registerUserNode: " << error << " in " << folder.string() << std::endl;
         return false;
     }
 }
