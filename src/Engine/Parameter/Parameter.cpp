@@ -60,7 +60,6 @@ prm::Parameter::Parameter(Template prmTemplate) : template_{prmTemplate}
     }
     }
 
-    std::cout << "created new parameter: " << prmTemplate.getName() << "\n";
 }
 
 std::string prm::Parameter::getName() const { return template_.getName(); }

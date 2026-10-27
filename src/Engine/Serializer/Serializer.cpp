@@ -125,7 +125,6 @@ namespace helix::nt {
 
 void Serializer::save(NetworkManager& networkManager, std::string filePath)
 {
-    std::cout << "serializing\n";
     std::ofstream file(filePath);
     cereal::JSONOutputArchive save(file);
 
