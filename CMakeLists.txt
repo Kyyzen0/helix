@@ -684,6 +684,7 @@ if(HELIX_BUILD_TESTS)
         tests/DisplayGeometryTests.cpp
         tests/ViewportRendererTests.cpp
         tests/AsyncCookTests.cpp
+        tests/CookPlanTests.cpp
         tests/SimulationTests.cpp
         src/Gui/Parameters/ParameterItem.cpp
     )
