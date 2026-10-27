@@ -459,6 +459,11 @@ qt_add_qml_module(${AppExec}
         src/Gui/Components/ParameterContextMenuAction.qml
         src/Gui/Components/ParameterContextMenuRow.qml
         src/Gui/Components/ParameterContextMenuTrigger.qml
+        src/Gui/Components/PanelSurface.qml
+        src/Gui/Components/SectionLabel.qml
+        src/Gui/Components/SplitterHandle.qml
+        src/Gui/Components/StatusBar.qml
+        src/Gui/Components/TypeBadge.qml
         src/Gui/MenuBar/AppMenuBar.qml
         src/Gui/MenuBar/MenuBar.qml
         src/Gui/MenuBar/MenuPopup.qml
