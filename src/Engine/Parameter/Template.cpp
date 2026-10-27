@@ -108,11 +108,11 @@ intT prm::Template::getNumOptions() const { return static_cast<intT>(options_.si
 
 const unsigned int prm::Template::getNumDefaults() const { return defaults_.size(); }
 
-String prm::Template::getName() const { return name_.getToken(); }
+const String& prm::Template::getName() const { return name_.getToken(); }
 
-String prm::Template::getToken() const { return name_.getToken(); }
+const String& prm::Template::getToken() const { return name_.getToken(); }
 
-String prm::Template::getLabel() const { return name_.getLabel(); }
+const String& prm::Template::getLabel() const { return name_.getLabel(); }
 
 prm::Direction prm::Template::getDirection() const { return direction_; }
 
