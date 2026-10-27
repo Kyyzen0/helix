@@ -535,8 +535,10 @@ TEST_CASE_METHOD(NetworkReset, "the last result stays on screen while the next c
     REQUIRE(shapeOf(*first->getOutput(probe, 0)).pointCounts.at(0) == 4);
 
     // The next cook runs, and the result on screen is still the old one until
-    // the cook is done.
-    probeState().holdMs = 200;
+    // the cook is done. The cook is held for much longer than the loop below
+    // lasts (about 40 ms), so a runner that stalls for a while in the loop does
+    // not let the cook finish first.
+    probeState().holdMs = 1000;
     setIntParameter(probe, "points", 8);
     manager.requestCook({probe});
 
