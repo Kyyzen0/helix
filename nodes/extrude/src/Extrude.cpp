@@ -71,11 +71,17 @@ static void extrudeConnected(
     std::unordered_map<helix::Offset, helix::Vector3> displacementSum;
     std::unordered_map<helix::Offset, unsigned int> displacementCount;
 
+    // One normal per selected face, indexed like faces, so the inset pass below
+    // reads it back instead of recomputing it for every boundary corner.
+    std::vector<helix::Vector3> selectedFaceNormals;
+    selectedFaceNormals.reserve(faces.size());
+
     for (size_t faceIdx = 0; faceIdx < faces.size(); ++faceIdx)
     {
         const helix::Offset face = faces[faceIdx];
         auto facePoints = mesh->getFacePoints(face);
-        const helix::Vector3 displacement = faceNormals[face] * distance;
+        selectedFaceNormals.push_back(faceNormals[face]);
+        const helix::Vector3 displacement = selectedFaceNormals.back() * distance;
         const unsigned int facePointCount = mesh->getFacePointCount(face);
 
         for (size_t i = 0; i < facePointCount; ++i)
@@ -134,8 +140,8 @@ static void extrudeConnected(
                 const helix::Vector3 prevPos = mesh->getPointPos(inIt->second.neighbour);
                 const helix::Vector3 cornerPos = mesh->getPointPos(oldOffset);
                 const helix::Vector3 nextPos = mesh->getPointPos(outIt->second.neighbour);
-                const helix::Vector3 inFaceNormal = faceNormals[faces[inIt->second.faceIdx]];
-                const helix::Vector3 outFaceNormal = faceNormals[faces[outIt->second.faceIdx]];
+                const helix::Vector3 inFaceNormal = selectedFaceNormals[inIt->second.faceIdx];
+                const helix::Vector3 outFaceNormal = selectedFaceNormals[outIt->second.faceIdx];
                 newPos += cornerInsetOffset(
                     prevPos,
                     cornerPos,
@@ -239,8 +245,8 @@ static void extrudeDisconnected(
     for (auto face : faces)
     {
         auto facePoints = mesh->getFacePoints(face);
-        const helix::Vector3 displacement = faceNormals[face] * distance;
         const helix::Vector3 faceNormal = faceNormals[face];
+        const helix::Vector3 displacement = faceNormal * distance;
         const unsigned int facePointCount = mesh->getFacePointCount(face);
 
         // Duplicate every ring point fresh for this face, applying an
