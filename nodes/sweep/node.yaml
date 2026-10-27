@@ -1,7 +1,7 @@
 version: 1
 
 name: sweep
-namespace: enzo
+namespace: helix
 label: Sweep
 tags: [curve, surface, polygon]
 
@@ -13,7 +13,7 @@ outputs: 1
 
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
   constructor: sweep
 
 icon: icon.svg

@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
-import Enzo
+import Helix
 import "../Components"
 
 // Shows a pair of angles as a dial, with a field for each bound. Zero degrees

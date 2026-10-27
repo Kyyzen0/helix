@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -43,8 +43,8 @@ TEST_CASE("Every shipped node loads and resolves its implementation")
     {
         INFO("node " << name);
 
-        // Every shipped node is published under the enzo namespace.
-        const std::string fullName = "enzo::" + name;
+        // Every shipped node is published under the helix namespace.
+        const std::string fullName = "helix::" + name;
         if (const nt::NodeAlias* nodeAlias = nt::NodeTypeTable::getNodeAlias(fullName))
         {
             REQUIRE(nt::NodeTypeTable::getNodeType(nodeAlias->aliasedType) != nullptr);
@@ -73,7 +73,7 @@ TEST_CASE("Loading twice leaves one entry per node")
     {
         INFO("node " << name);
 
-        const std::string fullName = "enzo::" + name;
+        const std::string fullName = "helix::" + name;
         size_t entryCount = 0;
         for (const nt::NodeType& nodeType : nt::NodeTypeTable::getData())
             if (nodeType.getFullName() == fullName) entryCount++;
@@ -140,7 +140,7 @@ implementation:
 std::filesystem::path userNodeRoot(const std::string& name)
 {
     const std::filesystem::path root =
-        std::filesystem::temp_directory_path() / ("enzo_user_node_" + name);
+        std::filesystem::temp_directory_path() / ("helix_user_node_" + name);
     std::filesystem::remove_all(root);
     std::filesystem::create_directories(root);
     return root;
@@ -218,7 +218,7 @@ TEST_CASE("A user node runs its source over the geometry arriving at its input")
 
     nt::nm()._reset();
     auto& nm = nt::nm();
-    const nt::NodeId grid = nm.createNode("enzo::grid");
+    const nt::NodeId grid = nm.createNode("helix::grid");
     const nt::NodeId user = nm.createNode("user::myCookedNode");
     nm.connectNodes(grid, 0, user, 0);
     nm.cook(user);
@@ -245,12 +245,12 @@ TEST_CASE("A user node survives a save and a reload of the project")
 
     nt::nm()._reset();
     auto& nm = nt::nm();
-    const nt::NodeId grid = nm.createNode("enzo::grid");
+    const nt::NodeId grid = nm.createNode("helix::grid");
     const nt::NodeId user = nm.createNode("user::mySavedNode");
     nm.connectNodes(grid, 0, user, 0);
     nm.cook(user);
 
-    const std::string path = "/tmp/enzo_user_node_roundtrip.json";
+    const std::string path = "/tmp/helix_user_node_roundtrip.json";
     nt::Serializer serializer;
     serializer.save(nm, path);
 
@@ -296,8 +296,8 @@ TEST_CASE("The sweep node sweeps a profile along a curve")
     nt::NodeLoader::loadNodes();
 
     auto& nm = nt::nm();
-    const nt::NodeId line = nm.createNode("enzo::line");
-    const nt::NodeId sweep = nm.createNode("enzo::sweep");
+    const nt::NodeId line = nm.createNode("helix::line");
+    const nt::NodeId sweep = nm.createNode("helix::sweep");
     nm.connectNodes(line, 0, sweep, 0);
     nm.cook(sweep);
 

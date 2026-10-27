@@ -2,7 +2,7 @@
 #include <cctype>
 #include <string_view>
 
-namespace enzo::utils {
+namespace helix::utils {
 
 /**
  * @brief Returns a view of the input with leading and trailing whitespace removed.
@@ -18,4 +18,4 @@ inline std::string_view trim(std::string_view text)
     return text.substr(start, end - start);
 }
 
-} // namespace enzo::utils
+} // namespace helix::utils

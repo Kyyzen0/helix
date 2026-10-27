@@ -1,7 +1,7 @@
 version: 1
 
 name: sineWave
-namespace: enzo
+namespace: helix
 label: Sine Wave
 tags: [deform, displace]
 
@@ -11,7 +11,7 @@ outputs: 1
 
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
   constructor: sineWave
 
 icon: icon.svg

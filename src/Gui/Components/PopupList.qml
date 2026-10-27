@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
-import Enzo
+import Helix
 import "../Utils.js" as Utils
 
 // Animated floating list shared by the menus and the parameter pickers. Owns the

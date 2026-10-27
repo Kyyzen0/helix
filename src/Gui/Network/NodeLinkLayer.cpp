@@ -9,7 +9,7 @@
 #include <numbers>
 #include <optional>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 
@@ -658,4 +658,4 @@ QSGNode* NodeLinkLayer::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     return root;
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

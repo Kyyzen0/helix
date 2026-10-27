@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // Moves the viewport camera with mouse drags and the wheel.
 MouseArea {

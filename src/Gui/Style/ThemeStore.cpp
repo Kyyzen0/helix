@@ -11,7 +11,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 
@@ -142,4 +142,4 @@ void writeThemeYaml(const QString& name, const QString& yaml)
 
 void deleteThemeFile(const QString& name) { QFile::remove(themePath(name)); }
 
-} // namespace enzo::ui
+} // namespace helix::ui

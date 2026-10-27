@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 import "../Components"
 
 // Segmented control switching the table between element classes. Each chip is

@@ -10,7 +10,7 @@
 
 namespace {
 
-class Normal : public enzo::nt::NodeImpl
+class Normal : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -20,7 +20,7 @@ class Normal : public enzo::nt::NodeImpl
 
 void Normal::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -59,4 +59,4 @@ void Normal::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(normal, Normal)
+HELIX_REGISTER_NODE(normal, Normal)

@@ -2,7 +2,7 @@
 
 # Usage: ./build.sh [Debug|Release|RelWithDebInfo] [--system-deps]  (default: Debug)
 #
-# The pinned dependencies are built into build-super/deps first, then enzo is
+# The pinned dependencies are built into build-super/deps first, then helix is
 # built against them. --system-deps skips that and builds into build against
 # whatever the system provides.
 set -e
@@ -20,5 +20,5 @@ done
 
 cmake -S . -B "$BUILD_DIR" -G Ninja \
     -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
-    -DENZO_SUPERBUILD="$SUPERBUILD"
+    -DHELIX_SUPERBUILD="$SUPERBUILD"
 cmake --build "$BUILD_DIR"

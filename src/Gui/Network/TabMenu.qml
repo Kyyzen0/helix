@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
-import Enzo
+import Helix
 import "../Utils.js" as Utils
 
 // Search menu for picking the node type to create. The search field holds focus so

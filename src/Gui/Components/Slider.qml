@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 import "../Style"
 
 // Horizontal slider that opens for typing on a click, or scrubs relative to drag distance.

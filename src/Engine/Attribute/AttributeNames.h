@@ -1,6 +1,6 @@
 #pragma once
 
-namespace enzo::attr {
+namespace helix::attr {
 
 /**
  * @brief Names of the attributes the engine gives a meaning to.
@@ -16,4 +16,4 @@ inline constexpr const char* up = "Up";
 
 } // namespace names
 
-} // namespace enzo::attr
+} // namespace helix::attr

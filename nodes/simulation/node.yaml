@@ -1,7 +1,7 @@
 version: 1
 
 name: simulation
-namespace: enzo
+namespace: helix
 label: Simulation
 tags: [simulation, particles, spring, animation]
 
@@ -9,7 +9,7 @@ outputs: 2
 
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
   constructor: simulation
 
 icon: icon.svg

@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 import "../Components"
 
 // The centred notice a settings page shows while the feature behind it is unbuilt.

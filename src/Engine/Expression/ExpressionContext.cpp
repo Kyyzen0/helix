@@ -3,7 +3,7 @@
 #include "Engine/Network/NetworkPath.h"
 #include "Engine/Parameter/NodeParameter.h"
 
-namespace enzo::expr {
+namespace helix::expr {
 
 namespace {
 template <typename Value>
@@ -54,4 +54,4 @@ ExpressionContext::readParameter<intT>(const String&, unsigned int) const;
 template std::optional<String>
 ExpressionContext::readParameter<String>(const String&, unsigned int) const;
 
-} // namespace enzo::expr
+} // namespace helix::expr

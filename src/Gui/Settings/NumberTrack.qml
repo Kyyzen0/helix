@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 import "../Utils.js" as Utils
 
 // Slim track dragged to set a whole number, such as the panel radius.

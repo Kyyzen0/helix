@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-namespace enzo::prm::style {
+namespace helix::prm::style {
 
 /// @brief Returns the names in a option written as a space separated list.
 ///
@@ -191,4 +191,4 @@ inline std::shared_ptr<prm::Parameter> getOption(const std::any& style, const st
     return nullptr;
 }
 
-} // namespace enzo::prm::style
+} // namespace helix::prm::style

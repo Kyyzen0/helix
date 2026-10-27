@@ -21,27 +21,21 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
-#include <QQuickWindow>
 #include <QSurfaceFormat>
 #include <QUrl>
 
-#include <climits>
 #include <iostream>
 #include <memory>
 
-#ifdef __GLIBC__
-#include <malloc.h>
-#endif
-
 namespace {
 
-#ifdef ENZO_QML_SOURCE_DIR
+#ifdef HELIX_QML_SOURCE_DIR
 /// @brief Returns the QML source root and every folder beneath it.
 ///
 /// Feature folders each hold their own QML, so the whole tree is watched.
 QStringList qmlSourceDirs()
 {
-    const QString root = QStringLiteral(ENZO_QML_SOURCE_DIR);
+    const QString root = QStringLiteral(HELIX_QML_SOURCE_DIR);
     QStringList dirs{root};
     QDirIterator it(root, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
     while (it.hasNext())
@@ -85,10 +79,10 @@ namespace {
 /// before any of the interface is built.
 QString parseCommandLine(int argc, char** argv)
 {
-    argparse::ArgumentParser parser("helix", ENZO_VERSION);
+    argparse::ArgumentParser parser("helix", HELIX_VERSION);
     parser.add_description("Procedural 3D modelling.");
     parser.add_argument("scene")
-        .help("an .enzo scene to open on startup")
+        .help("a .kut scene to open on startup")
         .nargs(argparse::nargs_pattern::optional)
         .default_value(std::string{});
 
@@ -115,7 +109,7 @@ QStringList loadFonts()
 {
     QSet<QString> families;
     QDirIterator it(
-        QString::fromStdString((enzo::getStaticDir() / "fonts").string()),
+        QString::fromStdString((helix::getStaticDir() / "fonts").string()),
         {"*.ttf"},
         QDir::Files,
         QDirIterator::Subdirectories
@@ -134,42 +128,20 @@ QStringList loadFonts()
 
 } // namespace
 
-namespace {
-
-/// @brief Keeps freed memory in the process so large buffers come back already mapped.
-///
-/// @note Each cook and viewport update allocates buffers of tens of megabytes.
-/// Returned to the system, every page of them faults on its next first write.
-void keepFreedMemory()
-{
-#ifdef __GLIBC__
-    mallopt(M_MMAP_THRESHOLD, INT_MAX);
-    mallopt(M_TRIM_THRESHOLD, INT_MAX);
-#endif
-}
-
-} // namespace
-
 int main(int argc, char** argv)
 {
-    keepFreedMemory();
     const QString scenePath = parseCommandLine(argc, argv);
 
-#ifndef __APPLE__
-    // The scene graph draws with the device of the graphics engine, which is
-    // a Vulkan device, so it needs the Vulkan backend of the render interface.
-    // The official binaries of Qt for macOS do not carry it, and their scene
-    // graph runs on Metal there.
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
-#endif
+    // The viewport draws with Metal, so a machine with no Metal device cannot show it. The
+    // message is fixed, since the smoke test of the CI accepts exactly this one.
+    if (!helix::gfx::GraphicsDevice::isMetalAvailable())
+    {
+        std::cerr << helix::gfx::GraphicsDevice::noDeviceMessage << "\n";
+        return 1;
+    }
 
     // Icons recolour their SVG markup through a local file XMLHttpRequest.
     qputenv("QML_XHR_ALLOW_FILE_READ", "1");
-
-    // Takes keys straight from the keyboard rather than through a Wayland input
-    // method, which repeats a held key as separate presses the network reads as
-    // taps rather than a hold.
-    qputenv("QT_IM_MODULES", "compose");
 
     // Send Qt and QML debug logging to the terminal.
     qputenv("QT_LOGGING_RULES", "default.debug=true;qml.debug=true;js.debug=true");
@@ -179,6 +151,9 @@ int main(int argc, char** argv)
     format.setSamples(4);
     QSurfaceFormat::setDefaultFormat(format);
 
+    // The viewport hands a Metal texture to the scene graph, which only the Metal one can show.
+    helix::ui::QtGraphicsBridge::selectMetal();
+
     QGuiApplication app(argc, argv);
     app.setOrganizationName("Helix");
     app.setApplicationName("Helix");
@@ -187,16 +162,16 @@ int main(int argc, char** argv)
     QQuickStyle::setStyle("Basic");
 
     // The view-models bridge the engine to QML.
-    enzo::ui::SpreadsheetViewModel spreadsheet;
-    enzo::ui::NetworkViewModel network;
-    enzo::ui::ViewportViewModel viewport;
-    enzo::ui::ParametersViewModel parameters;
-    enzo::ui::TimelineViewModel timeline;
-    enzo::ui::SceneController scene;
-    enzo::ui::ThemeViewModel themeSettings;
+    helix::ui::SpreadsheetViewModel spreadsheet;
+    helix::ui::NetworkViewModel network;
+    helix::ui::ViewportViewModel viewport;
+    helix::ui::ParametersViewModel parameters;
+    helix::ui::TimelineViewModel timeline;
+    helix::ui::SceneController scene;
+    helix::ui::ThemeViewModel themeSettings;
     themeSettings.setFontFamilies(fontFamilies);
 
-    enzo::nt::NodeLoader::loadNodes();
+    helix::nt::NodeLoader::loadNodes();
 
     if (!scenePath.isEmpty())
     {
@@ -218,45 +193,8 @@ int main(int argc, char** argv)
         }
     }
 
-    // Creates the one graphics device before any window, so the main window can draw with it.
-    std::unique_ptr<enzo::gfx::GraphicsDevice> graphicsDevice;
-    std::unique_ptr<enzo::ui::QtGraphicsBridge> graphicsBridge;
-    try
-    {
-        graphicsDevice = std::make_unique<enzo::gfx::GraphicsDevice>(
-            enzo::ui::QtGraphicsBridge::getInstanceExtensions()
-        );
-        graphicsBridge =
-            std::make_unique<enzo::ui::QtGraphicsBridge>(graphicsDevice->getVulkanHandles());
-    }
-    catch (const std::exception& error)
-    {
-#ifdef __APPLE__
-        // macOS has no Vulkan driver of its own, and the device needs one.
-        // The application starts without it, since the viewport cannot be
-        // presented there anyway, and every other part of it works.
-        std::cerr << "no graphics device on this host: " << error.what() << "\n";
-#else
-        std::cerr << "could not start the graphics device: " << error.what() << "\n";
-        return 1;
-#endif
-    }
-
     QQmlApplicationEngine engine;
 
-#ifndef __APPLE__
-    // Hands the device to each root window the engine loads, before it first renders.
-    // Other windows keep their own device, since each window renders on its own thread
-    // and two threads cannot submit to one queue.
-    QObject::connect(
-        &engine,
-        &QQmlApplicationEngine::objectCreated,
-        &engine,
-        [&graphicsBridge](QObject* root) {
-            if (auto* window = qobject_cast<QQuickWindow*>(root)) graphicsBridge->adoptDevice(window);
-        }
-    );
-#endif
     engine.rootContext()->setContextProperty("spreadsheet", &spreadsheet);
     engine.rootContext()->setContextProperty("network", &network);
     engine.rootContext()->setContextProperty("viewport", &viewport);
@@ -267,7 +205,7 @@ int main(int argc, char** argv)
 
     // A run from a build directory loads QML straight from the source tree and
     // reloads on edit. An installed run loads the module compiled into the binary.
-    const QString qmlSourceDir = QStringLiteral(ENZO_QML_SOURCE_DIR);
+    const QString qmlSourceDir = QStringLiteral(HELIX_QML_SOURCE_DIR);
     if (QFileInfo::exists(qmlSourceDir + "/App.qml"))
     {
         const QUrl entry = QUrl::fromLocalFile(qmlSourceDir + "/App.qml");
@@ -277,7 +215,7 @@ int main(int argc, char** argv)
     }
     else
     {
-        engine.loadFromModule("Enzo", "App");
+        engine.loadFromModule("Helix", "App");
     }
 
     if (engine.rootObjects().isEmpty()) return -1;

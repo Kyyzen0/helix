@@ -6,12 +6,13 @@ is measured against.
 
 ## The target
 
-The reference machine for this work is an Apple M1, but the goal is a build
-that stays usable on hardware that is several years older or much smaller:
-an Intel Mac with integrated graphics, 8 GB of RAM, and a thermal budget that
-forces the clock down within a minute of sustained load.
+Helix targets Apple silicon only. The reference machine for this work is an
+Apple M1, and the goal is a build that stays usable on the smallest
+configuration of it: 8 GB of RAM, and a thermal budget that forces the clock
+down within a minute of sustained load. There is no Intel Mac floor.
 
-Concretely, the numbers to hold on a modest machine:
+Concretely, the numbers to hold on an M1 with 8 GB. They are targets, and
+none of them has been measured yet:
 
 | Measure | Target |
 | --- | --- |
@@ -41,22 +42,22 @@ The answer is asynchronous cooking: the network cooks on a worker, the
 interface stays live, and the viewport shows the previous result until the new
 one is ready. This is owned by engine-async.
 
-### 2. The renderer translates every call
+### 2. The renderer does work every frame it does not have to
 
-macOS has no native Vulkan driver. Every Vulkan call goes through MoltenVK,
-which translates it into Metal. That translation is not free, and it applies
-to the draw calls that happen every frame.
+The viewport used to reach the GPU through Vulkan, and on macOS every Vulkan call went through
+MoltenVK, which translated it into Metal. That translation layer is gone: the renderer is
+written against Metal directly, through Apple's `metal-cpp` headers, and the frame is
+handed to the Qt Quick scene graph as a Metal texture it samples. The design needs no copy and no wait (see `docs/METAL-RENDERER.md`).
 
-The backend itself cannot be replaced. DiligentCore ships a
-`GraphicsEngineMetal` directory, but it contains an empty interface and a
-readme; there is no implementation behind it, on the pinned commit or on
-master. Porting the renderer to Metal directly would mean writing a backend,
-which is a project of its own.
-
-What can be done is to stop paying the translation cost per frame:
-rebuild the command buffers that are re-recorded unchanged, reuse the
-resource bindings between frames, and avoid rebuilding pipeline state when
-only the data changed. This is owned by graphics-vulkan.
+What stays to be done is to stop paying for work that did not change. Pipeline state objects
+are built once, when the renderer is made, and never because only the data changed. Geometry
+lives in shared buffers, which on Apple silicon are the same memory the CPU wrote, so there is
+no staging copy, and it is uploaded only when a frame brings new geometry. The frame constants
+travel inside the command, so a frame that only moves the camera allocates nothing. The
+multisampled targets are memoryless on an Apple GPU, which keeps them in tile memory. What is
+left to measure is the cost of the upload of large meshes and of the shared (uncompressed)
+colour texture, which is shared so the CPU can read it back in tests. This is owned by
+graphics-metal.
 
 ### 3. The build is compiled for everyone
 
@@ -87,7 +88,7 @@ shipped binary. This is owned by build-macos.
 | --- | --- | --- |
 | Build system, toolchain, release tuning | build-macos | `CMakeLists.txt`, `cmake/`, `superbuild/`, `scripts/`, packaging |
 | Async cooking, task scheduling | engine-async | `src/Engine/Network/`, `src/Engine/Core/` |
-| Renderer, viewport, GPU resources | graphics-vulkan | `src/Graphics/` |
+| Renderer, viewport, GPU resources | graphics-metal | `src/Graphics/` |
 | Interface, responsiveness | gui-rewrite | `src/Gui/` |
 | Timeline, simulation nodes | timeline-sim | `src/Engine/Simulation/`, timeline code |
 | Node authoring, user nodes | nodes-authoring | `nodes/`, node loading |
@@ -99,8 +100,8 @@ Each owner keeps to its own files, so the branches merge cleanly.
 The macOS toolchain is in place and verified:
 
 - CMake 3.31.6 and Ninja 1.12.1 under `toolchain/`
-- Qt 6.10.3, universal binary, arm64 and x86_64 in one package
-- MoltenVK 1.4.2 as the Vulkan driver
+- Qt 6.10.3, the universal package the Qt Company publishes (arm64 and x86_64 slices); Helix itself is arm64 only
+- the Metal compiler of Xcode, which builds the viewport shaders into `helix.metallib`
 - Bison 3.8.2 and flex, which the system copies are too old to replace
 
 Two problems of this machine are worth recording, because they look like code

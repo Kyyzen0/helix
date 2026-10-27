@@ -4,7 +4,7 @@
 #include "Engine/Network/NodePacket.h"
 #include "Gui/PathNames.h"
 
-namespace enzo::ui {
+namespace helix::ui {
 
 ViewportViewModel::ViewportViewModel(QObject* parent) : QObject(parent)
 {
@@ -60,4 +60,4 @@ QStringList ViewportViewModel::cameraPaths() const
     return paths;
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

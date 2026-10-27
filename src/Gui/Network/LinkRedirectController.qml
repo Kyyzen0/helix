@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // The pick up of a committed link by its nearer end.
 QtObject {

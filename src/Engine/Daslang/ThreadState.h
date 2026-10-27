@@ -4,11 +4,11 @@
 #include <optional>
 #include <vector>
 
-namespace enzo::expr {
+namespace helix::expr {
 class ExpressionContext;
 }
 
-namespace enzo::daslang {
+namespace helix::daslang {
 
 /**
  * @brief A daslang runtime context that also carries our evaluation world.
@@ -33,4 +33,4 @@ struct ThreadState : das::Context
     std::vector<String> warnings;
 };
 
-} // namespace enzo::daslang
+} // namespace helix::daslang

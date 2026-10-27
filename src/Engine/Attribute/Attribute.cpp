@@ -4,7 +4,7 @@
 #include <optional>
 #include <stdexcept>
 
-namespace enzo {
+namespace helix {
 
 attr::Attribute::Attribute(
     std::string name,
@@ -115,4 +115,4 @@ attr::AttributeType attr::Attribute::getType() const { return type_; }
 
 const std::string& attr::Attribute::getName() const { return name_; }
 
-} // namespace enzo
+} // namespace helix

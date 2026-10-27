@@ -1,18 +1,20 @@
 # Building Helix on macOS
 
-Helix builds on macOS arm64 with the system Apple clang. The upstream project
-builds on Rocky Linux and Windows, so this page collects what a macOS host
-needs on top of the ordinary build instructions in the [README](../README.md).
+Helix builds for macOS on Apple silicon (arm64) only, with the system Apple
+clang. There is no Intel, Windows or Linux build. This page collects what a
+macOS host needs on top of the ordinary build instructions in the
+[README](README.md).
 
 ## What a macOS build needs
 
 | Requirement | Notes |
 | --- | --- |
-| macOS 13.3 or newer | The deployment target of the whole tree. |
+| Apple silicon Mac, macOS 13.3 or newer | The deployment target of the whole tree. The bootstrap script and the CMake configure step refuse any other host or platform. |
 | Xcode Command Line Tools | `xcode-select --install`. Provides the Apple clang the build uses. |
 | Python 3 | The superbuild creates a virtual environment for aqtinstall with it. |
 | Git | Fetched by CMake, not by the superbuild. |
-| Network access | For the dependency archives, the Qt download and the DiligentCore clone. |
+| Metal compiler | Part of Xcode. Xcode 26 and later install it apart, with `xcodebuild -downloadComponent MetalToolchain`. The configure step stops with that command when it is missing. |
+| Network access | For the dependency archives, the Qt download and the `metal-cpp` archive from developer.apple.com. |
 
 Homebrew is not needed and is deliberately not used. Every tool the build
 requires is downloaded into `toolchain/` by
@@ -30,16 +32,13 @@ The script installs:
 
 | Tool | Version | Why |
 | --- | --- | --- |
-| CMake | 3.31.6 | The version the other builds use. |
-| Ninja | 1.12.1 | The generator the other builds use. |
+| CMake | 3.31.6 | The version the CI pins. |
+| Ninja | 1.12.1 | The generator the CI uses. |
 | aqtinstall | 3.3.0 | Downloads the pinned Qt. |
-| MoltenVK | 1.4.2 | The only Vulkan driver macOS has. |
-| Vulkan loader | 1.4.363 | The loader the Diligent engine asks for the portability extension. |
 | bison, flex | 3.8.2, 2.6.4 | daslang generates parsers with them. |
 | m4 | 1.4.21 | bison expands its macros with it. |
 
-`toolchain/env.sh` puts CMake and Ninja on `PATH` and points the Vulkan
-loader at the MoltenVK driver.
+`toolchain/env.sh` puts CMake, Ninja, bison and Qt on the search paths.
 
 ## Building
 
@@ -47,17 +46,17 @@ loader at the MoltenVK driver.
 source toolchain/env.sh
 cmake -S . -B build-super -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
-    -DENZO_SUPERBUILD=ON
+    -DHELIX_SUPERBUILD=ON
 cmake --build build-super
 ```
 
 The superbuild builds every pinned dependency into `build-super/deps` and
-then builds Helix itself into `build-super/enzo-build`.
+then builds Helix itself into `build-super/helix-build`.
 
 ## Installing and running
 
 ```sh
-cmake --install build-super/enzo-build --prefix "$PWD/stage"
+cmake --install build-super/helix-build --prefix "$PWD/stage"
 open stage/helix.app
 ```
 
@@ -67,7 +66,7 @@ The install produces a normal macOS application bundle:
 stage/helix.app/Contents/
 ├── Info.plist
 ├── MacOS/helix              the executable
-├── lib/                    enzoEngine, the node library and the boost libraries
+├── lib/                    helixEngine, the node library and the boost libraries
 ├── Frameworks/             the Qt frameworks
 ├── PlugIns/                the Qt plugins
 ├── Resources/qml/          the deployed QML modules
@@ -79,7 +78,7 @@ stage/helix.app/Contents/
 A run from the build tree works as well, without an install step:
 
 ```sh
-build-super/enzo-build/helix.app/Contents/MacOS/helix
+build-super/helix-build/helix.app/Contents/MacOS/helix
 ```
 
 ## The parser tools
@@ -140,28 +139,25 @@ since they go through the same wrapper. A check of the build that reads the
 error stream of a tool has to know about it, or it will read the noise for a
 failure.
 
-## The Vulkan driver
+## The Metal renderer
 
-macOS has no Vulkan driver of its own. MoltenVK translates Vulkan onto Metal
-and stands in for a driver, and the toolchain downloads it.
+The viewport is drawn with Metal directly, through Apple's `metal-cpp` headers. The
+design, and what to check on a Mac, is in
+[docs/METAL-RENDERER.md](docs/METAL-RENDERER.md). Three things matter to a build:
 
-Two things are worth knowing about how Helix reaches it:
-
-- **The Vulkan loader is needed as well.** The Diligent engine asks the loader
-  for the portability enumeration extension on macOS, which the driver of
-  MoltenVK does not offer, and refuses to create a device without it. The
-  loader has the extension, so the toolchain carries it too and puts it ahead
-  of MoltenVK on `DYLD_LIBRARY_PATH`. The loader then finds MoltenVK through
-  its manifest. The loader of the toolchain is built for macOS 15 and newer.
-- **The driver is found through the environment.** `toolchain/env.sh` points
-  `VK_ICD_FILENAMES` at the manifest of MoltenVK. A run that does not source
-  that file cannot reach a Vulkan device.
-
-The viewport needs a Metal capable device. A machine without one, such as a
-virtualised runner, cannot create a Vulkan device and the application will
-report that it has no adapter. Such a host still shows that the bundle is
-whole: the application loads every library of the bundle and creates a Vulkan
-instance before it asks for a device.
+- **The shaders are compiled at build time.** `src/Graphics/Shaders/*.metal` become
+  `helix.metallib` in `Contents/Resources` of the bundle, with `xcrun metal` and
+  `xcrun metallib`. A configure step without the Metal compiler stops and prints the
+  command that installs it. `-DHELIX_ALLOW_RUNTIME_SHADERS=ON` configures without it, for a
+  development build that compiles the shader sources when it starts.
+- **`metal-cpp` is pinned.** `cmake/versions.cmake` holds its url and SHA-256. Give
+  `-DHELIX_METAL_CPP_DIR=<folder with Metal/Metal.hpp>` to build without the download.
+- **A machine without a Metal device cannot show the viewport.** A virtualised runner may
+  have none. The application then prints `No Metal device available` and exits with a
+  non-zero status, before it builds any part of the interface. The smoke test of the CI
+  accepts that message and no other early exit, since the libraries of the bundle are loaded
+  before the check and it still proves the bundle is whole. The tests skip the renderer
+  tests on such a machine.
 
 ## The signature of the bundle
 
@@ -175,10 +171,8 @@ no message of its own.
 The install therefore signs the bundle again, with an ad hoc signature, in
 [`cmake/SignBundle.cmake`](cmake/SignBundle.cmake). Every library in it is
 signed on its own, and the bundle itself last, so that the resources of the
-application are bound to the signature of its executable.
-[`scripts/install-vulkan-loader.sh`](scripts/install-vulkan-loader.sh) signs it
-once more, since the loader it copies into the bundle is not part of the
-signature the install made.
+application, which include the compiled shaders, are bound to the signature of its
+executable.
 
 A signature that cannot be made is reported, but it does not stop the install.
 The bundle is still worth having without one, and a host that forbids the
@@ -190,14 +184,10 @@ which is described under the known limitations below.
 
 ## Known limitations
 
-- **The viewport stays empty.** The scene graph of Qt draws with the Vulkan
-  device of the graphics engine, which needs the Vulkan module of Qt. The
-  official binaries of Qt for macOS do not carry that module, and their scene
-  graph runs on Metal rather than on Vulkan, so the instance of the device
-  cannot be handed to them. The application builds and runs on macOS, with
-  every other part of it working, but the 3D view is not presented yet. The
-  part of the port that remains is a way of showing the image of the device on
-  that platform, such as a copy to the host that the scene graph can take.
+- **The Qt side of the viewport has not been run.** The renderer is tested against a real
+  Metal device, but the code that hands its texture to the Qt Quick scene graph was written
+  from the Qt documentation, without Qt installed on the machine it was written on. The
+  checklist in [docs/METAL-RENDERER.md](docs/METAL-RENDERER.md) says what to confirm.
 - **The bundle is not signed or notarised.** The install gives the bundle an ad
   hoc signature, which is enough for it to run on the machine that built it.
   macOS refuses to open an unsigned application that was downloaded, so a
@@ -208,12 +198,13 @@ which is described under the known limitations below.
   the Qt build needs 13.0, and the standard library of the current Xcode pulls
   its formatting header in through the stream header, and the conversion of a
   floating point number that header uses was only added to the system in 13.3.
-- **The Vulkan loader of the toolchain needs macOS 15.** The loader is not
-  part of the bundle but a component of the host, the way a driver is, so the
-  bundle itself still claims macOS 13.3.
-- **Only the tarball package is built.** The Linux job builds RPM and DEB
-  packages and the Windows job builds an installer. The macOS job builds a
-  tarball of the bundle.
+- **Only the tarball package is built.** The CI job builds a tarball of the
+  bundle, and no disk image or installer.
+- **The Qt download is universal.** The Qt Company publishes the macOS desktop
+  build of Qt as one package holding both an arm64 and an x86_64 slice, and
+  no arm64-only package. Helix and every dependency it builds are arm64 only
+  (`CMAKE_OSX_ARCHITECTURES=arm64`), so the x86_64 slice of Qt is carried
+  unused.
 - **The Qt deployment follows the bundle layout.** The frameworks land in
   `Contents/Frameworks` and the QML modules in `Contents/Resources/qml`,
   which is where macdeployqt puts them, while Helix's own libraries stay in

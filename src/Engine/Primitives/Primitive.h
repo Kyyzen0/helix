@@ -8,10 +8,10 @@
 #include <optional>
 #include <string>
 
-namespace enzo::geo {
+namespace helix::geo {
 
 /**
- * @class enzo::geo::Primitive
+ * @class helix::geo::Primitive
  * @brief Base class for all primitive types in the engine.
  *
  * A Primitive is the unit of geometry exchanged between nodes. It holds
@@ -70,7 +70,7 @@ class Primitive
             };
 
           private:
-            enzo::geo::Primitive& primitive_;
+            helix::geo::Primitive& primitive_;
             Offset curOffset_ = 0;
             void skipInvalid()
             {
@@ -83,7 +83,7 @@ class Primitive
         Iterator end() { return Iterator(primitive_, primitive_.getNumPoints()); }
 
       private:
-        enzo::geo::Primitive& primitive_;
+        helix::geo::Primitive& primitive_;
     };
     Primitive(std::string_view path = "/prim");
     Primitive(const Primitive& other);
@@ -310,4 +310,4 @@ class Primitive
 };
 
 using PrimPtr = std::shared_ptr<Primitive>;
-} // namespace enzo::geo
+} // namespace helix::geo

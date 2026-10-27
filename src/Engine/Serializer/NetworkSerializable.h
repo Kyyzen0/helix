@@ -6,7 +6,7 @@
 
 struct NetworkSerializable
 {
-    std::vector<enzo::nt::NodeSnapshot> nodes;
+    std::vector<helix::nt::NodeSnapshot> nodes;
     std::vector<NodeLinkSerializable> nodeLinks;
     TimelineSerializable timeline;
 

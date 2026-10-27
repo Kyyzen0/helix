@@ -1,12 +1,7 @@
 #pragma once
 #include "Graphics/Passes/PassSetup.h"
 
-#include <Buffer.h>
-#include <DeviceContext.h>
-#include <RefCntAutoPtr.hpp>
-#include <RenderDevice.h>
-
-namespace enzo::gfx {
+namespace helix::gfx {
 
 /// @brief The ground grid drawn under the scene.
 class GridPass
@@ -14,18 +9,15 @@ class GridPass
   public:
     /// @brief Builds the grid lines and the pipeline that draws them.
     ///
-    /// @param frameConstants the buffer the renderer fills with the frame constants.
     /// @param sampleCount the number of samples the viewport targets hold.
-    GridPass(
-        Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants, Diligent::Uint8 sampleCount
-    );
+    GridPass(GraphicsDevice& device, NS::UInteger sampleCount);
 
-    /// @brief Draws the grid into the bound targets.
-    void draw(Diligent::IDeviceContext* context);
+    /// @brief Draws the grid with the encoder of the frame.
+    void draw(MTL::RenderCommandEncoder* encoder);
 
   private:
     Pipeline pipeline_;
     GpuArray vertices_;
 };
 
-} // namespace enzo::gfx
+} // namespace helix::gfx

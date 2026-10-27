@@ -8,15 +8,15 @@
 #include <string>
 #include <vector>
 
-namespace enzo::nt {
+namespace helix::nt {
 class Node;
 }
 
 struct ParameterSerializable
 {
     std::string name;
-    std::vector<enzo::floatT> floatValues;
-    std::vector<enzo::intT> intValues;
+    std::vector<helix::floatT> floatValues;
+    std::vector<helix::intT> intValues;
     std::vector<std::string> stringValues;
     // One optional expression per component, parallel to the value vector. An
     // empty slot means the component uses its literal value.
@@ -40,15 +40,15 @@ struct ParameterSerializable
 
 // Capture a parameter's live state into a serializable model. Multiparms recurse
 // one model per instance field, flat parameters store their value vector.
-ParameterSerializable toSerializable(enzo::prm::Parameter& parameter);
+ParameterSerializable toSerializable(helix::prm::Parameter& parameter);
 
 // Snapshots a flat parameter from its name and values without a live Parameter.
-ParameterSerializable toSerializable(std::string name, const enzo::prm::PrmValues& values);
+ParameterSerializable toSerializable(std::string name, const helix::prm::PrmValues& values);
 
 // Write a serialized model back onto a live parameter. Multiparms reconcile their
 // instance count to the model before writing each field by name.
-void applySerializable(enzo::prm::Parameter& parameter, const ParameterSerializable& model);
+void applySerializable(helix::prm::Parameter& parameter, const ParameterSerializable& model);
 
 // Writes each model onto the node's parameter of the same name. A model naming a
 // parameter the node lacks is skipped.
-void applySerializable(enzo::nt::Node& node, const std::vector<ParameterSerializable>& models);
+void applySerializable(helix::nt::Node& node, const std::vector<ParameterSerializable>& models);

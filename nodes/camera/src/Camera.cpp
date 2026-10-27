@@ -7,7 +7,7 @@
 
 namespace {
 
-class Camera : public enzo::nt::NodeImpl
+class Camera : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -17,7 +17,7 @@ class Camera : public enzo::nt::NodeImpl
 
 void Camera::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -42,4 +42,4 @@ void Camera::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(camera, Camera)
+HELIX_REGISTER_NODE(camera, Camera)

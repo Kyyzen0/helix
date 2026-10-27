@@ -7,7 +7,7 @@
 
 namespace {
 
-class Merge : public enzo::nt::NodeImpl
+class Merge : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -17,7 +17,7 @@ class Merge : public enzo::nt::NodeImpl
 
 void Merge::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -56,4 +56,4 @@ void Merge::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(merge, Merge)
+HELIX_REGISTER_NODE(merge, Merge)

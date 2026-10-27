@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-namespace enzo::sim {
+namespace helix::sim {
 
 /**
  * @brief Names the one animated value a track belongs to.
@@ -55,7 +55,7 @@ struct KeyframeTarget
  * Example
  *
  * ```
- * auto& store = enzo::sim::KeyframeStore::instance();
+ * auto& store = helix::sim::KeyframeStore::instance();
  * store.setKeyframe({nodeId, "translate", 1}, 1.f, 0.f);
  * store.setKeyframe({nodeId, "translate", 1}, 24.f, 10.f);
  * store.evaluate({nodeId, "translate", 1}, 12.5f); // 4.807692
@@ -234,4 +234,4 @@ floatT resolveParameter(
     floatT frame
 );
 
-} // namespace enzo::sim
+} // namespace helix::sim

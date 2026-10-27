@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace enzo {
+namespace helix {
 
 nt::Node& nt::Network::getNode(nt::NodeId nodeId)
 {
@@ -109,4 +109,4 @@ nt::Network::findParameter(const NetworkPath& path, NodeId fromNode)
     return node->getParameter(path.getParameter());
 }
 
-} // namespace enzo
+} // namespace helix

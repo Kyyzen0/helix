@@ -3,7 +3,7 @@
 #include "Engine/Network/NetworkManager.h"
 #include <memory>
 
-namespace enzo {
+namespace helix {
 
 prm::NodeParameter::NodeParameter(Template prmTemplate, nt::NodeId nodeId)
     : Parameter{std::move(prmTemplate)}, nodeId_{nodeId}
@@ -25,4 +25,4 @@ void prm::NodeParameter::submitExpressionDependencies_(
     nt::nm().graph().setTimeDependent(unit, context.dependsOnTime());
 }
 
-} // namespace enzo
+} // namespace helix

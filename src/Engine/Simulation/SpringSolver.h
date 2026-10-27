@@ -3,7 +3,7 @@
 #include <functional>
 #include <vector>
 
-namespace enzo::sim {
+namespace helix::sim {
 
 /// @brief Everything that shapes a spring lattice.
 struct SpringSettings
@@ -45,7 +45,7 @@ struct SpringSettings
  * Example
  *
  * ```
- * enzo::sim::SpringSolver solver;
+ * helix::sim::SpringSolver solver;
  * solver.reset(settings);
  * solver.step(settings, 1.f / 24.f);
  * ```
@@ -116,4 +116,4 @@ std::vector<Vector3> simulateSprings(
     intT subSteps = 1
 );
 
-} // namespace enzo::sim
+} // namespace helix::sim

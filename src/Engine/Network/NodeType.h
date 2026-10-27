@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace enzo::nt {
+namespace helix::nt {
 class Node;
 class NodeImpl;
 class CookContext;
@@ -40,13 +40,13 @@ struct NodeType
 {
     std::string internalName;
 
-    /// @brief The namespace the node was published under, such as "enzo".
+    /// @brief The namespace the node was published under, such as "helix".
     /// @note Two authors may both publish a "circle" as long as their namespaces differ.
     std::string typeNamespace;
 
     std::string displayName;
     nodeConstructor ctorFunc = nullptr;
-    std::vector<enzo::prm::Template> templates;
+    std::vector<helix::prm::Template> templates;
 
     /// @brief The input ports the node declares, in the order their inputs run.
     std::vector<InputPort> inputPorts;
@@ -76,7 +76,7 @@ struct NodeType
     /// @brief Returns the internal type name shared by all nodes of this type (eg.
     /// "copy_to_points")
     const std::string& getName() const { return internalName; }
-    /// @brief Returns the name that uniquely identifies this type (eg. "enzo::copy_to_points")
+    /// @brief Returns the name that uniquely identifies this type (eg. "helix::copy_to_points")
     /// @note This is the form saved scenes store and the form lookups take.
     std::string getFullName() const { return typeNamespace + "::" + internalName; }
     /// @brief Returns the human readable type label shown in the UI (eg. "Copy To Points")
@@ -119,4 +119,4 @@ struct NodeType
         return folder / iconPath;
     }
 };
-} // namespace enzo::nt
+} // namespace helix::nt

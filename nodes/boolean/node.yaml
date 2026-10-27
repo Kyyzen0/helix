@@ -1,7 +1,7 @@
 version: 1
 
 name: boolean
-namespace: enzo
+namespace: helix
 label: Boolean
 tags: [boolean, combine, polygon]
 
@@ -12,7 +12,7 @@ outputs: 1
 
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
   constructor: boolean
 
 icon: icon.svg

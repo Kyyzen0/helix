@@ -3,7 +3,7 @@
 #include "Engine/Core/Types.h"
 #include "Engine/Primitives/Mesh.h"
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 
@@ -185,4 +185,4 @@ QHash<int, QByteArray> AttributeTableModel::roleNames() const
     return names;
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

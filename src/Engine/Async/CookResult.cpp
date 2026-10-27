@@ -1,6 +1,6 @@
 #include "Engine/Async/CookResult.h"
 
-namespace enzo::async {
+namespace helix::async {
 
 void CookResult::setOutput(
     nt::NodeId nodeId,
@@ -69,4 +69,4 @@ std::vector<nt::NodeId> CookResult::timeDependentNodes() const
     return std::vector<nt::NodeId>(timeDependent_.begin(), timeDependent_.end());
 }
 
-} // namespace enzo::async
+} // namespace helix::async

@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // A tinted monochrome icon loaded by name from the bundled Lucide set. The SVG
 // text is recoloured to `color` and handed to the image as a data url, so the

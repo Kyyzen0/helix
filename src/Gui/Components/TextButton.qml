@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // Text button, styled plain, accent, danger or flat by its variant.
 Rectangle {

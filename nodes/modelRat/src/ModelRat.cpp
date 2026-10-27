@@ -9,7 +9,7 @@
 
 namespace {
 
-class ModelRat : public enzo::nt::NodeImpl
+class ModelRat : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -19,7 +19,7 @@ class ModelRat : public enzo::nt::NodeImpl
 
 void ModelRat::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -40,8 +40,8 @@ void ModelRat::cook()
     const Vector3 scale = evalParmVector3("scale");
     const floatT uniformScale = evalParmFloat("uniform_scale");
 
-    const enzo::Transform transform =
-        enzo::Transform::fromComponents(translate, rotate, scale * uniformScale);
+    const helix::Transform transform =
+        helix::Transform::fromComponents(translate, rotate, scale * uniformScale);
     mesh->applyTransform(transform, TransformClass::POINT);
 
     NodePacket packet;
@@ -51,4 +51,4 @@ void ModelRat::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(modelRat, ModelRat)
+HELIX_REGISTER_NODE(modelRat, ModelRat)

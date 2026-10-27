@@ -1,10 +1,10 @@
 #pragma once
 #include "Engine/Primitives/Primitive.h"
 
-namespace enzo::geo {
+namespace helix::geo {
 
 /**
- * @class enzo::geo::Camera
+ * @class helix::geo::Camera
  * @brief Camera primitive with only primitive-level attributes.
  *
  * Unlike Mesh, Camera has no points, vertices, or faces.
@@ -29,4 +29,4 @@ class Camera : public Primitive
   private:
     attr::AttributeHandle<Matrix4> transformHandle_;
 };
-} // namespace enzo::geo
+} // namespace helix::geo

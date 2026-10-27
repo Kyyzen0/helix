@@ -4,7 +4,7 @@
 #include "Engine/Primitives/Mesh.h"
 #include <catch2/catch_test_macros.hpp>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 std::shared_ptr<script::PointScript> compileScript(const String& code)
@@ -188,7 +188,7 @@ TEST_CASE("compile shows bindings in errors as @name")
     const String error = getCompileError(R"(@value = "text")");
     INFO(error);
     REQUIRE(error.find("@value") != String::npos);
-    REQUIRE(error.find("enzoAttrib_") == String::npos);
+    REQUIRE(error.find("helixAttrib_") == String::npos);
 }
 
 // Running over points

@@ -7,25 +7,27 @@
 #include "Engine/Script/PointScript.h"
 #include "Engine/Script/ScriptEngine.h"
 #include <boost/dll/shared_library.hpp>
+#include <cxxabi.h>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <stdexcept>
+#include <typeinfo>
 #include <string>
 #include <variant>
 #include <vector>
 
 // The source and build tree locations, which let a development run work with no install step.
-#ifndef ENZO_DEV_NODES_DIR
-#define ENZO_DEV_NODES_DIR ""
+#ifndef HELIX_DEV_NODES_DIR
+#define HELIX_DEV_NODES_DIR ""
 #endif
-#ifndef ENZO_DEV_LIB_DIR
-#define ENZO_DEV_LIB_DIR ""
+#ifndef HELIX_DEV_LIB_DIR
+#define HELIX_DEV_LIB_DIR ""
 #endif
 
-namespace enzo::nt {
+namespace helix::nt {
 
 namespace {
 
@@ -41,7 +43,7 @@ std::filesystem::path getLibraryFile(const std::string& libraryName)
     const std::filesystem::path installed = getInstallRoot() / "lib" / fileName;
     if (std::filesystem::exists(installed)) return installed;
 
-    const std::filesystem::path developmentDirectory(ENZO_DEV_LIB_DIR);
+    const std::filesystem::path developmentDirectory(HELIX_DEV_LIB_DIR);
     const std::filesystem::path development = developmentDirectory / fileName;
     if (!developmentDirectory.empty() && std::filesystem::exists(development)) return development;
 
@@ -133,21 +135,9 @@ std::map<std::filesystem::path, std::shared_ptr<const script::PointScript>>& use
 // Returns the directory the user's own data lives in.
 std::filesystem::path getUserDataDirectory()
 {
-#if defined(__APPLE__)
     const char* home = std::getenv("HOME");
     if (home && *home) return std::filesystem::path(home) / "Library" / "Application Support" / "Helix";
     return std::filesystem::temp_directory_path() / "Helix";
-#elif defined(_WIN32)
-    const char* appData = std::getenv("APPDATA");
-    if (appData && *appData) return std::filesystem::path(appData) / "Helix";
-    return std::filesystem::temp_directory_path() / "Helix";
-#else
-    const char* dataHome = std::getenv("XDG_DATA_HOME");
-    if (dataHome && *dataHome) return std::filesystem::path(dataHome) / "helix";
-    const char* home = std::getenv("HOME");
-    if (home && *home) return std::filesystem::path(home) / ".local" / "share" / "helix";
-    return std::filesystem::temp_directory_path() / "helix";
-#endif
 }
 
 } // namespace
@@ -157,7 +147,7 @@ std::filesystem::path NodeLoader::getNodesDirectory()
     const std::filesystem::path installed = getInstallRoot() / "nodes";
     if (std::filesystem::is_directory(installed)) return installed;
 
-    const std::filesystem::path development(ENZO_DEV_NODES_DIR);
+    const std::filesystem::path development(HELIX_DEV_NODES_DIR);
     if (!development.empty() && std::filesystem::is_directory(development)) return development;
 
     throw std::runtime_error(
@@ -170,7 +160,7 @@ std::filesystem::path NodeLoader::getUserNodesDirectory()
 {
     // The environment variable lets a test and a development run keep their
     // nodes somewhere else.
-    if (const char* override = std::getenv("ENZO_USER_NODES_DIR"))
+    if (const char* override = std::getenv("HELIX_USER_NODES_DIR"))
         if (*override) return std::filesystem::path(override);
 
     return getUserDataDirectory() / "nodes";
@@ -234,6 +224,15 @@ bool NodeLoader::registerUserNode(const std::filesystem::path& folder, std::stri
     catch (const std::exception& caught)
     {
         error = caught.what();
+        return false;
+    }
+    catch (...)
+    {
+        // A node that fails to load leaves only itself out, whatever was thrown.
+        // The type is named so a throw that is not a std::exception can be found.
+        const std::type_info* thrown = abi::__cxa_current_exception_type();
+        error = std::string("unexpected exception of type ") + (thrown ? thrown->name() : "unknown");
+        std::cerr << "registerUserNode: " << error << " in " << folder.string() << std::endl;
         return false;
     }
 }
@@ -311,4 +310,4 @@ void NodeLoader::loadNodes()
     }
 }
 
-} // namespace enzo::nt
+} // namespace helix::nt

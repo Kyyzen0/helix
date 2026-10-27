@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-namespace enzo {
+namespace helix {
 
 class NodePacket
 {
@@ -58,19 +58,19 @@ class NodePacket
         TransformClass transformClass_;
     };
 
-    void addPrimitive(std::shared_ptr<enzo::geo::Primitive> primitive);
+    void addPrimitive(std::shared_ptr<helix::geo::Primitive> primitive);
     void attemptMerge(geo::PrimPtr prim);
 
-    std::shared_ptr<enzo::geo::Primitive> getPrimitive(unsigned int index);
-    std::shared_ptr<const enzo::geo::Primitive> getPrimitive(unsigned int index) const;
+    std::shared_ptr<helix::geo::Primitive> getPrimitive(unsigned int index);
+    std::shared_ptr<const helix::geo::Primitive> getPrimitive(unsigned int index) const;
     geo::PrimPtr getPrimAtPath(const std::string& path);
     std::shared_ptr<const geo::Primitive> getPrimAtPath(const std::string& path) const;
 
-    const std::vector<std::shared_ptr<enzo::geo::Primitive>>& getPrimitives() const
+    const std::vector<std::shared_ptr<helix::geo::Primitive>>& getPrimitives() const
     {
         return primitives_;
     }
-    std::vector<geo::PrimPtr> getPrimitives(enzo::geo::PrimType type) const;
+    std::vector<geo::PrimPtr> getPrimitives(helix::geo::PrimType type) const;
     void removePrim(std::string path);
 
     Transforms getTransforms(TransformClass transformClass)
@@ -85,4 +85,4 @@ class NodePacket
     std::vector<geo::PrimPtr> primitives_;
 };
 
-} // namespace enzo
+} // namespace helix

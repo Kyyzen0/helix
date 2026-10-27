@@ -15,7 +15,7 @@
 
 namespace {
 
-using namespace enzo;
+using namespace helix;
 
 class CopyToPoints : public nt::NodeImpl
 {
@@ -197,4 +197,4 @@ void CopyToPoints::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(copyToPoints, CopyToPoints)
+HELIX_REGISTER_NODE(copyToPoints, CopyToPoints)

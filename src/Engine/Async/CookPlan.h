@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace enzo::async {
+namespace helix::async {
 
 /**
  * @class CookPlan
@@ -77,4 +77,4 @@ class CookPlan
     std::unordered_map<nt::NodeId, NodeEntry> entries_;
 };
 
-} // namespace enzo::async
+} // namespace helix::async

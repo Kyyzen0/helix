@@ -3,7 +3,7 @@
 #include "Engine/Attribute/Attribute.h"
 #include "Engine/Core/Types.h"
 
-namespace enzo {
+namespace helix {
 class Point
 {
   public:
@@ -16,4 +16,4 @@ class Point
     attr::attribVector& attributes_;
     Offset offset_;
 };
-} // namespace enzo
+} // namespace helix

@@ -20,18 +20,18 @@ namespace {
 struct WaveSettings
 {
     bool radial = false;
-    enzo::Vector3 center = enzo::Vector3::Zero();
-    enzo::floatT frequency = 1;
-    enzo::Vector3 offset = enzo::Vector3::Zero();
-    enzo::floatT amplitude = 1;
+    helix::Vector3 center = helix::Vector3::Zero();
+    helix::floatT frequency = 1;
+    helix::Vector3 offset = helix::Vector3::Zero();
+    helix::floatT amplitude = 1;
     bool zeroCentered = true;
 };
 
 /// @brief Returns the wave value at every point of the mesh, in point order.
-std::vector<enzo::floatT>
-sampleWave(const enzo::geo::Mesh& mesh, const WaveSettings& settings, const enzo::prm::Ramp& remap)
+std::vector<helix::floatT>
+sampleWave(const helix::geo::Mesh& mesh, const WaveSettings& settings, const helix::prm::Ramp& remap)
 {
-    using namespace enzo;
+    using namespace helix;
 
     const std::span<const Vector3> positions = mesh.pointPosSpan();
     std::vector<floatT> wave(positions.size());
@@ -56,7 +56,7 @@ sampleWave(const enzo::geo::Mesh& mesh, const WaveSettings& settings, const enzo
     return wave;
 }
 
-class SineWave : public enzo::nt::NodeImpl
+class SineWave : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -66,7 +66,7 @@ class SineWave : public enzo::nt::NodeImpl
 
 void SineWave::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -185,4 +185,4 @@ void SineWave::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(sineWave, SineWave)
+HELIX_REGISTER_NODE(sineWave, SineWave)

@@ -8,7 +8,7 @@
 #include <cmath>
 #include <memory>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 

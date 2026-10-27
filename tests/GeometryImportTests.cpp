@@ -11,7 +11,7 @@
 #include <memory>
 #include <string>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -45,14 +45,14 @@ std::shared_ptr<const geo::Mesh> importMesh(const std::filesystem::path& file, f
     nt::NodeLoader::loadNodes();
     auto& nm = nt::nm();
 
-    const nt::NodeId nodeId = nm.createNode("enzo::geometryImport");
+    const nt::NodeId nodeId = nm.createNode("helix::geometryImport");
     nt::Node& node = nm.getNode(nodeId);
     node.getParameter("filePath").lock()->setString(file.string());
     node.getParameter("size").lock()->setFloat(size);
 
     nm.cook(nodeId);
 
-    std::shared_ptr<const enzo::NodePacket> packet = node.getOutputPacket(0);
+    std::shared_ptr<const helix::NodePacket> packet = node.getOutputPacket(0);
     REQUIRE(packet->size() == 1);
     return std::dynamic_pointer_cast<const geo::Mesh>(packet->getPrimitive(0));
 }
@@ -72,7 +72,7 @@ f 1/1/1 2/2/1 3/3/1 4/4/1
 
 TEST_CASE_METHOD(NMReset, "Importing an obj file builds its points and faces")
 {
-    const TemporaryObjFile file("enzoGeometryImportSquare.obj", kSquareObj);
+    const TemporaryObjFile file("helixGeometryImportSquare.obj", kSquareObj);
 
     const std::shared_ptr<const geo::Mesh> mesh = importMesh(file.getPath());
 
@@ -85,7 +85,7 @@ TEST_CASE_METHOD(NMReset, "Importing an obj file builds its points and faces")
 
 TEST_CASE_METHOD(NMReset, "The size parameter scales the imported points")
 {
-    const TemporaryObjFile file("enzoGeometryImportScaled.obj", kSquareObj);
+    const TemporaryObjFile file("helixGeometryImportScaled.obj", kSquareObj);
 
     const std::shared_ptr<const geo::Mesh> mesh = importMesh(file.getPath(), 2.f);
 
@@ -95,7 +95,7 @@ TEST_CASE_METHOD(NMReset, "The size parameter scales the imported points")
 TEST_CASE_METHOD(NMReset, "An open line record makes an unclosed face")
 {
     const TemporaryObjFile file(
-        "enzoGeometryImportLine.obj",
+        "helixGeometryImportLine.obj",
         "v 0 0 0\nv 1 0 0\nv 2 0 0\nl 1 2 3\n"
     );
 
@@ -110,7 +110,7 @@ TEST_CASE_METHOD(NMReset, "An open line record makes an unclosed face")
 TEST_CASE_METHOD(NMReset, "Negative obj indices count back from the last point")
 {
     const TemporaryObjFile file(
-        "enzoGeometryImportNegative.obj",
+        "helixGeometryImportNegative.obj",
         "v 0 0 0\nv 1 0 0\nv 2 0 0\nf -3 -2 -1\n"
     );
 
@@ -125,7 +125,7 @@ TEST_CASE_METHOD(NMReset, "An unset file path imports nothing")
     nt::NodeLoader::loadNodes();
     auto& nm = nt::nm();
 
-    const nt::NodeId nodeId = nm.createNode("enzo::geometryImport");
+    const nt::NodeId nodeId = nm.createNode("helix::geometryImport");
     nm.cook(nodeId);
 
     REQUIRE(nm.getNode(nodeId).getOutputPacket(0)->size() == 1);

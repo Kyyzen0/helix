@@ -16,11 +16,11 @@
 #include <utility>
 #include <vector>
 
-namespace enzo {
+namespace helix {
 class NetworkPath;
 }
 
-namespace enzo::nt {
+namespace helix::nt {
 /**
  * @brief The central coordinator of the engine's node system.
  *
@@ -53,13 +53,13 @@ class NetworkManager
      * @brief Creates a new node inside a scope.
      *
      * A node left unnamed takes its type's name without the namespace followed by the first
-     * free number, so the first "enzo::grid" placed in a scope becomes "grid1" and the next
+     * free number, so the first "helix::grid" placed in a scope becomes "grid1" and the next
      * becomes "grid2". Only siblings have to differ, so each scope numbers its own nodes.
      *
      * @throws std::runtime_error when no node type or alias is registered under typeName.
      *
-     * @param typeName The full name of a node type such as "enzo::grid", or of an alias such as
-     * "enzo::mountain", which creates a node of the type it stands in for with the alias's
+     * @param typeName The full name of a node type such as "helix::grid", or of an alias such as
+     * "helix::mountain", which creates a node of the type it stands in for with the alias's
      * starting values set.
      * @param parent The scope to create the node inside. The root holds the top level nodes.
      * @param name The name to give the node. Left empty a free one is picked, and a name
@@ -98,7 +98,7 @@ class NetworkManager
 
     /** @brief Creates a lock object that prevents cooking until destroyed
      */
-    enzo::nt::UpdateLock lockUpdates();
+    helix::nt::UpdateLock lockUpdates();
 
     /**
      * @brief Cooks dirtied nodes, is called automatically
@@ -190,12 +190,12 @@ class NetworkManager
     /**
      * @brief Returns the NodeIds for all selected nodes.
      */
-    const std::vector<enzo::nt::NodeId>& getSelectedNodes();
+    const std::vector<helix::nt::NodeId>& getSelectedNodes();
 
     /**
      * @brief Replaces the entire selection with the given set of nodes.
      */
-    void setSelectedNodes(std::vector<enzo::nt::NodeId> nodeIds);
+    void setSelectedNodes(std::vector<helix::nt::NodeId> nodeIds);
 
     /**
      * @brief Moves a node to a new position, pushing an undo command.
@@ -249,7 +249,7 @@ class NetworkManager
      * @brief Cooks the given node
      * @param nodeId node ID to cook
      */
-    void cook(enzo::nt::NodeId nodeId);
+    void cook(helix::nt::NodeId nodeId);
 
     /** @name Background cooking
      *
@@ -277,7 +277,7 @@ class NetworkManager
      * @param targets The nodes to cook. The display, primary and selected nodes
      * are the ones the interface shows, so those are the ones worth asking for.
      */
-    void requestCook(const std::vector<enzo::nt::NodeId>& targets);
+    void requestCook(const std::vector<helix::nt::NodeId>& targets);
 
     /// @brief Abandons the cook that is running and drops the one that was asked for.
     void cancelCook();
@@ -318,8 +318,8 @@ class NetworkManager
      * It falls back to the node's own geometry when nothing has been published
      * for it.
      */
-    std::shared_ptr<const enzo::NodePacket> getPublishedOutputPacket(
-        enzo::nt::NodeId nodeId,
+    std::shared_ptr<const helix::NodePacket> getPublishedOutputPacket(
+        helix::nt::NodeId nodeId,
         unsigned int outputIndex
     );
 
@@ -378,16 +378,16 @@ class NetworkManager
     // @brief A signal emitted when the geometry to be displayed is changed
     // This is different to #displayNodeChanged because the state of geometry
     // in a node can change based on parameters or other factors.
-    boost::signals2::signal<void(std::shared_ptr<const enzo::NodePacket>)> displayGeoChanged;
+    boost::signals2::signal<void(std::shared_ptr<const helix::NodePacket>)> displayGeoChanged;
 
     // @brief A signal emitted when the selected node's geometry is changed
-    boost::signals2::signal<void(std::shared_ptr<const enzo::NodePacket>)> selectedGeoChanged;
+    boost::signals2::signal<void(std::shared_ptr<const helix::NodePacket>)> selectedGeoChanged;
 
     // @brief A signal emitted when the primary node changes
     boost::signals2::signal<void(std::optional<nt::NodeId>)> primaryNodeChanged;
 
     // @brief A signal emitted when the primary node's geometry changes
-    boost::signals2::signal<void(std::shared_ptr<const enzo::NodePacket>)> primaryGeoChanged;
+    boost::signals2::signal<void(std::shared_ptr<const helix::NodePacket>)> primaryGeoChanged;
 
     // @brief A signal emitted when the selection of nodes changes
     boost::signals2::signal<void(std::vector<nt::NodeId> selectedNodeIds)> selectedNodesChanged;
@@ -499,7 +499,7 @@ class NetworkManager
     // variables
     // every node, its wiring, and the scopes they live in
     nt::Network network_;
-    std::vector<enzo::nt::NodeId> selectedNodes_;
+    std::vector<helix::nt::NodeId> selectedNodes_;
     // node selected for displaying in the viewport
     std::optional<NodeId> displayNode_ = std::nullopt;
     // the primary node that drives the parameter and geometry panes
@@ -542,5 +542,5 @@ class NetworkManager
     bool asyncCookingEnabled_ = false;
 };
 
-inline enzo::nt::NetworkManager& nm() { return enzo::nt::NetworkManager::getInstance(); }
-} // namespace enzo::nt
+inline helix::nt::NetworkManager& nm() { return helix::nt::NetworkManager::getInstance(); }
+} // namespace helix::nt

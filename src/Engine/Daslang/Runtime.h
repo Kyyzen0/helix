@@ -5,15 +5,15 @@
 #include <variant>
 #include <vector>
 
-namespace enzo::expr {
+namespace helix::expr {
 class ExpressionContext;
 }
 
-namespace enzo::script {
+namespace helix::script {
 class ScriptContext;
 }
 
-namespace enzo::daslang {
+namespace helix::daslang {
 
 /// @brief An argument to a script function, either an integer or the address a reference parameter writes to.
 using ScriptArgument = std::variant<intT, void*>;
@@ -136,4 +136,4 @@ class Runtime
     ~Runtime();
 };
 
-} // namespace enzo::daslang
+} // namespace helix::daslang

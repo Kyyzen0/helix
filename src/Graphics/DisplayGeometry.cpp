@@ -6,7 +6,7 @@
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
 
-namespace enzo::gfx {
+namespace helix::gfx {
 
 namespace {
 
@@ -159,4 +159,4 @@ void buildDisplayGeometry(DisplayGeometry& geometry, const NodePacket& packet)
     }
 }
 
-} // namespace enzo::gfx
+} // namespace helix::gfx

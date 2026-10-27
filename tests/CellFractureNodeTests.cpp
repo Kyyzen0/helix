@@ -10,7 +10,7 @@
 #include <memory>
 #include <set>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -53,9 +53,9 @@ GridAndSeeds addFractureOfQuad()
     auto& nm = nt::nm();
 
     GridAndSeeds nodes;
-    nodes.geometry = nm.createNode("enzo::grid");
-    nodes.seeds = nm.createNode("enzo::grid");
-    nodes.fracture = nm.createNode("enzo::cellFracture");
+    nodes.geometry = nm.createNode("helix::grid");
+    nodes.seeds = nm.createNode("helix::grid");
+    nodes.fracture = nm.createNode("helix::cellFracture");
     nm.connectNodes(nodes.geometry, 0, nodes.fracture, 0);
     nm.connectNodes(nodes.seeds, 0, nodes.fracture, 1);
 
@@ -72,9 +72,9 @@ GridAndSeeds addFractureOfCube(intT seedColumns, intT seedRows)
     auto& nm = nt::nm();
 
     GridAndSeeds nodes;
-    nodes.geometry = nm.createNode("enzo::cube");
-    nodes.seeds = nm.createNode("enzo::grid");
-    nodes.fracture = nm.createNode("enzo::cellFracture");
+    nodes.geometry = nm.createNode("helix::cube");
+    nodes.seeds = nm.createNode("helix::grid");
+    nodes.fracture = nm.createNode("helix::cellFracture");
     nm.connectNodes(nodes.geometry, 0, nodes.fracture, 0);
     nm.connectNodes(nodes.seeds, 0, nodes.fracture, 1);
 
@@ -211,8 +211,8 @@ TEST_CASE_METHOD(NMReset, "Geometry without seeds passes through unchanged")
     nt::NodeLoader::loadNodes();
     auto& nm = nt::nm();
 
-    const nt::NodeId geometry = nm.createNode("enzo::grid");
-    const nt::NodeId fracture = nm.createNode("enzo::cellFracture");
+    const nt::NodeId geometry = nm.createNode("helix::grid");
+    const nt::NodeId fracture = nm.createNode("helix::cellFracture");
     nm.connectNodes(geometry, 0, fracture, 0);
     setGridShape(nm.getNode(geometry), 2, 2);
     nm.cook(fracture);

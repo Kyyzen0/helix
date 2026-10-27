@@ -1,9 +1,9 @@
 #pragma once
 
-namespace enzo::daslang {
+namespace helix::daslang {
 
 /// @brief The module name a script requires for the vector operators.
-inline constexpr const char* vectorOperatorsModule = "enzo_vector";
+inline constexpr const char* vectorOperatorsModule = "helix_vector";
 
 /**
  * @brief Arithmetic between a float3 and a single number.
@@ -14,7 +14,7 @@ inline constexpr const char* vectorOperatorsModule = "enzo_vector";
 inline constexpr const char* vectorOperatorsSource = R"das(
 options gen2
 
-module enzo_vector shared
+module helix_vector shared
 
 def public operator + (a : float3; b : float) : float3 { return a + float3(b) }
 def public operator + (a : float; b : float3) : float3 { return float3(a) + b }
@@ -39,4 +39,4 @@ def public operator *= (var a : float3&; b : int) { a *= float(b) }
 def public operator /= (var a : float3&; b : int) { a /= float(b) }
 )das";
 
-} // namespace enzo::daslang
+} // namespace helix::daslang

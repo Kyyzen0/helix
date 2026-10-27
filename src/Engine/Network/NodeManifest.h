@@ -7,7 +7,7 @@
 #include <variant>
 #include <vector>
 
-namespace enzo::nt {
+namespace helix::nt {
 
 /// @brief The constructor a shared library exports to give a node its behaviour.
 struct CppImplementation
@@ -20,7 +20,7 @@ struct CppImplementation
 struct AliasImplementation
 {
     /// @brief The full name of the node type the alias stands in for, such as
-    /// "enzo::attributeNoise".
+    /// "helix::attributeNoise".
     std::string aliasedType;
 };
 
@@ -102,4 +102,4 @@ class NodeManifest
     std::map<std::string, std::vector<std::string>> parameterValues_;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

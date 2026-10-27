@@ -6,7 +6,7 @@
 #include <span>
 #include <stdexcept>
 
-namespace enzo {
+namespace helix {
 
 namespace {
 
@@ -275,4 +275,4 @@ void NodePacket::removePrim(std::string path)
     }
 }
 
-} // namespace enzo
+} // namespace helix

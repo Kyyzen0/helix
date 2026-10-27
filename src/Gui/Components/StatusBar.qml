@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // The strip along the bottom of the window reporting what the application is
 // doing right now.

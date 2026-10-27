@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace enzo::sim {
+namespace helix::sim {
 
 namespace {
 
@@ -220,4 +220,4 @@ std::vector<Vector3> simulateSprings(
     return solver.getPositions();
 }
 
-} // namespace enzo::sim
+} // namespace helix::sim

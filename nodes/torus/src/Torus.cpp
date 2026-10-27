@@ -22,7 +22,7 @@ struct TorusSettings
 
 // Returns the rotation in degrees that puts the hole of the torus on the named
 // axis. The torus is built around Y, so Y itself needs no rotation.
-enzo::Vector3 getAxisRotation(const std::string& axis)
+helix::Vector3 getAxisRotation(const std::string& axis)
 {
     if (axis == "x") return {0, 0, -90};
     if (axis == "z") return {90, 0, 0};
@@ -30,12 +30,12 @@ enzo::Vector3 getAxisRotation(const std::string& axis)
 }
 
 // Adds a ring of points around the tube, columnFraction of the way around the hole.
-std::vector<enzo::Offset>
-addTubeRing(enzo::geo::Mesh& mesh, const TorusSettings& settings, float columnFraction)
+std::vector<helix::Offset>
+addTubeRing(helix::geo::Mesh& mesh, const TorusSettings& settings, float columnFraction)
 {
     const float ringAngle = columnFraction * std::numbers::pi_v<float> * 2;
 
-    std::vector<enzo::Vector3> positions;
+    std::vector<helix::Vector3> positions;
     positions.reserve(settings.rows);
     for (int rowIndex = 0; rowIndex < settings.rows; ++rowIndex)
     {
@@ -55,9 +55,9 @@ addTubeRing(enzo::geo::Mesh& mesh, const TorusSettings& settings, float columnFr
 
 // Adds the band of quads going around the tube between two neighbouring rings.
 void addBandFaces(
-    enzo::geo::Mesh& mesh,
-    const std::vector<enzo::Offset>& ring,
-    const std::vector<enzo::Offset>& nextRing
+    helix::geo::Mesh& mesh,
+    const std::vector<helix::Offset>& ring,
+    const std::vector<helix::Offset>& nextRing
 )
 {
     const size_t rowCount = ring.size();
@@ -68,7 +68,7 @@ void addBandFaces(
     }
 }
 
-class Torus : public enzo::nt::NodeImpl
+class Torus : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -91,7 +91,7 @@ TorusSettings Torus::readSettings() const
 
 void Torus::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -124,4 +124,4 @@ void Torus::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(torus, Torus)
+HELIX_REGISTER_NODE(torus, Torus)

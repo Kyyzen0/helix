@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import Enzo
+import Helix
 import "../Style"
 
 // Right-click menu for a parameter, offering expression editing alongside

@@ -1,7 +1,7 @@
 version: 1
 
 name: grid
-namespace: enzo
+namespace: helix
 label: Grid
 tags: [primitive, surface, polygon]
 
@@ -9,7 +9,7 @@ outputs: 1
 
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
   constructor: grid
 
 icon: icon.svg

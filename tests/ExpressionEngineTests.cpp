@@ -7,7 +7,7 @@
 #include "Engine/Parameter/NodeParameter.h"
 #include <catch2/catch_test_macros.hpp>
 
-using namespace enzo;
+using namespace helix;
 
 TEST_CASE("evalFloat evaluates an arithmetic expression")
 {
@@ -54,11 +54,11 @@ TEST_CASE_METHOD(NMReset, "Prm reads another node's parameter by path")
     auto& nm = nt::nm();
 
     // The source node holds the value the expression should pull
-    nt::NodeId source = nm.createNode("enzo::transform");
+    nt::NodeId source = nm.createNode("helix::transform");
     nm.getNode(source).getParameter("translate").lock()->setFloat(7.0f);
 
     // A second node reads the source's translate through a path expression
-    nt::NodeId reader = nm.createNode("enzo::transform");
+    nt::NodeId reader = nm.createNode("helix::transform");
     auto translate = nm.getNode(reader).getParameter("translate").lock();
     translate->setExpression("prm(\"transform1.translate\")");
 
@@ -70,14 +70,14 @@ TEST_CASE_METHOD(NMReset, "Prm reads a chosen component of a vector parameter")
     auto& nm = nt::nm();
 
     // The source holds a distinct value in each component of its translate
-    nt::NodeId source = nm.createNode("enzo::transform");
+    nt::NodeId source = nm.createNode("helix::transform");
     auto sourceTranslate = nm.getNode(source).getParameter("translate").lock();
     sourceTranslate->setFloat(1.0f, 0);
     sourceTranslate->setFloat(2.0f, 1);
     sourceTranslate->setFloat(3.0f, 2);
 
     // The reader pulls the second and third components by index
-    nt::NodeId reader = nm.createNode("enzo::transform");
+    nt::NodeId reader = nm.createNode("helix::transform");
     auto translate = nm.getNode(reader).getParameter("translate").lock();
 
     translate->setExpression("prm(\"transform1.translate\", 1)");
@@ -92,13 +92,13 @@ TEST_CASE_METHOD(NMReset, "Prm without an index reads the first component")
     auto& nm = nt::nm();
 
     // The source holds different values across its translate components
-    nt::NodeId source = nm.createNode("enzo::transform");
+    nt::NodeId source = nm.createNode("helix::transform");
     auto sourceTranslate = nm.getNode(source).getParameter("translate").lock();
     sourceTranslate->setFloat(1.0f, 0);
     sourceTranslate->setFloat(2.0f, 1);
 
     // Omitting the index reads the same component as passing 0
-    nt::NodeId reader = nm.createNode("enzo::transform");
+    nt::NodeId reader = nm.createNode("helix::transform");
     auto translate = nm.getNode(reader).getParameter("translate").lock();
     translate->setExpression("prm(\"transform1.translate\")");
 
@@ -110,11 +110,11 @@ TEST_CASE_METHOD(NMReset, "Changing a parameter recooks nodes whose expressions 
     auto& nm = nt::nm();
 
     // The source node holds the value the reader pulls
-    nt::NodeId source = nm.createNode("enzo::transform");
+    nt::NodeId source = nm.createNode("helix::transform");
     nm.getNode(source).getParameter("translate").lock()->setFloat(7.0f);
 
     // The reader pulls the source's translate through an expression
-    nt::NodeId reader = nm.createNode("enzo::transform");
+    nt::NodeId reader = nm.createNode("helix::transform");
     auto translate = nm.getNode(reader).getParameter("translate").lock();
     translate->setExpression("prm(\"transform1.translate\")");
 
@@ -134,7 +134,7 @@ TEST_CASE_METHOD(NMReset, "Prm reports an error when the path matches no paramet
     auto& nm = nt::nm();
 
     // The reader points its expression at a node that does not exist
-    nt::NodeId reader = nm.createNode("enzo::transform");
+    nt::NodeId reader = nm.createNode("helix::transform");
     auto translate = nm.getNode(reader).getParameter("translate").lock();
     translate->setExpression("prm(\"does_not_exist.translate\")");
 
@@ -149,11 +149,11 @@ TEST_CASE_METHOD(NMReset, "PrmI reads another node's integer parameter")
     auto& nm = nt::nm();
 
     // The source node holds the integer the expression should pull
-    nt::NodeId source = nm.createNode("enzo::grid");
+    nt::NodeId source = nm.createNode("helix::grid");
     nm.getNode(source).getParameter("rows").lock()->setInt(5);
 
     // A second node reads the source's rows through a path expression
-    nt::NodeId reader = nm.createNode("enzo::grid");
+    nt::NodeId reader = nm.createNode("helix::grid");
     auto rows = nm.getNode(reader).getParameter("rows").lock();
     rows->setExpression("prmI(\"grid1.rows\")");
 
@@ -165,11 +165,11 @@ TEST_CASE_METHOD(NMReset, "PrmS reads another node's string parameter")
     auto& nm = nt::nm();
 
     // The source node holds the string the expression should pull
-    nt::NodeId source = nm.createNode("enzo::path");
+    nt::NodeId source = nm.createNode("helix::path");
     nm.getNode(source).getParameter("path").lock()->setString("hello");
 
     // A second node reads the source's path through a path expression
-    nt::NodeId reader = nm.createNode("enzo::path");
+    nt::NodeId reader = nm.createNode("helix::path");
     auto path = nm.getNode(reader).getParameter("path").lock();
     path->setExpression("prmS(\"path1.path\")");
 
@@ -266,7 +266,7 @@ TEST_CASE("Rand spreads many seeds evenly between zero and one")
     auto script = daslang::Runtime::instance().compile(
         "randSpreadTest",
         R"(options gen2
-require enzo_expression
+require helix_expression
 [export]
 def sample(seed : int64; var result : float&) {
     result = rand(seed)
@@ -332,7 +332,7 @@ TEST_CASE("RandVector spreads many seeds evenly between zero and one")
     auto script = daslang::Runtime::instance().compile(
         "randVectorSpreadTest",
         R"(options gen2
-require enzo_expression
+require helix_expression
 [export]
 def sample(seed : int64; var result : float3&) {
     result = randVector(seed)

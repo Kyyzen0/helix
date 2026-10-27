@@ -6,7 +6,7 @@
 
 // The daslang module that lets scripts read the attributes of their input mesh.
 
-namespace enzo::script {
+namespace helix::script {
 
 namespace {
 
@@ -176,7 +176,7 @@ void addHasAttribute(das::Module& module, const das::ModuleLibrary& lib, const S
 class GeometryModule : public das::Module
 {
   public:
-    GeometryModule() : das::Module("enzo_geometry")
+    GeometryModule() : das::Module("helix_geometry")
     {
         das::ModuleLibrary lib(this);
         lib.addBuiltInModule();
@@ -197,6 +197,6 @@ class GeometryModule : public das::Module
     }
 };
 
-} // namespace enzo::script
+} // namespace helix::script
 
-REGISTER_MODULE_IN_NAMESPACE(GeometryModule, enzo::script);
+REGISTER_MODULE_IN_NAMESPACE(GeometryModule, helix::script);

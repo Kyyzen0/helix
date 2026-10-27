@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-namespace enzo::nt {
+namespace helix::nt {
 /**
  * @brief Every node in a scene, their wiring, and the scopes they live in.
  *
@@ -118,4 +118,4 @@ class Network
     // The highest node id handed out so far
     NodeId maxNodeId_ = 0;
 };
-} // namespace enzo::nt
+} // namespace helix::nt

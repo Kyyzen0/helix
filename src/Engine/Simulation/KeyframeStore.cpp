@@ -8,7 +8,7 @@
 #include <cmath>
 #include <variant>
 
-namespace enzo::sim {
+namespace helix::sim {
 
 namespace {
 
@@ -306,4 +306,4 @@ floatT resolveParameter(
     return parameter_->evalFloat(component);
 }
 
-} // namespace enzo::sim
+} // namespace helix::sim

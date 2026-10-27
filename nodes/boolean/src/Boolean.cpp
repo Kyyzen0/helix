@@ -6,7 +6,7 @@
 
 namespace {
 
-class Boolean : public enzo::nt::NodeImpl
+class Boolean : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -16,7 +16,7 @@ class Boolean : public enzo::nt::NodeImpl
 
 void Boolean::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -69,4 +69,4 @@ void Boolean::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(boolean, Boolean)
+HELIX_REGISTER_NODE(boolean, Boolean)

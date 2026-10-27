@@ -4,7 +4,7 @@
 #include <tbb/spin_mutex.h>
 #include <unordered_set>
 
-namespace enzo::geo {
+namespace helix::geo {
 class Mesh;
 class FaceNormalHandle;
 class PointNormalHandle;
@@ -14,7 +14,7 @@ class VertexNormalHandle;
 inline constexpr double kDefaultCuspAngle = 60;
 
 /**
- * @class enzo::geo::Mesh
+ * @class helix::geo::Mesh
  * @brief Polygonal mesh primitive with point, vertex, and face attributes.
  *
  * Extends Primitive with mesh-specific topology: points, vertices, faces,
@@ -318,17 +318,17 @@ class Mesh : public Primitive
     mutable tbb::spin_mutex faceStartsMutex_;
 
     // intrinsic handles
-    enzo::attr::AttributeHandleInt vertexCountFaceHandle_;
-    enzo::attr::AttributeHandleBool closedFaceHandle_;
-    enzo::attr::AttributeHandleInt pointOffsetVertexHandle_;
-    enzo::attr::AttributeHandleVector3 posPointHandle_;
-    enzo::attr::AttributeHandleBool validFaceHandle_;
-    enzo::attr::AttributeHandleBool validVertexHandle_;
-    enzo::attr::AttributeHandleBool validPointHandle_;
+    helix::attr::AttributeHandleInt vertexCountFaceHandle_;
+    helix::attr::AttributeHandleBool closedFaceHandle_;
+    helix::attr::AttributeHandleInt pointOffsetVertexHandle_;
+    helix::attr::AttributeHandleVector3 posPointHandle_;
+    helix::attr::AttributeHandleBool validFaceHandle_;
+    helix::attr::AttributeHandleBool validVertexHandle_;
+    helix::attr::AttributeHandleBool validPointHandle_;
 };
 
 /**
- * @class enzo::geo::FaceNormalHandle
+ * @class helix::geo::FaceNormalHandle
  * @brief Read accessor for per-face normals.
  *
  * Built by @ref Mesh::getFaceNormal. The constructor resolves the Normal
@@ -357,7 +357,7 @@ class FaceNormalHandle
 };
 
 /**
- * @class enzo::geo::PointNormalHandle
+ * @class helix::geo::PointNormalHandle
  * @brief Read accessor for per-point normals.
  *
  * Built by @ref Mesh::getPointNormal. The constructor resolves the Normal
@@ -381,7 +381,7 @@ class PointNormalHandle
 };
 
 /**
- * @class enzo::geo::VertexNormalHandle
+ * @class helix::geo::VertexNormalHandle
  * @brief Read accessor for per-vertex normals.
  *
  * Built by @ref Mesh::getVertexNormal. The constructor resolves the Normal
@@ -401,4 +401,4 @@ class VertexNormalHandle
     std::optional<attr::AttributeHandleRO<Vector3>> pointAttribute_;
     std::vector<Vector3> computed_;
 };
-} // namespace enzo::geo
+} // namespace helix::geo

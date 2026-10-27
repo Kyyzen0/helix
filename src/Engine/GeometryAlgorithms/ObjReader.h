@@ -1,11 +1,11 @@
 #pragma once
 #include <istream>
 
-namespace enzo::geo {
+namespace helix::geo {
 class Mesh;
 }
 
-namespace enzo::utils {
+namespace helix::utils {
 
 /**
  * @brief Reads the vertex and face records of an obj file into a mesh.
@@ -17,4 +17,4 @@ namespace enzo::utils {
  */
 void readObjInto(std::istream& file, geo::Mesh& mesh);
 
-} // namespace enzo::utils
+} // namespace helix::utils

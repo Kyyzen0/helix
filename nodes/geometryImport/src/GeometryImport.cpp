@@ -10,7 +10,7 @@
 
 namespace {
 
-class GeometryImport : public enzo::nt::NodeImpl
+class GeometryImport : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -20,12 +20,12 @@ class GeometryImport : public enzo::nt::NodeImpl
   private:
     // Fills the mesh from the file the parameters name, leaving it empty and
     // reporting an error when there is nothing readable to fill it from.
-    void readFileInto(enzo::geo::Mesh& mesh);
+    void readFileInto(helix::geo::Mesh& mesh);
 };
 
-void GeometryImport::readFileInto(enzo::geo::Mesh& mesh)
+void GeometryImport::readFileInto(helix::geo::Mesh& mesh)
 {
-    using namespace enzo;
+    using namespace helix;
 
     String filePath = evalParmString("filePath");
     boost::trim(filePath);
@@ -55,7 +55,7 @@ void GeometryImport::readFileInto(enzo::geo::Mesh& mesh)
 
 void GeometryImport::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -69,4 +69,4 @@ void GeometryImport::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(geometryImport, GeometryImport)
+HELIX_REGISTER_NODE(geometryImport, GeometryImport)

@@ -4,10 +4,10 @@
 #include <boost/config.hpp>
 #include <string>
 
-namespace enzo::nt {
+namespace helix::nt {
 
 /// @brief The prefix on the symbol a node library exports for each constructor.
-inline constexpr const char* kNodeConstructorPrefix = "enzoNode_";
+inline constexpr const char* kNodeConstructorPrefix = "helixNode_";
 
 /// @brief Returns the exported symbol backing a constructor named in a manifest.
 inline std::string nodeConstructorSymbol(const std::string& constructorName)
@@ -15,7 +15,7 @@ inline std::string nodeConstructorSymbol(const std::string& constructorName)
     return kNodeConstructorPrefix + constructorName;
 }
 
-} // namespace enzo::nt
+} // namespace helix::nt
 
 /**
  * @brief Exposes a node implementation under the name its manifest asks for.
@@ -25,13 +25,13 @@ inline std::string nodeConstructorSymbol(const std::string& constructorName)
  * implementation constructor, which defaults to the node's own name.
  *
  * ```
- * ENZO_REGISTER_NODE(circle, Circle)
+ * HELIX_REGISTER_NODE(circle, Circle)
  * ```
  */
-#define ENZO_REGISTER_NODE(constructorName, ImplementationClass)                                   \
-    extern "C" BOOST_SYMBOL_EXPORT enzo::nt::NodeImpl* enzoNode_##constructorName(                 \
-        enzo::nt::Node& node,                                                                      \
-        enzo::nt::CookContext& context                                                             \
+#define HELIX_REGISTER_NODE(constructorName, ImplementationClass)                                   \
+    extern "C" BOOST_SYMBOL_EXPORT helix::nt::NodeImpl* helixNode_##constructorName(                 \
+        helix::nt::Node& node,                                                                      \
+        helix::nt::CookContext& context                                                             \
     )                                                                                              \
     {                                                                                              \
         return new ImplementationClass(node, context);                                             \

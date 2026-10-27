@@ -2,7 +2,7 @@
 
 #include "Engine/Core/Types.h"
 #include <utility>
-namespace enzo::prm {
+namespace helix::prm {
 class Default
 {
   public:
@@ -29,4 +29,4 @@ class Default
     floatT floatDefault_;
     String stringDefault_;
 };
-} // namespace enzo::prm
+} // namespace helix::prm

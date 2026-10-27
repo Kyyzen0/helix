@@ -9,7 +9,7 @@
 #include <variant>
 #include <vector>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -18,20 +18,20 @@ namespace {
 const std::string kMinimalManifest = R"(
 version: 1
 name: circle
-namespace: enzo
+namespace: helix
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
 )";
 
 // The smallest alias manifest that parses.
 const std::string kAliasManifest = R"(
 version: 1
 name: mountain
-namespace: enzo
+namespace: helix
 implementation:
   kind: alias
-  type: enzo::attributeNoise
+  type: helix::attributeNoise
 )";
 
 // The smallest user node manifest that parses. The source's file name is the
@@ -56,14 +56,14 @@ implementation:
 const std::string kAliasedManifest = R"(
 version: 1
 name: attributeNoise
-namespace: enzo
+namespace: helix
 label: Attribute Noise
 tags: [noise]
 inputs:
   - label: Geometry
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
 parameters:
   - name: name
     type: string
@@ -102,9 +102,9 @@ TEST_CASE("A minimal manifest gives the node its name and implementation")
     const nt::NodeManifest manifest = nt::NodeManifest::loadFromString(kMinimalManifest);
 
     REQUIRE(manifest.getNodeType().getName() == "circle");
-    REQUIRE(manifest.getNodeType().getFullName() == "enzo::circle");
+    REQUIRE(manifest.getNodeType().getFullName() == "helix::circle");
     const auto& implementation = std::get<nt::CppImplementation>(manifest.getImplementation());
-    REQUIRE(implementation.library == "enzoOps");
+    REQUIRE(implementation.library == "helixOps");
 }
 
 TEST_CASE("A missing label falls back to the node name")
@@ -126,10 +126,10 @@ TEST_CASE("A named constructor is kept as written")
     const std::string yaml = R"(
 version: 1
 name: hexagon
-namespace: enzo
+namespace: helix
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
   constructor: circle
 )";
     const nt::NodeManifest manifest = nt::NodeManifest::loadFromString(yaml);
@@ -141,9 +141,9 @@ TEST_CASE("An alias names the node type it stands in for")
 {
     const nt::NodeManifest manifest = nt::NodeManifest::loadFromString(kAliasManifest);
 
-    REQUIRE(manifest.getNodeType().getFullName() == "enzo::mountain");
+    REQUIRE(manifest.getNodeType().getFullName() == "helix::mountain");
     const auto& implementation = std::get<nt::AliasImplementation>(manifest.getImplementation());
-    REQUIRE(implementation.aliasedType == "enzo::attributeNoise");
+    REQUIRE(implementation.aliasedType == "helix::attributeNoise");
 }
 
 TEST_CASE("An alias reads its parameter values as written")
@@ -173,14 +173,14 @@ TEST_CASE("Inputs and the output count are read from the manifest")
     const std::string yaml = R"(
 version: 1
 name: sweep
-namespace: enzo
+namespace: helix
 inputs:
   - label: Backbone
   - label: Profile
 outputs: 3
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
 )";
     const nt::NodeManifest manifest = nt::NodeManifest::loadFromString(yaml);
     const nt::NodeType& nodeType = manifest.getNodeType();
@@ -196,14 +196,14 @@ TEST_CASE("An input is required unless the manifest marks it optional")
     const std::string yaml = R"(
 version: 1
 name: sweep
-namespace: enzo
+namespace: helix
 inputs:
   - label: Backbone
   - label: Profile
     optional: true
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
 )";
     const nt::NodeManifest manifest = nt::NodeManifest::loadFromString(yaml);
     const nt::NodeType& nodeType = manifest.getNodeType();
@@ -217,12 +217,12 @@ TEST_CASE("An input with no label is rejected")
     const std::string yaml = R"(
 version: 1
 name: blur
-namespace: enzo
+namespace: helix
 inputs:
   - multiInput: true
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
 )";
     REQUIRE_THROWS(nt::NodeManifest::loadFromString(yaml));
 }
@@ -232,13 +232,13 @@ TEST_CASE("A multi input port can be declared last")
     const std::string yaml = R"(
 version: 1
 name: merge
-namespace: enzo
+namespace: helix
 inputs:
   - label: Geometry
     multiInput: true
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
 )";
     const nt::NodeManifest manifest = nt::NodeManifest::loadFromString(yaml);
     const nt::NodeType& nodeType = manifest.getNodeType();
@@ -253,14 +253,14 @@ TEST_CASE("A multi input port before another port is rejected")
     const std::string yaml = R"(
 version: 1
 name: broken
-namespace: enzo
+namespace: helix
 inputs:
   - label: Cutters
     multiInput: true
   - label: Geometry
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
 )";
     REQUIRE_THROWS(nt::NodeManifest::loadFromString(yaml));
 }
@@ -279,18 +279,18 @@ TEST_CASE("Namespace, tags, icon and docs are read from the manifest")
     const std::string yaml = R"(
 version: 1
 name: circle
-namespace: enzo
+namespace: helix
 tags: [primitive, curve]
 icon: icon.svg
 docs: docs.md
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
 )";
     const nt::NodeManifest manifest = nt::NodeManifest::loadFromString(yaml);
     const nt::NodeType& nodeType = manifest.getNodeType();
 
-    REQUIRE(nodeType.typeNamespace == "enzo");
+    REQUIRE(nodeType.typeNamespace == "helix");
     REQUIRE(nodeType.tags == std::vector<std::string>{"primitive", "curve"});
     REQUIRE(nodeType.iconPath == "icon.svg");
     REQUIRE(nodeType.docsPath == "docs.md");
@@ -618,7 +618,7 @@ version: 2
 name: circle
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
 )";
     REQUIRE_THROWS_AS(nt::NodeManifest::loadFromString(yaml), std::runtime_error);
 }
@@ -629,7 +629,7 @@ TEST_CASE("A manifest with no name is rejected")
 version: 1
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
 )";
     REQUIRE_THROWS_AS(nt::NodeManifest::loadFromString(yaml), std::runtime_error);
 }
@@ -641,7 +641,7 @@ version: 1
 name: circle
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
 )";
     REQUIRE_THROWS_AS(nt::NodeManifest::loadFromString(yaml), std::runtime_error);
 }
@@ -651,7 +651,7 @@ TEST_CASE("A manifest with no implementation is rejected")
     const std::string yaml = R"(
 version: 1
 name: circle
-namespace: enzo
+namespace: helix
 )";
     REQUIRE_THROWS_AS(nt::NodeManifest::loadFromString(yaml), std::runtime_error);
 }
@@ -661,10 +661,10 @@ TEST_CASE("An implementation kind that is not built yet is rejected")
     const std::string yaml = R"(
 version: 1
 name: torus
-namespace: enzo
+namespace: helix
 implementation:
   kind: compound
-  network: network.enzo
+  network: network.kut
 )";
     REQUIRE_THROWS_AS(nt::NodeManifest::loadFromString(yaml), std::runtime_error);
 }
@@ -674,7 +674,7 @@ TEST_CASE("An alias with no type is rejected")
     const std::string yaml = R"(
 version: 1
 name: mountain
-namespace: enzo
+namespace: helix
 implementation:
   kind: alias
 )";
@@ -741,10 +741,10 @@ tags: [terrain]
 
     const nt::NodeAlias alias = aliasManifest.getNodeAlias(aliasedManifest.getNodeType());
 
-    REQUIRE(alias.getFullName() == "enzo::mountain");
+    REQUIRE(alias.getFullName() == "helix::mountain");
     REQUIRE(alias.getLabel() == "Mountain");
     REQUIRE(alias.tags == std::vector<std::string>{"terrain"});
-    REQUIRE(alias.aliasedType == "enzo::attributeNoise");
+    REQUIRE(alias.aliasedType == "helix::attributeNoise");
 }
 
 TEST_CASE("An alias reads each parameter value as the type of the parameter it sets")
@@ -921,7 +921,7 @@ TEST_CASE("A script implementation names the source the node runs")
         std::get<nt::ScriptImplementation>(manifest.getImplementation());
 
     REQUIRE(implementation.source == "source.das");
-    REQUIRE(implementation.library == "enzoOps");
+    REQUIRE(implementation.library == "helixOps");
     REQUIRE(implementation.constructor == "userNode");
 }
 
@@ -964,7 +964,7 @@ TEST_CASE("The sweep manifest parses into its node type")
     REQUIRE(nodeType.inputPorts.at(0).label == "Backbone");
     REQUIRE(nodeType.inputPorts.at(1).label == "Profile");
     REQUIRE(nodeType.inputPorts.at(1).optional);
-    REQUIRE(std::get<nt::CppImplementation>(manifest.getImplementation()).library == "enzoOps");
+    REQUIRE(std::get<nt::CppImplementation>(manifest.getImplementation()).library == "helixOps");
 
     // The parameters, in the order the node's interface is built from.
     REQUIRE(nodeType.templates.size() == 12);

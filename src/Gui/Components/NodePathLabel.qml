@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // A node's path with the node itself picked out.
 //

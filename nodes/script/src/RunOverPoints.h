@@ -6,12 +6,12 @@
 #include <tbb/enumerable_thread_specific.h>
 #include <tbb/parallel_for.h>
 
-namespace enzo::script {
+namespace helix::script {
 class PointScript;
 class ScriptContext;
-} // namespace enzo::script
+} // namespace helix::script
 
-namespace enzo {
+namespace helix {
 
 /// @brief The number of points one thread takes at a time. A whole multiple of 64
 /// keeps two threads off the same word of a bool attribute.
@@ -31,7 +31,7 @@ inline String runOverPoints(
     NodePacket& output
 )
 {
-    using namespace enzo;
+    using namespace helix;
 
     // Clones the script for each thread, since one script runs a single point at a time.
     tbb::enumerable_thread_specific<std::shared_ptr<script::PointScript>> threadScripts(
@@ -77,4 +77,4 @@ inline String runOverPoints(
     return error;
 }
 
-} // namespace enzo
+} // namespace helix

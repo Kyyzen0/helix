@@ -17,20 +17,20 @@ struct NMReset
 {
     NMReset()
     {
-        enzo::nt::NodeLoader::loadNodes();
-        enzo::nt::nm()._reset();
+        helix::nt::NodeLoader::loadNodes();
+        helix::nt::nm()._reset();
     }
-    ~NMReset() { enzo::nt::nm()._reset(); }
+    ~NMReset() { helix::nt::nm()._reset(); }
 };
 
 // Registers a node type that holds a scope and returns its full name.
 std::string addContainerType()
 {
-    enzo::nt::NodeLoader::loadNodes();
-    enzo::nt::NodeType nodeType = enzo::nt::NodeTypeTable::requireNodeType("enzo::grid");
+    helix::nt::NodeLoader::loadNodes();
+    helix::nt::NodeType nodeType = helix::nt::NodeTypeTable::requireNodeType("helix::grid");
     nodeType.internalName = "container";
     nodeType.childScopeType = "geometry";
-    return enzo::nt::NodeTypeTable::addNodeType(std::move(nodeType)).getFullName();
+    return helix::nt::NodeTypeTable::addNodeType(std::move(nodeType)).getFullName();
 }
 
 const std::string containerTypeName = addContainerType();
@@ -38,36 +38,36 @@ const std::string containerTypeName = addContainerType();
 // Registers an alias of the grid that starts with three rows and returns its full name.
 std::string addThreeRowGridAlias()
 {
-    enzo::nt::NodeLoader::loadNodes();
+    helix::nt::NodeLoader::loadNodes();
 
     ParameterSerializable rows;
     rows.name = "rows";
     rows.intValues = {3};
 
-    enzo::nt::NodeAlias alias;
+    helix::nt::NodeAlias alias;
     alias.internalName = "threeRowGrid";
     alias.typeNamespace = "test";
     alias.displayName = "Three Row Grid";
-    alias.aliasedType = "enzo::grid";
+    alias.aliasedType = "helix::grid";
     alias.parameterValues = {rows};
-    return enzo::nt::NodeTypeTable::addNodeAlias(std::move(alias)).getFullName();
+    return helix::nt::NodeTypeTable::addNodeAlias(std::move(alias)).getFullName();
 }
 
 const std::string threeRowGridAliasName = addThreeRowGridAlias();
 
 TEST_CASE_METHOD(NMReset, "network fixture separation start")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nt::NodeId newNodeId = nm.createNode("enzo::grid");
+    nt::NodeId newNodeId = nm.createNode("helix::grid");
     REQUIRE(newNodeId == 1);
     REQUIRE(nm.isValidNode(1));
 }
 
 TEST_CASE_METHOD(NMReset, "network fixture separation end")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     REQUIRE_FALSE(nm.isValidNode(1));
@@ -75,11 +75,11 @@ TEST_CASE_METHOD(NMReset, "network fixture separation end")
 
 TEST_CASE_METHOD(NMReset, "network")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nt::NodeId newNodeId = nm.createNode("enzo::grid");
-    nt::NodeId newNodeId2 = nm.createNode("enzo::grid");
+    nt::NodeId newNodeId = nm.createNode("helix::grid");
+    nt::NodeId newNodeId2 = nm.createNode("helix::grid");
 
     REQUIRE(nm.isValidNode(newNodeId));
     REQUIRE(nm.isValidNode(newNodeId2));
@@ -90,13 +90,13 @@ TEST_CASE_METHOD(NMReset, "network")
 
 TEST_CASE_METHOD(NMReset, "Undoing a node deletion restores its node links")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
     nm.undoStack().clear();
 
     // Build two connected nodes where the upstream output feeds the downstream input
-    nt::NodeId upstream = nm.createNode("enzo::grid");
-    nt::NodeId downstream = nm.createNode("enzo::grid");
+    nt::NodeId upstream = nm.createNode("helix::grid");
+    nt::NodeId downstream = nm.createNode("helix::grid");
     nt::nm().connectNodes(upstream, 0, downstream, 0);
 
     // Delete the downstream node
@@ -112,13 +112,13 @@ TEST_CASE_METHOD(NMReset, "Undoing a node deletion restores its node links")
 
 TEST_CASE_METHOD(NMReset, "Cooking a node cooks its whole upstream chain")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     // Wire a three node chain where each output feeds the next input
-    nt::NodeId first = nm.createNode("enzo::grid");
-    nt::NodeId second = nm.createNode("enzo::grid");
-    nt::NodeId third = nm.createNode("enzo::grid");
+    nt::NodeId first = nm.createNode("helix::grid");
+    nt::NodeId second = nm.createNode("helix::grid");
+    nt::NodeId third = nm.createNode("helix::grid");
     nt::nm().connectNodes(first, 0, second, 0);
     nt::nm().connectNodes(second, 0, third, 0);
 
@@ -131,12 +131,12 @@ TEST_CASE_METHOD(NMReset, "Cooking a node cooks its whole upstream chain")
 
 TEST_CASE_METHOD(NMReset, "Dirtying an upstream node restages everything downstream")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nt::NodeId first = nm.createNode("enzo::grid");
-    nt::NodeId second = nm.createNode("enzo::grid");
-    nt::NodeId third = nm.createNode("enzo::grid");
+    nt::NodeId first = nm.createNode("helix::grid");
+    nt::NodeId second = nm.createNode("helix::grid");
+    nt::NodeId third = nm.createNode("helix::grid");
     nt::nm().connectNodes(first, 0, second, 0);
     nt::nm().connectNodes(second, 0, third, 0);
 
@@ -152,12 +152,12 @@ TEST_CASE_METHOD(NMReset, "Dirtying an upstream node restages everything downstr
 
 TEST_CASE_METHOD(NMReset, "Cooking pulls geometry across an input node link")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     // A grid feeding a transform, which copies the grid's primitives through
-    nt::NodeId grid = nm.createNode("enzo::grid");
-    nt::NodeId transform = nm.createNode("enzo::transform");
+    nt::NodeId grid = nm.createNode("helix::grid");
+    nt::NodeId transform = nm.createNode("helix::transform");
     nt::nm().connectNodes(grid, 0, transform, 0);
 
     nm.cook(transform);
@@ -171,11 +171,11 @@ TEST_CASE_METHOD(NMReset, "Cooking pulls geometry across an input node link")
 
 TEST_CASE_METHOD(NMReset, "A node with no input cooks to an empty output")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     // A transform with nothing wired in has no primitives to pass through
-    nt::NodeId transform = nm.createNode("enzo::transform");
+    nt::NodeId transform = nm.createNode("helix::transform");
 
     nm.cook(transform);
 
@@ -184,27 +184,27 @@ TEST_CASE_METHOD(NMReset, "A node with no input cooks to an empty output")
 
 TEST_CASE_METHOD(NMReset, "reset")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nt::NodeId newNodeId = nm.createNode("enzo::grid");
+    nt::NodeId newNodeId = nm.createNode("helix::grid");
 
     nm._reset();
 
     REQUIRE_FALSE(nm.isValidNode(newNodeId));
 
-    nt::NodeId newNodeId2 = nm.createNode("enzo::grid");
+    nt::NodeId newNodeId2 = nm.createNode("helix::grid");
     REQUIRE(nm.isValidNode(newNodeId2));
 }
 
 TEST_CASE_METHOD(NMReset, "New nodes are numbered from their type name")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nt::NodeId first = nm.createNode("enzo::grid");
-    nt::NodeId second = nm.createNode("enzo::grid");
-    nt::NodeId transform = nm.createNode("enzo::transform");
+    nt::NodeId first = nm.createNode("helix::grid");
+    nt::NodeId second = nm.createNode("helix::grid");
+    nt::NodeId transform = nm.createNode("helix::transform");
 
     REQUIRE(nm.getNode(first).getPath() == "/grid1");
     REQUIRE(nm.getNode(second).getPath() == "/grid2");
@@ -215,11 +215,11 @@ TEST_CASE_METHOD(NMReset, "New nodes are numbered from their type name")
 
 TEST_CASE_METHOD(NMReset, "A requested node name is numbered until it is free")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nt::NodeId first = nm.createNode("enzo::grid", Path("/"), "mesh");
-    nt::NodeId second = nm.createNode("enzo::grid", Path("/"), "mesh");
+    nt::NodeId first = nm.createNode("helix::grid", Path("/"), "mesh");
+    nt::NodeId second = nm.createNode("helix::grid", Path("/"), "mesh");
 
     REQUIRE(nm.getNode(first).getName() == "mesh");
     REQUIRE(nm.getNode(second).getName() == "mesh1");
@@ -227,12 +227,12 @@ TEST_CASE_METHOD(NMReset, "A requested node name is numbered until it is free")
 
 TEST_CASE_METHOD(NMReset, "A node name only has to be free among its siblings")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nt::NodeId atRoot = nm.createNode("enzo::grid");
+    nt::NodeId atRoot = nm.createNode("helix::grid");
     nm.createNode(containerTypeName);
-    nt::NodeId nested = nm.createNode("enzo::grid", Path("/container1"));
+    nt::NodeId nested = nm.createNode("helix::grid", Path("/container1"));
 
     // The same name in two scopes is two different nodes
     REQUIRE(nm.getNode(atRoot).getPath() == "/grid1");
@@ -242,13 +242,13 @@ TEST_CASE_METHOD(NMReset, "A node name only has to be free among its siblings")
 
 TEST_CASE_METHOD(NMReset, "A node is found by an absolute or a relative path")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nt::NodeId outer = nm.createNode("enzo::grid");
+    nt::NodeId outer = nm.createNode("helix::grid");
     nm.createNode(containerTypeName);
-    nt::NodeId inner = nm.createNode("enzo::grid", Path("/container1"));
-    nt::NodeId sibling = nm.createNode("enzo::grid", Path("/container1"));
+    nt::NodeId inner = nm.createNode("helix::grid", Path("/container1"));
+    nt::NodeId sibling = nm.createNode("helix::grid", Path("/container1"));
 
     // An absolute path needs no node to start from
     REQUIRE(nm.findNode("/grid1") == &nm.getNode(outer));
@@ -273,11 +273,11 @@ TEST_CASE_METHOD(NMReset, "A node is found by an absolute or a relative path")
 
 TEST_CASE_METHOD(NMReset, "Undoing a node deletion restores its name")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nm.createNode("enzo::grid", Path("/"), "mesh");
-    nt::NodeId second = nm.createNode("enzo::grid", Path("/"), "mesh");
+    nm.createNode("helix::grid", Path("/"), "mesh");
+    nt::NodeId second = nm.createNode("helix::grid", Path("/"), "mesh");
     REQUIRE(nm.getNode(second).getName() == "mesh1");
 
     nm.deleteNode(second);
@@ -289,13 +289,13 @@ TEST_CASE_METHOD(NMReset, "Undoing a node deletion restores its name")
 
 TEST_CASE_METHOD(NMReset, "A scope exists only where a node holds one")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     // The root scope is always there for the top level nodes to live in
     REQUIRE(nm.getScope(Path("/")) != nullptr);
 
-    nm.createNode("enzo::grid");
+    nm.createNode("helix::grid");
     nm.createNode(containerTypeName);
 
     REQUIRE(nm.getScope(Path("/container1")) != nullptr);
@@ -308,24 +308,24 @@ TEST_CASE_METHOD(NMReset, "A scope exists only where a node holds one")
 
 TEST_CASE_METHOD(NMReset, "A node cannot be created where there is no scope")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    REQUIRE_THROWS(nm.createNode("enzo::grid", Path("/nothing_here")));
+    REQUIRE_THROWS(nm.createNode("helix::grid", Path("/nothing_here")));
 
     // An ordinary node is not a place other nodes can live
-    nm.createNode("enzo::grid");
-    REQUIRE_THROWS(nm.createNode("enzo::grid", Path("/grid1")));
+    nm.createNode("helix::grid");
+    REQUIRE_THROWS(nm.createNode("helix::grid", Path("/grid1")));
 }
 
 TEST_CASE_METHOD(NMReset, "A scope lists the nodes directly inside it")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nt::NodeId atRoot = nm.createNode("enzo::grid");
+    nt::NodeId atRoot = nm.createNode("helix::grid");
     nt::NodeId container = nm.createNode(containerTypeName);
-    nt::NodeId inner = nm.createNode("enzo::grid", Path("/container1"));
+    nt::NodeId inner = nm.createNode("helix::grid", Path("/container1"));
 
     std::vector<nt::NodeId> rootChildren = nm.getChildNodeIds(Path("/"));
     REQUIRE(rootChildren.size() == 2);
@@ -338,13 +338,13 @@ TEST_CASE_METHOD(NMReset, "A scope lists the nodes directly inside it")
 
 TEST_CASE_METHOD(NMReset, "Deleting a node that holds a scope takes its contents with it")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     nt::NodeId container = nm.createNode(containerTypeName);
-    nt::NodeId inner = nm.createNode("enzo::grid", Path("/container1"));
+    nt::NodeId inner = nm.createNode("helix::grid", Path("/container1"));
     nt::NodeId deeper = nm.createNode(containerTypeName, Path("/container1"));
-    nt::NodeId deepest = nm.createNode("enzo::grid", Path("/container1/container1"));
+    nt::NodeId deepest = nm.createNode("helix::grid", Path("/container1/container1"));
 
     nm.deleteNode(container);
 
@@ -361,12 +361,12 @@ TEST_CASE_METHOD(NMReset, "Deleting a node that holds a scope takes its contents
 
 TEST_CASE_METHOD(NMReset, "Undoing a delete brings the node back with its position and wiring")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
     nm.undoStack().clear();
 
-    nt::NodeId upstream = nm.createNode("enzo::grid");
-    nt::NodeId downstream = nm.createNode("enzo::transform", Path("/"), "", {5.f, 7.f});
+    nt::NodeId upstream = nm.createNode("helix::grid");
+    nt::NodeId downstream = nm.createNode("helix::transform", Path("/"), "", {5.f, 7.f});
     nm.connectNodes(upstream, 0, downstream, 0);
 
     nm.deleteNode(downstream);
@@ -391,13 +391,13 @@ TEST_CASE_METHOD(NMReset, "Undoing a delete brings the node back with its positi
 
 TEST_CASE_METHOD(NMReset, "Undoing a delete restores a scope before the nodes living in it")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
     nm.undoStack().clear();
 
     nt::NodeId container = nm.createNode(containerTypeName);
-    nt::NodeId inner = nm.createNode("enzo::grid", Path("/container1"));
-    nt::NodeId deeper = nm.createNode("enzo::transform", Path("/container1"), "", {2.f, 3.f});
+    nt::NodeId inner = nm.createNode("helix::grid", Path("/container1"));
+    nt::NodeId deeper = nm.createNode("helix::transform", Path("/container1"), "", {2.f, 3.f});
     nm.connectNodes(inner, 0, deeper, 0);
 
     nm.deleteNode(container);
@@ -422,42 +422,42 @@ TEST_CASE_METHOD(NMReset, "Undoing a delete restores a scope before the nodes li
 }
 
 // Returns the source node feeding each input of a node, low index first.
-static std::vector<enzo::nt::NodeId> getInputSources(enzo::nt::NodeId nodeId)
+static std::vector<helix::nt::NodeId> getInputSources(helix::nt::NodeId nodeId)
 {
-    std::vector<enzo::nt::NodeId> sources;
-    for (const enzo::nt::NodeLink& nodeLink : enzo::nt::nm().graph().getInputs(nodeId))
+    std::vector<helix::nt::NodeId> sources;
+    for (const helix::nt::NodeLink& nodeLink : helix::nt::nm().graph().getInputs(nodeId))
         sources.push_back(nodeLink.sourceNode);
     return sources;
 }
 
 TEST_CASE_METHOD(NMReset, "Connecting into a multi input port makes room for the node link")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nt::NodeId merge = nm.createNode("enzo::merge");
-    nt::NodeId first = nm.createNode("enzo::grid");
-    nt::NodeId second = nm.createNode("enzo::grid");
+    nt::NodeId merge = nm.createNode("helix::merge");
+    nt::NodeId first = nm.createNode("helix::grid");
+    nt::NodeId second = nm.createNode("helix::grid");
 
     nm.connectNodes(first, 0, merge, 0);
     nm.connectNodes(second, 0, merge, 1);
     REQUIRE(getInputSources(merge) == std::vector<nt::NodeId>{first, second});
 
     // Connects into an input the multi port already holds, moving the rest up
-    nt::NodeId inserted = nm.createNode("enzo::grid");
+    nt::NodeId inserted = nm.createNode("helix::grid");
     nm.connectNodes(inserted, 0, merge, 1);
     REQUIRE(getInputSources(merge) == std::vector<nt::NodeId>{first, inserted, second});
 }
 
 TEST_CASE_METHOD(NMReset, "Disconnecting from a multi input port closes the gap")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nt::NodeId merge = nm.createNode("enzo::merge");
-    nt::NodeId first = nm.createNode("enzo::grid");
-    nt::NodeId second = nm.createNode("enzo::grid");
-    nt::NodeId third = nm.createNode("enzo::grid");
+    nt::NodeId merge = nm.createNode("helix::merge");
+    nt::NodeId first = nm.createNode("helix::grid");
+    nt::NodeId second = nm.createNode("helix::grid");
+    nt::NodeId third = nm.createNode("helix::grid");
 
     nm.connectNodes(first, 0, merge, 0);
     nm.connectNodes(second, 0, merge, 1);
@@ -469,17 +469,17 @@ TEST_CASE_METHOD(NMReset, "Disconnecting from a multi input port closes the gap"
 
 TEST_CASE_METHOD(NMReset, "Undoing a node link into a multi input port restores the order")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
     nm.undoStack().clear();
 
-    nt::NodeId merge = nm.createNode("enzo::merge");
-    nt::NodeId first = nm.createNode("enzo::grid");
-    nt::NodeId second = nm.createNode("enzo::grid");
+    nt::NodeId merge = nm.createNode("helix::merge");
+    nt::NodeId first = nm.createNode("helix::grid");
+    nt::NodeId second = nm.createNode("helix::grid");
     nm.connectNodes(first, 0, merge, 0);
     nm.connectNodes(second, 0, merge, 1);
 
-    nt::NodeId inserted = nm.createNode("enzo::grid");
+    nt::NodeId inserted = nm.createNode("helix::grid");
     nm.connectNodes(inserted, 0, merge, 0);
     REQUIRE(getInputSources(merge) == std::vector<nt::NodeId>{inserted, first, second});
 
@@ -492,12 +492,12 @@ TEST_CASE_METHOD(NMReset, "Undoing a node link into a multi input port restores 
 
 TEST_CASE_METHOD(NMReset, "Connecting into an occupied single input port replaces the node link")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nt::NodeId transform = nm.createNode("enzo::transform");
-    nt::NodeId first = nm.createNode("enzo::grid");
-    nt::NodeId second = nm.createNode("enzo::grid");
+    nt::NodeId transform = nm.createNode("helix::transform");
+    nt::NodeId first = nm.createNode("helix::grid");
+    nt::NodeId second = nm.createNode("helix::grid");
 
     nm.connectNodes(first, 0, transform, 0);
     nm.connectNodes(second, 0, transform, 0);
@@ -506,12 +506,12 @@ TEST_CASE_METHOD(NMReset, "Connecting into an occupied single input port replace
 
 TEST_CASE_METHOD(NMReset, "Connecting past the last input of a multi input port appends")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    nt::NodeId merge = nm.createNode("enzo::merge");
-    nt::NodeId first = nm.createNode("enzo::grid");
-    nt::NodeId second = nm.createNode("enzo::grid");
+    nt::NodeId merge = nm.createNode("helix::merge");
+    nt::NodeId first = nm.createNode("helix::grid");
+    nt::NodeId second = nm.createNode("helix::grid");
 
     nm.connectNodes(first, 0, merge, 0);
     nt::NodeLink nodeLink = nm.connectNodes(second, 0, merge, 5);
@@ -526,13 +526,13 @@ TEST_CASE_METHOD(
     "An alias creates a node of the type it stands in for with its values set"
 )
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     nt::NodeId grid = nm.createNode(threeRowGridAliasName);
     nt::Node& node = nm.getNode(grid);
 
-    REQUIRE(node.getType().getFullName() == "enzo::grid");
+    REQUIRE(node.getType().getFullName() == "helix::grid");
     REQUIRE(node.getPath() == "/grid1");
     REQUIRE(node.getParameter("rows").lock()->evalInt() == 3);
     REQUIRE(node.getParameter("columns").lock()->evalInt() == 10);
@@ -540,18 +540,18 @@ TEST_CASE_METHOD(
 
 TEST_CASE_METHOD(NMReset, "An alias leaves the defaults of the type it stands in for alone")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     nm.createNode(threeRowGridAliasName);
-    nt::NodeId plainGrid = nm.createNode("enzo::grid");
+    nt::NodeId plainGrid = nm.createNode("helix::grid");
 
     REQUIRE(nm.getNode(plainGrid).getParameter("rows").lock()->evalInt() == 10);
 }
 
 TEST_CASE_METHOD(NMReset, "Redoing the creation of an alias node brings back its values")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
     nm.undoStack().clear();
 
@@ -562,4 +562,32 @@ TEST_CASE_METHOD(NMReset, "Redoing the creation of an alias node brings back its
 
     nm.undoStack().redo();
     REQUIRE(nm.getNode(grid).getParameter("rows").lock()->evalInt() == 3);
+}
+
+// The "enzo::" prefix exists only for scenes saved before the rename to "helix".
+TEST_CASE("normalizeTypeName rewrites only the exact legacy enzo:: prefix")
+{
+    using helix::nt::normalizeTypeName;
+
+    REQUIRE(normalizeTypeName("enzo::grid") == "helix::grid");
+    REQUIRE(normalizeTypeName("helix::grid") == "helix::grid");
+    REQUIRE(normalizeTypeName("enzo") == "enzo");
+    REQUIRE(normalizeTypeName("enzoish::x") == "enzoish::x");
+    REQUIRE(normalizeTypeName("grid") == "grid");
+    REQUIRE(normalizeTypeName("") == "");
+    // Only a leading prefix counts
+    REQUIRE(normalizeTypeName("test::enzo::grid") == "test::enzo::grid");
+}
+
+TEST_CASE_METHOD(NMReset, "A node can be created from a legacy enzo:: type name")
+{
+    using namespace helix;
+    auto& nm = nt::nm();
+
+    nt::NodeId grid = nm.createNode("enzo::grid");
+    REQUIRE(nm.getNode(grid).getType().getFullName() == "helix::grid");
+
+    // An alias resolves through the legacy name too
+    nt::NodeId mountain = nm.createNode("enzo::mountain");
+    REQUIRE(nm.getNode(mountain).getType().getFullName() == "helix::attributeNoise");
 }

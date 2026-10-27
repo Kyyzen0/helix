@@ -3,11 +3,11 @@
 #include <memory>
 #include <unordered_map>
 
-namespace enzo::daslang {
+namespace helix::daslang {
 class CompiledProgram;
 }
 
-namespace enzo::expr {
+namespace helix::expr {
 
 class ExpressionContext;
 
@@ -65,4 +65,4 @@ class ExpressionEngine
     std::unordered_map<String, std::shared_ptr<daslang::CompiledProgram>> cache_;
 };
 
-} // namespace enzo::expr
+} // namespace helix::expr

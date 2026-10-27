@@ -8,11 +8,11 @@
 #include <boost/signals2/connection.hpp>
 #include <memory>
 
-namespace enzo {
+namespace helix {
 class NodePacket;
 }
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief View-model backing the geometry spreadsheet.
 ///
@@ -76,4 +76,4 @@ class SpreadsheetViewModel : public QObject
     boost::signals2::scoped_connection primaryGeoSubscription_;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

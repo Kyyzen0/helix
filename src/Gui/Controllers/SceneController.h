@@ -5,7 +5,7 @@
 #include <QStringList>
 #include <QUrl>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief File side of the menu bar: new, open and save of the scene.
 ///
@@ -57,4 +57,4 @@ class SceneController : public QObject
     QString currentFilePath_;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

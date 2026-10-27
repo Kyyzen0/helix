@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // The three colours that stand for a theme, as one rounded strip.
 Item {

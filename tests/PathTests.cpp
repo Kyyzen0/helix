@@ -4,7 +4,7 @@
 
 TEST_CASE("pathValidation")
 {
-    using namespace enzo;
+    using namespace helix;
 
     // alphanumeric validation
     Path validAlphaNumeric = "/a/valid/path";
@@ -44,7 +44,7 @@ TEST_CASE("pathValidation")
 
 TEST_CASE("pathgetters")
 {
-    using namespace enzo;
+    using namespace helix;
 
     // path components
     Path basicPath = "/abs/path/to/object";
@@ -73,7 +73,7 @@ TEST_CASE("pathgetters")
 
 TEST_CASE("pathManipulation")
 {
-    using namespace enzo;
+    using namespace helix;
 
     // appending to path
     Path basicPath = "/abs/path/to/object";
@@ -106,7 +106,7 @@ TEST_CASE("pathManipulation")
 
 TEST_CASE("nodes")
 {
-    using namespace enzo;
+    using namespace helix;
 
     Path pathA = "/path/to/something";
     Path pathB = "/path/to/something";
@@ -118,7 +118,7 @@ TEST_CASE("nodes")
 
 TEST_CASE("A parent step is a valid path component")
 {
-    using namespace enzo;
+    using namespace helix;
 
     REQUIRE(Path("../mesh").isValid());
     REQUIRE(Path("/assets/../mesh").isValid());
@@ -135,7 +135,7 @@ TEST_CASE("A parent step is a valid path component")
 
 TEST_CASE("A path resolves to an absolute location against an anchor")
 {
-    using namespace enzo;
+    using namespace helix;
 
     Path anchor = "/assets/component";
 

@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 import "../Components"
 
 // The field naming the theme in use, opening the list of themes to choose from.

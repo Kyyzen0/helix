@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace enzo::utils {
+namespace helix::utils {
 
 std::optional<AttributeOperation> getAttributeOperation(const String& name)
 {
@@ -70,4 +70,4 @@ void applyOperation(
     }
 }
 
-} // namespace enzo::utils
+} // namespace helix::utils

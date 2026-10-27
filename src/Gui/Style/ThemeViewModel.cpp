@@ -14,7 +14,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 
@@ -272,4 +272,4 @@ QString ThemeViewModel::currentYaml() const
     return QString::fromUtf8(out.c_str());
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

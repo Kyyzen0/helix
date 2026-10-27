@@ -1,7 +1,7 @@
 #include "Engine/Util/UnionFind.h"
 #include <utility>
 
-namespace enzo::util {
+namespace helix::util {
 
 UnionFind::UnionFind(std::size_t elementCount)
     : parent_(elementCount), rank_(elementCount, 0), componentCount_(elementCount)
@@ -35,4 +35,4 @@ bool UnionFind::unite(std::size_t a, std::size_t b)
     return true;
 }
 
-} // namespace enzo::util
+} // namespace helix::util

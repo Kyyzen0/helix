@@ -4,7 +4,7 @@
 #include "Engine/Primitives/Primitive.h"
 #include "Engine/Selection/PrimPath.h"
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 
@@ -170,4 +170,4 @@ int PrimitiveTreeModel::primitiveIndexAt(const QModelIndex& index) const
     return nodeAt(index)->primitiveIndex;
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

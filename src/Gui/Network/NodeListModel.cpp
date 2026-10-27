@@ -5,7 +5,7 @@
 #include <QRectF>
 #include <algorithm>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 
@@ -365,4 +365,4 @@ int NodeListModel::rowOf(nt::NodeId nodeId) const
     return -1;
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

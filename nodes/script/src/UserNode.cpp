@@ -26,7 +26,7 @@
  */
 namespace {
 
-class UserNode : public enzo::nt::NodeImpl
+class UserNode : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -36,7 +36,7 @@ class UserNode : public enzo::nt::NodeImpl
 
 void UserNode::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -73,4 +73,4 @@ void UserNode::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(userNode, UserNode)
+HELIX_REGISTER_NODE(userNode, UserNode)

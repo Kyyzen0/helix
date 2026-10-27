@@ -1,7 +1,7 @@
 #include "Engine/Attribute/Transform.h"
 #include "Engine/Attribute/Attribute.h"
 
-namespace enzo {
+namespace helix {
 
 TransformOrder getTransformOrder(std::string_view name)
 {
@@ -90,4 +90,4 @@ Transform Transform::lookAt(const Vector3& translation, const Vector3& forward, 
     return result;
 }
 
-} // namespace enzo
+} // namespace helix

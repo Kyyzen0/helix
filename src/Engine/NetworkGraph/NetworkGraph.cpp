@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace enzo::nt {
+namespace helix::nt {
 
 void NetworkGraph::connect(const NodeLink& nodeLink)
 {
@@ -294,4 +294,4 @@ void NetworkGraph::addDependent_(
     pending.push_back(unit);
 }
 
-} // namespace enzo::nt
+} // namespace helix::nt

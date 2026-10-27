@@ -1,6 +1,6 @@
 #include "Engine/Parameter/Default.h"
 
-namespace enzo {
+namespace helix {
 
 prm::Default::Default() : floatDefault_{0}, stringDefault_{""} {}
 
@@ -14,4 +14,4 @@ prm::Default::Default(int intDefault) : floatDefault_(intDefault), stringDefault
 
 prm::Default::Default(bool boolDefault) : floatDefault_(boolDefault), stringDefault_{""} {}
 
-} // namespace enzo
+} // namespace helix

@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // Frame scale carrying the playhead on the current frame.
 Item {

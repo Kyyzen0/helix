@@ -1,10 +1,10 @@
 #include "Engine/Expression/ExpressionEngine.h"
 #include "Engine/Daslang/Runtime.h"
 
-namespace enzo::expr {
+namespace helix::expr {
 
 namespace {
-constexpr const char* evalFunctionName = "enzoEvalExpression";
+constexpr const char* evalFunctionName = "helixEvalExpression";
 
 // Wraps a bare expression in an exported function that returns the given type,
 // so daslang has a function to compile and call.
@@ -12,7 +12,7 @@ String wrapExpression(const String& expression, const String& returnType)
 {
     return "options gen2\n"
            "require math\n"
-           "require enzo_expression\n"
+           "require helix_expression\n"
            "[export]\n"
            "def " +
            String(evalFunctionName) + " : " + returnType +
@@ -77,4 +77,4 @@ bool ExpressionEngine::evalString(
     return script->evalString(evalFunctionName, context, result, error);
 }
 
-} // namespace enzo::expr
+} // namespace helix::expr

@@ -9,7 +9,7 @@
 #include "Engine/Primitives/Mesh.h"
 #include <catch2/catch_test_macros.hpp>
 
-using namespace enzo;
+using namespace helix;
 
 struct NMReset
 {
@@ -40,7 +40,7 @@ TEST_CASE("compile reports code that does not compile")
 TEST_CASE_METHOD(NMReset, "A script run over many points reads a parameter once")
 {
     auto& nm = nt::nm();
-    nt::NodeId source = nm.createNode("enzo::transform");
+    nt::NodeId source = nm.createNode("helix::transform");
     nm.getNode(source).getParameter("translate").lock()->setFloat(7.0f);
 
     String error;

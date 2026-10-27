@@ -1,6 +1,6 @@
 /**
  * @file Types.h
- * @brief Basic attribute, parameter, and node types for Enzo.
+ * @brief Basic attribute, parameter, and node types for Helix.
  */
 
 #pragma once
@@ -12,7 +12,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace enzo {
+namespace helix {
 
 namespace attr {
 /**
@@ -164,14 +164,14 @@ using Matrix3 = Eigen::Matrix3f;
 using Matrix4 = Eigen::Matrix4f;
 using String = std::string;
 /**
- * @brief enzo::Index is the continuous index of an element in a given AttributeOwner.
+ * @brief helix::Index is the continuous index of an element in a given AttributeOwner.
  *
  * Eg. point index, vertex index, primitive index, or global index.
- * This is usually provided by the user where enzo::Offset is used internally.
+ * This is usually provided by the user where helix::Offset is used internally.
  */
 using Index = size_t;
 /**
- * @brief enzo::Offset is the internal discontinuous index of an element in a given AttributeOwner.
+ * @brief helix::Offset is the internal discontinuous index of an element in a given AttributeOwner.
  *
  * Eg. point offset, vertex offset, primitive offset, or global offset.
  * This different but similar in concept to the index. This
@@ -342,4 +342,4 @@ enum class SocketIOType
     Output
 };
 } // namespace nt
-} // namespace enzo
+} // namespace helix

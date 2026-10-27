@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 import "../Components"
 
 // The display toggles, camera picker and display node path shown over the viewport.

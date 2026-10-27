@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-namespace enzo {
+namespace helix {
 
 class PrimPath
 {
@@ -24,4 +24,4 @@ class PrimPath
     std::vector<std::string> components_;
 };
 
-} // namespace enzo
+} // namespace helix

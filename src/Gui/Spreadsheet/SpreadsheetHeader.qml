@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 import "../Components"
 
 // Top bar of the spreadsheet drawer: title, breadcrumb path, component mode

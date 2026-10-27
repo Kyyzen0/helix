@@ -1,6 +1,6 @@
 #include "Engine/Async/CookSnapshot.h"
 
-namespace enzo::async {
+namespace helix::async {
 
 void CookSnapshot::setTime(floatT frame, floatT time)
 {
@@ -45,4 +45,4 @@ const CookParameterValue* CookSnapshot::findParameter(
     return &parameter->second;
 }
 
-} // namespace enzo::async
+} // namespace helix::async

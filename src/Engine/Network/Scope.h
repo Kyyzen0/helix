@@ -2,7 +2,7 @@
 #include "Engine/Core/Path.h"
 #include <string>
 
-namespace enzo::nt {
+namespace helix::nt {
 /**
  * @brief One place nodes live, either the root or the inside of a node that holds one.
  *
@@ -39,4 +39,4 @@ class Scope
     Path path_;
     std::string scopeType_;
 };
-} // namespace enzo::nt
+} // namespace helix::nt

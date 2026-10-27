@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // One icon button in a ParameterContextMenu, with its label underneath. The
 // hover background covers the icon and its label as a single block.

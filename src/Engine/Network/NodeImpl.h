@@ -7,11 +7,11 @@
 #include <string>
 #include <vector>
 
-namespace enzo::prm {
+namespace helix::prm {
 class Ramp;
 }
 
-namespace enzo::nt {
+namespace helix::nt {
 class Node;
 
 /**
@@ -30,7 +30,7 @@ class Node;
  *     using NodeImpl::NodeImpl;
  *     void cook() override { setOutputPacket(0, buildMesh()); }
  * };
- * ENZO_REGISTER_NODE(circle, Circle)
+ * HELIX_REGISTER_NODE(circle, Circle)
  * ```
  *
  * @note Every cook time query lives here as a forwarder, so an author writes
@@ -67,13 +67,13 @@ class BOOST_SYMBOL_EXPORT NodeImpl
 
     /// @brief Hands finished geometry to one of the node's outputs.
     /// @todo std::move the geometry instead of copying it.
-    void setOutputPacket(unsigned int outputIndex, enzo::NodePacket packet);
+    void setOutputPacket(unsigned int outputIndex, helix::NodePacket packet);
 
     /// @brief Returns a writable copy of the geometry arriving at one input.
-    enzo::NodePacket cloneInputPacket(unsigned int inputIndex);
+    helix::NodePacket cloneInputPacket(unsigned int inputIndex);
 
     /// @brief Returns the geometry arriving at an input, read only.
-    std::shared_ptr<const enzo::NodePacket> getInputPacket(unsigned int inputIndex);
+    std::shared_ptr<const helix::NodePacket> getInputPacket(unsigned int inputIndex);
 
     /// @brief Returns whether an input has anything connected to it.
     bool hasInput(unsigned int inputIndex);
@@ -104,11 +104,11 @@ class BOOST_SYMBOL_EXPORT NodeImpl
     Vector3 evalParmVector3(std::string_view parmName) const;
 
     /// @brief Snapshots a ramp parameter into a sampler for use during the cook.
-    enzo::prm::Ramp evalParmRamp(std::string_view parmName) const;
+    helix::prm::Ramp evalParmRamp(std::string_view parmName) const;
 
   private:
     Node& node_;
     CookContext& context_;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

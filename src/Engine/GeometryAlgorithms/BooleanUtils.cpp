@@ -13,7 +13,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace enzo::utils {
+namespace helix::utils {
 
 namespace {
 
@@ -77,7 +77,7 @@ struct DetriangulatedFace
     std::vector<int> loop;
 };
 
-// Pack one triangulated enzo mesh into a Manifold MeshGL64 and tag each tri's
+// Pack one triangulated helix mesh into a Manifold MeshGL64 and tag each tri's
 // faceID so the result still knows which source polygon every triangle
 // belonged to. The id offset lets caller A occupy [0, |A|) and caller B
 // occupy [|A|, |A|+|B|).
@@ -775,4 +775,4 @@ booleanMesh(const geo::Mesh& meshA, const geo::Mesh& meshB, BooleanOp op, std::s
     return assembleMesh(meshA, meshB, fragments, origins, faces);
 }
 
-} // namespace enzo::utils
+} // namespace helix::utils

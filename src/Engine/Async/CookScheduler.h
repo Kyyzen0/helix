@@ -13,7 +13,7 @@
 #include <thread>
 #include <vector>
 
-namespace enzo::async {
+namespace helix::async {
 
 /**
  * @class CookScheduler
@@ -169,4 +169,4 @@ class CookScheduler
     CookFinishedFn cookFinishedFn_;
 };
 
-} // namespace enzo::async
+} // namespace helix::async

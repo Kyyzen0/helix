@@ -5,7 +5,7 @@
 #include <QQuickItem>
 #include <QVariantList>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief Draws a ramp parameter's curve, sampled through prm::Ramp so the
 /// plot matches what a cook reads.
@@ -45,4 +45,4 @@ class RampCurveItem : public QQuickItem
     qreal curveWidth_ = 2;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

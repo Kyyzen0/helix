@@ -1,64 +1,51 @@
 #include "Graphics/Passes/PointPass.h"
-#include "Graphics/Shaders/Points.h"
 #include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 #include <vector>
 
-namespace enzo::gfx {
+namespace helix::gfx {
 
-PointPass::PointPass(
-    Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants, Diligent::Uint8 sampleCount
-)
+PointPass::PointPass(GraphicsDevice& device, NS::UInteger sampleCount)
 {
+    ScopedAutoreleasePool pool;
+
     // Corner buffer
     const std::vector<glm::vec2> corners = {{-0.5f, -0.5f}, {0.5f, -0.5f}, {-0.5f, 0.5f}, {0.5f, 0.5f}};
-    corners_ = createGpuArray(device, "Point corners", Diligent::BIND_VERTEX_BUFFER, corners);
+    corners_ = createGpuArray(device.getDevice(), "Point corners", corners);
 
-    // Pipeline
-    Diligent::GraphicsPipelineStateCreateInfo pipelineInfo;
-    pipelineInfo.PSODesc.Name = "Points";
+    // Reads the disc corners from vertex buffer 0 and one point position per disc from buffer 1.
+    MTL::VertexDescriptor* layout = MTL::VertexDescriptor::vertexDescriptor();
+    addVertexAttribute(layout, 0, MTL::VertexFormatFloat2, 0, 0);
+    addVertexBuffer(layout, 0, sizeof(glm::vec2), false);
+    addVertexAttribute(layout, 1, MTL::VertexFormatFloat3, 0, 1);
+    addVertexBuffer(layout, 1, sizeof(glm::vec3), true);
 
-    Diligent::GraphicsPipelineDesc& graphics = pipelineInfo.GraphicsPipeline;
-    graphics.PrimitiveTopology = Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-    graphics.RasterizerDesc.CullMode = Diligent::CULL_MODE_NONE;
-
-    // Reads the disc corners from buffer slot 0 and one point position per disc from slot 1.
-    const Diligent::LayoutElement layoutElements[] = {
-        {0, 0, 2, Diligent::VT_FLOAT32, false},
-        {1, 1, 3, Diligent::VT_FLOAT32, false, Diligent::INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
-    };
-    graphics.InputLayout.LayoutElements = layoutElements;
-    graphics.InputLayout.NumElements = 2;
-
-    Diligent::RefCntAutoPtr<Diligent::IShader> vertexShader =
-        createShader(device, shaders::pointsSource, Diligent::SHADER_TYPE_VERTEX, "vertexMain");
-    Diligent::RefCntAutoPtr<Diligent::IShader> pixelShader =
-        createShader(device, shaders::pointsSource, Diligent::SHADER_TYPE_PIXEL, "pixelMain");
-    pipelineInfo.pVS = vertexShader;
-    pipelineInfo.pPS = pixelShader;
-    pipeline_ = createPipeline(device, pipelineInfo, frameConstants, sampleCount);
+    PipelineSettings settings;
+    settings.name = "Points";
+    settings.vertexFunction = "pointsVertex";
+    settings.fragmentFunction = "pointsFragment";
+    settings.topology = MTL::PrimitiveTopologyClassTriangle;
+    settings.vertexLayout = layout;
+    pipeline_ = createPipeline(device, settings, sampleCount);
 }
 
-void PointPass::upload(Diligent::IRenderDevice* device, const DisplayGeometry& geometry)
+void PointPass::upload(MTL::Device* device, const DisplayGeometry& geometry, RetiredResources& retired)
 {
-    pointPositions_ =
-        createGpuArray(device, "Point positions", Diligent::BIND_VERTEX_BUFFER, geometry.pointPositions);
-    soloPointPositions_ = createGpuArray(
-        device, "Solo point positions", Diligent::BIND_VERTEX_BUFFER, geometry.soloPointPositions
-    );
+    replaceGpuArray(pointPositions_, device, "Point positions", geometry.pointPositions, retired);
+    replaceGpuArray(soloPointPositions_, device, "Solo point positions", geometry.soloPointPositions, retired);
 }
 
-void PointPass::draw(Diligent::IDeviceContext* context, bool pointsVisible)
+void PointPass::draw(MTL::RenderCommandEncoder* encoder, bool pointsVisible)
 {
     const GpuArray& positions = pointsVisible ? pointPositions_ : soloPointPositions_;
     if (!positions.buffer) return;
 
-    setVertexBuffers(context, {corners_.buffer, positions.buffer});
-    setPipeline(context, pipeline_);
-
-    Diligent::DrawAttribs drawAttribs;
-    drawAttribs.NumVertices = corners_.count;
-    drawAttribs.NumInstances = positions.count;
-    context->Draw(drawAttribs);
+    bindPipeline(encoder, pipeline_);
+    encoder->setVertexBuffer(corners_.buffer.get(), 0, 0);
+    encoder->setVertexBuffer(positions.buffer.get(), 0, 1);
+    encoder->drawPrimitives(
+        MTL::PrimitiveTypeTriangleStrip, NS::UInteger(0), NS::UInteger(corners_.count), NS::UInteger(positions.count)
+    );
 }
 
-} // namespace enzo::gfx
+} // namespace helix::gfx

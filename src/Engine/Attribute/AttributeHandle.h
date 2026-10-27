@@ -12,11 +12,11 @@
 
 #include <iostream>
 
-namespace enzo::attr {
+namespace helix::attr {
 
 /**
- * @class enzo::attr::AttributeHandle
- * @brief Read write accessor for #enzo::attr::Attribute
+ * @class helix::attr::AttributeHandle
+ * @brief Read write accessor for #helix::attr::Attribute
  *
  * @tparam T C++ value type matching the Attribute’s logical type
  *           (e.g., intT, floatT, Vector3, boolT).
@@ -175,13 +175,13 @@ template <typename T> class AttributeHandle
 
 using AttributeHandleInt = AttributeHandle<intT>;
 using AttributeHandleFloat = AttributeHandle<floatT>;
-using AttributeHandleVector3 = AttributeHandle<enzo::Vector3>;
-using AttributeHandleBool = AttributeHandle<enzo::boolT>;
-using AttributeHandleMatrix4 = AttributeHandle<enzo::Matrix4>;
+using AttributeHandleVector3 = AttributeHandle<helix::Vector3>;
+using AttributeHandleBool = AttributeHandle<helix::boolT>;
+using AttributeHandleMatrix4 = AttributeHandle<helix::Matrix4>;
 
 template <typename T>
 /**
- * @brief Read only accessor for #enzo::attr::Attribute
+ * @brief Read only accessor for #helix::attr::Attribute
  * @copydetails AttributeHandle
  */
 class AttributeHandleRO
@@ -237,8 +237,8 @@ class AttributeHandleRO
 
 using AttributeHandleInt = AttributeHandle<intT>;
 using AttributeHandleFloat = AttributeHandle<floatT>;
-using AttributeHandleVector3 = AttributeHandle<enzo::Vector3>;
-using AttributeHandleBool = AttributeHandle<enzo::boolT>;
-using AttributeHandleMatrix4 = AttributeHandle<enzo::Matrix4>;
+using AttributeHandleVector3 = AttributeHandle<helix::Vector3>;
+using AttributeHandleBool = AttributeHandle<helix::boolT>;
+using AttributeHandleMatrix4 = AttributeHandle<helix::Matrix4>;
 
-} // namespace enzo::attr
+} // namespace helix::attr

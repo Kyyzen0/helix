@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -41,8 +41,8 @@ struct ScriptGraph
     explicit ScriptGraph(const String& code)
     {
         auto& nm = nt::nm();
-        grid = nm.createNode("enzo::grid");
-        script = nm.createNode("enzo::script");
+        grid = nm.createNode("helix::grid");
+        script = nm.createNode("helix::script");
         nm.connectNodes(grid, 0, script, 0);
         nm.getNode(script).getParameter("code").lock()->setString(code);
         nm.cook(script);
@@ -118,11 +118,11 @@ TEST_CASE_METHOD(NMReset, "An empty script leaves the geometry alone")
 TEST_CASE_METHOD(NMReset, "A script over many points matches a serial run")
 {
     auto& nm = nt::nm();
-    const nt::NodeId grid = nm.createNode("enzo::grid");
+    const nt::NodeId grid = nm.createNode("helix::grid");
     nm.getNode(grid).getParameter("rows").lock()->setInt(200);
     nm.getNode(grid).getParameter("columns").lock()->setInt(200);
 
-    const nt::NodeId script = nm.createNode("enzo::script");
+    const nt::NodeId script = nm.createNode("helix::script");
     nm.connectNodes(grid, 0, script, 0);
     nm.getNode(script).getParameter("code").lock()->setString("@height = float(curPt()) * 0.5");
     nm.cook(script);
@@ -138,15 +138,15 @@ TEST_CASE_METHOD(NMReset, "A script over many points matches a serial run")
 TEST_CASE_METHOD(NMReset, "A script numbers the points left after a delete in order")
 {
     auto& nm = nt::nm();
-    const nt::NodeId grid = nm.createNode("enzo::grid");
+    const nt::NodeId grid = nm.createNode("helix::grid");
     nm.getNode(grid).getParameter("rows").lock()->setInt(200);
     nm.getNode(grid).getParameter("columns").lock()->setInt(200);
 
-    const nt::NodeId deleteNode = nm.createNode("enzo::delete");
+    const nt::NodeId deleteNode = nm.createNode("helix::delete");
     nm.connectNodes(grid, 0, deleteNode, 0);
     nm.getNode(deleteNode).getParameter("selection").lock()->setString("p{0}");
 
-    const nt::NodeId script = nm.createNode("enzo::script");
+    const nt::NodeId script = nm.createNode("helix::script");
     nm.connectNodes(deleteNode, 0, script, 0);
     nm.getNode(script).getParameter("code").lock()->setString(R"(i@index = curPt()
 i@count = ptCount())");
@@ -172,7 +172,7 @@ i@count = ptCount())");
 TEST_CASE_METHOD(NMReset, "A script reading a parameter recooks when that parameter changes")
 {
     auto& nm = nt::nm();
-    const nt::NodeId transform = nm.createNode("enzo::transform");
+    const nt::NodeId transform = nm.createNode("helix::transform");
     const std::shared_ptr<prm::NodeParameter> translate =
         nm.getNode(transform).getParameter("translate").lock();
     translate->setFloat(2.0f, 1);
@@ -214,11 +214,11 @@ TEST_CASE_METHOD(NMReset, "A script that fails to compile leaves the geometry al
 TEST_CASE_METHOD(NMReset, "A script reads its input while writing the same attribute")
 {
     auto& nm = nt::nm();
-    const nt::NodeId grid = nm.createNode("enzo::grid");
+    const nt::NodeId grid = nm.createNode("helix::grid");
     nm.getNode(grid).getParameter("rows").lock()->setInt(200);
     nm.getNode(grid).getParameter("columns").lock()->setInt(200);
 
-    const nt::NodeId script = nm.createNode("enzo::script");
+    const nt::NodeId script = nm.createNode("helix::script");
     nm.connectNodes(grid, 0, script, 0);
     nm.getNode(script).getParameter("code").lock()->setString(
         R"(@Position = pointAttrVector("Position", (curPt() + 1l) % ptCount()))"

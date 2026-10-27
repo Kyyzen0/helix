@@ -1,7 +1,7 @@
 #include "Engine/Network/NetworkPath.h"
 #include <utility>
 
-namespace enzo {
+namespace helix {
 
 NetworkPath::NetworkPath(const std::string& path)
 {
@@ -66,4 +66,4 @@ NetworkPath NetworkPath::getNode() const
     return NetworkPath(path_.substr(0, dotPos));
 }
 
-} // namespace enzo
+} // namespace helix

@@ -6,7 +6,7 @@
 #include <QVariantMap>
 #include <algorithm>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 
@@ -243,4 +243,4 @@ double TimelineViewModel::keyframeValue() const
     return static_cast<double>(target->evalFloat(static_cast<unsigned int>(keyframeComponent())));
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

@@ -16,8 +16,8 @@ namespace {
 // sealed arc's walls anchor to.
 struct Ring
 {
-    std::vector<enzo::Offset> rim;
-    enzo::Offset axisPoint = 0;
+    std::vector<helix::Offset> rim;
+    helix::Offset axisPoint = 0;
 };
 
 // The shape of the sphere, read once from the parameters.
@@ -25,7 +25,7 @@ struct SphereSettings
 {
     int columns = 16;
     int rows = 8;
-    enzo::Vector3 radius = {1, 1, 1};
+    helix::Vector3 radius = {1, 1, 1};
     float arcBegin = 0;
     float arcSpan = 1;
     bool isArc = false;
@@ -34,7 +34,7 @@ struct SphereSettings
 
 // Returns the rotation in degrees that puts the poles on the named axis. The
 // rings are built around Y, so Y itself needs no rotation.
-enzo::Vector3 getAxisRotation(const std::string& axis)
+helix::Vector3 getAxisRotation(const std::string& axis)
 {
     if (axis == "x") return {0, 0, -90};
     if (axis == "z") return {90, 0, 0};
@@ -42,7 +42,7 @@ enzo::Vector3 getAxisRotation(const std::string& axis)
 }
 
 // Adds one ring of latitude, at 0 for the bottom pole and at 1 for the top.
-Ring addRing(enzo::geo::Mesh& mesh, const SphereSettings& settings, float heightFraction)
+Ring addRing(helix::geo::Mesh& mesh, const SphereSettings& settings, float heightFraction)
 {
     const float latitude = heightFraction * std::numbers::pi_v<float>;
     const float ringScale = std::sin(latitude);
@@ -52,7 +52,7 @@ Ring addRing(enzo::geo::Mesh& mesh, const SphereSettings& settings, float height
     // step short of the full turn.
     const int rimPointCount = settings.columns + settings.isArc;
 
-    std::vector<enzo::Vector3> positions;
+    std::vector<helix::Vector3> positions;
     positions.reserve(rimPointCount);
     for (int columnIndex = 0; columnIndex < rimPointCount; ++columnIndex)
     {
@@ -72,7 +72,7 @@ Ring addRing(enzo::geo::Mesh& mesh, const SphereSettings& settings, float height
 }
 
 // Adds the band of quads running around the surface between two rings.
-void addSideFaces(enzo::geo::Mesh& mesh, const Ring& lower, const Ring& upper, int columns)
+void addSideFaces(helix::geo::Mesh& mesh, const Ring& lower, const Ring& upper, int columns)
 {
     const size_t rimPointCount = lower.rim.size();
     for (int columnIndex = 0; columnIndex < columns; ++columnIndex)
@@ -89,14 +89,14 @@ void addSideFaces(enzo::geo::Mesh& mesh, const Ring& lower, const Ring& upper, i
 
 // Adds the two flat walls running from the axis to the rim that seal the open
 // sides of a closed arc.
-void addArcWalls(enzo::geo::Mesh& mesh, const Ring& lower, const Ring& upper)
+void addArcWalls(helix::geo::Mesh& mesh, const Ring& lower, const Ring& upper)
 {
     mesh.addFace({lower.axisPoint, lower.rim.front(), upper.rim.front(), upper.axisPoint});
     mesh.addFace({lower.rim.back(), lower.axisPoint, upper.axisPoint, upper.rim.back()});
 }
 
 // Adds one triangle at a pole, wound so that it faces away from the centre.
-void addPoleFace(enzo::geo::Mesh& mesh, std::vector<enzo::Offset> points, bool isTop)
+void addPoleFace(helix::geo::Mesh& mesh, std::vector<helix::Offset> points, bool isTop)
 {
     if (!isTop) std::reverse(points.begin(), points.end());
     mesh.addFace(points);
@@ -105,10 +105,10 @@ void addPoleFace(enzo::geo::Mesh& mesh, std::vector<enzo::Offset> points, bool i
 // Adds the fan of triangles joining a ring to the pole beyond it, along with
 // the two walls that seal a closed arc there.
 void addPoleFaces(
-    enzo::geo::Mesh& mesh,
+    helix::geo::Mesh& mesh,
     const SphereSettings& settings,
     const Ring& ring,
-    enzo::Offset pole,
+    helix::Offset pole,
     bool isTop
 )
 {
@@ -126,7 +126,7 @@ void addPoleFaces(
     }
 }
 
-class Sphere : public enzo::nt::NodeImpl
+class Sphere : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -159,7 +159,7 @@ SphereSettings Sphere::readSettings() const
 
 void Sphere::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -203,4 +203,4 @@ void Sphere::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(sphere, Sphere)
+HELIX_REGISTER_NODE(sphere, Sphere)

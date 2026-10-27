@@ -4,11 +4,11 @@
 #include <memory>
 #include <vector>
 
-namespace enzo {
+namespace helix {
 class NodePacket;
 }
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief Primitives of a packet arranged as a path based tree.
 ///
@@ -68,4 +68,4 @@ class PrimitiveTreeModel : public QAbstractItemModel
     std::unique_ptr<Node> root_;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

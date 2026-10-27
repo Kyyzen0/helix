@@ -9,7 +9,7 @@
 #include <QPixmap>
 #include <QQuickWindow>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 
@@ -68,4 +68,4 @@ void IconCursor::applyCursor()
     setCursor(QCursor(pixmap, qRound(hotSpot_.x() * unitScale), qRound(hotSpot_.y() * unitScale)));
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

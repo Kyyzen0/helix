@@ -6,11 +6,11 @@
 #include <variant>
 #include <vector>
 
-namespace enzo::geo {
+namespace helix::geo {
 class Mesh;
 }
 
-namespace enzo::script {
+namespace helix::script {
 
 /// @brief A read handle for an attribute, empty for a type scripts can't read.
 using ScriptAttributeHandle = std::variant<
@@ -57,4 +57,4 @@ class MeshAttributeReader
     std::array<std::vector<ScriptAttribute>, ownerCount> attributes_;
 };
 
-} // namespace enzo::script
+} // namespace helix::script

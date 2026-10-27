@@ -2,11 +2,11 @@
 #include <memory>
 #include <string>
 
-namespace enzo::geo {
+namespace helix::geo {
 class Mesh;
 }
 
-namespace enzo::utils {
+namespace helix::utils {
 
 enum class BooleanOp
 {
@@ -28,4 +28,4 @@ std::shared_ptr<geo::Mesh> booleanMesh(
     std::string* error = nullptr
 );
 
-} // namespace enzo::utils
+} // namespace helix::utils

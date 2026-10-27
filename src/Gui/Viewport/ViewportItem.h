@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <optional>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief The viewport surface in the QML scene, drawn by the graphics device.
 class ViewportItem : public QQuickItem
@@ -15,7 +15,7 @@ class ViewportItem : public QQuickItem
     Q_OBJECT
     QML_ELEMENT
     Q_PROPERTY(
-        enzo::ui::ViewportViewModel* viewModel READ viewModel WRITE setViewModel NOTIFY
+        helix::ui::ViewportViewModel* viewModel READ viewModel WRITE setViewModel NOTIFY
             viewModelChanged
     )
     Q_PROPERTY(
@@ -101,4 +101,4 @@ class ViewportItem : public QQuickItem
     gfx::ViewportCamera camera_;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

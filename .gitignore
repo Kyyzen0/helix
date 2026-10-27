@@ -5,8 +5,6 @@ docs/latex
 perf.data*
 artifacts
 
-# Flatpak
-repo
 build-super
 
 # macOS

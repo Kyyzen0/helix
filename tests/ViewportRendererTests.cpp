@@ -2,72 +2,116 @@
 #include "Graphics/ViewportRenderer.h"
 #include "GraphicsTestUtils.h"
 #include <catch2/catch_test_macros.hpp>
+#include <chrono>
 #include <memory>
+#include <thread>
 
-using namespace enzo::gfx;
+using namespace helix::gfx;
 
-TEST_CASE("A viewport renderer draws into an image of the frame size")
+namespace {
+
+constexpr Rgba black{0, 0, 0, 255};
+
+/// @brief Returns a frame of the size with a black background and no geometry.
+FrameState makeFrame(std::uint32_t width, std::uint32_t height)
 {
-    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
-    ViewportRenderer renderer(*device);
-
     FrameState frame;
-    frame.pixelSize = {64, 32};
-    const VulkanImage image = renderer.render(frame);
-
-    REQUIRE(image.image != nullptr);
-    REQUIRE(image.size == frame.pixelSize);
+    frame.pixelSize = {width, height};
+    frame.backgroundColor = {0.f, 0.f, 0.f, 1.f};
+    return frame;
 }
 
-TEST_CASE("A viewport renderer keeps its image until the frame size changes")
+/// @brief Returns a triangle on the ground plane that covers the origin, facing up.
+std::shared_ptr<DisplayGeometry> makeTriangle()
 {
-    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
-    ViewportRenderer renderer(*device);
-
-    FrameState frame;
-    frame.pixelSize = {64, 32};
-    const VulkanImage first = renderer.render(frame);
-
-    frame.backgroundColor = {1.f, 0.f, 1.f, 1.f};
-    REQUIRE(renderer.render(frame).image == first.image);
-
-    frame.pixelSize = {128, 64};
-    const VulkanImage resized = renderer.render(frame);
-    REQUIRE(resized.image != first.image);
-    REQUIRE(resized.size == frame.pixelSize);
-}
-
-TEST_CASE("A viewport renderer draws meshes, points and cameras")
-{
-    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
-    ViewportRenderer renderer(*device);
-
     auto geometry = std::make_shared<DisplayGeometry>();
-    geometry->positions = {{0.f, 0.f, 0.f}, {1.f, 0.f, 0.f}, {0.f, 0.f, 1.f}};
+    geometry->positions = {{-5.f, 0.f, -5.f}, {5.f, 0.f, -5.f}, {0.f, 0.f, 6.f}};
     geometry->normals = {{0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}};
     geometry->topology.triangleIndices = {0, 1, 2};
     geometry->topology.edgeIndices = {0, 1, 1, 2, 2, 0};
-    geometry->soloPointPositions = {{2.f, 0.f, 0.f}};
-    geometry->cameraTransforms = {glm::mat4(1.f)};
-
-    FrameState frame;
-    frame.pixelSize = {64, 32};
-    frame.geometry = geometry;
-    REQUIRE(renderer.render(frame).image != nullptr);
+    return geometry;
 }
 
-TEST_CASE("A viewport renderer draws a frame with no pixels into no image")
+std::size_t countPixels(const PresentedFrame& frame, auto predicate)
+{
+    std::size_t count = 0;
+    for (std::uint32_t y = 0; y < frame.size.y; ++y)
+    {
+        for (std::uint32_t x = 0; x < frame.size.x; ++x)
+        {
+            if (predicate(pixelAt(frame, x, y))) ++count;
+        }
+    }
+    return count;
+}
+
+/// @brief Returns whether the pixel is the orange of a camera frame.
+bool isOrange(const Rgba& pixel)
+{
+    return pixel.r > 150 && pixel.r > pixel.g + 30 && pixel.g > pixel.b + 30;
+}
+
+} // namespace
+
+TEST_CASE("A viewport renderer draws into a texture of the frame size")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    FrameState frame = makeFrame(64, 32);
+    const RenderedImage image = renderer.render(frame);
+
+    REQUIRE(image.texture != nullptr);
+    REQUIRE(image.size == frame.pixelSize);
+    REQUIRE(image.texture->width() == 64);
+    REQUIRE(image.texture->height() == 32);
+    REQUIRE(image.texture->pixelFormat() == MTL::PixelFormatRGBA8Unorm);
+}
+
+TEST_CASE("A viewport renderer keeps its texture until the frame size changes")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    FrameState frame = makeFrame(64, 32);
+    const RenderedImage first = renderer.render(frame);
+
+    frame.backgroundColor = {1.f, 0.f, 1.f, 1.f};
+    REQUIRE(renderer.render(frame).texture == first.texture);
+
+    // The texture that was replaced stays valid until the frame that was recorded after the
+    // swap has finished, which is the frame a host may still have in flight.
+    frame.pixelSize = {128, 64};
+    {
+        ScopedAutoreleasePool pool;
+        MTL::CommandBuffer* commandBuffer = device->getCommandQueue()->commandBuffer();
+        const RenderedImage resized = renderer.encode(frame, commandBuffer);
+        REQUIRE(resized.texture != first.texture);
+        REQUIRE(resized.size == frame.pixelSize);
+        REQUIRE(first.texture->width() == 64);
+        REQUIRE(renderer.retiredResourceCount() > 0);
+        commandBuffer->commit();
+        commandBuffer->waitUntilCompleted();
+    }
+    for (int i = 0; i < 200 && renderer.retiredResourceCount() != 0; ++i)
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    REQUIRE(renderer.retiredResourceCount() == 0);
+}
+
+TEST_CASE("A viewport renderer draws a frame with no pixels into no texture")
 {
     std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
     ViewportRenderer renderer(*device);
 
     // A window that is hidden has no pixels, and nothing is drawn for it.
-    FrameState frame;
-    frame.pixelSize = {0, 0};
-    const VulkanImage image = renderer.render(frame);
+    const FrameState frame = makeFrame(0, 0);
+    const RenderedImage image = renderer.render(frame);
 
-    REQUIRE(image.image == nullptr);
+    REQUIRE(image.texture == nullptr);
     REQUIRE(image.size == glm::uvec2{0, 0});
+
+    const PresentedFrame presented = renderer.renderToPixels(frame);
+    REQUIRE(presented.pixels.empty());
 }
 
 TEST_CASE("A viewport renderer draws a frame again when the frame size changes")
@@ -75,27 +119,25 @@ TEST_CASE("A viewport renderer draws a frame again when the frame size changes")
     std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
     ViewportRenderer renderer(*device);
 
-    FrameState frame;
-    frame.pixelSize = {64, 32};
-    const VulkanImage first = renderer.render(frame);
+    FrameState frame = makeFrame(64, 32);
+    const RenderedImage first = renderer.render(frame);
 
     // A window that moves to a screen with a different scale changes the size of the
     // frame in device pixels.
     frame.pixelSize = {128, 64};
     frame.pixelRatio = 2.f;
-    const VulkanImage scaled = renderer.render(frame);
+    const RenderedImage scaled = renderer.render(frame);
 
-    REQUIRE(scaled.image != first.image);
+    REQUIRE(scaled.texture != first.texture);
     REQUIRE(scaled.size == glm::uvec2{128, 64});
 }
 
-TEST_CASE("A viewport renderer hands the pixels of a frame to a host that cannot sample it")
+TEST_CASE("A viewport renderer hands the pixels of a frame to a host that wants them")
 {
     std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
     ViewportRenderer renderer(*device);
 
-    FrameState frame;
-    frame.pixelSize = {64, 32};
+    FrameState frame = makeFrame(64, 32);
     frame.backgroundColor = {0.f, 0.5f, 1.f, 1.f};
     const PresentedFrame presented = renderer.renderToPixels(frame);
 
@@ -103,12 +145,13 @@ TEST_CASE("A viewport renderer hands the pixels of a frame to a host that cannot
     REQUIRE(presented.pixels.size() == 64u * 32u * 4u);
 
     // The background of the frame is the colour the host asked for, in the order the
-    // pixels are laid out in memory.
-    REQUIRE(presented.pixels[0] == 0);
-    REQUIRE(presented.pixels[1] >= 127);
-    REQUIRE(presented.pixels[1] <= 128);
-    REQUIRE(presented.pixels[2] == 255);
-    REQUIRE(presented.pixels[3] == 255);
+    // pixels are laid out in memory. The grid does not reach the corner.
+    const Rgba corner = pixelAt(presented, 0, 0);
+    REQUIRE(corner.r == 0);
+    REQUIRE(corner.g >= 127);
+    REQUIRE(corner.g <= 128);
+    REQUIRE(corner.b == 255);
+    REQUIRE(corner.a == 255);
 }
 
 TEST_CASE("A viewport renderer hands the pixels of a frame that changed size again")
@@ -116,8 +159,7 @@ TEST_CASE("A viewport renderer hands the pixels of a frame that changed size aga
     std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
     ViewportRenderer renderer(*device);
 
-    FrameState frame;
-    frame.pixelSize = {64, 32};
+    FrameState frame = makeFrame(64, 32);
     const PresentedFrame first = renderer.renderToPixels(frame);
 
     frame.pixelSize = {32, 16};
@@ -128,35 +170,286 @@ TEST_CASE("A viewport renderer hands the pixels of a frame that changed size aga
     REQUIRE(resized.pixels.size() != first.pixels.size());
 }
 
-TEST_CASE("The pixels of a frame are copied out of the rows of the device")
+TEST_CASE("A viewport renderer draws the grid over the background")
 {
-    // The rows of a texture are padded to the alignment of the device, so the rows of the
-    // host take every row of the texture on its own.
-    const std::uint32_t width = 2;
-    const std::uint32_t height = 3;
-    const std::size_t rowBytes = width * 4;
-    const std::size_t stride = rowBytes + 4;
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
 
-    std::vector<std::uint8_t> texture(stride * height, 0xAA);
-    for (std::uint32_t row = 0; row < height; ++row)
+    const PresentedFrame presented = renderer.renderToPixels(makeFrame(128, 128));
+
+    // The lines of the grid blend a grey over the black background, and leave the target opaque.
+    REQUIRE(countPixels(presented, [](const Rgba& p) { return differsFrom(p, black); }) > 50);
+    REQUIRE(countPixels(presented, [](const Rgba& p) { return p.a != 255; }) == 0);
+}
+
+TEST_CASE("A viewport renderer shades a mesh in the colour the host asks for")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    FrameState frame = makeFrame(64, 64);
+    frame.geometry = makeTriangle();
+    frame.geometryColor = {1.f, 0.f, 0.f, 1.f};
+    frame.wireframeVisible = false;
+    const PresentedFrame presented = renderer.renderToPixels(frame);
+
+    // The origin lies inside the triangle and projects to the middle of the frame. The light only
+    // shapes the colour, so a red mesh has no green and no blue.
+    const Rgba centre = pixelAt(presented, 32, 32);
+    REQUIRE(centre.r > 40);
+    REQUIRE(centre.g == 0);
+    REQUIRE(centre.b == 0);
+}
+
+TEST_CASE("A viewport renderer draws the wireframe darker than the faces, and hides it on request")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    FrameState frame = makeFrame(128, 128);
+    frame.geometry = makeTriangle();
+    frame.geometryColor = {1.f, 0.f, 0.f, 1.f};
+
+    frame.wireframeVisible = true;
+    const PresentedFrame withWireframe = renderer.renderToPixels(frame);
+    frame.wireframeVisible = false;
+    const PresentedFrame withoutWireframe = renderer.renderToPixels(frame);
+
+    REQUIRE_FALSE(samePixels(withWireframe, withoutWireframe));
+
+    // The wireframe is a dark shade of the mesh, which no lit face is.
+    const auto darkRed = [](const Rgba& p) { return p.r > 0 && p.r < 95 && p.g == 0 && p.b == 0; };
+    REQUIRE(countPixels(withWireframe, darkRed) > countPixels(withoutWireframe, darkRed));
+}
+
+TEST_CASE("A viewport renderer draws the points that belong to no face")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    auto geometry = std::make_shared<DisplayGeometry>();
+    geometry->soloPointPositions = {{0.f, 0.f, 0.f}};
+    geometry->pointPositions = {{0.f, 0.f, 0.f}, {2.f, 0.f, 0.f}};
+
+    FrameState frame = makeFrame(64, 64);
+    frame.geometry = geometry;
+    const PresentedFrame solo = renderer.renderToPixels(frame);
+
+    // The point sits at the origin, in the middle of the frame, as a white disc.
+    REQUIRE(pixelAt(solo, 32, 32) == Rgba{255, 255, 255, 255});
+
+    // Showing every point adds the second one.
+    frame.pointsVisible = true;
+    const PresentedFrame all = renderer.renderToPixels(frame);
+    const auto white = [](const Rgba& p) { return p.r > 200 && p.g > 200 && p.b > 200; };
+    REQUIRE(countPixels(all, white) > countPixels(solo, white));
+}
+
+TEST_CASE("A viewport renderer draws a camera as a frame, and leaves out the one the view looks through")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    auto geometry = std::make_shared<DisplayGeometry>();
+    geometry->cameraTransforms = {glm::mat4(1.f)};
+    geometry->cameraPaths = {"/camera"};
+
+    FrameState frame = makeFrame(256, 256);
+    frame.geometry = geometry;
+    REQUIRE(countPixels(renderer.renderToPixels(frame), isOrange) > 0);
+
+    // The view looks through the camera, so its own frame is not drawn.
+    frame.viewCameraIndex = 0;
+    REQUIRE(countPixels(renderer.renderToPixels(frame), isOrange) == 0);
+
+    // A view camera the geometry does not hold looks through the orbit camera instead.
+    frame.viewCameraIndex = 7;
+    REQUIRE(countPixels(renderer.renderToPixels(frame), isOrange) > 0);
+}
+
+TEST_CASE("A viewport renderer draws a full frame mesh that covers the background")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    // A ground plane far larger than the view.
+    auto geometry = std::make_shared<DisplayGeometry>();
+    geometry->positions = {{-100.f, 0.f, -100.f}, {100.f, 0.f, -100.f}, {100.f, 0.f, 100.f}, {-100.f, 0.f, 100.f}};
+    geometry->normals = {{0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}};
+    geometry->topology.triangleIndices = {0, 1, 2, 0, 2, 3};
+
+    FrameState frame = makeFrame(64, 64);
+    frame.geometry = geometry;
+    frame.wireframeVisible = false;
+    const PresentedFrame presented = renderer.renderToPixels(frame);
+
+    // The camera looks down at the plane, so the plane fills the frame below the horizon.
+    REQUIRE(differsFrom(pixelAt(presented, 32, 63), black));
+    REQUIRE(differsFrom(pixelAt(presented, 0, 63), black));
+    REQUIRE(differsFrom(pixelAt(presented, 63, 63), black));
+}
+
+TEST_CASE("Two frames drawn from the same data are identical")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    auto geometry = makeTriangle();
+    geometry->soloPointPositions = {{1.f, 0.f, 1.f}};
+    geometry->cameraTransforms = {glm::mat4(1.f)};
+
+    FrameState frame = makeFrame(96, 64);
+    frame.geometry = geometry;
+    frame.geometryColor = {0.3f, 0.7f, 0.4f, 1.f};
+
+    const PresentedFrame first = renderer.renderToPixels(frame);
+    const PresentedFrame second = renderer.renderToPixels(frame);
+    REQUIRE(samePixels(first, second));
+
+    // A renderer made afresh draws the same pixels, so nothing leaks from one frame into the next.
+    ViewportRenderer other(*device);
+    REQUIRE(samePixels(other.renderToPixels(frame), first));
+}
+
+TEST_CASE("A viewport renderer draws new geometry when the frame brings it")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    FrameState frame = makeFrame(64, 64);
+    frame.geometry = makeTriangle();
+    frame.wireframeVisible = false;
+    const PresentedFrame triangle = renderer.renderToPixels(frame);
+
+    frame.geometry = nullptr;
+    const PresentedFrame empty = renderer.renderToPixels(frame);
+    REQUIRE_FALSE(samePixels(triangle, empty));
+
+    // Moving the camera changes the pixels without bringing new geometry.
+    frame.geometry = makeTriangle();
+    frame.camera.orbit({40.f, 0.f});
+    REQUIRE_FALSE(samePixels(renderer.renderToPixels(frame), triangle));
+}
+
+TEST_CASE("A viewport renderer records into the command buffer of its host")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    FrameState frame = makeFrame(64, 48);
+    frame.geometry = makeTriangle();
+    const PresentedFrame reference = renderer.renderToPixels(frame);
+
+    // The scene graph of Qt Quick owns the command buffer and commits it after its own passes.
+    ViewportRenderer hosted(*device);
+    std::vector<std::uint8_t> pixels(64 * 48 * 4);
     {
-        for (std::uint32_t column = 0; column < width; ++column)
-        {
-            texture[row * stride + column * 4 + 0] = static_cast<std::uint8_t>(row);
-            texture[row * stride + column * 4 + 1] = static_cast<std::uint8_t>(column);
-        }
+        ScopedAutoreleasePool pool;
+        MTL::CommandBuffer* commandBuffer = device->getCommandQueue()->commandBuffer();
+        const RenderedImage image = hosted.encode(frame, commandBuffer);
+        REQUIRE(image.texture != nullptr);
+        commandBuffer->commit();
+        commandBuffer->waitUntilCompleted();
+        image.texture->getBytes(pixels.data(), 64 * 4, MTL::Region::Make2D(0, 0, 64, 48), 0);
     }
+    // Compares without printing the megabytes a failed vector comparison would.
+    const bool same = pixels == reference.pixels;
+    REQUIRE(same);
+}
 
-    std::vector<std::uint8_t> pixels(rowBytes * height, 0);
-    copyFrameRows(pixels.data(), texture.data(), stride, width, height);
+TEST_CASE("A viewport renderer keeps replaced buffers alive until the frames that read them have finished")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
 
-    for (std::uint32_t row = 0; row < height; ++row)
+    // Two geometries of different sizes, so each swap replaces buffers of another length.
+    std::shared_ptr<DisplayGeometry> small = makeTriangle();
+    auto large = std::make_shared<DisplayGeometry>(*small);
+    for (int i = 0; i < 500; ++i)
     {
-        for (std::uint32_t column = 0; column < width; ++column)
-        {
-            const std::size_t index = row * rowBytes + column * 4;
-            REQUIRE(pixels[index + 0] == static_cast<std::uint8_t>(row));
-            REQUIRE(pixels[index + 1] == static_cast<std::uint8_t>(column));
-        }
+        large->positions.push_back({0.f, 0.f, 0.f});
+        large->normals.push_back({0.f, 1.f, 0.f});
     }
+    large->pointPositions = {{0.f, 0.f, 0.f}, {1.f, 0.f, 1.f}};
+    large->cameraTransforms = {glm::mat4(1.f)};
+
+    FrameState frame = makeFrame(64, 48);
+    frame.wireframeVisible = false;
+
+    // The reference is drawn by a renderer that waits for each frame.
+    frame.geometry = small;
+    const PresentedFrame reference = ViewportRenderer(*device).renderToPixels(frame);
+
+    // A host commits its command buffers without waiting, like the scene graph of Qt Quick does
+    // while the previous frame is still on the GPU.
+    ViewportRenderer hosted(*device);
+    RenderedImage image;
+    NS::SharedPtr<MTL::CommandBuffer> lastOwner;
+    {
+        ScopedAutoreleasePool pool;
+        for (int i = 0; i < 60; ++i)
+        {
+            // The size changes now and then, which replaces the targets as well.
+            frame.pixelSize = {64, std::uint32_t(i % 20 == 19 ? 40 : 48)};
+            frame.geometry = i % 2 == 0 ? small : large;
+            MTL::CommandBuffer* commandBuffer = device->getCommandQueue()->commandBuffer();
+            image = hosted.encode(frame, commandBuffer);
+            // Every swap after the first replaced buffers, and this frame holds them: it has not
+            // been committed, so none can have been released.
+            if (i > 0) REQUIRE(hosted.retiredResourceCount() > 0);
+            commandBuffer->commit();
+            lastOwner = NS::RetainPtr(commandBuffer);
+        }
+        // The last frame goes back to the small geometry at the reference size.
+        frame.pixelSize = {64, 48};
+        frame.geometry = small;
+        MTL::CommandBuffer* commandBuffer = device->getCommandQueue()->commandBuffer();
+        image = hosted.encode(frame, commandBuffer);
+        commandBuffer->commit();
+        lastOwner = NS::RetainPtr(commandBuffer);
+    }
+    lastOwner->waitUntilCompleted();
+    REQUIRE(lastOwner->status() == MTL::CommandBufferStatusCompleted);
+
+    std::vector<std::uint8_t> pixels(64 * 48 * 4);
+    image.texture->getBytes(pixels.data(), 64 * 4, MTL::Region::Make2D(0, 0, 64, 48), 0);
+    const bool same = pixels == reference.pixels;
+    REQUIRE(same);
+
+    // The handlers that release the buffers run on another thread, just after the wait ends.
+    for (int i = 0; i < 200 && hosted.retiredResourceCount() != 0; ++i)
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    REQUIRE(hosted.retiredResourceCount() == 0);
+}
+
+TEST_CASE("A viewport renderer releases the buffers it replaced once the frame that held them has finished")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    FrameState frame = makeFrame(64, 48);
+    frame.geometry = makeTriangle();
+    renderer.renderToPixels(frame);
+    REQUIRE(renderer.retiredResourceCount() == 0);
+
+    // Replacing geometry hands the old buffers to the frame that is recorded.
+    frame.geometry = makeTriangle();
+    renderer.renderToPixels(frame);
+    for (int i = 0; i < 200 && renderer.retiredResourceCount() != 0; ++i)
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    REQUIRE(renderer.retiredResourceCount() == 0);
+}
+
+TEST_CASE("A viewport renderer hands out a texture before the first frame is drawn")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    // A host shows the texture in its scene before the frame that fills it is recorded.
+    const RenderedImage target = renderer.prepareTarget({80, 40});
+    REQUIRE(target.texture != nullptr);
+    REQUIRE(target.size == glm::uvec2{80, 40});
+
+    FrameState frame = makeFrame(80, 40);
+    REQUIRE(renderer.render(frame).texture == target.texture);
+    REQUIRE(renderer.prepareTarget({0, 0}).texture == nullptr);
 }

@@ -7,12 +7,12 @@
 #include <optional>
 #include <vector>
 
-namespace enzo::geo {
+namespace helix::geo {
 class Mesh;
 class Primitive;
 }
 
-namespace enzo::script {
+namespace helix::script {
 
 class ScriptContext;
 
@@ -123,4 +123,4 @@ class PointScript
     std::vector<daslang::ScriptArgument> arguments_;
 };
 
-} // namespace enzo::script
+} // namespace helix::script

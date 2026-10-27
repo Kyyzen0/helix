@@ -10,7 +10,7 @@
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-NINJA_FILE="${REPO_ROOT}/build/enzo-build/enzo-build/build.ninja"
+NINJA_FILE="${REPO_ROOT}/build/helix-build/helix-build/build.ninja"
 
 if [[ ! -f "${NINJA_FILE}" ]]; then
     echo "no build tree to take the flags from: ${NINJA_FILE}" >&2

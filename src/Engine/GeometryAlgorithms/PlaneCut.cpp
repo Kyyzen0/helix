@@ -8,7 +8,7 @@
 #include <map>
 #include <unordered_map>
 
-namespace enzo::utils {
+namespace helix::utils {
 
 namespace {
 
@@ -479,4 +479,4 @@ fillCutCaps(geo::Mesh& mesh, const std::vector<std::pair<Offset, Offset>>& cutEd
     return mesh.addFaces(capPoints, capCornerCounts);
 }
 
-} // namespace enzo::utils
+} // namespace helix::utils

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace enzo {
+namespace helix {
 
 // These evaluate the true ramp curve to fill the lookup table. They run once per
 // ramp at construction, not on the sampling hotpath, so they favour clarity.
@@ -191,4 +191,4 @@ void prm::Ramp::bake()
         lookupTable_[stepIndex] = curveValue(keys_, tableStartPosition_ + stepIndex * step);
 }
 
-} // namespace enzo
+} // namespace helix

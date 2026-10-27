@@ -7,7 +7,7 @@
 
 namespace {
 
-class Line : public enzo::nt::NodeImpl
+class Line : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -17,7 +17,7 @@ class Line : public enzo::nt::NodeImpl
 
 void Line::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -46,4 +46,4 @@ void Line::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(line, Line)
+HELIX_REGISTER_NODE(line, Line)

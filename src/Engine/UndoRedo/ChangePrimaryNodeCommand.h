@@ -5,7 +5,7 @@
 #include "Engine/UndoRedo/UndoCommand.h"
 #include <optional>
 
-namespace enzo::nt {
+namespace helix::nt {
 
 class ChangePrimaryNodeCommand : public UndoCommand
 {
@@ -38,4 +38,4 @@ class ChangePrimaryNodeCommand : public UndoCommand
     NodeId next_;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

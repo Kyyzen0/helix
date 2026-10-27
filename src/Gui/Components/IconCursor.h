@@ -5,7 +5,7 @@
 #include <QQuickItem>
 #include <QString>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief Shows a tinted icon from the bundled Lucide set as the mouse cursor over the item.
 /// @note The item takes no input, so it can sit over a MouseArea and only change the cursor.
@@ -41,4 +41,4 @@ class IconCursor : public QQuickItem
     bool active_ = false;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

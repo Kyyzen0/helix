@@ -5,7 +5,7 @@
 #include "Engine/UndoRedo/UndoCommand.h"
 #include <vector>
 
-namespace enzo::nt {
+namespace helix::nt {
 
 class ChangeSelectionCommand : public UndoCommand
 {
@@ -25,4 +25,4 @@ class ChangeSelectionCommand : public UndoCommand
     std::vector<NodeId> next_;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

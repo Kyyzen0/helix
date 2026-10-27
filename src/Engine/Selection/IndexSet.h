@@ -2,7 +2,7 @@
 #include "Engine/Core/Types.h"
 #include <set>
 
-namespace enzo {
+namespace helix {
 
 class IndexSet
 {
@@ -27,4 +27,4 @@ class WildcardIndexSet : public IndexSet
     bool contains(Index index) const override;
 };
 
-} // namespace enzo
+} // namespace helix

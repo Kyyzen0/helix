@@ -10,7 +10,7 @@
 #include <memory>
 #include <stdexcept>
 
-namespace enzo {
+namespace helix {
 
 nt::CookContext::CookContext(nt::NodeId nodeId, nt::NetworkManager& networkManager)
     : nodeId_{nodeId}, networkManager_{networkManager}
@@ -374,4 +374,4 @@ std::vector<String> nt::CookContext::evalParmStrings(std::string_view parmName) 
     }
 }
 
-} // namespace enzo
+} // namespace helix

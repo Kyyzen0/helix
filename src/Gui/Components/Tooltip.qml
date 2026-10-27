@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import Enzo
+import Helix
 
 // Themed tooltip shared by every hoverable control.
 //

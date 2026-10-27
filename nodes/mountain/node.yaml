@@ -1,13 +1,13 @@
 version: 1
 
 name: mountain
-namespace: enzo
+namespace: helix
 label: Mountain
 tags: [mountain, terrain, noise]
 
 implementation:
   kind: alias
-  type: enzo::attributeNoise
+  type: helix::attributeNoise
 
 parameterValues:
   name: Position

@@ -1,5 +1,19 @@
 cmake_minimum_required(VERSION 3.26)
 
+# Helix builds for macOS on Apple silicon only. The architecture has to be
+# chosen before project(), which is where the compiler is detected.
+#
+# The oldest macOS the bundle claims to run on. Every dependency is built for
+# it too, so the tree stays free of a library the host cannot load.
+#
+# The floor is 13.3, because the standard library of the current Xcode pulls
+# the formatting header in through the stream header, and the conversion of a
+# floating point number it uses there was only added to the system in 13.3.
+# Eigen reaches the stream header, so every file that includes it needs a
+# release that has the conversion.
+set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Helix targets Apple silicon only" FORCE)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3" CACHE STRING "Oldest macOS the build supports")
+
 # set vars
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -12,56 +26,39 @@ set(CMAKE_AUTORCC ON)
 # setup project
 project(helix VERSION 0.7.0)
 
+if(NOT APPLE)
+    message(FATAL_ERROR "Helix builds on macOS only.")
+endif()
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/versions.cmake)
 
 # Builds the pinned dependencies first, then configures this same project again
 # against them.
-option(ENZO_SUPERBUILD "Build the pinned dependencies, then helix against them" ON)
-if(ENZO_SUPERBUILD)
+option(HELIX_SUPERBUILD "Build the pinned dependencies, then helix against them" ON)
+if(HELIX_SUPERBUILD)
     add_subdirectory(superbuild)
     return()
 endif()
 
-# Every MSVC build writes a program database, so a crash in a shipped binary
-# resolves to function names.
-if(MSVC)
-    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT ProgramDatabase)
-    add_link_options(/DEBUG)
-    # /DEBUG leaves out dead code removal and identical function folding.
-    add_link_options($<$<NOT:$<CONFIG:Debug>>:/OPT:REF>)
-    add_link_options($<$<NOT:$<CONFIG:Debug>>:/OPT:ICF>)
-endif()
+# The one file that hands a Metal texture to the Qt Quick scene graph is Objective-C++,
+# since the scene graph takes its Metal objects as Objective-C ids.
+enable_language(OBJCXX)
+set(CMAKE_OBJCXX_STANDARD 20)
+set(CMAKE_OBJCXX_STANDARD_REQUIRED ON)
 
 # The installed libraries sit in one directory, so they find each other next to
 # themselves. The executable overrides this, since it sits in bin.
 #
 # macOS has no $ORIGIN. The loader path keyword names the directory of the
 # binary that carries the path, so a library next to itself is reached the
-# same way on every platform.
-if(APPLE)
-    # A library sits next to the libraries it shares a folder with and reaches
-    # the frameworks one folder up, which is where the bundle keeps them.
-    set(CMAKE_INSTALL_RPATH "@loader_path;@loader_path/../Frameworks")
-elseif(UNIX)
-    set(CMAKE_INSTALL_RPATH "$ORIGIN")
-else()
-    set(CMAKE_INSTALL_RPATH "")
-endif()
-
-# The oldest macOS the bundle claims to run on. Every dependency is built for
-# it too, so the tree stays free of a library the host cannot load.
+# same way.
 #
-# The floor is 13.3, because the standard library of the current Xcode pulls
-# the formatting header in through the stream header, and the conversion of a
-# floating point number it uses there was only added to the system in 13.3.
-# Eigen reaches the stream header, so every file that includes it needs a
-# release that has the conversion.
-if(APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3" CACHE STRING "Oldest macOS the build supports")
-endif()
+# A library sits next to the libraries it shares a folder with and reaches the
+# frameworks one folder up, which is where the bundle keeps them.
+set(CMAKE_INSTALL_RPATH "@loader_path;@loader_path/../Frameworks")
 
-set(ENZO_DEV_LIB_DIR "${CMAKE_BINARY_DIR}/nodes/")
-set(ENZO_DEV_NODES_DIR "${CMAKE_SOURCE_DIR}/nodes")
+set(HELIX_DEV_LIB_DIR "${CMAKE_BINARY_DIR}/nodes/")
+set(HELIX_DEV_NODES_DIR "${CMAKE_SOURCE_DIR}/nodes")
 
 set(ENGINE_SOURCES
     src/Engine/Attribute/Attribute.cpp
@@ -133,9 +130,8 @@ set(ENGINE_INCLUDE_DIRECTORIES
 
 # qt
 #
-# The Vulkan classes of Qt live in its Gui module, and the official binaries
-# of macOS are built without them, since their scene graph runs on Metal.
-# The graphics bridge leaves the instance of the device out there.
+# The scene graph of Qt Quick runs on Metal on macOS, and the viewport hands it
+# a Metal texture, so Qt needs nothing beyond the Quick module for it.
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets SvgWidgets Quick Qml QuickControls2 ShaderTools)
 qt_standard_project_setup()
 ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
@@ -164,30 +160,39 @@ find_package(FastNoise2 CONFIG REQUIRED)
 include(FetchContent)
 FetchContent_Declare(
   yaml-cpp
-  URL      ${ENZO_YAML_CPP_URL}
-  URL_HASH SHA256=${ENZO_YAML_CPP_SHA256}
+  URL      ${HELIX_YAML_CPP_URL}
+  URL_HASH SHA256=${HELIX_YAML_CPP_SHA256}
 )
 set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(yaml-cpp)
 
-# DiligentCore (viewport renderer), built with only its Vulkan backend
-FetchContent_Declare(
-  DiligentCore
-  GIT_REPOSITORY ${ENZO_DILIGENT_CORE_REPOSITORY}
-  GIT_TAG        ${ENZO_DILIGENT_CORE_COMMIT}
-)
-set(DILIGENT_NO_OPENGL ON CACHE BOOL "" FORCE)
-set(DILIGENT_NO_DIRECT3D11 ON CACHE BOOL "" FORCE)
-set(DILIGENT_NO_DIRECT3D12 ON CACHE BOOL "" FORCE)
-set(DILIGENT_INSTALL_CORE OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(DiligentCore)
-# Builds only the Diligent libraries enzo links against.
-set_property(DIRECTORY ${diligentcore_SOURCE_DIR} PROPERTY EXCLUDE_FROM_ALL ON)
+# metal-cpp (viewport renderer), Apple's header only C++ interface to Metal.
+#
+# The pinned archive is downloaded from Apple and checked against its hash. A folder
+# holding the headers (the one with Metal/Metal.hpp in it) can be given instead, to
+# build without network access:
+#
+#   cmake -DHELIX_METAL_CPP_DIR=/path/to/metal-cpp ...
+set(HELIX_METAL_CPP_DIR "" CACHE PATH "A metal-cpp folder to use instead of the pinned download")
+if(HELIX_METAL_CPP_DIR)
+    set(HELIX_METAL_CPP_INCLUDE_DIR "${HELIX_METAL_CPP_DIR}")
+else()
+    FetchContent_Declare(
+      metalcpp
+      URL      ${HELIX_METAL_CPP_URL}
+      URL_HASH SHA256=${HELIX_METAL_CPP_SHA256}
+    )
+    FetchContent_MakeAvailable(metalcpp)
+    set(HELIX_METAL_CPP_INCLUDE_DIR "${metalcpp_SOURCE_DIR}")
+endif()
+if(NOT EXISTS "${HELIX_METAL_CPP_INCLUDE_DIR}/Metal/Metal.hpp")
+    message(FATAL_ERROR "metal-cpp was not found: ${HELIX_METAL_CPP_INCLUDE_DIR}/Metal/Metal.hpp does not exist")
+endif()
 
 # daslang (das scripting language), built from the vendored submodule
 set(DASLANG_DIR "${CMAKE_SOURCE_DIR}/extern/daslang")
 
-# Trim daslang to the core libraries enzo links against.
+# Trim daslang to the core libraries helix links against.
 set(DAS_TOOLS_DISABLED ON CACHE BOOL "" FORCE)
 set(DAS_TESTS_DISABLED ON CACHE BOOL "" FORCE)
 set(DAS_TUTORIAL_DISABLED ON CACHE BOOL "" FORCE)
@@ -201,7 +206,7 @@ set(DAS_PUGIXML_DISABLED ON CACHE BOOL "" FORCE)
 set(DAS_HV_DISABLED ON CACHE BOOL "" FORCE)
 set(DAS_SQLITE_DISABLED ON CACHE BOOL "" FORCE)
 
-# Leaves the global operator new and delete alone. enzoEngine and each node
+# Leaves the global operator new and delete alone. helixEngine and each node
 # library link daslang separately, so its allocation cache cannot own every
 # free.
 add_compile_definitions(DAS_NO_GLOBAL_NEW_AND_DELETE)
@@ -229,76 +234,139 @@ list(APPEND ENGINE_INCLUDE_DIRECTORIES ${DASLANG_DIR}/include)
 # directory of the running executable.
 set(DAS_DASLIB_DIR "${DASLANG_DIR}/daslib")
 
-# Dev builds stage into build/helix so the layout mirrors the installed package.
-# A macOS build stages into the bundle instead, since the runtime reads its
-# content from the folder holding the executable.
-if(APPLE)
-    set(ENZO_DEV_STAGE_DIR "${CMAKE_BINARY_DIR}/helix.app/Contents")
-else()
-    set(ENZO_DEV_STAGE_DIR "${CMAKE_BINARY_DIR}/helix")
-endif()
+# A build stages into the bundle, since the runtime reads its content from the
+# folder holding the executable.
+set(HELIX_DEV_STAGE_DIR "${CMAKE_BINARY_DIR}/helix.app/Contents")
 
 # daslib sits beside the staged bin directory so daslang resolves its standard
 # library the same way it does from an install.
-file(COPY ${DAS_DASLIB_DIR} DESTINATION ${ENZO_DEV_STAGE_DIR})
+file(COPY ${DAS_DASLIB_DIR} DESTINATION ${HELIX_DEV_STAGE_DIR})
 
 # daslang is built without RTTI, so the files that subclass its types match it.
 # Otherwise their typeinfo references daslang symbols that were never emitted.
-# MSVC writes the full descriptor for a derived class into the file that
-# defines it, and turning RTTI off for part of a target trips the link time
-# check Boost.TypeIndex plants in every object.
-if(NOT MSVC)
-    set_source_files_properties(
-        src/Engine/Daslang/Runtime.cpp
-        src/Engine/Expression/ExpressionFunctions.cpp
-        src/Engine/Script/GeometryFunctions.cpp
-        PROPERTIES COMPILE_OPTIONS "-fno-rtti"
-    )
+set_source_files_properties(
+    src/Engine/Daslang/Runtime.cpp
+    src/Engine/Expression/ExpressionFunctions.cpp
+    src/Engine/Script/GeometryFunctions.cpp
+    PROPERTIES COMPILE_OPTIONS "-fno-rtti"
+)
+
+# Release flags for Apple silicon. They are set here, after the third party
+# libraries above, so they reach helix's own targets (the engine, the graphics
+# library, the application, the nodes and the tests) and leave the libraries
+# built from vendored or fetched sources as their own build files configure
+# them.
+#
+# -mcpu=apple-m1 targets the first Apple silicon core, which every later one
+# runs, and is added only where the compiler accepts it.
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag(-mcpu=apple-m1 HELIX_HAS_MCPU_APPLE_M1)
+add_compile_options("$<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:CXX>>:-O3>")
+if(HELIX_HAS_MCPU_APPLE_M1)
+    add_compile_options("$<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:CXX>>:-mcpu=apple-m1>")
+endif()
+
+# Link time optimization in Release, again for helix's own targets only: the
+# variable is read when a target is created, and the targets below are the
+# first ones made after this point.
+option(HELIX_ENABLE_LTO "Build Release with link time optimization" ON)
+if(HELIX_ENABLE_LTO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT HELIX_IPO_SUPPORTED OUTPUT HELIX_IPO_OUTPUT LANGUAGES CXX)
+    if(HELIX_IPO_SUPPORTED)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+    else()
+        message(STATUS "Link time optimization is not available: ${HELIX_IPO_OUTPUT}")
+    endif()
 endif()
 
 # The engine is a self contained library with no knowledge of the ui or the
 # operator plugins. The ui executable and the plugins both link against it, so
 # the whole process shares one engine and one set of its singletons. The engine
 # loads the plugins at runtime rather than linking them.
-add_library(enzoEngine SHARED ${ENGINE_SOURCES})
-target_link_libraries(enzoEngine PUBLIC glm::glm Eigen3::Eigen TBB::tbb Boost::filesystem Boost::system manifold::manifold libDaScript yaml-cpp::yaml-cpp)
-target_include_directories(enzoEngine PUBLIC ${ENGINE_INCLUDE_DIRECTORIES})
-# Exports every engine symbol on Windows, otherwise MSVC exports nothing from a DLL
-set_target_properties(enzoEngine PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
-target_compile_definitions(enzoEngine PRIVATE
-    ENZO_DEV_LIB_DIR="${ENZO_DEV_LIB_DIR}"
-    ENZO_DEV_NODES_DIR="${ENZO_DEV_NODES_DIR}"
-    ENZO_DEV_STATIC_DIR="${CMAKE_SOURCE_DIR}/static"
+add_library(helixEngine SHARED ${ENGINE_SOURCES})
+target_link_libraries(helixEngine PUBLIC glm::glm Eigen3::Eigen TBB::tbb Boost::filesystem Boost::system manifold::manifold libDaScript yaml-cpp::yaml-cpp)
+target_include_directories(helixEngine PUBLIC ${ENGINE_INCLUDE_DIRECTORIES})
+target_compile_definitions(helixEngine PRIVATE
+    HELIX_DEV_LIB_DIR="${HELIX_DEV_LIB_DIR}"
+    HELIX_DEV_NODES_DIR="${HELIX_DEV_NODES_DIR}"
+    HELIX_DEV_STATIC_DIR="${CMAKE_SOURCE_DIR}/static"
 )
 
 
 
-# Embeds each viewport shader as a string in a header named after the file,
-# so Grid.hlsl becomes Graphics/Shaders/Grid.h holding shaders::gridSource.
-set(GRAPHICS_SHADERS
-    src/Graphics/Shaders/CameraPrim.hlsl
-    src/Graphics/Shaders/Common.hlsli
-    src/Graphics/Shaders/Grid.hlsl
-    src/Graphics/Shaders/Mesh.hlsl
-    src/Graphics/Shaders/Points.hlsl
+# Compiles the viewport shaders into one Metal library at build time.
+#
+# The library is staged in the Resources folder of the application bundle of the build tree,
+# which the app and the tests, both of which sit inside that bundle, find beside their
+# executable, and the install copies it into the installed bundle.
+#
+# The offline Metal compiler is a component of Xcode. Xcode 26 and later install it apart:
+#
+#   xcodebuild -downloadComponent MetalToolchain
+#
+# A machine without it can still run a development build, which compiles the shader
+# sources when the program starts. Pass -DHELIX_ALLOW_RUNTIME_SHADERS=ON to configure
+# without the compiler; the packages are never built that way.
+option(HELIX_ALLOW_RUNTIME_SHADERS "Configure without the offline Metal compiler" OFF)
+set(HELIX_METAL_SHADER_DIR "${CMAKE_SOURCE_DIR}/src/Graphics/Shaders")
+set(HELIX_METAL_SHADERS CameraPrim Grid Mesh Points)
+set(HELIX_METALLIB "${HELIX_DEV_STAGE_DIR}/Resources/helix.metallib")
+
+execute_process(
+    COMMAND xcrun -sdk macosx metal --version
+    RESULT_VARIABLE HELIX_METAL_COMPILER_RESULT
+    OUTPUT_QUIET
+    ERROR_VARIABLE HELIX_METAL_COMPILER_ERROR
 )
-set(GRAPHICS_GENERATED_DIR "${CMAKE_BINARY_DIR}/generated")
-foreach(shaderPath ${GRAPHICS_SHADERS})
-    get_filename_component(shaderFile ${shaderPath} NAME_WE)
-    string(SUBSTRING ${shaderFile} 0 1 shaderFirstLetter)
-    string(SUBSTRING ${shaderFile} 1 -1 shaderRest)
-    string(TOLOWER ${shaderFirstLetter} shaderFirstLetter)
-    set(shaderName "${shaderFirstLetter}${shaderRest}")
-    file(READ ${shaderPath} shaderSource)
-    # Reconfigures when the shader changes.
-    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${shaderPath})
-    configure_file(cmake/ShaderSource.h.in "${GRAPHICS_GENERATED_DIR}/Graphics/Shaders/${shaderFile}.h" @ONLY)
-endforeach()
+if(HELIX_METAL_COMPILER_RESULT EQUAL 0)
+    set(HELIX_HAS_METAL_COMPILER TRUE)
+elseif(HELIX_ALLOW_RUNTIME_SHADERS)
+    set(HELIX_HAS_METAL_COMPILER FALSE)
+    message(WARNING "The Metal compiler is not available, so the shaders are compiled at startup: ${HELIX_METAL_COMPILER_ERROR}")
+else()
+    message(FATAL_ERROR
+        "The Metal compiler is not available: ${HELIX_METAL_COMPILER_ERROR}\n"
+        "Install it with: xcodebuild -downloadComponent MetalToolchain")
+endif()
+
+if(HELIX_HAS_METAL_COMPILER)
+    set(HELIX_AIR_FILES)
+    foreach(shaderName IN LISTS HELIX_METAL_SHADERS)
+        set(shaderSource "${HELIX_METAL_SHADER_DIR}/${shaderName}.metal")
+        set(shaderAir "${CMAKE_BINARY_DIR}/shaders/${shaderName}.air")
+        add_custom_command(
+            OUTPUT ${shaderAir}
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/shaders"
+            COMMAND xcrun -sdk macosx metal -c
+                    -std=metal3.0
+                    -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}
+                    -I "${HELIX_METAL_SHADER_DIR}"
+                    -o ${shaderAir} ${shaderSource}
+            DEPENDS ${shaderSource} "${HELIX_METAL_SHADER_DIR}/ShaderTypes.h"
+            COMMENT "Compiling ${shaderName}.metal"
+            VERBATIM
+        )
+        list(APPEND HELIX_AIR_FILES ${shaderAir})
+    endforeach()
+
+    add_custom_command(
+        OUTPUT ${HELIX_METALLIB}
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${HELIX_DEV_STAGE_DIR}/Resources"
+        COMMAND xcrun -sdk macosx metallib ${HELIX_AIR_FILES} -o ${HELIX_METALLIB}
+        DEPENDS ${HELIX_AIR_FILES}
+        COMMENT "Linking helix.metallib"
+        VERBATIM
+    )
+    add_custom_target(helixMetalLib ALL DEPENDS ${HELIX_METALLIB})
+endif()
 
 # Renders the viewport without depending on Qt.
-add_library(enzoGraphics STATIC
+add_library(helixGraphics STATIC
     src/Graphics/DisplayGeometry.cpp
     src/Graphics/GraphicsDevice.cpp
+    # Holds the implementation of metal-cpp, which exactly one file of the program may define.
+    src/Graphics/MetalImplementation.cpp
     src/Graphics/ViewportCamera.cpp
     src/Graphics/ViewportRenderer.cpp
     src/Graphics/Passes/CameraPrimPass.cpp
@@ -307,8 +375,22 @@ add_library(enzoGraphics STATIC
     src/Graphics/Passes/PassSetup.cpp
     src/Graphics/Passes/PointPass.cpp
 )
-target_link_libraries(enzoGraphics PUBLIC enzoEngine PRIVATE Diligent-GraphicsEngineVk-static Diligent-Common Vulkan::Headers)
-target_include_directories(enzoGraphics PUBLIC src PRIVATE ${GRAPHICS_GENERATED_DIR})
+find_library(HELIX_FOUNDATION_FRAMEWORK Foundation REQUIRED)
+find_library(HELIX_METAL_FRAMEWORK Metal REQUIRED)
+find_library(HELIX_QUARTZCORE_FRAMEWORK QuartzCore REQUIRED)
+target_link_libraries(helixGraphics PUBLIC helixEngine
+    ${HELIX_FOUNDATION_FRAMEWORK} ${HELIX_METAL_FRAMEWORK} ${HELIX_QUARTZCORE_FRAMEWORK})
+target_include_directories(helixGraphics PUBLIC src)
+# metal-cpp is a third party header only library, whose warnings are not ours to fix.
+target_include_directories(helixGraphics SYSTEM PUBLIC ${HELIX_METAL_CPP_INCLUDE_DIR})
+# Where a development build looks for the shaders when no library sits in the bundle.
+target_compile_definitions(helixGraphics PRIVATE
+    HELIX_DEV_METALLIB="${HELIX_METALLIB}"
+    HELIX_DEV_SHADER_DIR="${HELIX_METAL_SHADER_DIR}"
+)
+if(HELIX_HAS_METAL_COMPILER)
+    add_dependencies(helixGraphics helixMetalLib)
+endif()
 
 
 # QML application
@@ -328,7 +410,7 @@ qt_add_executable(${AppExec}
     src/Gui/Timeline/TimelineViewModel.cpp
     src/Gui/Controllers/SceneController.cpp
     src/Gui/Viewport/ViewportViewModel.cpp
-    src/Gui/Viewport/QtGraphicsBridge.cpp
+    src/Gui/Viewport/QtGraphicsBridge.mm
     src/Gui/Viewport/ViewportNode.cpp
 )
 
@@ -341,7 +423,7 @@ set_source_files_properties(src/Gui/Components/ParameterClipboard.qml
 )
 
 qt_add_qml_module(${AppExec}
-    URI Enzo
+    URI Helix
     VERSION 1.0
     # The prefix the qml engine searches by default, so an installed run finds
     # the module compiled into the binary.
@@ -377,6 +459,11 @@ qt_add_qml_module(${AppExec}
         src/Gui/Components/ParameterContextMenuAction.qml
         src/Gui/Components/ParameterContextMenuRow.qml
         src/Gui/Components/ParameterContextMenuTrigger.qml
+        src/Gui/Components/PanelSurface.qml
+        src/Gui/Components/SectionLabel.qml
+        src/Gui/Components/SplitterHandle.qml
+        src/Gui/Components/StatusBar.qml
+        src/Gui/Components/TypeBadge.qml
         src/Gui/MenuBar/AppMenuBar.qml
         src/Gui/MenuBar/MenuBar.qml
         src/Gui/MenuBar/MenuPopup.qml
@@ -437,7 +524,7 @@ qt_add_qml_module(${AppExec}
         src/Gui/Components/qmldir
 )
 
-qt6_add_shaders(${AppExec} "enzoShaders"
+qt6_add_shaders(${AppExec} "helixShaders"
     PREFIX
     "/"
     BASE
@@ -448,7 +535,7 @@ qt6_add_shaders(${AppExec} "enzoShaders"
 
 # The themes the program ships with. They are compiled in so no missing or
 # unreadable file can leave the application unstyled.
-qt_add_resources(${AppExec} "enzoTheme"
+qt_add_resources(${AppExec} "helixTheme"
     PREFIX
     "/"
     BASE
@@ -464,47 +551,42 @@ qt_add_resources(${AppExec} "enzoTheme"
 # A run from a build directory loads QML from here, so edits reload without a
 # rebuild. An installed run loads the module compiled into the binary instead.
 target_compile_definitions(${AppExec} PRIVATE
-    ENZO_QML_SOURCE_DIR="${CMAKE_SOURCE_DIR}/src/Gui"
+    HELIX_QML_SOURCE_DIR="${CMAKE_SOURCE_DIR}/src/Gui"
 )
 
-target_compile_definitions(${AppExec} PRIVATE ENZO_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(${AppExec} PRIVATE HELIX_VERSION="${PROJECT_VERSION}")
 
-if(APPLE)
-    # A macOS build produces a real application bundle, which is what the
-    # system expects to find when the application is launched from the
-    # desktop or from a bundle aware installer.
-    #
-    # The values of the bundle description are filled in here rather than left
-    # to the bundle target, which leaves the placeholders of a description it
-    # has already read empty.
-    set(MACOSX_BUNDLE_EXECUTABLE_NAME ${AppExec})
-    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.helix3d.Helix")
-    set(MACOSX_BUNDLE_BUNDLE_NAME "Helix")
-    set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
-    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")
-    configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Info.plist.in"
-        "${CMAKE_BINARY_DIR}/Info.plist"
-        @ONLY
-    )
-    set_target_properties(${AppExec} PROPERTIES
-        MACOSX_BUNDLE ON
-        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_BINARY_DIR}/Info.plist"
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.helix3d.Helix"
-        MACOSX_BUNDLE_BUNDLE_NAME "Helix"
-        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
-        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-    )
-else()
-    set_target_properties(${AppExec} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${ENZO_DEV_STAGE_DIR}/bin"
-    )
+# A macOS build produces a real application bundle, which is what the system
+# expects to find when the application is launched from the desktop or from a
+# bundle aware installer.
+#
+# The values of the bundle description are filled in here rather than left to
+# the bundle target, which leaves the placeholders of a description it has
+# already read empty.
+set(MACOSX_BUNDLE_EXECUTABLE_NAME ${AppExec})
+set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.helix3d.Helix")
+set(MACOSX_BUNDLE_BUNDLE_NAME "Helix")
+set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
+set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Info.plist.in"
+    "${CMAKE_BINARY_DIR}/Info.plist"
+    @ONLY
+)
+set_target_properties(${AppExec} PROPERTIES
+    MACOSX_BUNDLE ON
+    MACOSX_BUNDLE_INFO_PLIST "${CMAKE_BINARY_DIR}/Info.plist"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "com.helix3d.Helix"
+    MACOSX_BUNDLE_BUNDLE_NAME "Helix"
+    MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+)
+
+target_link_libraries(${AppExec} PRIVATE helixEngine helixGraphics argparse::argparse Qt6::Quick Qt6::QuickControls2)
+if(HELIX_HAS_METAL_COMPILER)
+    add_dependencies(${AppExec} helixMetalLib)
 endif()
-
-# The Vulkan classes of Qt live in its Gui module, which the quick module
-# brings in, so nothing else has to be linked for them.
-target_link_libraries(${AppExec} PRIVATE enzoEngine enzoGraphics argparse::argparse Qt6::Quick Qt6::QuickControls2 Vulkan::Headers)
 target_include_directories(${AppExec} PRIVATE
     ${ENGINE_INCLUDE_DIRECTORIES}
     # Folders holding QML_ELEMENT types, whose headers the generated type
@@ -517,28 +599,17 @@ target_include_directories(${AppExec} PRIVATE
 )
 
 
-# Groups the install tree under helix/ on Linux, so the bundled Qt stays out of
-# the system lib folder. Windows installs straight into its own Enzo folder.
 # A macOS install is a bundle, so its content sits inside the bundle.
-if(WIN32)
-    set(ENZO_APP_DIR "")
-elseif(APPLE)
-    set(ENZO_APP_DIR "${CMAKE_PROJECT_NAME}.app/Contents/")
-else()
-    set(ENZO_APP_DIR "${CMAKE_PROJECT_NAME}/")
-endif()
+set(HELIX_APP_DIR "${CMAKE_PROJECT_NAME}.app/Contents/")
 
 # The layout every install rule writes into.
-set(ENZO_BIN_DIR ${ENZO_APP_DIR}bin CACHE STRING "Binary install directory")
-set(ENZO_LIB_DIR ${ENZO_APP_DIR}lib CACHE STRING "Library install directory")
-set(ENZO_NODES_DIR ${ENZO_APP_DIR}nodes CACHE STRING "Node folder install directory")
+set(HELIX_LIB_DIR ${HELIX_APP_DIR}lib CACHE STRING "Library install directory")
+set(HELIX_NODES_DIR ${HELIX_APP_DIR}nodes CACHE STRING "Node folder install directory")
 
 # A bundle carries its own executable, so the binary directory is the one the
 # bundle keeps it in and the bundle itself lands at the root of the install.
-if(APPLE)
-    set(ENZO_BIN_DIR "${CMAKE_PROJECT_NAME}.app/Contents/MacOS")
-    set(ENZO_BUNDLE_DIR "." CACHE STRING "Folder the application bundle is installed into")
-endif()
+set(HELIX_BIN_DIR "${CMAKE_PROJECT_NAME}.app/Contents/MacOS")
+set(HELIX_BUNDLE_DIR "." CACHE STRING "Folder the application bundle is installed into")
 
 # compile nodes
 add_subdirectory(nodes)
@@ -549,14 +620,14 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Packaging.cmake)
 
 
 # tests
-option(ENZO_BUILD_TESTS "Build tests and benchmarks" ON)
-if(ENZO_BUILD_TESTS)
+option(HELIX_BUILD_TESTS "Build tests and benchmarks" ON)
+if(HELIX_BUILD_TESTS)
     Include(FetchContent)
 
     FetchContent_Declare(
       Catch2
-      URL      ${ENZO_CATCH2_URL}
-      URL_HASH SHA256=${ENZO_CATCH2_SHA256}
+      URL      ${HELIX_CATCH2_URL}
+      URL_HASH SHA256=${HELIX_CATCH2_SHA256}
     )
 
     FetchContent_MakeAvailable(Catch2)
@@ -617,30 +688,33 @@ if(ENZO_BUILD_TESTS)
         src/Gui/Parameters/ParameterItem.cpp
     )
     set_target_properties(${TestExec} PROPERTIES AUTOMOC ON)
-    target_link_libraries(${TestExec} PRIVATE enzoEngine enzoGraphics Qt6::Core Catch2::Catch2WithMain)
+    target_link_libraries(${TestExec} PRIVATE helixEngine helixGraphics Qt6::Core Catch2::Catch2WithMain)
     target_include_directories(${TestExec} PRIVATE src)
+    if(HELIX_HAS_METAL_COMPILER)
+        add_dependencies(${TestExec} helixMetalLib)
+    endif()
 
     # Stage the test binary next to daslib so daslang resolves its standard
     # library the same way the app does.
     set_target_properties(${TestExec} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${ENZO_DEV_STAGE_DIR}/bin"
+        RUNTIME_OUTPUT_DIRECTORY "${HELIX_DEV_STAGE_DIR}/bin"
     )
 
     # benchmarks
     add_executable(${BenchExec}
         tests/Benchmarks.cpp
     )
-    target_link_libraries(${BenchExec} PRIVATE enzoEngine Catch2::Catch2WithMain)
+    target_link_libraries(${BenchExec} PRIVATE helixEngine Catch2::Catch2WithMain)
 
     # GUI unit tests, Qt and yaml-cpp only, no engine
-    add_executable(enzoGuiTests
+    add_executable(helixGuiTests
         tests/gui/ThemeLoaderTests.cpp
         src/Gui/Style/ThemeLoader.cpp
     )
-    target_link_libraries(enzoGuiTests PRIVATE Qt6::Gui yaml-cpp::yaml-cpp Catch2::Catch2WithMain)
-    target_include_directories(enzoGuiTests PRIVATE src)
-    target_compile_definitions(enzoGuiTests PRIVATE
-        ENZO_DEV_STATIC_DIR="${CMAKE_SOURCE_DIR}/static"
+    target_link_libraries(helixGuiTests PRIVATE Qt6::Gui yaml-cpp::yaml-cpp Catch2::Catch2WithMain)
+    target_include_directories(helixGuiTests PRIVATE src)
+    target_compile_definitions(helixGuiTests PRIVATE
+        HELIX_DEV_STATIC_DIR="${CMAKE_SOURCE_DIR}/static"
     )
 endif()
 

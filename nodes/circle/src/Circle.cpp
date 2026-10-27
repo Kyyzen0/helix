@@ -11,7 +11,7 @@
 
 namespace {
 
-class Circle : public enzo::nt::NodeImpl
+class Circle : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -21,7 +21,7 @@ class Circle : public enzo::nt::NodeImpl
 
 void Circle::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     NodePacket packet;
     std::shared_ptr<geo::Mesh> mesh = std::make_shared<geo::Mesh>();
@@ -32,9 +32,9 @@ void Circle::cook()
     std::string arc_type = evalParmString("arc");
     float arcBegin = evalParmFloat("arc_angles", 0) / 360;
     float arcEnd = evalParmFloat("arc_angles", 1) / 360;
-    enzo::Vector3 center = evalParmVector3("center");
-    enzo::Vector3 rotate = evalParmVector3("rotate");
-    enzo::Vector2 radius = evalParmVector2("radius");
+    helix::Vector3 center = evalParmVector3("center");
+    helix::Vector3 rotate = evalParmVector3("rotate");
+    helix::Vector2 radius = evalParmVector2("radius");
 
     float arcDelta = arcEnd - arcBegin;
     if (arc_type == "closed") arcDelta = 1;
@@ -43,7 +43,7 @@ void Circle::cook()
 
     numPoints += isArc;
 
-    std::vector<enzo::Vector3> newPointPositions;
+    std::vector<helix::Vector3> newPointPositions;
     newPointPositions.reserve(numPoints);
 
     // Sliced and closed arc has one extra point in the middle for the triangles to anchor to
@@ -57,7 +57,7 @@ void Circle::cook()
         float u = sin(angle) * uniform_scale * radius[0];
         float v = cos(angle) * uniform_scale * radius[1];
 
-        enzo::Vector3 position;
+        helix::Vector3 position;
         if (orientation == "xy")
             position = {u, v, 0};
         else if (orientation == "yz")
@@ -85,7 +85,7 @@ void Circle::cook()
         mesh->addFace(newPoints, closed);
     }
 
-    mesh->applyTransform(enzo::Transform().translate(center).rotateEuler(rotate));
+    mesh->applyTransform(helix::Transform().translate(center).rotateEuler(rotate));
 
     packet.addPrimitive(std::move(mesh));
     setOutputPacket(0, packet);
@@ -93,4 +93,4 @@ void Circle::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(circle, Circle)
+HELIX_REGISTER_NODE(circle, Circle)

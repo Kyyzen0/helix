@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // Viewport panel hosting the graphics device surface.
 Item {

@@ -4,7 +4,7 @@
 #include "Engine/Network/NetworkManager.h"
 #include "Engine/UndoRedo/UndoCommand.h"
 
-namespace enzo::nt {
+namespace helix::nt {
 
 class ChangeNodeLinkCommand : public UndoCommand
 {
@@ -60,4 +60,4 @@ class ChangeNodeLinkCommand : public UndoCommand
     Action action_;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

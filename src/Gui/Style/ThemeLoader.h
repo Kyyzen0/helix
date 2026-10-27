@@ -4,7 +4,7 @@
 #include <QString>
 #include <QVariant>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief Resolves a YAML theme into a flat table of design tokens.
 ///
@@ -26,4 +26,4 @@ class ThemeLoader
     loadFromString(const QString& defaultYaml, const QString& userYaml = {});
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

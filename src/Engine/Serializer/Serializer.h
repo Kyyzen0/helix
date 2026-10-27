@@ -1,6 +1,6 @@
 #include "Engine/Network/NetworkManager.h"
 
-namespace enzo::nt {
+namespace helix::nt {
 
 class Serializer
 {
@@ -14,4 +14,4 @@ class Serializer
     void load(NetworkManager& networkManager, std::string filePath);
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

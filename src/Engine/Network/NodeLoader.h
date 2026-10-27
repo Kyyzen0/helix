@@ -4,11 +4,11 @@
 #include <memory>
 #include <string>
 
-namespace enzo::script {
+namespace helix::script {
 class PointScript;
 }
 
-namespace enzo::nt {
+namespace helix::nt {
 
 /**
  * @brief The startup pass that fills the node type table from the node folders on disk.
@@ -44,7 +44,7 @@ class BOOST_SYMBOL_EXPORT NodeLoader
      * so a node the user wrote is still there the next time the application
      * starts.
      *
-     * @note The environment variable ENZO_USER_NODES_DIR overrides the
+     * @note The environment variable HELIX_USER_NODES_DIR overrides the
      * directory, which lets a test and a development run point somewhere else.
      */
     static std::filesystem::path getUserNodesDirectory();
@@ -75,4 +75,4 @@ class BOOST_SYMBOL_EXPORT NodeLoader
     getUserScript(const std::filesystem::path& folder);
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

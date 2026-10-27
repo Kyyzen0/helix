@@ -12,16 +12,16 @@
 
 #include "Gui/Style/ThemeLoader.h"
 
-using enzo::ui::ThemeLoader;
+using helix::ui::ThemeLoader;
 
 namespace {
 
-const std::string kDefaultThemePath = ENZO_DEV_STATIC_DIR "/theme/default.yml";
+const std::string kDefaultThemePath = HELIX_DEV_STATIC_DIR "/theme/default.yml";
 
 /// @brief Returns the path of every theme that ships alongside the default.
 std::vector<std::string> shippedThemePaths()
 {
-    const QDir themes(ENZO_DEV_STATIC_DIR "/theme");
+    const QDir themes(HELIX_DEV_STATIC_DIR "/theme");
 
     std::vector<std::string> paths;
     for (const QString& file : themes.entryList({"*.yml"}, QDir::Files, QDir::Name))

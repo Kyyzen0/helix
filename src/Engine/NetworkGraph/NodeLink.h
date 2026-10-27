@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <functional>
 
-namespace enzo::nt {
+namespace helix::nt {
 
 /**
  * @brief One wired link between two nodes, the ground truth of the network's wiring.
@@ -26,12 +26,12 @@ struct NodeLink
     bool operator==(const NodeLink& other) const = default;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt
 
 // Hashing lives in one place so a Node link can key an unordered container.
-template <> struct std::hash<enzo::nt::NodeLink>
+template <> struct std::hash<helix::nt::NodeLink>
 {
-    std::size_t operator()(const enzo::nt::NodeLink& nodeLink) const noexcept
+    std::size_t operator()(const helix::nt::NodeLink& nodeLink) const noexcept
     {
         std::size_t seed = 0;
         boost::hash_combine(seed, nodeLink.sourceNode);

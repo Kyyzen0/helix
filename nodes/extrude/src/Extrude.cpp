@@ -10,13 +10,13 @@
 #include <vector>
 
 namespace {
-using Edge = std::pair<enzo::Offset, enzo::Offset>;
+using Edge = std::pair<helix::Offset, helix::Offset>;
 struct EdgeHash
 {
     size_t operator()(const Edge& edge) const noexcept
     {
-        const size_t a = std::hash<enzo::Offset>{}(edge.first);
-        const size_t b = std::hash<enzo::Offset>{}(edge.second);
+        const size_t a = std::hash<helix::Offset>{}(edge.first);
+        const size_t b = std::hash<helix::Offset>{}(edge.second);
         return a ^ (b + 0x9e3779b97f4a7c15ULL + (a << 6) + (a >> 2));
     }
 };
@@ -32,30 +32,30 @@ struct EdgeHash
  * @return The offset to add to the corner, or zero if the two edges are
  * antiparallel and the bisector is undefined.
  */
-enzo::Vector3 cornerInsetOffset(
-    const enzo::Vector3& prevPos,
-    const enzo::Vector3& cornerPos,
-    const enzo::Vector3& nextPos,
-    const enzo::Vector3& inEdgeFaceNormal,
-    const enzo::Vector3& outEdgeFaceNormal,
+helix::Vector3 cornerInsetOffset(
+    const helix::Vector3& prevPos,
+    const helix::Vector3& cornerPos,
+    const helix::Vector3& nextPos,
+    const helix::Vector3& inEdgeFaceNormal,
+    const helix::Vector3& outEdgeFaceNormal,
     float distance
 )
 {
-    const enzo::Vector3 inDir = (cornerPos - prevPos).normalized();
-    const enzo::Vector3 outDir = (nextPos - cornerPos).normalized();
-    const enzo::Vector3 inNormal = inEdgeFaceNormal.cross(inDir).normalized();
-    const enzo::Vector3 outNormal = outEdgeFaceNormal.cross(outDir).normalized();
+    const helix::Vector3 inDir = (cornerPos - prevPos).normalized();
+    const helix::Vector3 outDir = (nextPos - cornerPos).normalized();
+    const helix::Vector3 inNormal = inEdgeFaceNormal.cross(inDir).normalized();
+    const helix::Vector3 outNormal = outEdgeFaceNormal.cross(outDir).normalized();
     const double denom = 1.0 + inNormal.dot(outNormal);
-    if (std::abs(denom) < 1e-6) return enzo::Vector3::Zero();
-    const enzo::Vector3 bisector = (inNormal + outNormal) / denom;
+    if (std::abs(denom) < 1e-6) return helix::Vector3::Zero();
+    const helix::Vector3 bisector = (inNormal + outNormal) / denom;
     return bisector * static_cast<double>(distance);
 }
 } // namespace
 
 /// @brief Extrudes faces as a connected island, sharing corners between adjacent selected faces.
 static void extrudeConnected(
-    std::shared_ptr<enzo::geo::Mesh> mesh,
-    const std::vector<enzo::Offset>& faces,
+    std::shared_ptr<helix::geo::Mesh> mesh,
+    const std::vector<helix::Offset>& faces,
     float distance,
     float inset,
     const std::string& sideGroupName,
@@ -68,20 +68,20 @@ static void extrudeConnected(
 
     // Record directed edges and accumulate extrude displacement per shared point.
     std::unordered_map<Edge, size_t, EdgeHash> edgeToFaceIdx;
-    std::unordered_map<enzo::Offset, enzo::Vector3> displacementSum;
-    std::unordered_map<enzo::Offset, unsigned int> displacementCount;
+    std::unordered_map<helix::Offset, helix::Vector3> displacementSum;
+    std::unordered_map<helix::Offset, unsigned int> displacementCount;
 
     for (size_t faceIdx = 0; faceIdx < faces.size(); ++faceIdx)
     {
-        const enzo::Offset face = faces[faceIdx];
+        const helix::Offset face = faces[faceIdx];
         auto facePoints = mesh->getFacePoints(face);
-        const enzo::Vector3 displacement = faceNormals[face] * distance;
+        const helix::Vector3 displacement = faceNormals[face] * distance;
         const unsigned int facePointCount = mesh->getFacePointCount(face);
 
         for (size_t i = 0; i < facePointCount; ++i)
         {
-            const enzo::Offset pointOffset = facePoints[i];
-            const enzo::Offset nextPointOffset = facePoints[(i + 1) % facePointCount];
+            const helix::Offset pointOffset = facePoints[i];
+            const helix::Offset nextPointOffset = facePoints[(i + 1) % facePointCount];
             edgeToFaceIdx[{pointOffset, nextPointOffset}] = faceIdx;
 
             auto [it, inserted] = displacementSum.try_emplace(pointOffset, displacement);
@@ -95,11 +95,11 @@ static void extrudeConnected(
     // boundary and the face that owns the directed edge.
     struct OuterHalfEdge
     {
-        enzo::Offset neighbour;
+        helix::Offset neighbour;
         size_t faceIdx;
     };
-    std::unordered_map<enzo::Offset, OuterHalfEdge> outgoingOuter;
-    std::unordered_map<enzo::Offset, OuterHalfEdge> incomingOuter;
+    std::unordered_map<helix::Offset, OuterHalfEdge> outgoingOuter;
+    std::unordered_map<helix::Offset, OuterHalfEdge> incomingOuter;
     for (const auto& [edge, faceIdx] : edgeToFaceIdx)
     {
         if (edgeToFaceIdx.count({edge.second, edge.first})) continue;
@@ -109,8 +109,8 @@ static void extrudeConnected(
 
     // Duplicate each unique ring point along its averaged displacement,
     // applying an inward-bisector inset on outer boundary points only.
-    std::vector<enzo::Offset> uniqueOldPoints;
-    std::vector<enzo::Vector3> newPointPositions;
+    std::vector<helix::Offset> uniqueOldPoints;
+    std::vector<helix::Vector3> newPointPositions;
     uniqueOldPoints.reserve(displacementSum.size());
     newPointPositions.reserve(displacementSum.size());
 
@@ -124,18 +124,18 @@ static void extrudeConnected(
         if (!emitFront && !onOuterBoundary) continue;
 
         const float averageDivisor = static_cast<float>(displacementCount[oldOffset]);
-        const enzo::Vector3 averagedDisplacement = dispSum / averageDivisor;
-        enzo::Vector3 newPos = mesh->getPointPos(oldOffset) + averagedDisplacement;
+        const helix::Vector3 averagedDisplacement = dispSum / averageDivisor;
+        helix::Vector3 newPos = mesh->getPointPos(oldOffset) + averagedDisplacement;
 
         if (inset != 0.0f)
         {
             if (inIt != incomingOuter.end() && outIt != outgoingOuter.end())
             {
-                const enzo::Vector3 prevPos = mesh->getPointPos(inIt->second.neighbour);
-                const enzo::Vector3 cornerPos = mesh->getPointPos(oldOffset);
-                const enzo::Vector3 nextPos = mesh->getPointPos(outIt->second.neighbour);
-                const enzo::Vector3 inFaceNormal = faceNormals[faces[inIt->second.faceIdx]];
-                const enzo::Vector3 outFaceNormal = faceNormals[faces[outIt->second.faceIdx]];
+                const helix::Vector3 prevPos = mesh->getPointPos(inIt->second.neighbour);
+                const helix::Vector3 cornerPos = mesh->getPointPos(oldOffset);
+                const helix::Vector3 nextPos = mesh->getPointPos(outIt->second.neighbour);
+                const helix::Vector3 inFaceNormal = faceNormals[faces[inIt->second.faceIdx]];
+                const helix::Vector3 outFaceNormal = faceNormals[faces[outIt->second.faceIdx]];
                 newPos += cornerInsetOffset(
                     prevPos,
                     cornerPos,
@@ -152,8 +152,8 @@ static void extrudeConnected(
     }
 
     // Create new points and map old ring to new ring
-    std::vector<enzo::Offset> newPoints = mesh->addPoints(newPointPositions);
-    std::unordered_map<enzo::Offset, enzo::Offset> oldToNew;
+    std::vector<helix::Offset> newPoints = mesh->addPoints(newPointPositions);
+    std::unordered_map<helix::Offset, helix::Offset> oldToNew;
     oldToNew.reserve(uniqueOldPoints.size());
     for (size_t i = 0; i < uniqueOldPoints.size(); ++i)
     {
@@ -161,10 +161,10 @@ static void extrudeConnected(
     }
 
     // Build top caps and side quads
-    std::vector<enzo::Offset> sidePointOffsetsFlat;
-    std::vector<enzo::Offset> sideVertexCounts;
-    std::vector<enzo::Offset> topPointOffsetsFlat;
-    std::vector<enzo::Offset> topVertexCounts;
+    std::vector<helix::Offset> sidePointOffsetsFlat;
+    std::vector<helix::Offset> sideVertexCounts;
+    std::vector<helix::Offset> topPointOffsetsFlat;
+    std::vector<helix::Offset> topVertexCounts;
 
     for (auto face : faces)
     {
@@ -186,13 +186,13 @@ static void extrudeConnected(
             // Skip internal edges whose reverse appears in another selected face
             for (size_t i = 0; i < facePointCount; ++i)
             {
-                const enzo::Offset bottomStart = facePoints[i];
-                const enzo::Offset bottomEnd = facePoints[(i + 1) % facePointCount];
+                const helix::Offset bottomStart = facePoints[i];
+                const helix::Offset bottomEnd = facePoints[(i + 1) % facePointCount];
 
                 if (edgeToFaceIdx.count({bottomEnd, bottomStart})) continue;
 
-                const enzo::Offset topStart = oldToNew[bottomStart];
-                const enzo::Offset topEnd = oldToNew[bottomEnd];
+                const helix::Offset topStart = oldToNew[bottomStart];
+                const helix::Offset topEnd = oldToNew[bottomEnd];
 
                 sidePointOffsetsFlat.push_back(bottomStart);
                 sidePointOffsetsFlat.push_back(bottomEnd);
@@ -206,21 +206,21 @@ static void extrudeConnected(
     // Add the new faces and tag them
     if (emitSide)
     {
-        std::vector<enzo::Offset> sideOffsets =
+        std::vector<helix::Offset> sideOffsets =
             mesh->addFaces(sidePointOffsetsFlat, sideVertexCounts);
         if (!sideGroupName.empty()) mesh->addToFaceGroup(sideGroupName, sideOffsets);
     }
     if (emitFront)
     {
-        std::vector<enzo::Offset> topOffsets = mesh->addFaces(topPointOffsetsFlat, topVertexCounts);
+        std::vector<helix::Offset> topOffsets = mesh->addFaces(topPointOffsetsFlat, topVertexCounts);
         if (!frontGroupName.empty()) mesh->addToFaceGroup(frontGroupName, topOffsets);
     }
 }
 
 /// @brief Extrudes each selected face in isolation.
 static void extrudeDisconnected(
-    std::shared_ptr<enzo::geo::Mesh> mesh,
-    const std::vector<enzo::Offset>& faces,
+    std::shared_ptr<helix::geo::Mesh> mesh,
+    const std::vector<helix::Offset>& faces,
     float distance,
     float inset,
     const std::string& sideGroupName,
@@ -231,40 +231,40 @@ static void extrudeDisconnected(
 {
     auto faceNormals = mesh->getFaceNormal();
 
-    std::vector<enzo::Offset> sidePointOffsetsFlat;
-    std::vector<enzo::Offset> sideVertexCounts;
-    std::vector<enzo::Offset> topPointOffsetsFlat;
-    std::vector<enzo::Offset> topVertexCounts;
+    std::vector<helix::Offset> sidePointOffsetsFlat;
+    std::vector<helix::Offset> sideVertexCounts;
+    std::vector<helix::Offset> topPointOffsetsFlat;
+    std::vector<helix::Offset> topVertexCounts;
 
     for (auto face : faces)
     {
         auto facePoints = mesh->getFacePoints(face);
-        const enzo::Vector3 displacement = faceNormals[face] * distance;
-        const enzo::Vector3 faceNormal = faceNormals[face];
+        const helix::Vector3 displacement = faceNormals[face] * distance;
+        const helix::Vector3 faceNormal = faceNormals[face];
         const unsigned int facePointCount = mesh->getFacePointCount(face);
 
         // Duplicate every ring point fresh for this face, applying an
         // inward-bisector inset on each corner.
-        std::vector<enzo::Vector3> newPositionsLocal;
+        std::vector<helix::Vector3> newPositionsLocal;
         newPositionsLocal.reserve(facePointCount);
         for (size_t i = 0; i < facePointCount; ++i)
         {
-            enzo::Vector3 newPos = mesh->getPointPos(facePoints[i]) + displacement;
+            helix::Vector3 newPos = mesh->getPointPos(facePoints[i]) + displacement;
             if (inset != 0.0f)
             {
-                const enzo::Offset prevOffset =
+                const helix::Offset prevOffset =
                     facePoints[(i + facePointCount - 1) % facePointCount];
-                const enzo::Offset nextOffset = facePoints[(i + 1) % facePointCount];
-                const enzo::Vector3 prevPos = mesh->getPointPos(prevOffset);
-                const enzo::Vector3 cornerPos = mesh->getPointPos(facePoints[i]);
-                const enzo::Vector3 nextPos = mesh->getPointPos(nextOffset);
+                const helix::Offset nextOffset = facePoints[(i + 1) % facePointCount];
+                const helix::Vector3 prevPos = mesh->getPointPos(prevOffset);
+                const helix::Vector3 cornerPos = mesh->getPointPos(facePoints[i]);
+                const helix::Vector3 nextPos = mesh->getPointPos(nextOffset);
                 newPos +=
                     cornerInsetOffset(prevPos, cornerPos, nextPos, faceNormal, faceNormal, inset);
             }
             newPositionsLocal.push_back(newPos);
         }
 
-        std::vector<enzo::Offset> faceNewPoints = mesh->addPoints(newPositionsLocal);
+        std::vector<helix::Offset> faceNewPoints = mesh->addPoints(newPositionsLocal);
 
         if (emitFront)
         {
@@ -281,10 +281,10 @@ static void extrudeDisconnected(
             // Every edge gets its own side quad
             for (size_t i = 0; i < facePointCount; ++i)
             {
-                const enzo::Offset bottomStart = facePoints[i];
-                const enzo::Offset bottomEnd = facePoints[(i + 1) % facePointCount];
-                const enzo::Offset topStart = faceNewPoints[i];
-                const enzo::Offset topEnd = faceNewPoints[(i + 1) % facePointCount];
+                const helix::Offset bottomStart = facePoints[i];
+                const helix::Offset bottomEnd = facePoints[(i + 1) % facePointCount];
+                const helix::Offset topStart = faceNewPoints[i];
+                const helix::Offset topEnd = faceNewPoints[(i + 1) % facePointCount];
 
                 sidePointOffsetsFlat.push_back(bottomStart);
                 sidePointOffsetsFlat.push_back(bottomEnd);
@@ -298,13 +298,13 @@ static void extrudeDisconnected(
     // Add the new faces and tag them
     if (emitSide)
     {
-        std::vector<enzo::Offset> sideOffsets =
+        std::vector<helix::Offset> sideOffsets =
             mesh->addFaces(sidePointOffsetsFlat, sideVertexCounts);
         if (!sideGroupName.empty()) mesh->addToFaceGroup(sideGroupName, sideOffsets);
     }
     if (emitFront)
     {
-        std::vector<enzo::Offset> topOffsets = mesh->addFaces(topPointOffsetsFlat, topVertexCounts);
+        std::vector<helix::Offset> topOffsets = mesh->addFaces(topPointOffsetsFlat, topVertexCounts);
         if (!frontGroupName.empty()) mesh->addToFaceGroup(frontGroupName, topOffsets);
     }
 }
@@ -324,8 +324,8 @@ struct OutputFlags
 };
 
 void extrude(
-    enzo::geo::PrimPtr prim,
-    std::vector<enzo::Offset> faces,
+    helix::geo::PrimPtr prim,
+    std::vector<helix::Offset> faces,
     float distance,
     float inset,
     bool connected,
@@ -333,7 +333,7 @@ void extrude(
     const OutputFlags& outputs
 )
 {
-    std::shared_ptr<enzo::geo::Mesh> mesh = std::dynamic_pointer_cast<enzo::geo::Mesh>(prim);
+    std::shared_ptr<helix::geo::Mesh> mesh = std::dynamic_pointer_cast<helix::geo::Mesh>(prim);
     if (!mesh)
     {
         return;
@@ -390,7 +390,7 @@ void extrude(
 
 namespace {
 
-class Extrude : public enzo::nt::NodeImpl
+class Extrude : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -400,7 +400,7 @@ class Extrude : public enzo::nt::NodeImpl
 
 void Extrude::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -422,7 +422,7 @@ void Extrude::cook()
     outputs.side = evalParmBool("sideOutput");
     outputs.back = evalParmBool("backOutput");
 
-    enzo::Selection selection(selectionStr);
+    helix::Selection selection(selectionStr);
 
     for (geo::PrimPtr prim : selection.getPrims(packet))
     {
@@ -442,4 +442,4 @@ void Extrude::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(extrude, Extrude)
+HELIX_REGISTER_NODE(extrude, Extrude)

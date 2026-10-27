@@ -12,13 +12,13 @@ namespace {
 ///
 /// @note A primitive owner holds a single value, so it is either covered whole or
 ///       not at all.
-std::vector<enzo::Offset> getSelectedOffsets(
-    enzo::Selection& selection,
-    enzo::geo::PrimPtr prim,
-    enzo::attr::AttributeOwner owner
+std::vector<helix::Offset> getSelectedOffsets(
+    helix::Selection& selection,
+    helix::geo::PrimPtr prim,
+    helix::attr::AttributeOwner owner
 )
 {
-    using namespace enzo;
+    using namespace helix;
 
     switch (owner)
     {
@@ -42,14 +42,14 @@ std::vector<enzo::Offset> getSelectedOffsets(
  */
 template <typename T>
 bool writeAttribute(
-    enzo::NodePacket& packet,
-    enzo::Selection& selection,
-    enzo::attr::AttributeOwner owner,
-    const enzo::String& name,
+    helix::NodePacket& packet,
+    helix::Selection& selection,
+    helix::attr::AttributeOwner owner,
+    const helix::String& name,
     const T& value
 )
 {
-    using namespace enzo;
+    using namespace helix;
 
     for (geo::PrimPtr prim : selection.getPrims(packet))
     {
@@ -64,7 +64,7 @@ bool writeAttribute(
     return true;
 }
 
-class AttributeCreate : public enzo::nt::NodeImpl
+class AttributeCreate : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -74,7 +74,7 @@ class AttributeCreate : public enzo::nt::NodeImpl
 
 void AttributeCreate::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -135,4 +135,4 @@ void AttributeCreate::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(attributeCreate, AttributeCreate)
+HELIX_REGISTER_NODE(attributeCreate, AttributeCreate)

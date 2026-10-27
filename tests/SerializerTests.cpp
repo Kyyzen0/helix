@@ -5,11 +5,15 @@
 #include "Engine/Parameter/Parameter.h"
 #include "Engine/Serializer/ParameterSerializable.h"
 #include "Engine/Serializer/Serializer.h"
+#include <algorithm>
 #include <catch2/catch_test_macros.hpp>
 #include <fstream>
+#include <iterator>
 #include <optional>
+#include <string>
+#include <vector>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -28,20 +32,20 @@ struct NMReset
 {
     NMReset()
     {
-        enzo::nt::NodeLoader::loadNodes();
-        enzo::nt::nm()._reset();
+        helix::nt::NodeLoader::loadNodes();
+        helix::nt::nm()._reset();
     }
-    ~NMReset() { enzo::nt::nm()._reset(); }
+    ~NMReset() { helix::nt::nm()._reset(); }
 };
 
 // Registers a node type that holds a scope and returns its full name.
 std::string addScopedType()
 {
-    enzo::nt::NodeLoader::loadNodes();
-    enzo::nt::NodeType nodeType = enzo::nt::NodeTypeTable::requireNodeType("enzo::grid");
+    helix::nt::NodeLoader::loadNodes();
+    helix::nt::NodeType nodeType = helix::nt::NodeTypeTable::requireNodeType("helix::grid");
     nodeType.internalName = "scopedContainer";
     nodeType.childScopeType = "geometry";
-    return enzo::nt::NodeTypeTable::addNodeType(std::move(nodeType)).getFullName();
+    return helix::nt::NodeTypeTable::addNodeType(std::move(nodeType)).getFullName();
 }
 
 const std::string scopedTypeName = addScopedType();
@@ -141,13 +145,13 @@ TEST_CASE("Applying a ramp model reconciles a mismatched instance count")
 TEST_CASE_METHOD(NMReset, "A node path round trips through save and load")
 {
     auto& nm = nt::nm();
-    nt::NodeId grid = nm.createNode("enzo::grid");
+    nt::NodeId grid = nm.createNode("helix::grid");
     // Use a path the placeholder would never regenerate so the test fails if the
     // path is not actually serialized
     const std::string savedPath = "/my_renamed_grid";
     nm.getNode(grid).setPath(savedPath);
 
-    const std::string path = "/tmp/enzo_serializer_path_roundtrip.json";
+    const std::string path = "/tmp/helix_serializer_path_roundtrip.json";
     nt::Serializer serializer;
     serializer.save(nm, path);
 
@@ -162,11 +166,11 @@ TEST_CASE_METHOD(NMReset, "A node path round trips through save and load")
 TEST_CASE_METHOD(NMReset, "A node link round trips through save and load")
 {
     auto& nm = nt::nm();
-    nt::NodeId grid = nm.createNode("enzo::grid");
-    nt::NodeId transform = nm.createNode("enzo::transform");
+    nt::NodeId grid = nm.createNode("helix::grid");
+    nt::NodeId transform = nm.createNode("helix::transform");
     nt::nm().connectNodes(grid, 0, transform, 0);
 
-    const std::string path = "/tmp/enzo_serializer_roundtrip.json";
+    const std::string path = "/tmp/helix_serializer_roundtrip.json";
     nt::Serializer serializer;
     serializer.save(nm, path);
 
@@ -196,9 +200,9 @@ TEST_CASE_METHOD(NMReset, "A node inside a scope round trips through save and lo
 
     nt::NodeId container = nm.createNode(scopedTypeName);
     const Path containerPath = nm.getNode(container).getPath();
-    nm.createNode("enzo::grid", containerPath);
+    nm.createNode("helix::grid", containerPath);
 
-    const std::string path = "/tmp/enzo_serializer_scope_roundtrip.json";
+    const std::string path = "/tmp/helix_serializer_scope_roundtrip.json";
     nt::Serializer serializer;
     serializer.save(nm, path);
 
@@ -220,7 +224,7 @@ TEST_CASE_METHOD(NMReset, "The timeline round trips through save and load")
     nm.setFps(30);
     nm.setFrame(20);
 
-    const std::string path = "/tmp/enzo_serializer_timeline_roundtrip.json";
+    const std::string path = "/tmp/helix_serializer_timeline_roundtrip.json";
     nt::Serializer serializer;
     serializer.save(nm, path);
 
@@ -235,9 +239,78 @@ TEST_CASE_METHOD(NMReset, "The timeline round trips through save and load")
 
 TEST_CASE_METHOD(NMReset, "Loading a file without a timeline fails")
 {
-    const std::string path = "/tmp/enzo_serializer_no_timeline.json";
+    const std::string path = "/tmp/helix_serializer_no_timeline.json";
     std::ofstream(path) << R"({"networkModel": {"nodes": [], "nodeLinks": []}})";
 
     nt::Serializer serializer;
     REQUIRE_THROWS(serializer.load(nt::nm(), path));
+}
+
+namespace {
+
+std::string readFile(const std::string& path)
+{
+    std::ifstream file(path);
+    return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+}
+
+std::string replaceAll(std::string text, const std::string& from, const std::string& to)
+{
+    for (std::size_t at = text.find(from); at != std::string::npos; at = text.find(from, at + to.size()))
+        text.replace(at, from.size(), to);
+    return text;
+}
+
+// Describes a network by the type, path and wiring of its nodes, ignoring the node ids a load
+// hands out.
+std::vector<std::string> describeNetwork(helix::nt::NetworkManager& nm)
+{
+    using namespace helix;
+    std::vector<std::string> lines;
+    for (auto [nodeId, node] : nm.nodes())
+    {
+        std::string line = node.getType().getFullName() + " " + node.getPath().getString();
+        for (const nt::NodeLink& link : nm.graph().getInputs(nodeId))
+            line += " <-" + nm.getNode(link.sourceNode).getPath().getString() + ":" +
+                    std::to_string(link.sourceOutput) + ">" + std::to_string(link.targetInput);
+        lines.push_back(line);
+    }
+    std::sort(lines.begin(), lines.end());
+    return lines;
+}
+
+} // namespace
+
+// A scene saved before the rename to "helix" names its node types "enzo::<name>". The legacy
+// file here is a real save with the type names rewritten, so the layout is the real one.
+TEST_CASE_METHOD(NMReset, "A scene saved with enzo:: type names loads like the helix:: one")
+{
+    auto& nm = nt::nm();
+    nt::NodeId grid = nm.createNode("helix::grid");
+    nt::NodeId transform = nm.createNode("helix::transform");
+    nm.connectNodes(grid, 0, transform, 0);
+    const std::vector<std::string> expected = describeNetwork(nm);
+    REQUIRE(expected.size() == 2);
+
+    const std::string currentPath = "/tmp/helix_serializer_current_names.json";
+    const std::string legacyPath = "/tmp/helix_serializer_legacy_names.json";
+    const std::string resavedPath = "/tmp/helix_serializer_legacy_resaved.json";
+    nt::Serializer serializer;
+    serializer.save(nm, currentPath);
+
+    const std::string legacyScene = replaceAll(readFile(currentPath), "helix::", "enzo::");
+    REQUIRE(legacyScene.find("enzo::grid") != std::string::npos);
+    REQUIRE(legacyScene.find("helix::") == std::string::npos);
+    std::ofstream(legacyPath) << legacyScene;
+
+    nm._reset();
+    serializer.load(nm, legacyPath);
+    REQUIRE(describeNetwork(nm) == expected);
+
+    // Saving again writes only the new names
+    serializer.save(nm, resavedPath);
+    const std::string resaved = readFile(resavedPath);
+    REQUIRE(resaved.find("enzo") == std::string::npos);
+    REQUIRE(resaved.find("helix::grid") != std::string::npos);
+    REQUIRE(resaved.find("helix::transform") != std::string::npos);
 }

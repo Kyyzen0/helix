@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Effects
 import QtQuick.VectorImage
-import Enzo
+import Helix
 import "../Components"
 import "../Utils.js" as Utils
 

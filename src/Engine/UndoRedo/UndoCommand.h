@@ -2,7 +2,7 @@
 
 #include "Engine/UndoRedo/UndoCommands.h"
 
-namespace enzo::nt {
+namespace helix::nt {
 
 class UndoCommand
 {
@@ -13,4 +13,4 @@ class UndoCommand
     virtual UndoCommandType type() const = 0;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

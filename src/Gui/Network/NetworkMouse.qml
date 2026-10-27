@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // Turns mouse events into controller verbs. A left press picks the tool that
 // owns the drag until the release.

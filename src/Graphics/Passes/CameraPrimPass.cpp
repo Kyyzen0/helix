@@ -1,9 +1,9 @@
 #include "Graphics/Passes/CameraPrimPass.h"
-#include "Graphics/Shaders/CameraPrim.h"
+#include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 #include <vector>
 
-namespace enzo::gfx {
+namespace helix::gfx {
 
 namespace {
 
@@ -22,74 +22,65 @@ std::vector<glm::vec3> buildFrameVertices()
 
 } // namespace
 
-CameraPrimPass::CameraPrimPass(
-    Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants, Diligent::Uint8 sampleCount
-)
+CameraPrimPass::CameraPrimPass(GraphicsDevice& device, NS::UInteger sampleCount)
 {
+    ScopedAutoreleasePool pool;
+
     // Frame vertex buffer
-    frameVertices_ =
-        createGpuArray(device, "Camera frame vertices", Diligent::BIND_VERTEX_BUFFER, buildFrameVertices());
+    frameVertices_ = createGpuArray(device.getDevice(), "Camera frame vertices", buildFrameVertices());
 
-    // Pipeline
-    Diligent::GraphicsPipelineStateCreateInfo pipelineInfo;
-    pipelineInfo.PSODesc.Name = "Camera primitives";
+    // Reads the frame vertices from vertex buffer 0 and one transform per camera, column by
+    // column, from buffer 1.
+    MTL::VertexDescriptor* layout = MTL::VertexDescriptor::vertexDescriptor();
+    addVertexAttribute(layout, 0, MTL::VertexFormatFloat3, 0, 0);
+    addVertexBuffer(layout, 0, sizeof(glm::vec3), false);
+    for (NS::UInteger column = 0; column < 4; ++column)
+        addVertexAttribute(layout, 1 + column, MTL::VertexFormatFloat4, column * sizeof(glm::vec4), 1);
+    addVertexBuffer(layout, 1, sizeof(glm::mat4), true);
 
-    Diligent::GraphicsPipelineDesc& graphics = pipelineInfo.GraphicsPipeline;
-    graphics.PrimitiveTopology = Diligent::PRIMITIVE_TOPOLOGY_LINE_LIST;
-    graphics.RasterizerDesc.CullMode = Diligent::CULL_MODE_NONE;
-
-    // Reads the frame vertices from buffer slot 0 and one transform per camera, column by column, from slot 1.
-    constexpr Diligent::INPUT_ELEMENT_FREQUENCY perCamera = Diligent::INPUT_ELEMENT_FREQUENCY_PER_INSTANCE;
-    const Diligent::LayoutElement layoutElements[] = {
-        {0, 0, 3, Diligent::VT_FLOAT32, false},
-        {1, 1, 4, Diligent::VT_FLOAT32, false, perCamera},
-        {2, 1, 4, Diligent::VT_FLOAT32, false, perCamera},
-        {3, 1, 4, Diligent::VT_FLOAT32, false, perCamera},
-        {4, 1, 4, Diligent::VT_FLOAT32, false, perCamera},
-    };
-    graphics.InputLayout.LayoutElements = layoutElements;
-    graphics.InputLayout.NumElements = 5;
-
-    Diligent::RefCntAutoPtr<Diligent::IShader> vertexShader =
-        createShader(device, shaders::cameraPrimSource, Diligent::SHADER_TYPE_VERTEX, "vertexMain");
-    Diligent::RefCntAutoPtr<Diligent::IShader> pixelShader =
-        createShader(device, shaders::cameraPrimSource, Diligent::SHADER_TYPE_PIXEL, "pixelMain");
-    pipelineInfo.pVS = vertexShader;
-    pipelineInfo.pPS = pixelShader;
-    pipeline_ = createPipeline(device, pipelineInfo, frameConstants, sampleCount);
+    PipelineSettings settings;
+    settings.name = "Camera primitives";
+    settings.vertexFunction = "cameraPrimVertex";
+    settings.fragmentFunction = "cameraPrimFragment";
+    settings.topology = MTL::PrimitiveTopologyClassLine;
+    settings.vertexLayout = layout;
+    pipeline_ = createPipeline(device, settings, sampleCount);
 }
 
-void CameraPrimPass::upload(Diligent::IRenderDevice* device, const DisplayGeometry& geometry)
+void CameraPrimPass::upload(MTL::Device* device, const DisplayGeometry& geometry, RetiredResources& retired)
 {
-    transforms_ =
-        createGpuArray(device, "Camera transforms", Diligent::BIND_VERTEX_BUFFER, geometry.cameraTransforms);
+    replaceGpuArray(transforms_, device, "Camera transforms", geometry.cameraTransforms, retired);
 }
 
-void CameraPrimPass::draw(Diligent::IDeviceContext* context, std::optional<std::size_t> hiddenCamera)
+void CameraPrimPass::draw(MTL::RenderCommandEncoder* encoder, std::optional<std::size_t> hiddenCamera)
 {
     if (!transforms_.buffer) return;
 
-    setVertexBuffers(context, {frameVertices_.buffer, transforms_.buffer});
-    setPipeline(context, pipeline_);
+    bindPipeline(encoder, pipeline_);
+    encoder->setVertexBuffer(frameVertices_.buffer.get(), 0, 0);
+    encoder->setVertexBuffer(transforms_.buffer.get(), 0, 1);
 
     if (!hiddenCamera.has_value())
     {
-        drawRange(context, 0, transforms_.count);
+        drawRange(encoder, 0, transforms_.count);
         return;
     }
-    drawRange(context, 0, *hiddenCamera);
-    drawRange(context, *hiddenCamera + 1, transforms_.count);
+    drawRange(encoder, 0, *hiddenCamera);
+    drawRange(encoder, *hiddenCamera + 1, transforms_.count);
 }
 
-void CameraPrimPass::drawRange(Diligent::IDeviceContext* context, std::size_t first, std::size_t end)
+void CameraPrimPass::drawRange(MTL::RenderCommandEncoder* encoder, std::size_t first, std::size_t end)
 {
     if (first >= end) return;
 
-    Diligent::DrawAttribs drawAttribs;
-    drawAttribs.NumVertices = frameVertices_.count;
-    drawAttribs.FirstInstanceLocation = Diligent::Uint32(first);
-    drawAttribs.NumInstances = Diligent::Uint32(end - first);
-    context->Draw(drawAttribs);
+    // The first instance moves where the per camera transforms start being read from.
+    encoder->drawPrimitives(
+        MTL::PrimitiveTypeLine,
+        NS::UInteger(0),
+        NS::UInteger(frameVertices_.count),
+        NS::UInteger(end - first),
+        NS::UInteger(first)
+    );
 }
 
-} // namespace enzo::gfx
+} // namespace helix::gfx

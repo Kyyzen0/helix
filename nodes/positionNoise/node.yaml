@@ -1,12 +1,12 @@
 version: 1
 
 name: positionNoise
-namespace: enzo
+namespace: helix
 label: Position Noise
 
 implementation:
   kind: alias
-  type: enzo::attributeNoise
+  type: helix::attributeNoise
 
 parameterValues:
   name: Position

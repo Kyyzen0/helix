@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // Geometry spreadsheet drawer: a header bar over a primitives tree sidebar and
 // the attribute table of the selected primitive.

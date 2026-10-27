@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief Geometry attributes of one primitive laid out as a table.
 ///
@@ -68,4 +68,4 @@ class AttributeTableModel : public QAbstractTableModel
     std::vector<Column> columns_;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

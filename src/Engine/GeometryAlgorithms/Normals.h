@@ -2,11 +2,11 @@
 #include "Engine/Core/Types.h"
 #include <vector>
 
-namespace enzo::geo {
+namespace helix::geo {
 class Mesh;
 }
 
-namespace enzo::utils {
+namespace helix::utils {
 
 /**
  * @brief Returns one smooth normal per point, indexed by point offset.
@@ -30,4 +30,4 @@ std::vector<Vector3> computePointNormals(const geo::Mesh& mesh);
  */
 std::vector<Vector3> computeVertexNormals(const geo::Mesh& mesh, double cuspAngle);
 
-} // namespace enzo::utils
+} // namespace helix::utils

@@ -1,11 +1,11 @@
 #include "Engine/Parameter/Parameter.h"
 #include <catch2/catch_test_macros.hpp>
 
-using namespace enzo;
+using namespace helix;
 
 static prm::Template dropdownTemplate()
 {
-    using namespace enzo::prm;
+    using namespace helix::prm;
     return Template(Type::DROPDOWN, Name("operation", "Operation"), Default("union"))
         .setOptions({
             Name("union", "Union"),
@@ -36,7 +36,7 @@ TEST_CASE("evalInt returns minus one when the dropdown token is not an option")
 
 static prm::Template floatTemplate()
 {
-    using namespace enzo::prm;
+    using namespace helix::prm;
     return Template(Type::FLOAT, Name("distance", "Distance"), Default(1));
 }
 
@@ -72,13 +72,13 @@ TEST_CASE("A failed expression yields zero rather than the stored literal")
 
 static prm::Template intTemplate()
 {
-    using namespace enzo::prm;
+    using namespace helix::prm;
     return Template(Type::INT, Name("count", "Count"), Default(7));
 }
 
 static prm::Template stringTemplate()
 {
-    using namespace enzo::prm;
+    using namespace helix::prm;
     return Template(Type::STRING, Name("label", "Label"), Default("hello"));
 }
 
@@ -116,7 +116,7 @@ TEST_CASE("evalString reads a numeric parameter as empty")
 // its own instance fields.
 static prm::Template rampTemplate(int points)
 {
-    using namespace enzo::prm;
+    using namespace helix::prm;
     return Template(Type::RAMP, Name("amplitude", "Amplitude"), Default(points));
 }
 
