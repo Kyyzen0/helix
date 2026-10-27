@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Enzo: src/Engine/Network/NodeImpl.h Source File</title>
+<title>Helix: src/Engine/Network/NodeImpl.h Source File</title>
 <link rel="icon" href="icon-main-white.png" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -35,7 +35,7 @@ MathJax.Hub.Config({
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="icon-main-white.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Enzo
+   <div id="projectname">Helix
    </div>
   </td>
  </tr>
@@ -110,38 +110,38 @@ $(function(){ initResizable(false); });
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">namespace </span>enzo::prm {</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">namespace </span>helix::prm {</div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="keyword">class </span>Ramp;</div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>}</div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="keyword">namespace </span>enzo::nt {</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="keyword">namespace </span>helix::nt {</div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">class </span>Node;</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
 <div class="foldopen" id="foldopen00039" data-start="{" data-end="};">
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classenzo_1_1nt_1_1NodeImpl.html">   39</a></span><span class="keyword">class </span>BOOST_SYMBOL_EXPORT <a class="code hl_class" href="classenzo_1_1nt_1_1NodeImpl.html">NodeImpl</a></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classhelix_1_1nt_1_1NodeImpl.html">   39</a></span><span class="keyword">class </span>BOOST_SYMBOL_EXPORT <a class="code hl_class" href="classhelix_1_1nt_1_1NodeImpl.html">NodeImpl</a></div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>{</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <a class="code hl_class" href="classenzo_1_1nt_1_1NodeImpl.html">NodeImpl</a>(<a class="code hl_class" href="classenzo_1_1nt_1_1Node.html">Node</a>&amp; node, <a class="code hl_class" href="classenzo_1_1nt_1_1CookContext.html">CookContext</a>&amp; context) : node_{node}, context_{context} {}</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classenzo_1_1nt_1_1NodeImpl.html">~NodeImpl</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <a class="code hl_class" href="classhelix_1_1nt_1_1NodeImpl.html">NodeImpl</a>(<a class="code hl_class" href="classhelix_1_1nt_1_1Node.html">Node</a>&amp; node, <a class="code hl_class" href="classhelix_1_1nt_1_1CookContext.html">CookContext</a>&amp; context) : node_{node}, context_{context} {}</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classhelix_1_1nt_1_1NodeImpl.html">~NodeImpl</a>() = <span class="keywordflow">default</span>;</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="classenzo_1_1nt_1_1NodeImpl.html#a65d99c57095048a57d9d50ee31d1209e">   47</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classenzo_1_1nt_1_1NodeImpl.html#a65d99c57095048a57d9d50ee31d1209e">cook</a>() = 0;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="classhelix_1_1nt_1_1NodeImpl.html#a55a8520f1cd4c26d373c5e07b84b8ed0">   47</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classhelix_1_1nt_1_1NodeImpl.html#a55a8520f1cd4c26d373c5e07b84b8ed0">cook</a>() = 0;</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="keyword">protected</span>:</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordtype">void</span> throwError(std::string error);</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordtype">void</span> throwWarning(std::string warning);</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <a class="code hl_typedef" href="Types_8h.html#aab12bf4b9a39db7c3a93f15e7e6f10f9">NodeId</a> getNodeId() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <a class="code hl_typedef" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">NodeId</a> getNodeId() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keyword">const</span> std::filesystem::path&amp; getNodeFolder() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordtype">bool</span> outputRequested(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> outputIndex);</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keywordtype">void</span> setOutputPacket(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> outputIndex, <a class="code hl_class" href="classenzo_1_1NodePacket.html">enzo::NodePacket</a> packet);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keywordtype">void</span> setOutputPacket(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> outputIndex, <a class="code hl_class" href="classhelix_1_1NodePacket.html">helix::NodePacket</a> packet);</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <a class="code hl_class" href="classenzo_1_1NodePacket.html">enzo::NodePacket</a> cloneInputPacket(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> inputIndex);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <a class="code hl_class" href="classhelix_1_1NodePacket.html">helix::NodePacket</a> cloneInputPacket(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> inputIndex);</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    std::shared_ptr&lt;const enzo::NodePacket&gt; getInputPacket(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> inputIndex);</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    std::shared_ptr&lt;const helix::NodePacket&gt; getInputPacket(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> inputIndex);</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keywordtype">bool</span> hasInput(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> inputIndex);</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
@@ -165,23 +165,23 @@ $(function(){ initResizable(false); });
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    Vector2 evalParmVector2(std::string_view parmName) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    Vector3 evalParmVector3(std::string_view parmName) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <a class="code hl_class" href="classenzo_1_1prm_1_1Ramp.html">enzo::prm::Ramp</a> evalParmRamp(std::string_view parmName) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <a class="code hl_class" href="classhelix_1_1prm_1_1Ramp.html">helix::prm::Ramp</a> evalParmRamp(std::string_view parmName) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <a class="code hl_class" href="classenzo_1_1nt_1_1Node.html">Node</a>&amp; node_;</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <a class="code hl_class" href="classenzo_1_1nt_1_1CookContext.html">CookContext</a>&amp; context_;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <a class="code hl_class" href="classhelix_1_1nt_1_1Node.html">Node</a>&amp; node_;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <a class="code hl_class" href="classhelix_1_1nt_1_1CookContext.html">CookContext</a>&amp; context_;</div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>};</div>
 </div>
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>} <span class="comment">// namespace enzo::nt</span></div>
-<div class="ttc" id="aTypes_8h_html"><div class="ttname"><a href="Types_8h.html">Types.h</a></div><div class="ttdoc">Basic attribute, parameter, and node types for Enzo.</div></div>
-<div class="ttc" id="aTypes_8h_html_aab12bf4b9a39db7c3a93f15e7e6f10f9"><div class="ttname"><a href="Types_8h.html#aab12bf4b9a39db7c3a93f15e7e6f10f9">enzo::nt::NodeId</a></div><div class="ttdeci">uint64_t NodeId</div><div class="ttdoc">The unique ID assigned to each node in the network.</div><div class="ttdef"><b>Definition</b> Types.h:334</div></div>
-<div class="ttc" id="aclassenzo_1_1NodePacket_html"><div class="ttname"><a href="classenzo_1_1NodePacket.html">enzo::NodePacket</a></div><div class="ttdef"><b>Definition</b> NodePacket.h:9</div></div>
-<div class="ttc" id="aclassenzo_1_1nt_1_1CookContext_html"><div class="ttname"><a href="classenzo_1_1nt_1_1CookContext.html">enzo::nt::CookContext</a></div><div class="ttdoc">The handle a node holds while it cooks to get context about the network.</div><div class="ttdef"><b>Definition</b> CookContext.h:37</div></div>
-<div class="ttc" id="aclassenzo_1_1nt_1_1NodeImpl_html"><div class="ttname"><a href="classenzo_1_1nt_1_1NodeImpl.html">enzo::nt::NodeImpl</a></div><div class="ttdoc">The base class a node author subclasses to write a node's behaviour.</div><div class="ttdef"><b>Definition</b> NodeImpl.h:40</div></div>
-<div class="ttc" id="aclassenzo_1_1nt_1_1NodeImpl_html_a65d99c57095048a57d9d50ee31d1209e"><div class="ttname"><a href="classenzo_1_1nt_1_1NodeImpl.html#a65d99c57095048a57d9d50ee31d1209e">enzo::nt::NodeImpl::cook</a></div><div class="ttdeci">virtual void cook()=0</div><div class="ttdoc">Produces this node's output packets from its inputs and parameters.</div></div>
-<div class="ttc" id="aclassenzo_1_1nt_1_1Node_html"><div class="ttname"><a href="classenzo_1_1nt_1_1Node.html">enzo::nt::Node</a></div><div class="ttdoc">The unique runtime representation of a node.</div><div class="ttdef"><b>Definition</b> Node.h:18</div></div>
-<div class="ttc" id="aclassenzo_1_1prm_1_1Ramp_html"><div class="ttname"><a href="classenzo_1_1prm_1_1Ramp.html">enzo::prm::Ramp</a></div><div class="ttdoc">A sampled snapshot of a ramp parameter read during cook.</div><div class="ttdef"><b>Definition</b> Ramp.h:25</div></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>} <span class="comment">// namespace helix::nt</span></div>
+<div class="ttc" id="aTypes_8h_html"><div class="ttname"><a href="Types_8h.html">Types.h</a></div><div class="ttdoc">Basic attribute, parameter, and node types for Helix.</div></div>
+<div class="ttc" id="aTypes_8h_html_a7ee202d2a627624f0575ccd8434d6968"><div class="ttname"><a href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">helix::nt::NodeId</a></div><div class="ttdeci">uint64_t NodeId</div><div class="ttdoc">The unique ID assigned to each node in the network.</div><div class="ttdef"><b>Definition</b> Types.h:334</div></div>
+<div class="ttc" id="aclasshelix_1_1NodePacket_html"><div class="ttname"><a href="classhelix_1_1NodePacket.html">helix::NodePacket</a></div><div class="ttdef"><b>Definition</b> NodePacket.h:9</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1CookContext_html"><div class="ttname"><a href="classhelix_1_1nt_1_1CookContext.html">helix::nt::CookContext</a></div><div class="ttdoc">The handle a node holds while it cooks to get context about the network.</div><div class="ttdef"><b>Definition</b> CookContext.h:37</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1NodeImpl_html"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeImpl.html">helix::nt::NodeImpl</a></div><div class="ttdoc">The base class a node author subclasses to write a node's behaviour.</div><div class="ttdef"><b>Definition</b> NodeImpl.h:40</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1NodeImpl_html_a55a8520f1cd4c26d373c5e07b84b8ed0"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeImpl.html#a55a8520f1cd4c26d373c5e07b84b8ed0">helix::nt::NodeImpl::cook</a></div><div class="ttdeci">virtual void cook()=0</div><div class="ttdoc">Produces this node's output packets from its inputs and parameters.</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1Node_html"><div class="ttname"><a href="classhelix_1_1nt_1_1Node.html">helix::nt::Node</a></div><div class="ttdoc">The unique runtime representation of a node.</div><div class="ttdef"><b>Definition</b> Node.h:18</div></div>
+<div class="ttc" id="aclasshelix_1_1prm_1_1Ramp_html"><div class="ttname"><a href="classhelix_1_1prm_1_1Ramp.html">helix::prm::Ramp</a></div><div class="ttdoc">A sampled snapshot of a ramp parameter read during cook.</div><div class="ttdef"><b>Definition</b> Ramp.h:25</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

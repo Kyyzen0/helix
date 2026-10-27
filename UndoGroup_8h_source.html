@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Enzo: src/Engine/UndoRedo/UndoGroup.h Source File</title>
+<title>Helix: src/Engine/UndoRedo/UndoGroup.h Source File</title>
 <link rel="icon" href="icon-main-white.png" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -35,7 +35,7 @@ MathJax.Hub.Config({
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="icon-main-white.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Enzo
+   <div id="projectname">Helix
    </div>
   </td>
  </tr>
@@ -107,22 +107,22 @@ $(function(){ initResizable(false); });
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="keyword">namespace </span>enzo::nt {</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="keyword">namespace </span>helix::nt {</div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
 <div class="foldopen" id="foldopen00010" data-start="{" data-end="};">
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="classenzo_1_1nt_1_1UndoGroup.html">   10</a></span><span class="keyword">class </span><a class="code hl_class" href="classenzo_1_1nt_1_1UndoGroup.html">UndoGroup</a> : <span class="keyword">public</span> <a class="code hl_class" href="classenzo_1_1nt_1_1UndoCommand.html">UndoCommand</a></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="classhelix_1_1nt_1_1UndoGroup.html">   10</a></span><span class="keyword">class </span><a class="code hl_class" href="classhelix_1_1nt_1_1UndoGroup.html">UndoGroup</a> : <span class="keyword">public</span> <a class="code hl_class" href="classhelix_1_1nt_1_1UndoCommand.html">UndoCommand</a></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>{</div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>  <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    <a class="code hl_class" href="classenzo_1_1nt_1_1UndoGroup.html">UndoGroup</a>() {}</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    <a class="code hl_class" href="classhelix_1_1nt_1_1UndoGroup.html">UndoGroup</a>() {}</div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
 <div class="foldopen" id="foldopen00016" data-start="{" data-end="}">
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="classenzo_1_1nt_1_1UndoGroup.html#acbbe1180d61bb0aadd5a378b7552cade">   16</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classenzo_1_1nt_1_1UndoGroup.html#acbbe1180d61bb0aadd5a378b7552cade">addCommand</a>(std::unique_ptr&lt;UndoCommand&gt; command)</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="classhelix_1_1nt_1_1UndoGroup.html#ab35bec13f57826483bdc6cd98e5c116d">   16</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classhelix_1_1nt_1_1UndoGroup.html#ab35bec13f57826483bdc6cd98e5c116d">addCommand</a>(std::unique_ptr&lt;UndoCommand&gt; command)</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    {</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        commands_.push_back(std::move(command));</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    }</div>
 </div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classenzo_1_1nt_1_1UndoGroup.html#a9d606e988ecbd13784fac1967b2228b3">   22</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classenzo_1_1nt_1_1UndoGroup.html#a9d606e988ecbd13784fac1967b2228b3">isEmpty</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> commands_.empty(); }</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classhelix_1_1nt_1_1UndoGroup.html#a296e2c8f9acee16e4e5d5802590006d1">   22</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classhelix_1_1nt_1_1UndoGroup.html#a296e2c8f9acee16e4e5d5802590006d1">isEmpty</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> commands_.empty(); }</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keywordtype">void</span> undo()<span class="keyword"> override</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">    </span>{</div>
@@ -147,11 +147,11 @@ $(function(){ initResizable(false); });
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>};</div>
 </div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>} <span class="comment">// namespace enzo::nt</span></div>
-<div class="ttc" id="aclassenzo_1_1nt_1_1UndoCommand_html"><div class="ttname"><a href="classenzo_1_1nt_1_1UndoCommand.html">enzo::nt::UndoCommand</a></div><div class="ttdef"><b>Definition</b> UndoCommand.h:8</div></div>
-<div class="ttc" id="aclassenzo_1_1nt_1_1UndoGroup_html"><div class="ttname"><a href="classenzo_1_1nt_1_1UndoGroup.html">enzo::nt::UndoGroup</a></div><div class="ttdoc">Bundles several commands into a single atomic undo unit.</div><div class="ttdef"><b>Definition</b> UndoGroup.h:11</div></div>
-<div class="ttc" id="aclassenzo_1_1nt_1_1UndoGroup_html_a9d606e988ecbd13784fac1967b2228b3"><div class="ttname"><a href="classenzo_1_1nt_1_1UndoGroup.html#a9d606e988ecbd13784fac1967b2228b3">enzo::nt::UndoGroup::isEmpty</a></div><div class="ttdeci">bool isEmpty() const</div><div class="ttdoc">Returns true when the group holds no commands.</div><div class="ttdef"><b>Definition</b> UndoGroup.h:22</div></div>
-<div class="ttc" id="aclassenzo_1_1nt_1_1UndoGroup_html_acbbe1180d61bb0aadd5a378b7552cade"><div class="ttname"><a href="classenzo_1_1nt_1_1UndoGroup.html#acbbe1180d61bb0aadd5a378b7552cade">enzo::nt::UndoGroup::addCommand</a></div><div class="ttdeci">void addCommand(std::unique_ptr&lt; UndoCommand &gt; command)</div><div class="ttdoc">Appends a command to the group, taking ownership.</div><div class="ttdef"><b>Definition</b> UndoGroup.h:16</div></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>} <span class="comment">// namespace helix::nt</span></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1UndoCommand_html"><div class="ttname"><a href="classhelix_1_1nt_1_1UndoCommand.html">helix::nt::UndoCommand</a></div><div class="ttdef"><b>Definition</b> UndoCommand.h:8</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1UndoGroup_html"><div class="ttname"><a href="classhelix_1_1nt_1_1UndoGroup.html">helix::nt::UndoGroup</a></div><div class="ttdoc">Bundles several commands into a single atomic undo unit.</div><div class="ttdef"><b>Definition</b> UndoGroup.h:11</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1UndoGroup_html_a296e2c8f9acee16e4e5d5802590006d1"><div class="ttname"><a href="classhelix_1_1nt_1_1UndoGroup.html#a296e2c8f9acee16e4e5d5802590006d1">helix::nt::UndoGroup::isEmpty</a></div><div class="ttdeci">bool isEmpty() const</div><div class="ttdoc">Returns true when the group holds no commands.</div><div class="ttdef"><b>Definition</b> UndoGroup.h:22</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1UndoGroup_html_ab35bec13f57826483bdc6cd98e5c116d"><div class="ttname"><a href="classhelix_1_1nt_1_1UndoGroup.html#ab35bec13f57826483bdc6cd98e5c116d">helix::nt::UndoGroup::addCommand</a></div><div class="ttdeci">void addCommand(std::unique_ptr&lt; UndoCommand &gt; command)</div><div class="ttdoc">Appends a command to the group, taking ownership.</div><div class="ttdef"><b>Definition</b> UndoGroup.h:16</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

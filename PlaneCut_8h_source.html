@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Enzo: src/Engine/GeometryAlgorithms/PlaneCut.h Source File</title>
+<title>Helix: src/Engine/GeometryAlgorithms/PlaneCut.h Source File</title>
 <link rel="icon" href="icon-main-white.png" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -35,7 +35,7 @@ MathJax.Hub.Config({
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="icon-main-white.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Enzo
+   <div id="projectname">Helix
    </div>
   </td>
  </tr>
@@ -108,31 +108,31 @@ $(function(){ initResizable(false); });
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;utility&gt;</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">namespace </span>enzo::geo {</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">namespace </span>helix::geo {</div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="keyword">class </span>Mesh;</div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>}</div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">namespace </span>enzo::utils {</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">namespace </span>helix::utils {</div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
 <div class="foldopen" id="foldopen00015" data-start="{" data-end="};">
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="structenzo_1_1utils_1_1PlaneCut.html">   15</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structenzo_1_1utils_1_1PlaneCut.html">PlaneCut</a></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="structhelix_1_1utils_1_1PlaneCut.html">   15</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structhelix_1_1utils_1_1PlaneCut.html">PlaneCut</a></div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>{</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    std::shared_ptr&lt;geo::Mesh&gt; mesh;</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="structenzo_1_1utils_1_1PlaneCut.html#af3055e4a3a7fd969f5ca48b1529394da">   20</a></span>    std::vector&lt;std::pair&lt;Offset, Offset&gt;&gt; <a class="code hl_variable" href="structenzo_1_1utils_1_1PlaneCut.html#af3055e4a3a7fd969f5ca48b1529394da">cutEdges</a>;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="structhelix_1_1utils_1_1PlaneCut.html#a1eeb21bd341afd5834a2ecc12cdf0228">   20</a></span>    std::vector&lt;std::pair&lt;Offset, Offset&gt;&gt; <a class="code hl_variable" href="structhelix_1_1utils_1_1PlaneCut.html#a1eeb21bd341afd5834a2ecc12cdf0228">cutEdges</a>;</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>};</div>
 </div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>std::optional&lt;PlaneCut&gt;</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>cutMeshByPlane(<span class="keyword">const</span> <a class="code hl_class" href="classenzo_1_1geo_1_1Mesh.html">geo::Mesh</a>&amp; mesh, <span class="keyword">const</span> Vector3&amp; planePoint, <span class="keyword">const</span> Vector3&amp; keptSideNormal);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>cutMeshByPlane(<span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1geo_1_1Mesh.html">geo::Mesh</a>&amp; mesh, <span class="keyword">const</span> Vector3&amp; planePoint, <span class="keyword">const</span> Vector3&amp; keptSideNormal);</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>std::vector&lt;Offset&gt;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>fillCutCaps(<a class="code hl_class" href="classenzo_1_1geo_1_1Mesh.html">geo::Mesh</a>&amp; mesh, <span class="keyword">const</span> std::vector&lt;std::pair&lt;Offset, Offset&gt;&gt;&amp; cutEdges);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>fillCutCaps(<a class="code hl_class" href="classhelix_1_1geo_1_1Mesh.html">geo::Mesh</a>&amp; mesh, <span class="keyword">const</span> std::vector&lt;std::pair&lt;Offset, Offset&gt;&gt;&amp; cutEdges);</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>} <span class="comment">// namespace enzo::utils</span></div>
-<div class="ttc" id="aTypes_8h_html"><div class="ttname"><a href="Types_8h.html">Types.h</a></div><div class="ttdoc">Basic attribute, parameter, and node types for Enzo.</div></div>
-<div class="ttc" id="aclassenzo_1_1geo_1_1Mesh_html"><div class="ttname"><a href="classenzo_1_1geo_1_1Mesh.html">enzo::geo::Mesh</a></div><div class="ttdoc">Polygonal mesh primitive with point, vertex, and face attributes.</div></div>
-<div class="ttc" id="astructenzo_1_1utils_1_1PlaneCut_html"><div class="ttname"><a href="structenzo_1_1utils_1_1PlaneCut.html">enzo::utils::PlaneCut</a></div><div class="ttdoc">A mesh cut by a plane, along with the edges the cut left on the plane.</div><div class="ttdef"><b>Definition</b> PlaneCut.h:16</div></div>
-<div class="ttc" id="astructenzo_1_1utils_1_1PlaneCut_html_af3055e4a3a7fd969f5ca48b1529394da"><div class="ttname"><a href="structenzo_1_1utils_1_1PlaneCut.html#af3055e4a3a7fd969f5ca48b1529394da">enzo::utils::PlaneCut::cutEdges</a></div><div class="ttdeci">std::vector&lt; std::pair&lt; Offset, Offset &gt; &gt; cutEdges</div><div class="ttdoc">The edges around the opening the cut left, as point offset pairs that follow the winding of their fac...</div><div class="ttdef"><b>Definition</b> PlaneCut.h:20</div></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>} <span class="comment">// namespace helix::utils</span></div>
+<div class="ttc" id="aTypes_8h_html"><div class="ttname"><a href="Types_8h.html">Types.h</a></div><div class="ttdoc">Basic attribute, parameter, and node types for Helix.</div></div>
+<div class="ttc" id="aclasshelix_1_1geo_1_1Mesh_html"><div class="ttname"><a href="classhelix_1_1geo_1_1Mesh.html">helix::geo::Mesh</a></div><div class="ttdoc">Polygonal mesh primitive with point, vertex, and face attributes.</div></div>
+<div class="ttc" id="astructhelix_1_1utils_1_1PlaneCut_html"><div class="ttname"><a href="structhelix_1_1utils_1_1PlaneCut.html">helix::utils::PlaneCut</a></div><div class="ttdoc">A mesh cut by a plane, along with the edges the cut left on the plane.</div><div class="ttdef"><b>Definition</b> PlaneCut.h:16</div></div>
+<div class="ttc" id="astructhelix_1_1utils_1_1PlaneCut_html_a1eeb21bd341afd5834a2ecc12cdf0228"><div class="ttname"><a href="structhelix_1_1utils_1_1PlaneCut.html#a1eeb21bd341afd5834a2ecc12cdf0228">helix::utils::PlaneCut::cutEdges</a></div><div class="ttdeci">std::vector&lt; std::pair&lt; Offset, Offset &gt; &gt; cutEdges</div><div class="ttdoc">The edges around the opening the cut left, as point offset pairs that follow the winding of their fac...</div><div class="ttdef"><b>Definition</b> PlaneCut.h:20</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

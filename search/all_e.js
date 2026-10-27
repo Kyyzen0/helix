@@ -1,15 +1,15 @@
 var searchData=
 [
-  ['offset_0',['Offset',['../Types_8h.html#a2b9e720fc80cc45d06a8a364d4e87eb2',1,'enzo']]],
-  ['operator_20std_3a_3astring_5fview_1',['string_view',['../classenzo_1_1Path.html#a6a922863b7a9915408c87d65003dc3f2',1,'enzo::Path']]],
-  ['operator_28_29_2',['operator()',['../classenzo_1_1utils_1_1FaceTangents.html#abb5964daab0ef098c0c8b20173d54e82',1,'enzo::utils::FaceTangents']]],
-  ['operator_2a_3',['operator*',['../classenzo_1_1Transform.html#a9d5b54b81ecd5aa9cc235dff84c40354',1,'enzo::Transform']]],
-  ['operator_3c_4',['operator&lt;',['../structenzo_1_1sim_1_1KeyframeTarget.html#ab796319164c22f3df11483c902699784',1,'enzo::sim::KeyframeTarget']]],
-  ['operator_3d_5',['operator=',['../classenzo_1_1nt_1_1Node.html#a203df9c1d6c875c36a94c02e0a68e0e9',1,'enzo::nt::Node']]],
-  ['operator_5b_5d_6',['operator[]',['../classenzo_1_1attr_1_1AttributeHandle.html#ad63cc140a4da8aa3f79490ac2324a1d7',1,'enzo::attr::AttributeHandle::operator[]()'],['../classenzo_1_1attr_1_1AttributeHandleRO.html#a690f520581dfd095e2c6e486c45adf78',1,'enzo::attr::AttributeHandleRO::operator[]()']]],
-  ['optional_7',['optional',['../structenzo_1_1nt_1_1InputPort.html#a4da3a0434d0f0e2e91d0d4a9afb971df',1,'enzo::nt::InputPort']]],
-  ['options_8',['options',['../StyleAccess_8h.html#aae5a6ffbf995f2dc41d9051cf4110440',1,'enzo::prm::style']]],
-  ['origin_9',['origin',['../index.html#autotoc_md2',1,'Credits and origin'],['../structenzo_1_1sim_1_1ParticleSettings.html#ae0b6ac4b9d3b7a0eea5222d95cf02a6e',1,'enzo::sim::ParticleSettings::origin'],['../structenzo_1_1sim_1_1SpringSettings.html#a46f1cdac5447338a1e85ec4ebcd7c4f9',1,'enzo::sim::SpringSettings::origin']]],
-  ['outputrequested_10',['outputRequested',['../classenzo_1_1nt_1_1Node.html#aeee770d1df55a6cdf977d100391647e4',1,'enzo::nt::Node::outputRequested()'],['../classenzo_1_1nt_1_1NodeImpl.html#a25ccd08fcd7875eef7b1e6a8a99f6600',1,'enzo::nt::NodeImpl::outputRequested()']]],
-  ['owners_11',['owners',['../structenzo_1_1prm_1_1style_1_1Attribute.html#a7afcbd6124485dd6403392c0a318a5f0',1,'enzo::prm::style::Attribute']]]
+  ['offset_0',['Offset',['../Types_8h.html#a090b4268abc5df3f3b223275ad7eae36',1,'helix']]],
+  ['operator_20std_3a_3astring_5fview_1',['string_view',['../classhelix_1_1Path.html#ac2e3bc9eb251838aa28c96d0ffbb9714',1,'helix::Path']]],
+  ['operator_28_29_2',['operator()',['../classhelix_1_1utils_1_1FaceTangents.html#a48cf744e3298b5c2a299e5662c99d370',1,'helix::utils::FaceTangents']]],
+  ['operator_2a_3',['operator*',['../classhelix_1_1Transform.html#acd80121aed7b8d9f9751d8c9cab53011',1,'helix::Transform']]],
+  ['operator_3c_4',['operator&lt;',['../structhelix_1_1sim_1_1KeyframeTarget.html#a9aceec9d6030f8679948e94e4f4adec5',1,'helix::sim::KeyframeTarget']]],
+  ['operator_3d_5',['operator=',['../classhelix_1_1nt_1_1Node.html#a4b3c84a921b6e481ba6aa47ec7ff3b89',1,'helix::nt::Node']]],
+  ['operator_5b_5d_6',['operator[]',['../classhelix_1_1attr_1_1AttributeHandle.html#aa5ccadf29787441d9507aebe537b102a',1,'helix::attr::AttributeHandle::operator[]()'],['../classhelix_1_1attr_1_1AttributeHandleRO.html#a2318267544616e3e2a2db6ce389d419d',1,'helix::attr::AttributeHandleRO::operator[]()']]],
+  ['optional_7',['optional',['../structhelix_1_1nt_1_1InputPort.html#acdda48c58eb4017f430a3f1310c3b127',1,'helix::nt::InputPort']]],
+  ['options_8',['options',['../StyleAccess_8h.html#adc78323db69a31647b3a7ed90c4f3c7c',1,'helix::prm::style']]],
+  ['origin_9',['origin',['../index.html#autotoc_md2',1,'Credits and origin'],['../structhelix_1_1sim_1_1ParticleSettings.html#a7dc345c875fd26929e6f369dbb093ca8',1,'helix::sim::ParticleSettings::origin'],['../structhelix_1_1sim_1_1SpringSettings.html#a511e8c77164aae27a1773edbc6c8a79b',1,'helix::sim::SpringSettings::origin']]],
+  ['outputrequested_10',['outputRequested',['../classhelix_1_1nt_1_1Node.html#aa845edc5ff15ceb1925b36b1acf5539b',1,'helix::nt::Node::outputRequested()'],['../classhelix_1_1nt_1_1NodeImpl.html#a408c817bdc43a1f410432b5f0d8ebb80',1,'helix::nt::NodeImpl::outputRequested()']]],
+  ['owners_11',['owners',['../structhelix_1_1prm_1_1style_1_1Attribute.html#a24af3f4705fbfa942521fda936446206',1,'helix::prm::style::Attribute']]]
 ];

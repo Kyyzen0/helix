@@ -1,17 +1,17 @@
 var searchData=
 [
-  ['takesinput_0',['takesInput',['../classenzo_1_1nt_1_1Node.html#a002af788380bd00d945846a81c99e382',1,'enzo::nt::Node']]],
-  ['takewarnings_1',['takeWarnings',['../classenzo_1_1daslang_1_1CompiledProgram.html#aa678079bcf0db964e6b0b2ad7b0bdb69',1,'enzo::daslang::CompiledProgram']]],
-  ['threadcount_2',['threadCount',['../classenzo_1_1async_1_1CookScheduler.html#a090fab8fe32f2ed1500998b4cf6a17c4',1,'enzo::async::CookScheduler']]],
-  ['throwerror_3',['throwError',['../classenzo_1_1nt_1_1NodeImpl.html#a7dca3650428baca3dfb974467ab0bd33',1,'enzo::nt::NodeImpl']]],
-  ['throwwarning_4',['throwWarning',['../classenzo_1_1nt_1_1NodeImpl.html#ab0af16ee3514b23e593f82a201d5a31a',1,'enzo::nt::NodeImpl']]],
-  ['time_5',['time',['../classenzo_1_1async_1_1CookSnapshot.html#a35d9970c563b19765899c88962ca33af',1,'enzo::async::CookSnapshot']]],
-  ['timedependentnodes_6',['timeDependentNodes',['../classenzo_1_1async_1_1CookResult.html#a8a9096b4853dace35b5e2b53dc2bb89c',1,'enzo::async::CookResult']]],
-  ['tostring_7',['toString',['../Types_8h.html#aa747b7a013ecc2df775727846306bb4b',1,'enzo::prm::toString()'],['../StyleAccess_8h.html#a5064a25247979502dffe1d9be4c359a9',1,'enzo::prm::style::toString()']]],
-  ['totype_8',['toType',['../Types_8h.html#aee1c0fcff4b265e7ca4e8ee24795fee8',1,'enzo::prm']]],
-  ['tovaluetype_9',['toValueType',['../Types_8h.html#a354280b56bee0c17f37514110b8d76dc',1,'enzo::prm']]],
-  ['tovector_10',['toVector',['../structenzo_1_1geo_1_1Mesh_1_1FaceOffsets.html#ab2b349378647b66048c354ac2b976e73',1,'enzo::geo::Mesh::FaceOffsets']]],
-  ['transform_11',['Transform',['../classenzo_1_1Transform.html#ac0503206b00d8af4e7cfcb6b901f4b91',1,'enzo::Transform::Transform()'],['../classenzo_1_1Transform.html#ae334a4305c267a8fd3e28e3ce441418e',1,'enzo::Transform::Transform(const Matrix4 &amp;matrix)']]],
-  ['translate_12',['translate',['../classenzo_1_1Transform.html#a67235a9e66315b1946d499642d5f955b',1,'enzo::Transform']]],
-  ['tryaddattribute_13',['tryAddAttribute',['../classenzo_1_1geo_1_1Primitive.html#a28da46cf5b4fe61943cc536a6ab73214',1,'enzo::geo::Primitive::tryAddAttribute(attr::AttributeOwner owner, std::string name, attr::AttributeType type, bool intrinsic=false, bool isInternal=false)'],['../classenzo_1_1geo_1_1Primitive.html#a8a7f563f18c19e9449569a538144bbf6',1,'enzo::geo::Primitive::tryAddAttribute(attr::AttributeOwner owner, std::string name, bool intrinsic=false, bool isInternal=false)']]]
+  ['takesinput_0',['takesInput',['../classhelix_1_1nt_1_1Node.html#a662bebbccd07384366df735abd6633b8',1,'helix::nt::Node']]],
+  ['takewarnings_1',['takeWarnings',['../classhelix_1_1daslang_1_1CompiledProgram.html#abcfe32269475021c569717bad72c7402',1,'helix::daslang::CompiledProgram']]],
+  ['threadcount_2',['threadCount',['../classhelix_1_1async_1_1CookScheduler.html#a83c2f7c5227f309c8720d79ba3ea026a',1,'helix::async::CookScheduler']]],
+  ['throwerror_3',['throwError',['../classhelix_1_1nt_1_1NodeImpl.html#a5f8af6fe7b0f498e7dda7ca57806fccb',1,'helix::nt::NodeImpl']]],
+  ['throwwarning_4',['throwWarning',['../classhelix_1_1nt_1_1NodeImpl.html#ade040afaadbb9f615de2947340b0fb36',1,'helix::nt::NodeImpl']]],
+  ['time_5',['time',['../classhelix_1_1async_1_1CookSnapshot.html#af6677563b0f7161af0c2fb735296c56a',1,'helix::async::CookSnapshot']]],
+  ['timedependentnodes_6',['timeDependentNodes',['../classhelix_1_1async_1_1CookResult.html#ac9fe107c863c3b42141129cec78452cd',1,'helix::async::CookResult']]],
+  ['tostring_7',['toString',['../Types_8h.html#a2f74fee973b7cc446717c77e98baa76d',1,'helix::prm::toString()'],['../StyleAccess_8h.html#a1075b604d43af466186c4c97bb332112',1,'helix::prm::style::toString()']]],
+  ['totype_8',['toType',['../Types_8h.html#ad151470e282638e212fca83618a77cd7',1,'helix::prm']]],
+  ['tovaluetype_9',['toValueType',['../Types_8h.html#a903a1491c560624d3fc21ca7d942107e',1,'helix::prm']]],
+  ['tovector_10',['toVector',['../structhelix_1_1geo_1_1Mesh_1_1FaceOffsets.html#acedf43c29299f5665fa508b53ac6202f',1,'helix::geo::Mesh::FaceOffsets']]],
+  ['transform_11',['Transform',['../classhelix_1_1Transform.html#a8186397d2cb1e6375382a26b79eb35dc',1,'helix::Transform::Transform()'],['../classhelix_1_1Transform.html#a0e037a4cd39b5918ac8365c827f296e5',1,'helix::Transform::Transform(const Matrix4 &amp;matrix)']]],
+  ['translate_12',['translate',['../classhelix_1_1Transform.html#a079e65ecdf04b5367fc815c1392713d1',1,'helix::Transform']]],
+  ['tryaddattribute_13',['tryAddAttribute',['../classhelix_1_1geo_1_1Primitive.html#a517fd7485b1bac3e5f6f7ad6e274d901',1,'helix::geo::Primitive::tryAddAttribute(attr::AttributeOwner owner, std::string name, attr::AttributeType type, bool intrinsic=false, bool isInternal=false)'],['../classhelix_1_1geo_1_1Primitive.html#a8735f8b273c526e002a1fc2324262b54',1,'helix::geo::Primitive::tryAddAttribute(attr::AttributeOwner owner, std::string name, bool intrinsic=false, bool isInternal=false)']]]
 ];
