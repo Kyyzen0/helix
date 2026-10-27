@@ -5,7 +5,7 @@
 #include "Engine/Simulation/SpringSolver.h"
 #include <string>
 
-namespace enzo::sim {
+namespace helix::sim {
 
 /**
  * @brief Reads the settings of a simulation at a frame, keyframes included.
@@ -89,4 +89,4 @@ inline SpringSettings springSettingsAt(nt::NodeId nodeId, floatT frame)
     return settings;
 }
 
-} // namespace enzo::sim
+} // namespace helix::sim

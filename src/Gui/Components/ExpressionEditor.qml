@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
-import Enzo
+import Helix
 import "../Style"
 
 // Floating editor for a parameter's expression, opened from its pill.

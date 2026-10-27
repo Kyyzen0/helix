@@ -3,24 +3,24 @@
 #include "Engine/Core/Types.h"
 #include "Engine/Network/NodePacket.h"
 
-namespace enzo::nt {
+namespace helix::nt {
 class NetworkManager;
 }
 
-namespace enzo::prm {
+namespace helix::prm {
 class Ramp;
 }
 
-namespace enzo::async {
+namespace helix::async {
 // The pictures a cook reads from, defined in the Async folder.
 struct CookParameterValue;
 class CookSnapshot;
 class CookPlan;
 class CookResult;
 class CookCancelToken;
-} // namespace enzo::async
+} // namespace helix::async
 
-namespace enzo::nt {
+namespace helix::nt {
 /**
  * @class CookContext
  * @brief The handle a node holds while it cooks to get context about the network.
@@ -42,7 +42,7 @@ class CookContext
      * @param nodeId The node being cooked.
      * @param networkManager The network the cook reads from.
      */
-    CookContext(enzo::nt::NodeId nodeId, enzo::nt::NetworkManager& networkManager);
+    CookContext(helix::nt::NodeId nodeId, helix::nt::NetworkManager& networkManager);
 
     /**
      * @brief Builds a context that reads a snapshot rather than the live network.
@@ -55,20 +55,20 @@ class CookContext
      * @param cancelToken The flag that tells the cook it has been abandoned.
      */
     CookContext(
-        enzo::nt::NodeId nodeId,
-        enzo::nt::NetworkManager& networkManager,
-        const enzo::async::CookSnapshot& snapshot,
-        const enzo::async::CookPlan& plan,
-        enzo::async::CookResult& result,
-        const enzo::async::CookCancelToken& cancelToken
+        helix::nt::NodeId nodeId,
+        helix::nt::NetworkManager& networkManager,
+        const helix::async::CookSnapshot& snapshot,
+        const helix::async::CookPlan& plan,
+        helix::async::CookResult& result,
+        const helix::async::CookCancelToken& cancelToken
     );
 
     /// @brief Returns the id of the node being cooked.
-    enzo::nt::NodeId getNodeId() const { return nodeId_; }
-    enzo::NodePacket cloneInputPacket(unsigned int inputIndex);
+    helix::nt::NodeId getNodeId() const { return nodeId_; }
+    helix::NodePacket cloneInputPacket(unsigned int inputIndex);
 
     /// @brief Returns the geometry arriving at an input, read only.
-    std::shared_ptr<const enzo::NodePacket> getInputPacket(unsigned int inputIndex);
+    std::shared_ptr<const helix::NodePacket> getInputPacket(unsigned int inputIndex);
     bool hasInput(unsigned int inputIndex);
     unsigned int getInputCount();
 
@@ -102,30 +102,30 @@ class CookContext
     Vector3 evalParmVector3(std::string_view parmName) const;
 
     // Snapshot a ramp parameter into a sampler for use during cook.
-    enzo::prm::Ramp evalParmRamp(std::string_view parmName) const;
+    helix::prm::Ramp evalParmRamp(std::string_view parmName) const;
 
   private:
     /// @brief Records that the cooking node reads the scene time.
     void recordTimeDependency_() const;
 
     /// @brief Returns the snapshot's value for a parameter, or null when it holds none.
-    const enzo::async::CookParameterValue* findParameterValue_(
+    const helix::async::CookParameterValue* findParameterValue_(
         std::string_view parmName
     ) const;
 
     /// @brief Returns the snapshot's value for one component of a parameter.
-    floatT snapshotFloat_(const enzo::async::CookParameterValue& value, unsigned int index) const;
-    intT snapshotInt_(const enzo::async::CookParameterValue& value, unsigned int index) const;
-    String snapshotString_(const enzo::async::CookParameterValue& value, unsigned int index) const;
+    floatT snapshotFloat_(const helix::async::CookParameterValue& value, unsigned int index) const;
+    intT snapshotInt_(const helix::async::CookParameterValue& value, unsigned int index) const;
+    String snapshotString_(const helix::async::CookParameterValue& value, unsigned int index) const;
 
-    enzo::nt::NodeId nodeId_;
-    enzo::nt::NetworkManager& networkManager_;
+    helix::nt::NodeId nodeId_;
+    helix::nt::NetworkManager& networkManager_;
 
     // Set when the context reads a snapshot rather than the live network. The
     // pointers are null for the ordinary kind.
-    const enzo::async::CookSnapshot* snapshot_ = nullptr;
-    const enzo::async::CookPlan* plan_ = nullptr;
-    enzo::async::CookResult* result_ = nullptr;
-    const enzo::async::CookCancelToken* cancelToken_ = nullptr;
+    const helix::async::CookSnapshot* snapshot_ = nullptr;
+    const helix::async::CookPlan* plan_ = nullptr;
+    helix::async::CookResult* result_ = nullptr;
+    const helix::async::CookCancelToken* cancelToken_ = nullptr;
 };
-} // namespace enzo::nt
+} // namespace helix::nt

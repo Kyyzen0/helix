@@ -7,7 +7,7 @@
 
 TEST_CASE("attrHandleInt")
 {
-    using namespace enzo;
+    using namespace helix;
 
     auto myAttrib = std::make_shared<attr::Attribute>("test", attr::AttrType::intT);
     attr::AttributeHandleInt myHandle(myAttrib);
@@ -19,7 +19,7 @@ TEST_CASE("attrHandleInt")
 
 TEST_CASE("geometry")
 {
-    using namespace enzo;
+    using namespace helix;
     geo::Mesh geo;
     // check add function
     attr::AttributeHandleInt myHandle = geo.addAttribute<intT>(attr::AttrOwner::POINT, "index");
@@ -43,7 +43,7 @@ TEST_CASE("geometry")
 
 TEST_CASE("attrHandleFloat")
 {
-    using namespace enzo;
+    using namespace helix;
 
     std::shared_ptr<attr::Attribute> myAttrib =
         std::make_shared<attr::Attribute>("test", attr::AttrType::floatT);
@@ -56,7 +56,7 @@ TEST_CASE("attrHandleFloat")
 
 TEST_CASE("attrHandleVector3")
 {
-    using namespace enzo;
+    using namespace helix;
 
     std::shared_ptr<attr::Attribute> myAttrib =
         std::make_shared<attr::Attribute>("test", attr::AttrType::vectorT);
@@ -69,7 +69,7 @@ TEST_CASE("attrHandleVector3")
 
 TEST_CASE("Attribute Type")
 {
-    using namespace enzo;
+    using namespace helix;
     REQUIRE(attr::AttributeType::intT == attr::AttributeType::intT);
     REQUIRE(attr::AttributeType::intT != attr::AttributeType::floatT);
     REQUIRE(attr::AttributeType::floatT == attr::AttributeType::floatT);
@@ -79,7 +79,7 @@ TEST_CASE("Attribute Type")
 
 TEST_CASE("Vector3")
 {
-    using namespace enzo;
+    using namespace helix;
     Vector3 u(1, 2, 3);
     Vector3 v(1, 2, 3);
     REQUIRE(u == v);
@@ -92,7 +92,7 @@ TEST_CASE("Vector3")
 
 TEST_CASE("Vector4")
 {
-    using namespace enzo;
+    using namespace helix;
     Vector4 u(1, 2, 3, 4);
     REQUIRE(u.x() == 1);
     REQUIRE(u.y() == 2);

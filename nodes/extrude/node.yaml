@@ -1,7 +1,7 @@
 version: 1
 
 name: extrude
-namespace: enzo
+namespace: helix
 label: Extrude
 tags: [polygon, surface, modelling]
 
@@ -11,7 +11,7 @@ outputs: 1
 
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
   constructor: extrude
 
 icon: icon.svg

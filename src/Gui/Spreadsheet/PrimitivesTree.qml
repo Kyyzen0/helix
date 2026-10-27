@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import Enzo
+import Helix
 import "../Components"
 
 // Sidebar listing the primitives of the selected node as a path tree. Tapping a

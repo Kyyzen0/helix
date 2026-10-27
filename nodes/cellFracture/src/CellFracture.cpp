@@ -17,7 +17,7 @@
 
 namespace {
 
-using namespace enzo;
+using namespace helix;
 
 constexpr Offset kNoPoint = std::numeric_limits<Offset>::max();
 
@@ -277,4 +277,4 @@ void CellFracture::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(cellFracture, CellFracture)
+HELIX_REGISTER_NODE(cellFracture, CellFracture)

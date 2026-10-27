@@ -8,7 +8,7 @@
 #include <icecream.hpp>
 #include <string>
 
-namespace enzo::nt {
+namespace helix::nt {
 
 /// @brief Undo step for a parameter edit. Restores the whole parameter from a
 /// snapshot so flat values and multiparm instances both round trip.
@@ -16,7 +16,7 @@ class ChangeParameterCommand : public UndoCommand
 {
   public:
     ChangeParameterCommand(
-        enzo::nt::NodeId nodeId,
+        helix::nt::NodeId nodeId,
         std::string paramName,
         ParameterSerializable before,
         ParameterSerializable after
@@ -28,10 +28,10 @@ class ChangeParameterCommand : public UndoCommand
 
     // Flat parameters hand over their value vectors and the snapshot is built here.
     ChangeParameterCommand(
-        enzo::nt::NodeId nodeId,
+        helix::nt::NodeId nodeId,
         std::string paramName,
-        const enzo::prm::PrmValues& before,
-        const enzo::prm::PrmValues& after
+        const helix::prm::PrmValues& before,
+        const helix::prm::PrmValues& after
     )
         : nodeId_(nodeId), paramName_(paramName), before_(toSerializable(paramName, before)),
           after_(toSerializable(paramName, after))
@@ -58,10 +58,10 @@ class ChangeParameterCommand : public UndoCommand
             IC("ChangeParameterCommand — parameter not found", nodeId_, paramName_);
     }
 
-    enzo::nt::NodeId nodeId_;
+    helix::nt::NodeId nodeId_;
     std::string paramName_;
     ParameterSerializable before_;
     ParameterSerializable after_;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

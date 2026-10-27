@@ -1,7 +1,7 @@
 #include "Engine/Selection/PrimPath.h"
 #include <sstream>
 
-namespace enzo {
+namespace helix {
 
 PrimPath::PrimPath(const std::string& path) : path_(path)
 {
@@ -29,4 +29,4 @@ PrimPath PrimPath::parent() const
     return PrimPath(result);
 }
 
-} // namespace enzo
+} // namespace helix

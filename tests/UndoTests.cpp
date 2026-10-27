@@ -6,7 +6,7 @@
 #include "Engine/UndoRedo/ChangeParameterCommand.h"
 #include <catch2/catch_test_macros.hpp>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -25,7 +25,7 @@ struct PluginsAndReset
 TEST_CASE_METHOD(PluginsAndReset, "Undo and redo restore a ramp field edit")
 {
     auto& networkManager = nt::nm();
-    nt::NodeId nodeId = networkManager.createNode("enzo::sineWave");
+    nt::NodeId nodeId = networkManager.createNode("helix::sineWave");
 
     auto remap = networkManager.getNode(nodeId).getParameter("remap").lock();
     REQUIRE(remap);
@@ -49,7 +49,7 @@ TEST_CASE_METHOD(PluginsAndReset, "Undo and redo restore a ramp field edit")
 TEST_CASE_METHOD(PluginsAndReset, "Undo restores a removed ramp control point")
 {
     auto& networkManager = nt::nm();
-    nt::NodeId nodeId = networkManager.createNode("enzo::sineWave");
+    nt::NodeId nodeId = networkManager.createNode("helix::sineWave");
 
     auto remap = networkManager.getNode(nodeId).getParameter("remap").lock();
     REQUIRE(remap);
@@ -72,7 +72,7 @@ TEST_CASE_METHOD(PluginsAndReset, "Undo restores a removed ramp control point")
 TEST_CASE_METHOD(PluginsAndReset, "Undoing a delete restores a parameter expression")
 {
     auto& networkManager = nt::nm();
-    nt::NodeId nodeId = networkManager.createNode("enzo::sineWave");
+    nt::NodeId nodeId = networkManager.createNode("helix::sineWave");
 
     auto frequency = networkManager.getNode(nodeId).getParameter("frequency").lock();
     REQUIRE(frequency);
@@ -93,7 +93,7 @@ TEST_CASE_METHOD(PluginsAndReset, "Undoing a delete restores a parameter express
 TEST_CASE_METHOD(PluginsAndReset, "Undoing a delete restores added ramp control points")
 {
     auto& networkManager = nt::nm();
-    nt::NodeId nodeId = networkManager.createNode("enzo::sineWave");
+    nt::NodeId nodeId = networkManager.createNode("helix::sineWave");
 
     auto remap = networkManager.getNode(nodeId).getParameter("remap").lock();
     REQUIRE(remap);

@@ -5,7 +5,7 @@
 #include <atomic>
 #include <cstdint>
 
-namespace enzo::async {
+namespace helix::async {
 
 /**
  * @brief Names one attempt at cooking the network.
@@ -62,4 +62,4 @@ class CookCancelToken
     std::atomic<bool> cancelled_{false};
 };
 
-} // namespace enzo::async
+} // namespace helix::async

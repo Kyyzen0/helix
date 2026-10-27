@@ -10,7 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -44,8 +44,8 @@ nt::NodeId addAttributeCreateAfterGrid()
     nt::NodeLoader::loadNodes();
     auto& nm = nt::nm();
 
-    const nt::NodeId grid = nm.createNode("enzo::grid");
-    const nt::NodeId attributeCreate = nm.createNode("enzo::attributeCreate");
+    const nt::NodeId grid = nm.createNode("helix::grid");
+    const nt::NodeId attributeCreate = nm.createNode("helix::attributeCreate");
     nm.connectNodes(grid, 0, attributeCreate, 0);
 
     nm.getNode(attributeCreate).getParameter("name").lock()->setString("test");

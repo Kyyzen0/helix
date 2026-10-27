@@ -6,7 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 
-using namespace enzo;
+using namespace helix;
 TEST_CASE("getPrims")
 {
     // Setup packet

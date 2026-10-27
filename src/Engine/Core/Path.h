@@ -6,18 +6,18 @@
 #include <string_view>
 #include <vector>
 
-namespace enzo {
+namespace helix {
 /**
  * @brief A default path class for creation and manipulation of tree-based paths.
  */
 class Path
 {
   public:
-    /// @brief Constructs an empty enzo::Path object.
+    /// @brief Constructs an empty helix::Path object.
     Path();
-    /// @brief Constructs an enzo::Path object from a given std::string.
+    /// @brief Constructs an helix::Path object from a given std::string.
     Path(const std::string& path);
-    /// @brief Constructs an enzo::Path object from a C string.
+    /// @brief Constructs an helix::Path object from a C string.
     Path(const char* path);
 
     /// @brief Returns the string with surrounding whitespace removed.
@@ -112,7 +112,7 @@ class Path
      *
      * @returns A new Path with @p path appended.
      */
-    Path append(const enzo::Path& path) const;
+    Path append(const helix::Path& path) const;
 
     /**
      * @brief Increments the numerical suffix of the path's name by a given amount.
@@ -188,5 +188,5 @@ class Path
     std::string path_;
 };
 
-std::ostream& operator<<(std::ostream& os, const enzo::Path& other);
-} // namespace enzo
+std::ostream& operator<<(std::ostream& os, const helix::Path& other);
+} // namespace helix

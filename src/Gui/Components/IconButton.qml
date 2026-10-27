@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // Square icon button, styled plain, field, or accent by its variant.
 Rectangle {

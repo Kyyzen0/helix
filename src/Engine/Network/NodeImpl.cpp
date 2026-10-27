@@ -3,7 +3,7 @@
 #include "Engine/Parameter/Ramp.h"
 #include <iostream>
 
-namespace enzo::nt {
+namespace helix::nt {
 
 void NodeImpl::throwError(std::string error) { std::cerr << "NODE EXCEPTION: " << error << "\n"; }
 
@@ -94,4 +94,4 @@ prm::Ramp NodeImpl::evalParmRamp(std::string_view parmName) const
     return context_.evalParmRamp(parmName);
 }
 
-} // namespace enzo::nt
+} // namespace helix::nt

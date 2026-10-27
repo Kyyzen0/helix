@@ -5,8 +5,23 @@
 #include <boost/config.hpp>
 #include <deque>
 #include <string>
+#include <string_view>
 
-namespace enzo::nt {
+namespace helix::nt {
+
+/**
+ * @brief Rewrites the legacy "enzo::" prefix of a node type name to "helix::".
+ *
+ * Scenes saved before the namespace rename store their node types as "enzo::<name>". Every
+ * lookup in the NodeTypeTable goes through this function, so those scenes (and any script or
+ * user file still using the old names) keep resolving. Only the exact leading "enzo::" is
+ * rewritten; any other name, including one already under "helix::", comes back unchanged.
+ * Saving always writes the "helix::" name.
+ *
+ * @note This exists only for scenes saved before the rename. It can be removed, along with its
+ * call sites in the NodeTypeTable, once old scenes are no longer supported.
+ */
+BOOST_SYMBOL_EXPORT std::string normalizeTypeName(std::string_view typeName);
 
 /**
  * @brief The sole owner of every node type the application knows about.
@@ -21,7 +36,7 @@ class BOOST_SYMBOL_EXPORT NodeTypeTable
     /// @brief Takes ownership of a node type and returns the stored copy.
     static const NodeType& addNodeType(NodeType nodeType);
 
-    /// @brief Returns the type registered under a full name, such as "enzo::grid".
+    /// @brief Returns the type registered under a full name, such as "helix::grid".
     /// @return The type, or nullptr when nothing carries that name.
     static const NodeType* getNodeType(const std::string& fullName);
 
@@ -37,7 +52,7 @@ class BOOST_SYMBOL_EXPORT NodeTypeTable
     /// @throws std::runtime_error when a type or another alias already carries its full name.
     static const NodeAlias& addNodeAlias(NodeAlias nodeAlias);
 
-    /// @brief Returns the alias registered under a full name, such as "enzo::mountain".
+    /// @brief Returns the alias registered under a full name, such as "helix::mountain".
     /// @return The alias, or nullptr when nothing carries that name.
     static const NodeAlias* getNodeAlias(const std::string& fullName);
 
@@ -51,4 +66,4 @@ class BOOST_SYMBOL_EXPORT NodeTypeTable
     static std::deque<NodeAlias> nodeAliasStore_;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

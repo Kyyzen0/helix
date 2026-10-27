@@ -4,7 +4,7 @@
 
 TEST_CASE("A network path accepts both node and parameter references")
 {
-    using namespace enzo;
+    using namespace helix;
 
     // A plain path references a node
     NetworkPath node = "/geo/mesh";
@@ -21,7 +21,7 @@ TEST_CASE("A network path accepts both node and parameter references")
 
 TEST_CASE("A network path inherits the base path component rules")
 {
-    using namespace enzo;
+    using namespace helix;
 
     REQUIRE(NetworkPath("geo/mesh").isValid());
     REQUIRE(NetworkPath("/").isValid());
@@ -33,7 +33,7 @@ TEST_CASE("A network path inherits the base path component rules")
 
 TEST_CASE("A network path rejects malformed parameters")
 {
-    using namespace enzo;
+    using namespace helix;
 
     // A dot with no name after it is not a parameter
     REQUIRE(!NetworkPath("/geo/mesh.").isValid());
@@ -50,7 +50,7 @@ TEST_CASE("A network path rejects malformed parameters")
 
 TEST_CASE("A network path strips its parameter to recover the node")
 {
-    using namespace enzo;
+    using namespace helix;
 
     NetworkPath parameter = "/geo/mesh.tx";
     NetworkPath node = parameter.getNode();
@@ -64,7 +64,7 @@ TEST_CASE("A network path strips its parameter to recover the node")
 
 TEST_CASE("A network path reads a trailing parent step as a node")
 {
-    using namespace enzo;
+    using namespace helix;
 
     REQUIRE(NetworkPath("..").isValid());
     REQUIRE(!NetworkPath("..").hasParameter());

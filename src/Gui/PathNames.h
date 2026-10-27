@@ -4,7 +4,7 @@
 #include <QStringList>
 #include <string>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /**
  * @brief Returns the names along a path, from the top down.
@@ -19,4 +19,4 @@ inline QStringList getPathNames(const Path& path)
     return names;
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

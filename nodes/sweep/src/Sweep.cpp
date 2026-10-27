@@ -18,7 +18,7 @@ namespace {
 // A circle or square is closed, a ribbon or an open input curve is not.
 struct Profile
 {
-    std::vector<enzo::Vector3> points;
+    std::vector<helix::Vector3> points;
     bool closed = true;
 };
 
@@ -26,23 +26,23 @@ struct Profile
 struct SweepSettings
 {
     bool applyScale = false;
-    enzo::prm::Ramp scaleRamp;
+    helix::prm::Ramp scaleRamp;
     bool capEnds = false;
     std::string capGroupName;
     bool stretchTurns = true;
 };
 
 // Defined at the bottom of the file, below the node code they serve.
-std::vector<enzo::Vector3> buildCircleProfile(int columns);
-std::vector<enzo::Vector3> buildSquareProfile(int columns);
-std::vector<enzo::Vector3> buildRibbonProfile(int columns);
-Profile buildProfileFromInput(enzo::NodePacket& packet);
-void sweepMesh(enzo::geo::Mesh& mesh, const Profile& profile, const SweepSettings& settings);
+std::vector<helix::Vector3> buildCircleProfile(int columns);
+std::vector<helix::Vector3> buildSquareProfile(int columns);
+std::vector<helix::Vector3> buildRibbonProfile(int columns);
+Profile buildProfileFromInput(helix::NodePacket& packet);
+void sweepMesh(helix::geo::Mesh& mesh, const Profile& profile, const SweepSettings& settings);
 } // namespace
 
 namespace {
 
-class Sweep : public enzo::nt::NodeImpl
+class Sweep : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -55,7 +55,7 @@ class Sweep : public enzo::nt::NodeImpl
 
 void Sweep::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -102,7 +102,7 @@ void Sweep::cook()
  */
 Profile Sweep::buildProfile()
 {
-    using namespace enzo;
+    using namespace helix;
 
     const std::string profileShape = evalParmString("profileShape");
 
@@ -127,7 +127,7 @@ Profile Sweep::buildProfile()
     return profile;
 }
 
-using namespace enzo;
+using namespace helix;
 
 /// @brief Returns the direction of a vector, or the fallback when it has no length.
 Vector3 safeNormalized(const Vector3& vector, const Vector3& fallback)
@@ -529,4 +529,4 @@ void sweepMesh(geo::Mesh& mesh, const Profile& profile, const SweepSettings& set
 
 } // namespace
 
-ENZO_REGISTER_NODE(sweep, Sweep)
+HELIX_REGISTER_NODE(sweep, Sweep)

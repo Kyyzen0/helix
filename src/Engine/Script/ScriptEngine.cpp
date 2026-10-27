@@ -1,7 +1,7 @@
 #include "Engine/Script/ScriptEngine.h"
 #include "Engine/Script/PointScript.h"
 
-namespace enzo::script {
+namespace helix::script {
 
 ScriptEngine& ScriptEngine::instance()
 {
@@ -19,4 +19,4 @@ std::shared_ptr<const PointScript> ScriptEngine::compile(const String& code, Str
     return script;
 }
 
-} // namespace enzo::script
+} // namespace helix::script

@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace enzo {
+namespace helix {
 
 geo::Primitive::Primitive(std::string_view path) : path_(path) {}
 
@@ -352,4 +352,4 @@ attr::attribVector geo::Primitive::deepCopyAttributes(attr::attribVector origina
     return copied;
 }
 
-} // namespace enzo
+} // namespace helix

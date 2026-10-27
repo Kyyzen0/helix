@@ -4,7 +4,7 @@
 #include "Engine/Primitives/Mesh.h"
 #include <catch2/catch_test_macros.hpp>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 // Builds a quad with a height on each point, a value on each vertex and face,

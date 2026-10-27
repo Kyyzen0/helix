@@ -15,7 +15,7 @@
 #include <tbb/spin_mutex.h>
 #include <tbb/task_group.h>
 
-namespace enzo {
+namespace helix {
 
 geo::Mesh::Mesh(std::string_view path)
     : vertexCountFaceHandle_{addAttribute<intT>(attr::AttrOwner::FACE, "vertexCount", true, true)},
@@ -823,4 +823,4 @@ geo::VertexNormalHandle geo::Mesh::getVertexNormal(double cuspAngle) const
     return VertexNormalHandle(*this, cuspAngle);
 }
 
-} // namespace enzo
+} // namespace helix

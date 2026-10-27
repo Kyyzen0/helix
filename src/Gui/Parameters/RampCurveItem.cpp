@@ -7,7 +7,7 @@
 #include <cmath>
 #include <vector>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 
@@ -187,4 +187,4 @@ QSGNode* RampCurveItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     return root;
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

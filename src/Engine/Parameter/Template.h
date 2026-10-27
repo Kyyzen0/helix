@@ -12,31 +12,31 @@
 #include <utility>
 #include <vector>
 
-namespace enzo::prm {
+namespace helix::prm {
 
 class Template
 {
   public:
-    Template(enzo::prm::Type type, prm::Name name);
-    Template(enzo::prm::Type type, prm::Name name, unsigned int vectorSize);
+    Template(helix::prm::Type type, prm::Name name);
+    Template(helix::prm::Type type, prm::Name name, unsigned int vectorSize);
     Template(
-        enzo::prm::Type type,
+        helix::prm::Type type,
         prm::Name name,
         std::vector<prm::Default> defaults,
         unsigned int vectorSize = 1,
         std::vector<prm::Range> ranges = std::vector<prm::Range>()
     );
     Template(
-        enzo::prm::Type type,
+        helix::prm::Type type,
         prm::Name name,
         prm::Default theDefault,
         unsigned int vectorSize = 1,
         Range range = Range()
     );
     // get name and get token are identical
-    enzo::String getName() const;
-    enzo::String getToken() const;
-    enzo::String getLabel() const;
+    helix::String getName() const;
+    helix::String getToken() const;
+    helix::String getLabel() const;
     const prm::Default getDefault(unsigned int index = 0) const;
     const prm::Range& getRange(unsigned int index = 0) const;
     /**
@@ -64,19 +64,19 @@ class Template
 
     /// @brief Returns the child template with the given token.
     /// @throws std::out_of_range when no child carries the token.
-    const Template& getChild(const enzo::String& token) const;
+    const Template& getChild(const helix::String& token) const;
 
     const bool isContainer() const;
     bool isMultiParm() const;
 
-    enzo::String getTooltip() const;
-    enzo::String getDocumentation() const;
+    helix::String getTooltip() const;
+    helix::String getDocumentation() const;
     /// @brief A condition that greys the parameter out, such as "applyscale == 0".
     /// @return The condition, empty when the parameter is always enabled.
-    enzo::String getDisableCondition() const;
+    helix::String getDisableCondition() const;
     /// @brief A condition that hides the parameter, such as "profileshape != 1".
     /// @return The condition, empty when the parameter is always shown.
-    enzo::String getHideCondition() const;
+    helix::String getHideCondition() const;
     bool isLabelHidden() const;
     /// @brief Returns whether a group shows its label beside its row instead of above it.
     bool isLabelInline() const;
@@ -84,7 +84,7 @@ class Template
 
     /// @brief Returns the Lucide icon name shown beside a divider's label.
     /// @return The name, empty when the parameter carries no icon.
-    enzo::String getIcon() const;
+    helix::String getIcon() const;
 
     // Chainable setters. Mutate in place and return *this so a Template can
     // be configured inline at construction.
@@ -123,7 +123,7 @@ class Template
     const std::any& getStyle() const;
 
   private:
-    enzo::prm::Type type_;
+    helix::prm::Type type_;
     std::vector<prm::Default> defaults_;
     std::vector<prm::Range> ranges_;
     std::vector<prm::Name> options_;
@@ -154,4 +154,4 @@ class Template
     inline const static std::unordered_set<prm::Type> labelHiddenByDefault_ = {prm::Type::DIVIDER};
 };
 
-} // namespace enzo::prm
+} // namespace helix::prm

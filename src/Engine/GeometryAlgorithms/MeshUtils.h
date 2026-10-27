@@ -5,11 +5,11 @@
 #include <span>
 #include <vector>
 
-namespace enzo::geo {
+namespace helix::geo {
 class Mesh;
 }
 
-namespace enzo::utils {
+namespace helix::utils {
 
 /**
  * @brief A triangulated mesh paired with a mapping from each output triangle to its source face.
@@ -103,4 +103,4 @@ class FaceTangents
     std::vector<Vector3> tangents_;
 };
 
-} // namespace enzo::utils
+} // namespace helix::utils

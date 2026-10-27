@@ -1,7 +1,7 @@
 #include "Engine/UndoRedo/UndoStack.h"
 #include "Engine/UndoRedo/UndoDisabler.h"
 
-namespace enzo::nt {
+namespace helix::nt {
 
 void UndoStack::push(std::unique_ptr<UndoCommand> command)
 {
@@ -60,4 +60,4 @@ void UndoStack::clear()
     currentIndex_ = 0;
 }
 
-} // namespace enzo::nt
+} // namespace helix::nt

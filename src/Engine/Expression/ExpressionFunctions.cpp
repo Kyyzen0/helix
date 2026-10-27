@@ -4,10 +4,10 @@
 #include "daScript/ast/ast_interop.h"
 #include <bit>
 
-// The daslang module that exposes enzo's functions to expressions. Each one
+// The daslang module that exposes helix's functions to expressions. Each one
 // returns a single value.
 
-namespace enzo::expr {
+namespace helix::expr {
 
 namespace {
 
@@ -206,7 +206,7 @@ das::float3 randVectorFromVector(das::float3 seed)
 class ExpressionModule : public das::Module
 {
   public:
-    ExpressionModule() : das::Module("enzo_expression")
+    ExpressionModule() : das::Module("helix_expression")
     {
         das::ModuleLibrary lib(this);
         lib.addBuiltInModule();
@@ -218,7 +218,7 @@ class ExpressionModule : public das::Module
             lib,
             "prm",
             das::SideEffects::modifyExternal,
-            "enzo::expr::prm"
+            "helix::expr::prm"
         )
             ->args({"path", "index", "context"})
             ->arg_init(1, new das::ExprConstInt(0));
@@ -228,7 +228,7 @@ class ExpressionModule : public das::Module
             lib,
             "prmI",
             das::SideEffects::modifyExternal,
-            "enzo::expr::prmI"
+            "helix::expr::prmI"
         )
             ->args({"path", "index", "context"})
             ->arg_init(1, new das::ExprConstInt(0));
@@ -238,7 +238,7 @@ class ExpressionModule : public das::Module
             lib,
             "prmS",
             das::SideEffects::modifyExternal,
-            "enzo::expr::prmS"
+            "helix::expr::prmS"
         )
             ->args({"path", "index", "context"})
             ->arg_init(1, new das::ExprConstInt(0));
@@ -248,7 +248,7 @@ class ExpressionModule : public das::Module
             lib,
             "frame",
             das::SideEffects::modifyExternal,
-            "enzo::expr::frame"
+            "helix::expr::frame"
         )
             ->args({"context"});
 
@@ -257,7 +257,7 @@ class ExpressionModule : public das::Module
             lib,
             "time",
             das::SideEffects::modifyExternal,
-            "enzo::expr::time"
+            "helix::expr::time"
         )
             ->args({"context"});
 
@@ -267,7 +267,7 @@ class ExpressionModule : public das::Module
             lib,
             "rand",
             das::SideEffects::none,
-            "enzo::expr::randFromInt32"
+            "helix::expr::randFromInt32"
         )
             ->args({"seed"});
 
@@ -276,7 +276,7 @@ class ExpressionModule : public das::Module
             lib,
             "rand",
             das::SideEffects::none,
-            "enzo::expr::randFromInt64"
+            "helix::expr::randFromInt64"
         )
             ->args({"seed"});
 
@@ -285,7 +285,7 @@ class ExpressionModule : public das::Module
             lib,
             "rand",
             das::SideEffects::none,
-            "enzo::expr::randFromFloat"
+            "helix::expr::randFromFloat"
         )
             ->args({"seed"});
 
@@ -294,7 +294,7 @@ class ExpressionModule : public das::Module
             lib,
             "rand",
             das::SideEffects::none,
-            "enzo::expr::randFromVector"
+            "helix::expr::randFromVector"
         )
             ->args({"seed"});
 
@@ -303,7 +303,7 @@ class ExpressionModule : public das::Module
             lib,
             "randVector",
             das::SideEffects::none,
-            "enzo::expr::randVectorFromInt32"
+            "helix::expr::randVectorFromInt32"
         )
             ->args({"seed"});
 
@@ -312,7 +312,7 @@ class ExpressionModule : public das::Module
             lib,
             "randVector",
             das::SideEffects::none,
-            "enzo::expr::randVectorFromInt64"
+            "helix::expr::randVectorFromInt64"
         )
             ->args({"seed"});
 
@@ -321,7 +321,7 @@ class ExpressionModule : public das::Module
             lib,
             "randVector",
             das::SideEffects::none,
-            "enzo::expr::randVectorFromFloat"
+            "helix::expr::randVectorFromFloat"
         )
             ->args({"seed"});
 
@@ -330,12 +330,12 @@ class ExpressionModule : public das::Module
             lib,
             "randVector",
             das::SideEffects::none,
-            "enzo::expr::randVectorFromVector"
+            "helix::expr::randVectorFromVector"
         )
             ->args({"seed"});
     }
 };
 
-} // namespace enzo::expr
+} // namespace helix::expr
 
-REGISTER_MODULE_IN_NAMESPACE(ExpressionModule, enzo::expr);
+REGISTER_MODULE_IN_NAMESPACE(ExpressionModule, helix::expr);

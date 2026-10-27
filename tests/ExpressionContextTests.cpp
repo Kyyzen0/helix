@@ -6,7 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <tbb/parallel_for.h>
 
-using namespace enzo;
+using namespace helix;
 
 struct NMReset
 {
@@ -21,7 +21,7 @@ struct NMReset
 TEST_CASE_METHOD(NMReset, "readParameter keeps the first value for the rest of the evaluation")
 {
     auto& nm = nt::nm();
-    nt::NodeId source = nm.createNode("enzo::transform");
+    nt::NodeId source = nm.createNode("helix::transform");
     auto translate = nm.getNode(source).getParameter("translate").lock();
     translate->setFloat(7.0f);
 
@@ -36,7 +36,7 @@ TEST_CASE_METHOD(NMReset, "readParameter keeps the first value for the rest of t
 TEST_CASE_METHOD(NMReset, "readParameter records a parameter's node once however often it is read")
 {
     auto& nm = nt::nm();
-    nt::NodeId source = nm.createNode("enzo::transform");
+    nt::NodeId source = nm.createNode("helix::transform");
 
     expr::ExpressionContext context(source);
     context.readParameter<floatT>("transform1.translate", 0);
@@ -49,7 +49,7 @@ TEST_CASE_METHOD(NMReset, "readParameter records a parameter's node once however
 TEST_CASE_METHOD(NMReset, "readParameter returns nothing when the path matches no parameter")
 {
     auto& nm = nt::nm();
-    nt::NodeId source = nm.createNode("enzo::transform");
+    nt::NodeId source = nm.createNode("helix::transform");
 
     expr::ExpressionContext context(source);
     REQUIRE_FALSE(context.readParameter<floatT>("does_not_exist.translate", 0));
@@ -59,7 +59,7 @@ TEST_CASE_METHOD(NMReset, "readParameter returns nothing when the path matches n
 TEST_CASE_METHOD(NMReset, "readParameter gives every thread the same value")
 {
     auto& nm = nt::nm();
-    nt::NodeId source = nm.createNode("enzo::transform");
+    nt::NodeId source = nm.createNode("helix::transform");
     nm.getNode(source).getParameter("translate").lock()->setFloat(7.0f);
 
     expr::ExpressionContext context(source);

@@ -9,7 +9,7 @@
 #include <variant>
 #include <vector>
 
-namespace enzo::expr {
+namespace helix::expr {
 
 /**
  * @brief The world a single expression evaluation reads and writes to.
@@ -79,4 +79,4 @@ ExpressionContext::readParameter<intT>(const String&, unsigned int) const;
 extern template std::optional<String>
 ExpressionContext::readParameter<String>(const String&, unsigned int) const;
 
-} // namespace enzo::expr
+} // namespace helix::expr

@@ -16,7 +16,7 @@ DECLARE_MODULE(ExpressionModule);
 // Makes our geometry functions module (pointAttr and friends) available.
 DECLARE_MODULE(GeometryModule);
 
-namespace enzo::daslang {
+namespace helix::daslang {
 
 static_assert(maxScriptArguments == DAS_MAX_FUNCTION_ARGUMENTS);
 
@@ -250,4 +250,4 @@ Runtime::compile(const String& name, const String& source, String& error)
     return std::shared_ptr<CompiledProgram>(new CompiledProgram({fileAccess, program, context}));
 }
 
-} // namespace enzo::daslang
+} // namespace helix::daslang

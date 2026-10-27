@@ -1,6 +1,6 @@
 #include "Engine/Primitives/Camera.h"
 
-namespace enzo {
+namespace helix {
 
 geo::Camera::Camera(std::string_view path)
     : transformHandle_{addAttribute<Matrix4>(attr::AttributeOwner::PRIMITIVE, "transform", true)},
@@ -36,4 +36,4 @@ void geo::Camera::applyTransform(const Matrix4& mat, TransformClass transformCla
     setTransform(mat * getTransform());
 }
 
-} // namespace enzo
+} // namespace helix

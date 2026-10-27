@@ -12,7 +12,7 @@
 
 namespace {
 
-class Grid : public enzo::nt::NodeImpl
+class Grid : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -22,7 +22,7 @@ class Grid : public enzo::nt::NodeImpl
 
 void Grid::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -85,4 +85,4 @@ void Grid::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(grid, Grid)
+HELIX_REGISTER_NODE(grid, Grid)

@@ -138,21 +138,21 @@ AllocationCounts readAllocationCounts()
 }
 
 /// Returns a grid node with the given number of rows and columns.
-enzo::nt::NodeId addGrid(enzo::nt::NetworkManager& nm, int rows, int columns)
+helix::nt::NodeId addGrid(helix::nt::NetworkManager& nm, int rows, int columns)
 {
-    const enzo::nt::NodeId grid = nm.createNode("enzo::grid");
+    const helix::nt::NodeId grid = nm.createNode("helix::grid");
     nm.getNode(grid).getParameter("rows").lock()->setInt(rows);
     nm.getNode(grid).getParameter("columns").lock()->setInt(columns);
     return grid;
 }
 
 /// Returns the number of points in the first mesh a node produces.
-unsigned int pointCount(enzo::nt::NetworkManager& nm, enzo::nt::NodeId node)
+unsigned int pointCount(helix::nt::NetworkManager& nm, helix::nt::NodeId node)
 {
-    const std::shared_ptr<const enzo::NodePacket> packet = nm.getNode(node).getOutputPacket(0);
+    const std::shared_ptr<const helix::NodePacket> packet = nm.getNode(node).getOutputPacket(0);
     if (!packet) return 0;
     const auto mesh =
-        std::dynamic_pointer_cast<const enzo::geo::Mesh>(packet->getPrimitive(0));
+        std::dynamic_pointer_cast<const helix::geo::Mesh>(packet->getPrimitive(0));
     if (!mesh) return 0;
     return static_cast<unsigned int>(mesh->getNumPoints());
 }
@@ -183,14 +183,14 @@ CookMeasurement measureCook(
     bool background
 )
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     // The signal fires when the new geometry is put on screen.
     int publishCount = 0;
     Clock::time_point publishTime;
     auto connection = nm.displayGeoChanged.connect(
-        [&](std::shared_ptr<const enzo::NodePacket>) {
+        [&](std::shared_ptr<const helix::NodePacket>) {
             ++publishCount;
             publishTime = Clock::now();
         }
@@ -276,7 +276,7 @@ void printCookMeasurement(
 
 TEST_CASE_METHOD(NMReset, "Perf: probe of the pieces a cook is made of")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     std::cout << "MEAS probe.hardware_threads value=" << std::thread::hardware_concurrency()
@@ -300,7 +300,7 @@ TEST_CASE_METHOD(NMReset, "Perf: probe of the pieces a cook is made of")
     // Eight grids under a merge, which is the network the background cook can
     // spread over its workers.
     std::vector<nt::NodeId> branches;
-    const nt::NodeId merge = nm.createNode("enzo::merge");
+    const nt::NodeId merge = nm.createNode("helix::merge");
     for (int i = 0; i < 8; ++i)
     {
         const nt::NodeId branch = perf::addGrid(nm, 400, 400);
@@ -331,11 +331,11 @@ TEST_CASE_METHOD(NMReset, "Perf: probe of the pieces a cook is made of")
 
 TEST_CASE_METHOD(NMReset, "Perf: dense point grid, cook on the calling thread")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     const nt::NodeId grid = perf::addGrid(nm, 1000, 1000);
-    const nt::NodeId transform = nm.createNode("enzo::transform");
+    const nt::NodeId transform = nm.createNode("helix::transform");
     nm.connectNodes(grid, 0, transform, 0);
     nm.setDisplayNode(transform);
 
@@ -355,12 +355,12 @@ TEST_CASE_METHOD(NMReset, "Perf: dense point grid, cook on the calling thread")
 
 TEST_CASE_METHOD(NMReset, "Perf: dense point grid, cook in the background")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
     nm.setAsyncCookingEnabled(true);
 
     const nt::NodeId grid = perf::addGrid(nm, 1000, 1000);
-    const nt::NodeId transform = nm.createNode("enzo::transform");
+    const nt::NodeId transform = nm.createNode("helix::transform");
     nm.connectNodes(grid, 0, transform, 0);
     nm.setDisplayNode(transform);
 
@@ -379,11 +379,11 @@ TEST_CASE_METHOD(NMReset, "Perf: dense point grid, cook in the background")
 
 TEST_CASE_METHOD(NMReset, "Perf: network of eight dense branches, cook on the calling thread")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     std::vector<nt::NodeId> branches;
-    const nt::NodeId merge = nm.createNode("enzo::merge");
+    const nt::NodeId merge = nm.createNode("helix::merge");
     for (int i = 0; i < 8; ++i)
     {
         const nt::NodeId branch = perf::addGrid(nm, 400, 400);
@@ -413,12 +413,12 @@ TEST_CASE_METHOD(NMReset, "Perf: network of eight dense branches, cook on the ca
 
 TEST_CASE_METHOD(NMReset, "Perf: network of eight dense branches, cook in the background")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
     nm.setAsyncCookingEnabled(true);
 
     std::vector<nt::NodeId> branches;
-    const nt::NodeId merge = nm.createNode("enzo::merge");
+    const nt::NodeId merge = nm.createNode("helix::merge");
     for (int i = 0; i < 8; ++i)
     {
         const nt::NodeId branch = perf::addGrid(nm, 400, 400);
@@ -447,14 +447,14 @@ TEST_CASE_METHOD(NMReset, "Perf: network of eight dense branches, cook in the ba
 
 TEST_CASE_METHOD(NMReset, "Perf: peak memory of a one million point scene")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     const size_t residentAtStart = perf::residentBytes();
     std::cout << "MEAS memory.resident_at_start unit=bytes value=" << residentAtStart << "\n";
 
     const nt::NodeId grid = perf::addGrid(nm, 1000, 1000);
-    const nt::NodeId transform = nm.createNode("enzo::transform");
+    const nt::NodeId transform = nm.createNode("helix::transform");
     nm.connectNodes(grid, 0, transform, 0);
     nm.setDisplayNode(transform);
 
@@ -472,7 +472,7 @@ TEST_CASE_METHOD(NMReset, "Perf: peak memory of a one million point scene")
 
 TEST_CASE("Perf: engine startup")
 {
-    using namespace enzo;
+    using namespace helix;
 
     const double launchToRegistry = perf::millisecondsSinceLaunch();
     const perf::Clock::time_point start = perf::Clock::now();
@@ -486,7 +486,7 @@ TEST_CASE("Perf: engine startup")
     // The first scene the interface shows.
     auto& nm = nt::nm();
     const nt::NodeId grid = perf::addGrid(nm, 1000, 1000);
-    const nt::NodeId transform = nm.createNode("enzo::transform");
+    const nt::NodeId transform = nm.createNode("helix::transform");
     nm.connectNodes(grid, 0, transform, 0);
     nm.setDisplayNode(transform);
 

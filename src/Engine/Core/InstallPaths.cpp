@@ -2,11 +2,11 @@
 #include <boost/dll/runtime_symbol_info.hpp>
 
 // The source tree location, which lets a development run work with no install step.
-#ifndef ENZO_DEV_STATIC_DIR
-#define ENZO_DEV_STATIC_DIR ""
+#ifndef HELIX_DEV_STATIC_DIR
+#define HELIX_DEV_STATIC_DIR ""
 #endif
 
-namespace enzo {
+namespace helix {
 
 std::filesystem::path getInstallRoot()
 {
@@ -18,7 +18,7 @@ std::filesystem::path getStaticDir()
 {
     const std::filesystem::path installed = getInstallRoot() / "share";
     if (std::filesystem::exists(installed)) return installed;
-    return ENZO_DEV_STATIC_DIR;
+    return HELIX_DEV_STATIC_DIR;
 }
 
-} // namespace enzo
+} // namespace helix

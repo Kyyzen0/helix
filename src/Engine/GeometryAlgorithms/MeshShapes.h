@@ -2,11 +2,11 @@
 #include "Engine/Core/Types.h"
 #include <memory>
 
-namespace enzo::geo {
+namespace helix::geo {
 class Mesh;
 }
 
-namespace enzo::utils {
+namespace helix::utils {
 
 /**
  * @brief Builds an axis aligned cube as a Mesh with 8 points and 6 quad faces.
@@ -18,4 +18,4 @@ namespace enzo::utils {
  */
 std::shared_ptr<geo::Mesh> buildCube(const Vector3& size, const Vector3& center);
 
-} // namespace enzo::utils
+} // namespace helix::utils

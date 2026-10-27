@@ -7,11 +7,11 @@
 #include <string_view>
 #include <variant>
 
-namespace enzo::expr {
+namespace helix::expr {
 class ExpressionContext;
 }
 
-namespace enzo::prm {
+namespace helix::prm {
 
 using PrmValues = std::variant<std::vector<floatT>, std::vector<intT>, std::vector<String>>;
 
@@ -23,8 +23,8 @@ class Parameter
 
     std::string getName() const;
     std::string getLabel() const;
-    enzo::prm::Type getType() const;
-    enzo::prm::ValueType getValueType() const;
+    helix::prm::Type getType() const;
+    helix::prm::ValueType getValueType() const;
     unsigned int getVectorSize() const;
 
     floatT evalFloat(unsigned int index = 0) const;
@@ -129,4 +129,4 @@ class Parameter
     std::vector<std::optional<String>> expressions_;
     std::vector<std::vector<std::shared_ptr<Parameter>>> instances_;
 };
-} // namespace enzo::prm
+} // namespace helix::prm

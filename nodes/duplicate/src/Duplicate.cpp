@@ -8,7 +8,7 @@
 
 namespace {
 
-class Duplicate : public enzo::nt::NodeImpl
+class Duplicate : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -18,7 +18,7 @@ class Duplicate : public enzo::nt::NodeImpl
 
 void Duplicate::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -44,8 +44,8 @@ void Duplicate::cook()
             const Vector3 rotation = rotatePerCopy * stepsFromOriginal;
             const Vector3 scale = scalePerCopy.array().pow(stepsFromOriginal).matrix();
 
-            const enzo::Transform transform =
-                enzo::Transform::fromComponents(translation, rotation, scale, transformOrder);
+            const helix::Transform transform =
+                helix::Transform::fromComponents(translation, rotation, scale, transformOrder);
 
             geo::PrimPtr copy = prim->clone();
             copy->applyTransform(transform, TransformClass::POINT_PRIORITY);
@@ -63,4 +63,4 @@ void Duplicate::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(duplicate, Duplicate)
+HELIX_REGISTER_NODE(duplicate, Duplicate)

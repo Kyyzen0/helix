@@ -1,7 +1,7 @@
 #include "Gui/Network/NodeLinkListModel.h"
 #include "Engine/Network/NetworkManager.h"
 
-namespace enzo::ui {
+namespace helix::ui {
 
 NodeLinkListModel::NodeLinkListModel(QObject* parent) : QAbstractListModel(parent) {}
 
@@ -99,4 +99,4 @@ int NodeLinkListModel::rowOf(const nt::NodeLink& nodeLink) const
     return -1;
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

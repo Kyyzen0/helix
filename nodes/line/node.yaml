@@ -1,7 +1,7 @@
 version: 1
 
 name: line
-namespace: enzo
+namespace: helix
 label: Line
 tags: [primitive, curve]
 
@@ -9,7 +9,7 @@ outputs: 1
 
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
   constructor: line
 
 icon: icon.svg

@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // The hint shown on a network with no nodes in it. It sits on the panel colour
 // so the background dots do not run through the text.

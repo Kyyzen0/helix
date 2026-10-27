@@ -4,7 +4,7 @@
 
 namespace {
 
-class Path : public enzo::nt::NodeImpl
+class Path : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -14,7 +14,7 @@ class Path : public enzo::nt::NodeImpl
 
 void Path::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -32,4 +32,4 @@ void Path::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(path, Path)
+HELIX_REGISTER_NODE(path, Path)

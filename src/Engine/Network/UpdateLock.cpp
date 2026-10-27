@@ -2,7 +2,7 @@
 #include "Engine/Network/NetworkManager.h"
 #include <icecream.hpp>
 
-namespace enzo {
+namespace helix {
 
 unsigned int nt::UpdateLock::lockCounter = 0;
 
@@ -28,4 +28,4 @@ bool nt::UpdateLock::isLocked() { return lockCounter > 0; }
 
 bool nt::UpdateLock::isUnlocked() { return !isLocked(); }
 
-} // namespace enzo
+} // namespace helix

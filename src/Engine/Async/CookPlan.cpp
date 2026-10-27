@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace enzo::async {
+namespace helix::async {
 
 CookPlan CookPlan::build(
     const std::vector<nt::NodeId>& targets,
@@ -107,4 +107,4 @@ std::vector<nt::NodeId> CookPlan::nodes() const
     return nodeIds;
 }
 
-} // namespace enzo::async
+} // namespace helix::async

@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // The label a control draws above itself, for kinds the row gives no side label.
 Text {

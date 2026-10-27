@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -32,7 +32,7 @@ std::shared_ptr<const geo::Mesh> getMesh(nt::Node& node)
 nt::NodeId addSpiral()
 {
     nt::NodeLoader::loadNodes();
-    return nt::nm().createNode("enzo::spiral");
+    return nt::nm().createNode("helix::spiral");
 }
 
 } // namespace

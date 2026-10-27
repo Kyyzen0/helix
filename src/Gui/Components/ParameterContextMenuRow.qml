@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // One row of a ParameterContextMenu or its paste submenu, shared by both so
 // the icon, label and detail styling stay identical at every level. Sized to

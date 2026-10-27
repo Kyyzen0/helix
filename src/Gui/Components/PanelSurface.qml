@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Shapes
-import Enzo
+import Helix
 
 // The chrome every pane of the application is drawn on.
 //

@@ -1,7 +1,7 @@
 version: 1
 
 name: spiral
-namespace: enzo
+namespace: helix
 label: Spiral
 tags: [primitive, curve, helix]
 
@@ -9,7 +9,7 @@ outputs: 1
 
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
   constructor: spiral
 
 icon: icon.svg

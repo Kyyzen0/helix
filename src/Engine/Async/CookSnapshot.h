@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace enzo::async {
+namespace helix::async {
 
 /**
  * @brief One parameter's value, as the cook will read it.
@@ -97,4 +97,4 @@ class CookSnapshot
     std::unordered_map<nt::NodeId, NodeState> nodes_;
 };
 
-} // namespace enzo::async
+} // namespace helix::async

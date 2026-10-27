@@ -7,14 +7,14 @@
 #include <variant>
 #include <vector>
 
-namespace enzo {
+namespace helix {
 namespace attr {
 template <typename T> using StoreContainer = std::vector<T>;
 
 template <typename T> class AttributeHandle;
 
 /**
- * @class enzo::attr::Attribute
+ * @class helix::attr::Attribute
  * @brief Containers for geometry data.
  *
  * Attributes are the containers for geometry data in the engine.
@@ -27,7 +27,7 @@ template <typename T> class AttributeHandle;
  * (e.g., ints, floats, vectors, bools). This allows a single attribute class
  * to store data regardless of the type without templates.
  * Attributes cannot be read or written from by themselves.
- * For that an attribute handle is required, (see #enzo::attr::AttributeHandle).
+ * For that an attribute handle is required, (see #helix::attr::AttributeHandle).
  *
  * @note Values are strongly typed; invalid type combinations are guarded both
  *       at compile time (via handles) and at runtime (defensive checks).
@@ -108,12 +108,12 @@ class Attribute
     using StoreVariant = std::variant<
         std::shared_ptr<StoreContainer<intT>>,
         std::shared_ptr<StoreContainer<floatT>>,
-        std::shared_ptr<StoreContainer<enzo::Vector3>>,
-        std::shared_ptr<StoreContainer<enzo::boolT>>,
-        std::shared_ptr<StoreContainer<enzo::Matrix4>>>;
+        std::shared_ptr<StoreContainer<helix::Vector3>>,
+        std::shared_ptr<StoreContainer<helix::boolT>>,
+        std::shared_ptr<StoreContainer<helix::Matrix4>>>;
     StoreVariant store_;
 };
 
 using attribVector = std::vector<std::shared_ptr<attr::Attribute>>;
 } // namespace attr
-} // namespace enzo
+} // namespace helix

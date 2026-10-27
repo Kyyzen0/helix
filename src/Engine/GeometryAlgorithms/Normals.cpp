@@ -9,7 +9,7 @@
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
 
-namespace enzo::utils {
+namespace helix::utils {
 
 namespace {
 
@@ -192,4 +192,4 @@ std::vector<Vector3> computeVertexNormals(const geo::Mesh& mesh, double cuspAngl
     return vertexNormals;
 }
 
-} // namespace enzo::utils
+} // namespace helix::utils

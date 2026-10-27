@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
-import Enzo
+import Helix
 
 // Reusable stand-in for a feature that is not built yet. A caller sets the heading
 // and opens it to show a centered card naming the feature.

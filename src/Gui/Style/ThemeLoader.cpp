@@ -11,7 +11,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 
@@ -202,4 +202,4 @@ ThemeLoader::loadFromFile(const QString& defaultPath, const QString& userPath)
     return loadFromString(QString::fromUtf8(defaultFile.readAll()), userYaml);
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

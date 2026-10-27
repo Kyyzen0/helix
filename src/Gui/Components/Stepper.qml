@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // Pill walking a selection through a sequence one step at a time.
 Rectangle {

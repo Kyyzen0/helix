@@ -3,7 +3,7 @@
 #include <QString>
 #include <QStringList>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief Returns the folder holding the user's theme files.
 /// @note Creates the folder when it is missing.
@@ -41,4 +41,4 @@ void writeThemeYaml(const QString& name, const QString& yaml);
 /// @brief Deletes a user theme's file.
 void deleteThemeFile(const QString& name);
 
-} // namespace enzo::ui
+} // namespace helix::ui

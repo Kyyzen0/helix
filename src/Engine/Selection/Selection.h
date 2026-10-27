@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-namespace enzo {
+namespace helix {
 class Selection
 {
   public:
@@ -27,7 +27,7 @@ class Selection
     bool getInverted() const { return inverted_; }
 
   private:
-    std::vector<std::unique_ptr<enzo::SelectionComponent>> components_;
+    std::vector<std::unique_ptr<helix::SelectionComponent>> components_;
     bool inverted_ = false;
 };
-} // namespace enzo
+} // namespace helix

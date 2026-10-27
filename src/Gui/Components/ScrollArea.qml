@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import Enzo
+import Helix
 
 // A container that scrolls its contents with the wheel and a slim scrollbar.
 Flickable {

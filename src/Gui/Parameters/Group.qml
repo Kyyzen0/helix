@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import Enzo
+import Helix
 import "../Style"
 
 // A group of parameters, stacked in a column or laid out in a row.

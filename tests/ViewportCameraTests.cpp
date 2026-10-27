@@ -4,7 +4,7 @@
 #include <glm/geometric.hpp>
 #include <glm/vec4.hpp>
 
-using namespace enzo::gfx;
+using namespace helix::gfx;
 using Catch::Approx;
 
 namespace {

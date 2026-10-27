@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace enzo {
+namespace helix {
 
 prm::Parameter::Parameter(Template prmTemplate) : template_{prmTemplate}
 {
@@ -439,4 +439,4 @@ void prm::Parameter::moveInstance(unsigned int fromIndex, unsigned int toIndex)
     handleValueChange_();
 }
 
-} // namespace enzo
+} // namespace helix

@@ -3,7 +3,7 @@
 #include <functional>
 #include <vector>
 
-namespace enzo::sim {
+namespace helix::sim {
 
 /// @brief One particle of a particle system.
 struct Particle
@@ -46,7 +46,7 @@ struct ParticleSettings
  * Example
  *
  * ```
- * enzo::sim::ParticleSolver solver;
+ * helix::sim::ParticleSolver solver;
  * solver.reset(settings);
  * solver.step(settings, 1.f / 24.f);
  * ```
@@ -95,4 +95,4 @@ std::vector<Particle> simulateParticles(
     intT subSteps = 1
 );
 
-} // namespace enzo::sim
+} // namespace helix::sim

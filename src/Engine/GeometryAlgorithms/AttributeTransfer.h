@@ -3,7 +3,7 @@
 #include "Engine/Primitives/Primitive.h"
 #include <span>
 
-namespace enzo::utils {
+namespace helix::utils {
 
 /// @brief An element whose attribute values are a blend of two source elements.
 struct ElementBlend
@@ -45,4 +45,4 @@ void interpolateAttributeValues(
     std::span<const ElementBlend> elementBlends
 );
 
-} // namespace enzo::utils
+} // namespace helix::utils

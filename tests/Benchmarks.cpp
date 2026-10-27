@@ -17,19 +17,19 @@ struct NMReset
 {
     NMReset()
     {
-        enzo::nt::NodeLoader::loadNodes();
-        enzo::nt::nm()._reset();
+        helix::nt::NodeLoader::loadNodes();
+        helix::nt::nm()._reset();
     }
-    ~NMReset() { enzo::nt::nm()._reset(); }
+    ~NMReset() { helix::nt::nm()._reset(); }
 };
 
 TEST_CASE_METHOD(NMReset, "Network Manager")
 {
-    using namespace enzo;
+    using namespace helix;
 
     auto& nm = nt::nm();
 
-    nt::NodeId startNode = nm.createNode("enzo::cube");
+    nt::NodeId startNode = nm.createNode("helix::cube");
     nt::NodeId prevNode = startNode;
     std::vector<nt::NodeId> prevNodes;
 
@@ -37,7 +37,7 @@ TEST_CASE_METHOD(NMReset, "Network Manager")
     {
         for (int i = 0; i < 4; ++i)
         {
-            nt::NodeId newNode = nm.createNode("enzo::cube");
+            nt::NodeId newNode = nm.createNode("helix::cube");
             prevNodes.push_back(newNode);
             nt::nm().connectNodes(newNode, i, prevNode, 0);
         }
@@ -47,7 +47,7 @@ TEST_CASE_METHOD(NMReset, "Network Manager")
             for (int i = 0; i < size(prevNodesBuffer); ++i)
             {
                 prevNodes.clear();
-                nt::NodeId newNode = nm.createNode("enzo::cube");
+                nt::NodeId newNode = nm.createNode("helix::cube");
                 prevNodes.push_back(newNode);
                 nt::nm().connectNodes(newNode, 0, prevNodesBuffer[i], 0);
             }
@@ -60,7 +60,7 @@ TEST_CASE_METHOD(NMReset, "Network Manager")
 namespace {
 
 // Sets a sphere node's radius and division counts.
-void setSphereShape(enzo::nt::Node& sphere, float radius, int columns, int rows)
+void setSphereShape(helix::nt::Node& sphere, float radius, int columns, int rows)
 {
     for (int axis = 0; axis < 3; ++axis)
         sphere.getParameter("radius").lock()->setFloat(radius, axis);
@@ -69,20 +69,20 @@ void setSphereShape(enzo::nt::Node& sphere, float radius, int columns, int rows)
 }
 
 // Returns a cooked fracture of a dense sphere around seed points on three nested spheres.
-enzo::nt::NodeId addFractureOfSphere(int seedColumns, int seedRows)
+helix::nt::NodeId addFractureOfSphere(int seedColumns, int seedRows)
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    const nt::NodeId geometry = nm.createNode("enzo::sphere");
+    const nt::NodeId geometry = nm.createNode("helix::sphere");
     setSphereShape(nm.getNode(geometry), 1.0f, 64, 32);
 
     // Turns each seed sphere by a different angle so their rings do not line up.
-    const nt::NodeId seeds = nm.createNode("enzo::merge");
+    const nt::NodeId seeds = nm.createNode("helix::merge");
     const float seedRadii[] = {0.3f, 0.6f, 0.9f};
     for (int shellIndex = 0; shellIndex < 3; ++shellIndex)
     {
-        const nt::NodeId shell = nm.createNode("enzo::sphere");
+        const nt::NodeId shell = nm.createNode("helix::sphere");
         nt::Node& shellNode = nm.getNode(shell);
         setSphereShape(shellNode, seedRadii[shellIndex], seedColumns, seedRows);
         shellNode.getParameter("rotate").lock()->setFloat(17.0f * (shellIndex + 1), 0);
@@ -90,7 +90,7 @@ enzo::nt::NodeId addFractureOfSphere(int seedColumns, int seedRows)
         nm.connectNodes(shell, 0, seeds, 0);
     }
 
-    const nt::NodeId fracture = nm.createNode("enzo::cellFracture");
+    const nt::NodeId fracture = nm.createNode("helix::cellFracture");
     nm.connectNodes(geometry, 0, fracture, 0);
     nm.connectNodes(seeds, 0, fracture, 1);
     nm.cook(fracture);
@@ -98,9 +98,9 @@ enzo::nt::NodeId addFractureOfSphere(int seedColumns, int seedRows)
 }
 
 // Prints the point, face, piece and inside face counts of a fracture's output.
-void printFractureShape(enzo::nt::NodeId fracture)
+void printFractureShape(helix::nt::NodeId fracture)
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
     const auto mesh = std::dynamic_pointer_cast<const geo::Mesh>(
         nm.getNode(fracture).getOutputPacket(0)->getPrimitive(0)
@@ -128,7 +128,7 @@ void printFractureShape(enzo::nt::NodeId fracture)
 
 TEST_CASE_METHOD(NMReset, "Cell fracture")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     // Cooks only the fracture each run, since the nodes above it stay clean.
@@ -159,15 +159,15 @@ TEST_CASE_METHOD(NMReset, "Cell fracture")
 
 TEST_CASE_METHOD(NMReset, "Cell fracture of a cube")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     // Places every seed on a sphere around the cube, so every halfway plane passes through its
     // center.
-    const nt::NodeId cube = nm.createNode("enzo::cube");
-    const nt::NodeId seeds = nm.createNode("enzo::sphere");
+    const nt::NodeId cube = nm.createNode("helix::cube");
+    const nt::NodeId seeds = nm.createNode("helix::sphere");
     setSphereShape(nm.getNode(seeds), 1.0f, 30, 30);
-    const nt::NodeId fracture = nm.createNode("enzo::cellFracture");
+    const nt::NodeId fracture = nm.createNode("helix::cellFracture");
     nm.connectNodes(cube, 0, fracture, 0);
     nm.connectNodes(seeds, 0, fracture, 1);
     nm.cook(fracture);
@@ -183,24 +183,24 @@ TEST_CASE_METHOD(NMReset, "Cell fracture of a cube")
 namespace {
 
 // Returns a grid node with the given division counts.
-enzo::nt::NodeId addGrid(int rows, int columns)
+helix::nt::NodeId addGrid(int rows, int columns)
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    const nt::NodeId grid = nm.createNode("enzo::grid");
+    const nt::NodeId grid = nm.createNode("helix::grid");
     nm.getNode(grid).getParameter("rows").lock()->setInt(rows);
     nm.getNode(grid).getParameter("columns").lock()->setInt(columns);
     return grid;
 }
 
 // Returns a cooked copy to points node wiring the prototype onto the target points.
-enzo::nt::NodeId addCopyToPoints(enzo::nt::NodeId prototype, enzo::nt::NodeId targetPoints)
+helix::nt::NodeId addCopyToPoints(helix::nt::NodeId prototype, helix::nt::NodeId targetPoints)
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    const nt::NodeId copy = nm.createNode("enzo::copyToPoints");
+    const nt::NodeId copy = nm.createNode("helix::copyToPoints");
     nm.connectNodes(prototype, 0, copy, 0);
     nm.connectNodes(targetPoints, 0, copy, 1);
     nm.cook(copy);
@@ -208,9 +208,9 @@ enzo::nt::NodeId addCopyToPoints(enzo::nt::NodeId prototype, enzo::nt::NodeId ta
 }
 
 // Prints the point and face counts of a node's output mesh.
-void printMeshShape(const std::string& label, enzo::nt::NodeId node)
+void printMeshShape(const std::string& label, helix::nt::NodeId node)
 {
-    using namespace enzo;
+    using namespace helix;
     const auto mesh = std::dynamic_pointer_cast<const geo::Mesh>(
         nt::nm().getNode(node).getOutputPacket(0)->getPrimitive(0)
     );
@@ -223,10 +223,10 @@ void printMeshShape(const std::string& label, enzo::nt::NodeId node)
 
 TEST_CASE_METHOD(NMReset, "Copy dense prototype to points")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    const nt::NodeId denseSphere = nm.createNode("enzo::sphere");
+    const nt::NodeId denseSphere = nm.createNode("helix::sphere");
     setSphereShape(nm.getNode(denseSphere), 1.0f, 400, 250);
     const nt::NodeId fewPoints = addGrid(4, 4);
     const nt::NodeId denseOntoFew = addCopyToPoints(denseSphere, fewPoints);
@@ -243,10 +243,10 @@ TEST_CASE_METHOD(NMReset, "Copy dense prototype to points")
 
 TEST_CASE_METHOD(NMReset, "Copy to many points")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    const nt::NodeId cube = nm.createNode("enzo::cube");
+    const nt::NodeId cube = nm.createNode("helix::cube");
     const nt::NodeId manyPoints = addGrid(316, 316);
     const nt::NodeId cubeOntoMany = addCopyToPoints(cube, manyPoints);
     printMeshShape("many target points", manyPoints);
@@ -260,10 +260,10 @@ TEST_CASE_METHOD(NMReset, "Copy to many points")
 
 TEST_CASE_METHOD(NMReset, "Copy medium prototype to medium points")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
-    const nt::NodeId mediumSphere = nm.createNode("enzo::sphere");
+    const nt::NodeId mediumSphere = nm.createNode("helix::sphere");
     setSphereShape(nm.getNode(mediumSphere), 1.0f, 32, 32);
     const nt::NodeId mediumPoints = addGrid(32, 32);
     const nt::NodeId mediumOntoMedium = addCopyToPoints(mediumSphere, mediumPoints);
@@ -279,7 +279,7 @@ TEST_CASE_METHOD(NMReset, "Copy medium prototype to medium points")
 
 TEST_CASE("Ramp sampling")
 {
-    using namespace enzo;
+    using namespace helix;
 
     // A curved run bordered by linear keys, the shape the per point hotpath sees.
     prm::Ramp ramp(
@@ -304,11 +304,11 @@ TEST_CASE("Ramp sampling")
 
 TEST_CASE_METHOD(NMReset, "Script attribute reads")
 {
-    using namespace enzo;
+    using namespace helix;
     auto& nm = nt::nm();
 
     const nt::NodeId grid = addGrid(1000, 1000);
-    const nt::NodeId script = nm.createNode("enzo::script");
+    const nt::NodeId script = nm.createNode("helix::script");
     nm.connectNodes(grid, 0, script, 0);
     nm.cook(script);
     printMeshShape("script input", grid);

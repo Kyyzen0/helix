@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-namespace enzo::nt {
+namespace helix::nt {
 
 class UndoStack
 {
@@ -44,4 +44,4 @@ class UndoTransaction
     UndoStack& stack_;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

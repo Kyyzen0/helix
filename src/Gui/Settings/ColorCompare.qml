@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // One labelled colour of the pair the picker compares.
 Row {

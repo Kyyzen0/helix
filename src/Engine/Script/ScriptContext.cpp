@@ -3,7 +3,7 @@
 #include "Engine/Primitives/Mesh.h"
 #include <algorithm>
 
-namespace enzo::script {
+namespace helix::script {
 
 ScriptContext::ScriptContext(nt::NodeId currentNode, const NodePacket& input)
     : expr::ExpressionContext(currentNode)
@@ -40,4 +40,4 @@ void ScriptContext::addWarning(const String& warning) const
     warnings_.push_back(warning);
 }
 
-} // namespace enzo::script
+} // namespace helix::script

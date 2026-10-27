@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-namespace enzo {
+namespace helix {
 
 /**
  * @brief Abstract base for one piece of a Selection expression.
@@ -140,4 +140,4 @@ class GroupSelectionComponent : public SelectionComponent
     std::string groupName_;
 };
 
-} // namespace enzo
+} // namespace helix

@@ -5,7 +5,7 @@
 #include "Engine/Network/NodeSnapshot.h"
 #include "Engine/UndoRedo/UndoCommand.h"
 
-namespace enzo::nt {
+namespace helix::nt {
 
 class DeleteNodeCommand : public UndoCommand
 {
@@ -26,4 +26,4 @@ class DeleteNodeCommand : public UndoCommand
     NodeSnapshot snapshot_;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

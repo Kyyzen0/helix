@@ -6,15 +6,15 @@
 #include <optional>
 #include <vector>
 
-namespace enzo {
+namespace helix {
 class NodePacket;
 }
 
-namespace enzo::geo {
+namespace helix::geo {
 class Mesh;
 }
 
-namespace enzo::script {
+namespace helix::script {
 
 /**
  * @brief The world a script reads during one cook of a node.
@@ -50,4 +50,4 @@ class ScriptContext : public expr::ExpressionContext
     mutable std::vector<String> warnings_;
 };
 
-} // namespace enzo::script
+} // namespace helix::script

@@ -11,8 +11,8 @@
 
 namespace {
 
-using enzo::floatT;
-using enzo::intT;
+using helix::floatT;
+using helix::intT;
 
 /**
  * @brief A particle system that runs over time.
@@ -25,7 +25,7 @@ using enzo::intT;
  * keyframes is read at each step of the simulation, so the system moves with
  * the animation rather than jumping when the frame changes.
  */
-class Particles : public enzo::nt::NodeImpl
+class Particles : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -35,7 +35,7 @@ class Particles : public enzo::nt::NodeImpl
 
 void Particles::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     // Reading the frame tells the engine the node depends on the time, so it
     // cooks again whenever the scene moves.
@@ -76,4 +76,4 @@ void Particles::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(particles, Particles)
+HELIX_REGISTER_NODE(particles, Particles)

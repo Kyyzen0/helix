@@ -15,7 +15,7 @@
 #include <optional>
 #include <stdexcept>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 /// The vertical space left between a node and the one created below it.
@@ -471,4 +471,4 @@ void NetworkViewModel::setDisplayNodeToPrimary()
 
 void NetworkViewModel::clearSelection() { selectNodes({}, std::nullopt); }
 
-} // namespace enzo::ui
+} // namespace helix::ui

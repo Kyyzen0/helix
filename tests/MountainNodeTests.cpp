@@ -10,7 +10,7 @@
 #include <memory>
 #include <vector>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -38,9 +38,9 @@ std::shared_ptr<const geo::Mesh> getMesh(nt::Node& node)
 TEST_CASE_METHOD(NMReset, "A mountain is an attribute noise set to fractal noise along the normals")
 {
     auto& nm = nt::nm();
-    nt::Node& node = nm.getNode(nm.createNode("enzo::mountain"));
+    nt::Node& node = nm.getNode(nm.createNode("helix::mountain"));
 
-    REQUIRE(node.getType().getFullName() == "enzo::attributeNoise");
+    REQUIRE(node.getType().getFullName() == "helix::attributeNoise");
     REQUIRE(node.getPath() == "/attributeNoise1");
     REQUIRE(node.getParameter("name").lock()->evalString() == attr::names::position);
     REQUIRE(node.getParameter("type").lock()->evalString() == "vector");
@@ -52,8 +52,8 @@ TEST_CASE_METHOD(NMReset, "A mountain is an attribute noise set to fractal noise
 TEST_CASE_METHOD(NMReset, "A mountain moves every point along its normal")
 {
     auto& nm = nt::nm();
-    const nt::NodeId grid = nm.createNode("enzo::grid");
-    const nt::NodeId mountain = nm.createNode("enzo::mountain");
+    const nt::NodeId grid = nm.createNode("helix::grid");
+    const nt::NodeId mountain = nm.createNode("helix::mountain");
     nm.connectNodes(grid, 0, mountain, 0);
     nm.getNode(mountain).getParameter("frequency").lock()->setFloat(0.37f);
     nm.cook(mountain);

@@ -5,11 +5,11 @@
 #include <utility>
 #include <vector>
 
-namespace enzo::geo {
+namespace helix::geo {
 class Mesh;
 }
 
-namespace enzo::utils {
+namespace helix::utils {
 
 /// @brief A mesh cut by a plane, along with the edges the cut left on the plane.
 struct PlaneCut
@@ -45,4 +45,4 @@ cutMeshByPlane(const geo::Mesh& mesh, const Vector3& planePoint, const Vector3& 
 std::vector<Offset>
 fillCutCaps(geo::Mesh& mesh, const std::vector<std::pair<Offset, Offset>>& cutEdges);
 
-} // namespace enzo::utils
+} // namespace helix::utils

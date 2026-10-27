@@ -4,7 +4,7 @@
 #include "Engine/Network/NetworkManager.h"
 #include "Engine/UndoRedo/UndoCommand.h"
 
-namespace enzo::nt {
+namespace helix::nt {
 
 class MoveNodeCommand : public UndoCommand
 {
@@ -34,4 +34,4 @@ class MoveNodeCommand : public UndoCommand
     Vector2 newPos_;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

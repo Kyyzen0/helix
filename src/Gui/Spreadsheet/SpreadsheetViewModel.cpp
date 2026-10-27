@@ -4,7 +4,7 @@
 #include "Engine/Network/NodePacket.h"
 #include "Gui/PathNames.h"
 
-namespace enzo::ui {
+namespace helix::ui {
 
 SpreadsheetViewModel::SpreadsheetViewModel(QObject* parent) : QObject(parent)
 {
@@ -91,4 +91,4 @@ void SpreadsheetViewModel::showPacket(std::shared_ptr<const NodePacket> packet)
     Q_EMIT geometryChanged();
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

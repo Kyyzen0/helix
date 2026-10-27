@@ -6,7 +6,7 @@
 #include <QVariantList>
 #include <boost/signals2/connection.hpp>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief View-model backing the timeline bar.
 ///
@@ -121,7 +121,7 @@ class TimelineViewModel : public QObject
 
   private:
     /// @brief Returns the node the keyframes belong to.
-    enzo::nt::NodeId keyframeNode() const;
+    helix::nt::NodeId keyframeNode() const;
 
     /// @brief Returns the parameter the keyframe buttons work on.
     std::shared_ptr<prm::NodeParameter> keyframeParameterValue() const;
@@ -142,4 +142,4 @@ class TimelineViewModel : public QObject
     int keyframeComponent_ = 0;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

@@ -12,7 +12,7 @@
 #include <memory>
 #include <vector>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -35,7 +35,7 @@ std::shared_ptr<const geo::Mesh> getMesh(nt::Node& node)
 nt::NodeId addAttributeNoiseAfter(nt::NodeId input)
 {
     auto& nm = nt::nm();
-    const nt::NodeId attributeNoise = nm.createNode("enzo::attributeNoise");
+    const nt::NodeId attributeNoise = nm.createNode("helix::attributeNoise");
     nm.connectNodes(input, 0, attributeNoise, 0);
     nm.getNode(attributeNoise).getParameter("frequency").lock()->setFloat(0.37f);
     return attributeNoise;
@@ -44,7 +44,7 @@ nt::NodeId addAttributeNoiseAfter(nt::NodeId input)
 nt::NodeId addGrid()
 {
     nt::NodeLoader::loadNodes();
-    return nt::nm().createNode("enzo::grid");
+    return nt::nm().createNode("helix::grid");
 }
 
 // Sets the node to add vector noise to Position.
@@ -302,7 +302,7 @@ TEST_CASE_METHOD(NMReset, "Each operation combines the noise with the value alre
     const nt::NodeId grid = addGrid();
 
     // Writes 0.25 on every point for the operations to combine with.
-    const nt::NodeId attributeCreate = nm.createNode("enzo::attributeCreate");
+    const nt::NodeId attributeCreate = nm.createNode("helix::attributeCreate");
     nm.connectNodes(grid, 0, attributeCreate, 0);
     nm.getNode(attributeCreate).getParameter("name").lock()->setString("noise");
     nm.getNode(attributeCreate).getParameter("floatValue").lock()->setFloat(0.25f);

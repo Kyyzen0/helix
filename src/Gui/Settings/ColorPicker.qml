@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
-import Enzo
+import Helix
 import "../Components"
 import "../Utils.js" as Utils
 

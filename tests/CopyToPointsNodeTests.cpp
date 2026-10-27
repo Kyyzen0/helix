@@ -10,7 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -33,7 +33,7 @@ std::shared_ptr<const geo::Mesh> getMesh(nt::Node& node)
 nt::NodeId addQuadGrid(floatT size)
 {
     auto& nm = nt::nm();
-    const nt::NodeId grid = nm.createNode("enzo::grid");
+    const nt::NodeId grid = nm.createNode("helix::grid");
     nm.getNode(grid).getParameter("rows").lock()->setInt(2);
     nm.getNode(grid).getParameter("columns").lock()->setInt(2);
     nm.getNode(grid).getParameter("size").lock()->setFloat(size);
@@ -44,7 +44,7 @@ nt::NodeId addQuadGrid(floatT size)
 nt::NodeId addAttributeCreate(nt::NodeId input, const std::string& name, const std::string& type)
 {
     auto& nm = nt::nm();
-    const nt::NodeId attributeCreate = nm.createNode("enzo::attributeCreate");
+    const nt::NodeId attributeCreate = nm.createNode("helix::attributeCreate");
     nm.connectNodes(input, 0, attributeCreate, 0);
 
     auto& node = nm.getNode(attributeCreate);
@@ -84,7 +84,7 @@ QuadCopies addQuadCopiedOntoQuad()
     const nt::NodeId withFloat = addAttributeCreate(addQuadGrid(1.f), "weight", "float");
     nodes.prototype = addAttributeCreate(withFloat, "tint", "vector");
     nodes.targetPoints = addQuadGrid(10.f);
-    nodes.copy = nm.createNode("enzo::copyToPoints");
+    nodes.copy = nm.createNode("helix::copyToPoints");
     nm.connectNodes(nodes.prototype, 0, nodes.copy, 0);
     nm.connectNodes(nodes.targetPoints, 0, nodes.copy, 1);
     nm.cook(nodes.copy);

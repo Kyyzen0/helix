@@ -11,7 +11,7 @@
 #include <optional>
 #include <vector>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief Nodes of the network as a flat list for QML to repeat over.
 ///
@@ -179,4 +179,4 @@ class NodeListModel : public QAbstractListModel
     std::vector<Node> nodes_;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

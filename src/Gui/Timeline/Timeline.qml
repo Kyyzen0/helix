@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 import "../Components"
 
 // Bar along the bottom of the window holding the transport, the current frame,

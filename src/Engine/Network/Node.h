@@ -9,7 +9,7 @@
 #include <optional>
 #include <string>
 
-namespace enzo::nt {
+namespace helix::nt {
 /**
  * @class Node
  * @brief The unique runtime representation of a node
@@ -28,7 +28,7 @@ class Node
      * @param path The full path locating the node, whose leaf is the node name.
      * The nt::NetworkManager picks a path that is free within its parent.
      */
-    Node(enzo::nt::NodeId nodeId, const nt::NodeType& nodeType, const Path& path);
+    Node(helix::nt::NodeId nodeId, const nt::NodeType& nodeType, const Path& path);
     virtual ~Node() = default;
     /// @brief Deleted copy constructor to avoid accidental copies.
     Node(const Node&) = delete;
@@ -46,10 +46,10 @@ class Node
      *
      * @todo Add option to force cook or cook if dirty.
      */
-    std::shared_ptr<const enzo::NodePacket> getOutputPacket(unsigned int outputIndex) const;
+    std::shared_ptr<const helix::NodePacket> getOutputPacket(unsigned int outputIndex) const;
 
     /// @brief Stores finished geometry against one of the node's outputs.
-    void setOutputPacket(unsigned int outputIndex, enzo::NodePacket packet);
+    void setOutputPacket(unsigned int outputIndex, helix::NodePacket packet);
 
     /// @brief Returns whether anything downstream is asking for one of the node's outputs.
     /// @todo Always true until dirtiness is tracked per output.
@@ -147,12 +147,12 @@ class Node
     void onParameterChanged(const std::string& parmName);
 
     std::vector<std::shared_ptr<prm::NodeParameter>> parameters_;
-    std::vector<std::shared_ptr<const enzo::NodePacket>> outputPackets_;
-    enzo::nt::NodeId nodeId_;
-    const enzo::nt::NodeType& nodeType_;
+    std::vector<std::shared_ptr<const helix::NodePacket>> outputPackets_;
+    helix::nt::NodeId nodeId_;
+    const helix::nt::NodeType& nodeType_;
     // Full path locating this node within the network, its leaf is the node name
     Path path_;
     Vector2 position_{0.f, 0.f};
     bool dirty_ = true;
 };
-} // namespace enzo::nt
+} // namespace helix::nt

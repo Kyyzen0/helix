@@ -11,8 +11,8 @@
 
 namespace {
 
-using enzo::floatT;
-using enzo::intT;
+using helix::floatT;
+using helix::intT;
 
 /**
  * @brief A sheet of points joined by springs, hanging over time.
@@ -25,7 +25,7 @@ using enzo::intT;
  * keyframes is read at each step of the simulation, so the sheet moves with
  * the animation rather than jumping when the frame changes.
  */
-class Springs : public enzo::nt::NodeImpl
+class Springs : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -35,7 +35,7 @@ class Springs : public enzo::nt::NodeImpl
 
 void Springs::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     // Reading the frame tells the engine the node depends on the time, so it
     // cooks again whenever the scene moves.
@@ -94,4 +94,4 @@ void Springs::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(springs, Springs)
+HELIX_REGISTER_NODE(springs, Springs)

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace enzo::nt {
+namespace helix::nt {
 
 // forward declaration
 class NetworkManager;
@@ -42,4 +42,4 @@ class UpdateLock
 
     friend nt::NetworkManager;
 };
-} // namespace enzo::nt
+} // namespace helix::nt

@@ -14,14 +14,14 @@ namespace {
 
 // Returns the rotation in degrees that winds the spiral around the named axis.
 // The spiral is built around Y, so Y itself needs no rotation.
-enzo::Vector3 getAxisRotation(const std::string& axis)
+helix::Vector3 getAxisRotation(const std::string& axis)
 {
     if (axis == "x") return {0, 0, -90};
     if (axis == "z") return {90, 0, 0};
     return {0, 0, 0};
 }
 
-class Spiral : public enzo::nt::NodeImpl
+class Spiral : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -31,7 +31,7 @@ class Spiral : public enzo::nt::NodeImpl
 
 void Spiral::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -73,4 +73,4 @@ void Spiral::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(spiral, Spiral)
+HELIX_REGISTER_NODE(spiral, Spiral)

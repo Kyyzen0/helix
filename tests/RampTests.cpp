@@ -6,7 +6,7 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -131,7 +131,7 @@ TEST_CASE("B spline sampling matches a pinned golden curve")
 
 TEST_CASE("A new ramp parameter defaults to an identity ramp")
 {
-    using namespace enzo::prm;
+    using namespace helix::prm;
     Parameter parameter(Template(Type::RAMP, Name("amplitude", "Amplitude"), Default(2)));
 
     REQUIRE(parameter.getInstanceCount() == 2);
@@ -143,12 +143,12 @@ TEST_CASE("A new ramp parameter defaults to an identity ramp")
 
 TEST_CASE("A node's ramp parameter defaults to an identity ramp")
 {
-    using namespace enzo::prm;
-    enzo::nt::NodeLoader::loadNodes();
-    auto& nm = enzo::nt::nm();
+    using namespace helix::prm;
+    helix::nt::NodeLoader::loadNodes();
+    auto& nm = helix::nt::nm();
     nm._reset();
 
-    const auto nodeId = nm.createNode("enzo::sineWave");
+    const auto nodeId = nm.createNode("helix::sineWave");
     auto parameter = nm.getNode(nodeId).getParameter("remap").lock();
     REQUIRE(parameter);
 
@@ -163,7 +163,7 @@ TEST_CASE("A node's ramp parameter defaults to an identity ramp")
 
 TEST_CASE("A ramp snapshot sorts the control points by position")
 {
-    using namespace enzo::prm;
+    using namespace helix::prm;
     Parameter parameter(Template(Type::RAMP, Name("amplitude", "Amplitude"), Default(2)));
 
     // Seed two points out of order so the snapshot must sort them by position.

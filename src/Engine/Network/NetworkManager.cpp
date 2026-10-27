@@ -24,7 +24,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace enzo {
+namespace helix {
 
 nt::NodeId nt::NetworkManager::createNode(
     const std::string& typeName,
@@ -410,7 +410,7 @@ async::CookScheduler& nt::NetworkManager::cookScheduler()
     return *cookSchedulerPtr_;
 }
 
-void nt::NetworkManager::requestCook(const std::vector<enzo::nt::NodeId>& targets)
+void nt::NetworkManager::requestCook(const std::vector<helix::nt::NodeId>& targets)
 {
     {
         std::lock_guard<std::mutex> lock(cookMutex_);
@@ -674,8 +674,8 @@ std::shared_ptr<const async::CookResult> nt::NetworkManager::getPublishedCookRes
     return publishedCookResult_;
 }
 
-std::shared_ptr<const enzo::NodePacket> nt::NetworkManager::getPublishedOutputPacket(
-    enzo::nt::NodeId nodeId,
+std::shared_ptr<const helix::NodePacket> nt::NetworkManager::getPublishedOutputPacket(
+    helix::nt::NodeId nodeId,
     unsigned int outputIndex
 )
 {
@@ -875,4 +875,4 @@ void nt::NetworkManager::_reset()
     resetTime_();
 }
 
-} // namespace enzo
+} // namespace helix

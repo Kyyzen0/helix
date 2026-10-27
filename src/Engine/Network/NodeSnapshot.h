@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace enzo::nt {
+namespace helix::nt {
 class Node;
 
 /**
@@ -70,4 +70,4 @@ class NodeSnapshot
     Vector2 position_ = {0.f, 0.f};
     std::vector<ParameterSerializable> parameters_;
 };
-} // namespace enzo::nt
+} // namespace helix::nt

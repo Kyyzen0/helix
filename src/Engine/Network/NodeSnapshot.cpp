@@ -3,7 +3,7 @@
 #include "Engine/Network/Node.h"
 #include "Engine/Network/NodeTypeTable.h"
 
-namespace enzo {
+namespace helix {
 
 nt::NodeSnapshot nt::NodeSnapshot::capture(nt::Node& node)
 {
@@ -26,4 +26,4 @@ void nt::NodeSnapshot::restore(nt::NodeId nodeId) const
     applySerializable(nm().getNode(nodeId), parameters_);
 }
 
-} // namespace enzo
+} // namespace helix

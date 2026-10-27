@@ -1,7 +1,7 @@
 version: 1
 
 name: geometryImport
-namespace: enzo
+namespace: helix
 label: Geometry Import
 tags: [import, file, primitive]
 
@@ -9,7 +9,7 @@ outputs: 1
 
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
   constructor: geometryImport
 
 icon: icon.svg

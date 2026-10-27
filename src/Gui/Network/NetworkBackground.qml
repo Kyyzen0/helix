@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // The dotted grid behind the network. The shader draws the pan and zoom, the
 // item itself is never transformed.

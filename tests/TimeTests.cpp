@@ -12,21 +12,21 @@ struct NMReset
 {
     NMReset()
     {
-        enzo::nt::nm()._reset();
+        helix::nt::nm()._reset();
         // The keyframes of one test must not reach the next, since the node
         // ids are handed out again from the start.
-        enzo::sim::KeyframeStore::instance().clear();
+        helix::sim::KeyframeStore::instance().clear();
     }
     ~NMReset()
     {
-        enzo::sim::KeyframeStore::instance().clear();
-        enzo::nt::nm()._reset();
+        helix::sim::KeyframeStore::instance().clear();
+        helix::nt::nm()._reset();
     }
 };
 
 TEST_CASE_METHOD(NMReset, "the scene opens on frame one of a twenty four frames per second range")
 {
-    auto& nm = enzo::nt::nm();
+    auto& nm = helix::nt::nm();
 
     REQUIRE(nm.getFrame() == 1);
     REQUIRE(nm.getStartFrame() == 1);
@@ -36,7 +36,7 @@ TEST_CASE_METHOD(NMReset, "the scene opens on frame one of a twenty four frames 
 
 TEST_CASE_METHOD(NMReset, "the frame holds whatever it is set to inside the range")
 {
-    auto& nm = enzo::nt::nm();
+    auto& nm = helix::nt::nm();
 
     nm.setFrame(72);
     REQUIRE(nm.getFrame() == 72);
@@ -48,7 +48,7 @@ TEST_CASE_METHOD(NMReset, "the frame holds whatever it is set to inside the rang
 
 TEST_CASE_METHOD(NMReset, "a frame outside the range clamps to the nearest end of it")
 {
-    auto& nm = enzo::nt::nm();
+    auto& nm = helix::nt::nm();
 
     nm.setFrame(-10);
     REQUIRE(nm.getFrame() == 1);
@@ -59,7 +59,7 @@ TEST_CASE_METHOD(NMReset, "a frame outside the range clamps to the nearest end o
 
 TEST_CASE_METHOD(NMReset, "a start frame past the end carries the end along with it")
 {
-    auto& nm = enzo::nt::nm();
+    auto& nm = helix::nt::nm();
 
     nm.setStartFrame(300);
 
@@ -69,7 +69,7 @@ TEST_CASE_METHOD(NMReset, "a start frame past the end carries the end along with
 
 TEST_CASE_METHOD(NMReset, "an end frame before the start carries the start along with it")
 {
-    auto& nm = enzo::nt::nm();
+    auto& nm = helix::nt::nm();
 
     nm.setStartFrame(100);
     nm.setEndFrame(50);
@@ -80,7 +80,7 @@ TEST_CASE_METHOD(NMReset, "an end frame before the start carries the start along
 
 TEST_CASE_METHOD(NMReset, "narrowing the range pulls the frame back inside it")
 {
-    auto& nm = enzo::nt::nm();
+    auto& nm = helix::nt::nm();
 
     nm.setFrame(200);
     nm.setEndFrame(100);
@@ -95,7 +95,7 @@ TEST_CASE_METHOD(NMReset, "narrowing the range pulls the frame back inside it")
 
 TEST_CASE_METHOD(NMReset, "the time in seconds counts from the start of frame one")
 {
-    auto& nm = enzo::nt::nm();
+    auto& nm = helix::nt::nm();
 
     REQUIRE(nm.getTime() == 0);
 
@@ -108,7 +108,7 @@ TEST_CASE_METHOD(NMReset, "the time in seconds counts from the start of frame on
 
 TEST_CASE_METHOD(NMReset, "a playback rate of zero or less is refused")
 {
-    auto& nm = enzo::nt::nm();
+    auto& nm = helix::nt::nm();
 
     nm.setFps(0);
     REQUIRE(nm.getFps() == 24);
@@ -119,11 +119,11 @@ TEST_CASE_METHOD(NMReset, "a playback rate of zero or less is refused")
 
 TEST_CASE_METHOD(NMReset, "the frame signal reports every move and nothing else")
 {
-    auto& nm = enzo::nt::nm();
+    auto& nm = helix::nt::nm();
 
     unsigned int moveCount = 0;
-    enzo::floatT lastFrame = 0;
-    auto connection = nm.frameChanged.connect([&](enzo::floatT frame) {
+    helix::floatT lastFrame = 0;
+    auto connection = nm.frameChanged.connect([&](helix::floatT frame) {
         ++moveCount;
         lastFrame = frame;
     });
@@ -145,7 +145,7 @@ TEST_CASE_METHOD(NMReset, "the frame signal reports every move and nothing else"
 
 TEST_CASE_METHOD(NMReset, "clearing the scene puts the time back to its defaults")
 {
-    auto& nm = enzo::nt::nm();
+    auto& nm = helix::nt::nm();
 
     nm.setStartFrame(10);
     nm.setEndFrame(50);
@@ -162,11 +162,11 @@ TEST_CASE_METHOD(NMReset, "clearing the scene puts the time back to its defaults
 
 TEST_CASE_METHOD(NMReset, "a cook reads the frame the scene sits on")
 {
-    enzo::nt::NodeLoader::loadNodes();
-    auto& nm = enzo::nt::nm();
+    helix::nt::NodeLoader::loadNodes();
+    auto& nm = helix::nt::nm();
 
-    enzo::nt::NodeId nodeId = nm.createNode("enzo::grid");
-    enzo::nt::CookContext context(nodeId, nm);
+    helix::nt::NodeId nodeId = nm.createNode("helix::grid");
+    helix::nt::CookContext context(nodeId, nm);
 
     nm.setFrame(49);
 
@@ -176,10 +176,10 @@ TEST_CASE_METHOD(NMReset, "a cook reads the frame the scene sits on")
 
 TEST_CASE_METHOD(NMReset, "moving the frame dirties a parameter whose expression reads it")
 {
-    enzo::nt::NodeLoader::loadNodes();
-    auto& nm = enzo::nt::nm();
+    helix::nt::NodeLoader::loadNodes();
+    auto& nm = helix::nt::nm();
 
-    enzo::nt::NodeId nodeId = nm.createNode("enzo::transform");
+    helix::nt::NodeId nodeId = nm.createNode("helix::transform");
     auto translate = nm.getNode(nodeId).getParameter("translate").lock();
     translate->setExpression("frame()");
 
@@ -195,10 +195,10 @@ TEST_CASE_METHOD(NMReset, "moving the frame dirties a parameter whose expression
 
 TEST_CASE_METHOD(NMReset, "moving the frame leaves a node that never read it alone")
 {
-    enzo::nt::NodeLoader::loadNodes();
-    auto& nm = enzo::nt::nm();
+    helix::nt::NodeLoader::loadNodes();
+    auto& nm = helix::nt::nm();
 
-    enzo::nt::NodeId nodeId = nm.createNode("enzo::grid");
+    helix::nt::NodeId nodeId = nm.createNode("helix::grid");
     nm.cook(nodeId);
     REQUIRE_FALSE(nm.getNode(nodeId).isDirty());
 
@@ -208,13 +208,13 @@ TEST_CASE_METHOD(NMReset, "moving the frame leaves a node that never read it alo
 
 TEST_CASE_METHOD(NMReset, "moving the frame dirties a node whose cook read it")
 {
-    enzo::nt::NodeLoader::loadNodes();
-    auto& nm = enzo::nt::nm();
+    helix::nt::NodeLoader::loadNodes();
+    auto& nm = helix::nt::nm();
 
-    enzo::nt::NodeId nodeId = nm.createNode("enzo::grid");
+    helix::nt::NodeId nodeId = nm.createNode("helix::grid");
     nm.cook(nodeId);
 
-    enzo::nt::CookContext context(nodeId, nm);
+    helix::nt::CookContext context(nodeId, nm);
     context.getFrame();
 
     nm.setFrame(20);
@@ -223,11 +223,11 @@ TEST_CASE_METHOD(NMReset, "moving the frame dirties a node whose cook read it")
 
 TEST_CASE_METHOD(NMReset, "a cook that no longer reads the frame stops being time dependent")
 {
-    enzo::nt::NodeLoader::loadNodes();
-    auto& nm = enzo::nt::nm();
+    helix::nt::NodeLoader::loadNodes();
+    auto& nm = helix::nt::nm();
 
-    enzo::nt::NodeId nodeId = nm.createNode("enzo::grid");
-    enzo::nt::CookContext context(nodeId, nm);
+    helix::nt::NodeId nodeId = nm.createNode("helix::grid");
+    helix::nt::CookContext context(nodeId, nm);
     context.getFrame();
 
     // Clears the read, since the grid's own cook reads no time
@@ -238,13 +238,13 @@ TEST_CASE_METHOD(NMReset, "a cook that no longer reads the frame stops being tim
 
 TEST_CASE_METHOD(NMReset, "a keyframed parameter takes the value its track holds at the frame")
 {
-    enzo::nt::NodeLoader::loadNodes();
-    auto& nm = enzo::nt::nm();
+    helix::nt::NodeLoader::loadNodes();
+    auto& nm = helix::nt::nm();
 
-    enzo::nt::NodeId nodeId = nm.createNode("enzo::transform");
+    helix::nt::NodeId nodeId = nm.createNode("helix::transform");
     auto translate = nm.getNode(nodeId).getParameter("translate").lock();
 
-    auto& store = enzo::sim::KeyframeStore::instance();
+    auto& store = helix::sim::KeyframeStore::instance();
     store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
     store.setKeyframe({nodeId, "translate", 0}, 11.f, 10.f);
 
@@ -257,17 +257,17 @@ TEST_CASE_METHOD(NMReset, "a keyframed parameter takes the value its track holds
 
 TEST_CASE_METHOD(NMReset, "a keyframed parameter is marked as reading the time")
 {
-    enzo::nt::NodeLoader::loadNodes();
-    auto& nm = enzo::nt::nm();
+    helix::nt::NodeLoader::loadNodes();
+    auto& nm = helix::nt::nm();
 
-    enzo::nt::NodeId nodeId = nm.createNode("enzo::transform");
+    helix::nt::NodeId nodeId = nm.createNode("helix::transform");
 
-    auto& store = enzo::sim::KeyframeStore::instance();
+    auto& store = helix::sim::KeyframeStore::instance();
     store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
 
-    const enzo::nt::Unit expected{nodeId, "translate", 0};
+    const helix::nt::Unit expected{nodeId, "translate", 0};
     bool found = false;
-    for (const enzo::nt::Unit& unit : nm.graph().getTimeDependents())
+    for (const helix::nt::Unit& unit : nm.graph().getTimeDependents())
         if (unit == expected) found = true;
 
     REQUIRE(found);
@@ -275,13 +275,13 @@ TEST_CASE_METHOD(NMReset, "a keyframed parameter is marked as reading the time")
 
 TEST_CASE_METHOD(NMReset, "a node holding a keyframed parameter cooks again when the frame moves")
 {
-    enzo::nt::NodeLoader::loadNodes();
-    auto& nm = enzo::nt::nm();
+    helix::nt::NodeLoader::loadNodes();
+    auto& nm = helix::nt::nm();
 
-    enzo::nt::NodeId nodeId = nm.createNode("enzo::transform");
+    helix::nt::NodeId nodeId = nm.createNode("helix::transform");
     auto translate = nm.getNode(nodeId).getParameter("translate").lock();
 
-    auto& store = enzo::sim::KeyframeStore::instance();
+    auto& store = helix::sim::KeyframeStore::instance();
     store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
     store.setKeyframe({nodeId, "translate", 0}, 11.f, 10.f);
 
@@ -297,12 +297,12 @@ TEST_CASE_METHOD(NMReset, "a node holding a keyframed parameter cooks again when
 
 TEST_CASE_METHOD(NMReset, "taking the keyframes away stops the node following the frame")
 {
-    enzo::nt::NodeLoader::loadNodes();
-    auto& nm = enzo::nt::nm();
+    helix::nt::NodeLoader::loadNodes();
+    auto& nm = helix::nt::nm();
 
-    enzo::nt::NodeId nodeId = nm.createNode("enzo::transform");
+    helix::nt::NodeId nodeId = nm.createNode("helix::transform");
 
-    auto& store = enzo::sim::KeyframeStore::instance();
+    auto& store = helix::sim::KeyframeStore::instance();
     store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
     store.clearTrack({nodeId, "translate", 0});
 

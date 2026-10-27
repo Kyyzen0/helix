@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
-import Enzo
+import Helix
 import "Spreadsheet"
 import "Network"
 import "Viewport"

@@ -1,7 +1,7 @@
 #pragma once
 #include <filesystem>
 
-namespace enzo {
+namespace helix {
 
 /// @brief Returns the directory holding bin, lib, nodes and share.
 std::filesystem::path getInstallRoot();
@@ -12,4 +12,4 @@ std::filesystem::path getInstallRoot();
 /// directory rather than an install.
 std::filesystem::path getStaticDir();
 
-} // namespace enzo
+} // namespace helix

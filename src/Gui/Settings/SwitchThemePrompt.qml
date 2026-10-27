@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
-import Enzo
+import Helix
 import "../Components"
 
 // The question asked when another theme is chosen while the current one holds

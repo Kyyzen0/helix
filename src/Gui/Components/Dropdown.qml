@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // Picker unrolling a list of choices below or above its trigger. The trigger
 // names the current choice, or shows an icon where the list holds one off actions.

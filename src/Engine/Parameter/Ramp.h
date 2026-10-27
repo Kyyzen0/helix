@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace enzo::prm {
+namespace helix::prm {
 
 class Parameter;
 
@@ -76,4 +76,4 @@ class Ramp
     floatT tablePositionSpan_ = 0;
 };
 
-} // namespace enzo::prm
+} // namespace helix::prm

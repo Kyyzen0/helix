@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace enzo::utils {
+namespace helix::utils {
 
 namespace {
 
@@ -97,4 +97,4 @@ void readObjInto(std::istream& file, geo::Mesh& mesh)
     }
 }
 
-} // namespace enzo::utils
+} // namespace helix::utils

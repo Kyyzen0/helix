@@ -11,7 +11,7 @@
 
 namespace {
 
-class Script : public enzo::nt::NodeImpl
+class Script : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -21,7 +21,7 @@ class Script : public enzo::nt::NodeImpl
 
 void Script::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -66,4 +66,4 @@ void Script::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(script, Script)
+HELIX_REGISTER_NODE(script, Script)

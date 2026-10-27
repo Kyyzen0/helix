@@ -11,21 +11,21 @@ namespace {
 
 /// @brief Moves the given points of a mesh, leaving the rest of the mesh where it is.
 void transformPoints(
-    enzo::geo::PrimPtr prim,
-    const std::vector<enzo::Offset>& pointOffsets,
-    const enzo::Transform& transform
+    helix::geo::PrimPtr prim,
+    const std::vector<helix::Offset>& pointOffsets,
+    const helix::Transform& transform
 )
 {
-    auto mesh = std::dynamic_pointer_cast<enzo::geo::Mesh>(prim);
+    auto mesh = std::dynamic_pointer_cast<helix::geo::Mesh>(prim);
     if (!mesh) return;
 
-    for (const enzo::Offset pointOffset : pointOffsets)
+    for (const helix::Offset pointOffset : pointOffsets)
     {
         mesh->setPointPos(pointOffset, transform * mesh->getPointPos(pointOffset));
     }
 }
 
-class Transform : public enzo::nt::NodeImpl
+class Transform : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -35,7 +35,7 @@ class Transform : public enzo::nt::NodeImpl
 
 void Transform::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -47,8 +47,8 @@ void Transform::cook()
     const Vector3 scale = evalParmVector3("scale");
     const floatT uniformScale = evalParmFloat("uniform_scale");
 
-    const enzo::Transform transform =
-        enzo::Transform::fromComponents(translate, rotate, scale * uniformScale);
+    const helix::Transform transform =
+        helix::Transform::fromComponents(translate, rotate, scale * uniformScale);
 
     Selection selection(selectionString);
     for (geo::PrimPtr prim : selection.getPrims(packet))
@@ -67,4 +67,4 @@ void Transform::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(transform, Transform)
+HELIX_REGISTER_NODE(transform, Transform)

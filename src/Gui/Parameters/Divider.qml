@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 import "../Components"
 
 // A labelled section break between runs of parameters.

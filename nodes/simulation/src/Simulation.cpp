@@ -13,8 +13,8 @@
 
 namespace {
 
-using enzo::floatT;
-using enzo::intT;
+using helix::floatT;
+using helix::intT;
 
 /**
  * @brief A node that runs two procedural simulations over time.
@@ -28,7 +28,7 @@ using enzo::intT;
  * keyframes is read at each step of the simulation, so the system moves with
  * the animation rather than jumping when the frame changes.
  */
-class Simulation : public enzo::nt::NodeImpl
+class Simulation : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -40,68 +40,68 @@ class Simulation : public enzo::nt::NodeImpl
     floatT valueAt_(const char* parameter, unsigned int component, floatT frame) const;
 
     /// @brief The settings of the particle system at a frame.
-    enzo::sim::ParticleSettings particleSettingsAt_(floatT frame) const;
+    helix::sim::ParticleSettings particleSettingsAt_(floatT frame) const;
 
     /// @brief The settings of the spring sheet at a frame.
-    enzo::sim::SpringSettings springSettingsAt_(floatT frame) const;
+    helix::sim::SpringSettings springSettingsAt_(floatT frame) const;
 };
 
 floatT Simulation::valueAt_(const char* parameter, unsigned int component, floatT frame) const
 {
-    return enzo::sim::resolveParameter(getNodeId(), parameter, component, frame);
+    return helix::sim::resolveParameter(getNodeId(), parameter, component, frame);
 }
 
-enzo::sim::ParticleSettings Simulation::particleSettingsAt_(floatT frame) const
+helix::sim::ParticleSettings Simulation::particleSettingsAt_(floatT frame) const
 {
-    enzo::sim::ParticleSettings settings;
-    settings.count = static_cast<enzo::intT>(valueAt_("particle_count", 0, frame));
-    settings.origin = enzo::Vector3(
+    helix::sim::ParticleSettings settings;
+    settings.count = static_cast<helix::intT>(valueAt_("particle_count", 0, frame));
+    settings.origin = helix::Vector3(
         valueAt_("particle_origin", 0, frame),
         valueAt_("particle_origin", 1, frame),
         valueAt_("particle_origin", 2, frame)
     );
-    settings.extent = enzo::Vector3(
+    settings.extent = helix::Vector3(
         valueAt_("particle_extent", 0, frame),
         valueAt_("particle_extent", 1, frame),
         valueAt_("particle_extent", 2, frame)
     );
-    settings.gravity = enzo::Vector3(
+    settings.gravity = helix::Vector3(
         valueAt_("particle_gravity", 0, frame),
         valueAt_("particle_gravity", 1, frame),
         valueAt_("particle_gravity", 2, frame)
     );
     settings.drag = valueAt_("particle_drag", 0, frame);
     settings.swirl = valueAt_("particle_swirl", 0, frame);
-    settings.seed = static_cast<enzo::intT>(valueAt_("particle_seed", 0, frame));
+    settings.seed = static_cast<helix::intT>(valueAt_("particle_seed", 0, frame));
     return settings;
 }
 
-enzo::sim::SpringSettings Simulation::springSettingsAt_(floatT frame) const
+helix::sim::SpringSettings Simulation::springSettingsAt_(floatT frame) const
 {
-    enzo::sim::SpringSettings settings;
-    settings.columns = static_cast<enzo::intT>(valueAt_("spring_columns", 0, frame));
-    settings.rows = static_cast<enzo::intT>(valueAt_("spring_rows", 0, frame));
+    helix::sim::SpringSettings settings;
+    settings.columns = static_cast<helix::intT>(valueAt_("spring_columns", 0, frame));
+    settings.rows = static_cast<helix::intT>(valueAt_("spring_rows", 0, frame));
     settings.spacing = valueAt_("spring_spacing", 0, frame);
-    settings.origin = enzo::Vector3(
+    settings.origin = helix::Vector3(
         valueAt_("spring_origin", 0, frame),
         valueAt_("spring_origin", 1, frame),
         valueAt_("spring_origin", 2, frame)
     );
-    settings.gravity = enzo::Vector3(
+    settings.gravity = helix::Vector3(
         valueAt_("spring_gravity", 0, frame),
         valueAt_("spring_gravity", 1, frame),
         valueAt_("spring_gravity", 2, frame)
     );
     settings.stiffness = valueAt_("spring_stiffness", 0, frame);
     settings.damping = valueAt_("spring_damping", 0, frame);
-    settings.iterations = static_cast<enzo::intT>(valueAt_("spring_iterations", 0, frame));
-    settings.seed = static_cast<enzo::intT>(valueAt_("spring_seed", 0, frame));
+    settings.iterations = static_cast<helix::intT>(valueAt_("spring_iterations", 0, frame));
+    settings.seed = static_cast<helix::intT>(valueAt_("spring_seed", 0, frame));
     return settings;
 }
 
 void Simulation::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     // Reading the frame tells the engine the node depends on the time, so it
     // cooks again whenever the scene moves.
@@ -188,4 +188,4 @@ void Simulation::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(simulation, Simulation)
+HELIX_REGISTER_NODE(simulation, Simulation)

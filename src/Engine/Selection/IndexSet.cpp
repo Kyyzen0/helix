@@ -1,6 +1,6 @@
 #include "Engine/Selection/IndexSet.h"
 
-namespace enzo {
+namespace helix {
 
 ExplicitIndexSet::ExplicitIndexSet(std::set<Index> indices) : indices_(std::move(indices)) {}
 
@@ -8,4 +8,4 @@ bool ExplicitIndexSet::contains(Index index) const { return indices_.count(index
 
 bool WildcardIndexSet::contains(Index /*index*/) const { return true; }
 
-} // namespace enzo
+} // namespace helix

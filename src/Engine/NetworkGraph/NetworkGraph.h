@@ -7,7 +7,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace enzo::nt {
+namespace helix::nt {
 
 /**
  * @brief The single owner of the network's wiring and dependencies.
@@ -122,4 +122,4 @@ class NetworkGraph
     std::unordered_set<Unit> timeDependents_;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

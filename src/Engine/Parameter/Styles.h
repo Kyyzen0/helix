@@ -14,7 +14,7 @@
 #include <memory>
 #include <vector>
 
-namespace enzo::prm::style {
+namespace helix::prm::style {
 
 struct BoolSwitch
 {
@@ -104,4 +104,4 @@ struct Attribute
     String attributeTypes() const { return options[ATTRIBUTE_TYPES]->evalString(); }
 };
 
-} // namespace enzo::prm::style
+} // namespace helix::prm::style

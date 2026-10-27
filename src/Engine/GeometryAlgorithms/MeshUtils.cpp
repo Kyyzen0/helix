@@ -6,7 +6,7 @@
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
 
-namespace enzo::utils {
+namespace helix::utils {
 
 namespace {
 
@@ -308,4 +308,4 @@ std::span<const Vector3> FaceTangents::operator()(Offset faceOffset)
     return tangents_;
 }
 
-} // namespace enzo::utils
+} // namespace helix::utils

@@ -2,7 +2,7 @@
 #include "Engine/Primitives/Mesh.h"
 #include <catch2/catch_test_macros.hpp>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 geo::Mesh buildQuad()

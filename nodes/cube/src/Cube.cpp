@@ -9,7 +9,7 @@
 
 namespace {
 
-class Cube : public enzo::nt::NodeImpl
+class Cube : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -19,7 +19,7 @@ class Cube : public enzo::nt::NodeImpl
 
 void Cube::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -58,4 +58,4 @@ void Cube::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(cube, Cube)
+HELIX_REGISTER_NODE(cube, Cube)

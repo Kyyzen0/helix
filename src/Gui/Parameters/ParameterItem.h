@@ -10,20 +10,20 @@
 #include <boost/signals2/connection.hpp>
 #include <memory>
 
-namespace enzo::prm {
+namespace helix::prm {
 class NodeParameter;
 class Template;
-} // namespace enzo::prm
+} // namespace helix::prm
 
-namespace enzo::prm::style {
+namespace helix::prm::style {
 struct Attribute;
 }
 
-namespace enzo::nt {
+namespace helix::nt {
 class Node;
 }
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief One parameter exposed to QML, bound two ways to its engine parameter.
 class ParameterItem : public QObject
@@ -183,4 +183,4 @@ class ParameterItem : public QObject
     bool hidden_ = false;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

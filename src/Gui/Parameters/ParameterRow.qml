@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 import "../Style"
 import "../Components"
 

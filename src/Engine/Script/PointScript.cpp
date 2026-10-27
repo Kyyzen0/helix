@@ -8,11 +8,11 @@
 #include <cstring>
 #include <regex>
 
-namespace enzo::script {
+namespace helix::script {
 
 namespace {
-constexpr const char* runFunctionName = "enzoRunScript";
-constexpr const char* bindingPrefix = "enzoAttrib_";
+constexpr const char* runFunctionName = "helixRunScript";
+constexpr const char* bindingPrefix = "helixAttrib_";
 
 // The number of arguments before the bindings, which are the point's index and the point count.
 constexpr size_t pointArgumentCount = 2;
@@ -313,7 +313,7 @@ class BindingRewriter
 // index, the point count and a reference to each binding.
 String wrapScript(const String& code, const std::vector<AttributeBinding>& bindings)
 {
-    String arguments = "enzoCurPtArgument : int64; enzoPtCountArgument : int64";
+    String arguments = "helixCurPtArgument : int64; helixPtCountArgument : int64";
     for (const AttributeBinding& binding : bindings)
     {
         arguments += "; var " + String(bindingPrefix) + binding.name + " : " +
@@ -322,19 +322,19 @@ String wrapScript(const String& code, const std::vector<AttributeBinding>& bindi
 
     return "options gen2\n"
            "require math\n"
-           "require enzo_expression\n"
-           "require enzo_geometry\n"
+           "require helix_expression\n"
+           "require helix_geometry\n"
            "require " +
            String(daslang::vectorOperatorsModule) + "\n"
-           "var private enzoCurPt : int64\n"
-           "var private enzoPtCount : int64\n"
-           "def curPt() : int64 { return enzoCurPt; }\n"
-           "def ptCount() : int64 { return enzoPtCount; }\n"
+           "var private helixCurPt : int64\n"
+           "var private helixPtCount : int64\n"
+           "def curPt() : int64 { return helixCurPt; }\n"
+           "def ptCount() : int64 { return helixPtCount; }\n"
            "[export]\n"
            "def " +
            String(runFunctionName) + "(" + arguments + ") {\n"
-           "enzoCurPt = enzoCurPtArgument\n"
-           "enzoPtCount = enzoPtCountArgument\n" +
+           "helixCurPt = helixCurPtArgument\n"
+           "helixPtCount = helixPtCountArgument\n" +
            code + "\n}\n";
 }
 
@@ -533,4 +533,4 @@ bool PointScript::run(
     return true;
 }
 
-} // namespace enzo::script
+} // namespace helix::script

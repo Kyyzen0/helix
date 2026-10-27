@@ -10,7 +10,7 @@
 #include <QVariantMap>
 #include <vector>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief Draws every node link of the network into one scene graph geometry node.
 ///
@@ -184,4 +184,4 @@ class NodeLinkLayer : public QQuickItem
     QTimer fadeTimer_;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

@@ -26,7 +26,7 @@ template <typename T> FastNoise::SmartNode<> newGenerator()
 
 /// @brief Returns the generator the noise type and cellular mode name, or nothing
 /// when they name none.
-FastNoise::SmartNode<> getGenerator(const enzo::String& noiseType, const enzo::String& cellularMode)
+FastNoise::SmartNode<> getGenerator(const helix::String& noiseType, const helix::String& cellularMode)
 {
     if (noiseType == "simplex") return newGenerator<FastNoise::Simplex>();
     if (noiseType == "superSimplex") return newGenerator<FastNoise::SuperSimplex>();
@@ -77,14 +77,14 @@ float getFractalBound(const int octaves, const float gain)
 /// @brief Returns the noise value at every point of the mesh, in point order.
 std::vector<float> sampleNoise(
     const FastNoise::Generator& generator,
-    const enzo::geo::Mesh& mesh,
-    const enzo::floatT scale,
-    const enzo::floatT frequency,
-    const enzo::Vector3& offset,
+    const helix::geo::Mesh& mesh,
+    const helix::floatT scale,
+    const helix::floatT frequency,
+    const helix::Vector3& offset,
     const int seed
 )
 {
-    using namespace enzo;
+    using namespace helix;
 
     const std::span<const Vector3> positions = mesh.pointPosSpan();
     const size_t pointCount = positions.size();
@@ -117,7 +117,7 @@ std::vector<float> sampleNoise(
     return noise;
 }
 
-class AttributeNoise : public enzo::nt::NodeImpl
+class AttributeNoise : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -127,7 +127,7 @@ class AttributeNoise : public enzo::nt::NodeImpl
 
 void AttributeNoise::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -284,4 +284,4 @@ void AttributeNoise::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(attributeNoise, AttributeNoise)
+HELIX_REGISTER_NODE(attributeNoise, AttributeNoise)

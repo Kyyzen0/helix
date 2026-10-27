@@ -3,9 +3,9 @@
 #include <string_view>
 #include <utility>
 
-enzo::Path::Path() : path_("") {}
+helix::Path::Path() : path_("") {}
 
-enzo::Path::Path(const std::string& path)
+helix::Path::Path(const std::string& path)
 {
     // Trim surrounding whitespace before validating so checks like isRoot are not
     // thrown off by padding such as " / "
@@ -20,9 +20,9 @@ enzo::Path::Path(const std::string& path)
     path_ = std::move(stripped);
 }
 
-enzo::Path::Path(const char* path) : Path(std::string(path)) {}
+helix::Path::Path(const char* path) : Path(std::string(path)) {}
 
-std::string enzo::Path::strip(const std::string& str)
+std::string helix::Path::strip(const std::string& str)
 {
     size_t startWhitespace = str.find_first_not_of(" \t\n\r\f\v");
 
@@ -33,15 +33,15 @@ std::string enzo::Path::strip(const std::string& str)
     return str.substr(startWhitespace, endWhitespace - startWhitespace + 1);
 }
 
-bool enzo::Path::isEmpty() const { return path_.empty(); }
+bool helix::Path::isEmpty() const { return path_.empty(); }
 
-bool enzo::Path::isRoot() const { return path_ == "/"; }
+bool helix::Path::isRoot() const { return path_ == "/"; }
 
-bool enzo::Path::isAbsolute() const { return !isEmpty() && path_.front() == '/'; }
+bool helix::Path::isAbsolute() const { return !isEmpty() && path_.front() == '/'; }
 
-bool enzo::Path::isRelative() const { return !isEmpty() && path_.front() != '/'; }
+bool helix::Path::isRelative() const { return !isEmpty() && path_.front() != '/'; }
 
-bool enzo::Path::isValidName(const std::string& name)
+bool helix::Path::isValidName(const std::string& name)
 {
     if (name.empty()) return false;
 
@@ -54,12 +54,12 @@ bool enzo::Path::isValidName(const std::string& name)
     return true;
 }
 
-bool enzo::Path::isValidComponent(const std::string& component)
+bool helix::Path::isValidComponent(const std::string& component)
 {
     return component == ".." || isValidName(component);
 }
 
-bool enzo::Path::isValidFormatting(const std::string& pathString)
+bool helix::Path::isValidFormatting(const std::string& pathString)
 {
     if (pathString.empty()) return false;
 
@@ -89,9 +89,9 @@ bool enzo::Path::isValidFormatting(const std::string& pathString)
     return true;
 }
 
-bool enzo::Path::isValid() const { return isValidFormatting(path_); }
+bool helix::Path::isValid() const { return isValidFormatting(path_); }
 
-std::string enzo::Path::getName() const
+std::string helix::Path::getName() const
 {
     if (isEmpty() || isRoot()) return "";
 
@@ -102,7 +102,7 @@ std::string enzo::Path::getName() const
     return path_.substr(slashPos + 1);
 }
 
-enzo::Path enzo::Path::getParent() const
+helix::Path helix::Path::getParent() const
 {
     if (isEmpty() || isRoot()) return *this;
 
@@ -115,7 +115,7 @@ enzo::Path enzo::Path::getParent() const
     return Path(path_.substr(0, slashPos));
 }
 
-std::vector<std::string> enzo::Path::split() const
+std::vector<std::string> helix::Path::split() const
 {
     std::vector<std::string> components;
 
@@ -138,9 +138,9 @@ std::vector<std::string> enzo::Path::split() const
     return components;
 }
 
-std::vector<enzo::Path> enzo::Path::getPrefixes() const
+std::vector<helix::Path> helix::Path::getPrefixes() const
 {
-    std::vector<enzo::Path> prefixes;
+    std::vector<helix::Path> prefixes;
 
     if (isEmpty() || isRoot()) return prefixes;
 
@@ -158,9 +158,9 @@ std::vector<enzo::Path> enzo::Path::getPrefixes() const
     return prefixes;
 }
 
-const std::string& enzo::Path::getString() const { return path_; }
+const std::string& helix::Path::getString() const { return path_; }
 
-enzo::Path enzo::Path::append(const enzo::Path& path) const
+helix::Path helix::Path::append(const helix::Path& path) const
 {
     if (path.isEmpty()) return *this;
 
@@ -170,17 +170,17 @@ enzo::Path enzo::Path::append(const enzo::Path& path) const
     std::string appendedPath = path.isAbsolute() ? path.getString().substr(1) : path.getString();
 
     // The root already ends in the delimiter, so joining adds nothing
-    if (isRoot()) return enzo::Path("/" + appendedPath);
+    if (isRoot()) return helix::Path("/" + appendedPath);
 
-    return enzo::Path(path_ + "/" + appendedPath);
+    return helix::Path(path_ + "/" + appendedPath);
 }
 
-enzo::Path enzo::Path::increment(int increment) const
+helix::Path helix::Path::increment(int increment) const
 {
     if (isEmpty() || isRoot()) return *this;
 
     std::string name = getName();
-    enzo::Path parent = getParent();
+    helix::Path parent = getParent();
 
     // Find where the numerical suffix starts
     size_t digitStartPos = name.size();
@@ -193,24 +193,24 @@ enzo::Path enzo::Path::increment(int increment) const
     int number = suffix.empty() ? 0 : std::stoi(suffix);
     std::string incrementedName = base + std::to_string(number + increment);
 
-    return parent.append(enzo::Path(incrementedName));
+    return parent.append(helix::Path(incrementedName));
 }
 
-enzo::Path enzo::Path::makeRelative() const
+helix::Path helix::Path::makeRelative() const
 {
     if (isEmpty() || isRoot() || isRelative()) return *this;
 
-    return enzo::Path(getString().substr(1));
+    return helix::Path(getString().substr(1));
 }
 
-enzo::Path enzo::Path::makeAbsolute() const
+helix::Path helix::Path::makeAbsolute() const
 {
     if (isEmpty() || isRoot() || isAbsolute()) return *this;
 
-    return enzo::Path("/" + getString());
+    return helix::Path("/" + getString());
 }
 
-enzo::Path enzo::Path::makeRelativeTo(const enzo::Path& anchor) const
+helix::Path helix::Path::makeRelativeTo(const helix::Path& anchor) const
 {
     // Only paths that share the anchor as a prefix can be made relative to it
     if (!(isAbsolute() && anchor.isAbsolute() && hasPrefix(anchor))) return *this;
@@ -221,10 +221,10 @@ enzo::Path enzo::Path::makeRelativeTo(const enzo::Path& anchor) const
     std::string anchorStr = anchor.isRoot() ? "/" : anchor.getString() + "/";
     std::string relative = path_.substr(anchorStr.size());
 
-    return enzo::Path(relative);
+    return helix::Path(relative);
 }
 
-enzo::Path enzo::Path::makeAbsoluteFrom(const enzo::Path& anchor) const
+helix::Path helix::Path::makeAbsoluteFrom(const helix::Path& anchor) const
 {
     // An absolute path already names its location and only needs its steps collapsed
     Path joined = isAbsolute() ? *this : anchor.append(*this);
@@ -246,7 +246,7 @@ enzo::Path enzo::Path::makeAbsoluteFrom(const enzo::Path& anchor) const
     return absolutePath.empty() ? Path("/") : Path(absolutePath);
 }
 
-bool enzo::Path::hasPrefix(const Path& prefix) const
+bool helix::Path::hasPrefix(const Path& prefix) const
 {
     if (prefix.isEmpty()) return false;
 
@@ -257,13 +257,13 @@ bool enzo::Path::hasPrefix(const Path& prefix) const
     return path_.compare(0, prefix.getString().size() + 1, prefix.getString() + "/") == 0;
 }
 
-enzo::Path::operator std::string_view() const { return path_; }
+helix::Path::operator std::string_view() const { return path_; }
 
-bool enzo::Path::operator==(std::string_view other) const { return path_ == other; }
+bool helix::Path::operator==(std::string_view other) const { return path_ == other; }
 
-bool enzo::Path::operator!=(std::string_view other) const { return path_ != other; }
+bool helix::Path::operator!=(std::string_view other) const { return path_ != other; }
 
-std::ostream& enzo::operator<<(std::ostream& os, const enzo::Path& other)
+std::ostream& helix::operator<<(std::ostream& os, const helix::Path& other)
 {
     return os << other.getString();
 }

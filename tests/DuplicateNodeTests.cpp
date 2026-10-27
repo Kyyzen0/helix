@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -42,8 +42,8 @@ GridAndDuplicate addDuplicateAfterGrid()
     auto& nm = nt::nm();
 
     GridAndDuplicate nodes;
-    nodes.grid = nm.createNode("enzo::grid");
-    nodes.duplicate = nm.createNode("enzo::duplicate");
+    nodes.grid = nm.createNode("helix::grid");
+    nodes.duplicate = nm.createNode("helix::duplicate");
     nm.connectNodes(nodes.grid, 0, nodes.duplicate, 0);
 
     nm.getNode(nodes.grid).getParameter("rows").lock()->setInt(1);

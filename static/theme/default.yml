@@ -1,7 +1,7 @@
-# The theme Enzo ships with. It defines every token, so a user theme only carries
+# The theme Helix ships with. It defines every token, so a user theme only carries
 # the values it changes and falls back to the rest.
 
-name: Enzo
+name: Helix
 
 # The palette the settings theme page lists, section by section. A variable left
 # out here is derived from the ones above it and is only edited in the file.

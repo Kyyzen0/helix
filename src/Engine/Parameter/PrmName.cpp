@@ -1,6 +1,6 @@
 #include "Engine/Parameter/PrmName.h"
 
-namespace enzo {
+namespace helix {
 
 prm::Name::Name(String token, String label) : token_{token}, label_{label} {}
 
@@ -12,4 +12,4 @@ String prm::Name::getToken() const { return token_; }
 
 String prm::Name::getLabel() const { return label_; }
 
-} // namespace enzo
+} // namespace helix

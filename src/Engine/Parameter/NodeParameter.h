@@ -2,13 +2,13 @@
 #include "Engine/Core/Types.h"
 #include "Engine/Parameter/Parameter.h"
 
-namespace enzo::prm {
+namespace helix::prm {
 
 class NodeParameter : public Parameter
 {
   public:
-    NodeParameter(Template prmTemplate, enzo::nt::NodeId nodeId);
-    enzo::nt::NodeId getNodeId() const { return nodeId_; }
+    NodeParameter(Template prmTemplate, helix::nt::NodeId nodeId);
+    helix::nt::NodeId getNodeId() const { return nodeId_; }
 
   protected:
     /// @brief Builds the context an expression runs from, e.g. what node the
@@ -23,6 +23,6 @@ class NodeParameter : public Parameter
     ) const override;
 
   private:
-    enzo::nt::NodeId nodeId_;
+    helix::nt::NodeId nodeId_;
 };
-} // namespace enzo::prm
+} // namespace helix::prm

@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // Horizontal top bar menu.
 //

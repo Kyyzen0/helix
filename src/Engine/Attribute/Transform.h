@@ -5,11 +5,11 @@
 #include <numbers>
 #include <string_view>
 
-namespace enzo::attr {
+namespace helix::attr {
 class Attribute;
 }
 
-namespace enzo {
+namespace helix {
 
 /**
  * @brief The order a point passes through a translation, a rotation, and a scale.
@@ -34,7 +34,7 @@ enum class TransformOrder : uint8_t
 TransformOrder getTransformOrder(std::string_view name);
 
 /**
- * @class enzo::Transform
+ * @class helix::Transform
  * @brief An affine transform that composes translation, rotation, and scale.
  *
  * Builder methods mutate in place and return a reference so calls can be
@@ -146,4 +146,4 @@ class Transform
     Affine xform_;
 };
 
-} // namespace enzo
+} // namespace helix

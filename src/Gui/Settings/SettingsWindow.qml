@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Window
-import Enzo
+import Helix
 import "../Components"
 
 // The settings window, one page per section listed down the left.

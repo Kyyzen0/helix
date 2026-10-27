@@ -1,7 +1,7 @@
 version: 1
 
 name: transform
-namespace: enzo
+namespace: helix
 label: Transform
 tags: [transform, utility]
 
@@ -11,7 +11,7 @@ outputs: 1
 
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
   constructor: transform
 
 icon: icon.svg

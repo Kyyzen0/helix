@@ -4,7 +4,7 @@
 #include "Engine/Parameter/Template.h"
 #include "Gui/Parameters/ParameterItem.h"
 
-namespace enzo::ui {
+namespace helix::ui {
 
 ParametersViewModel::ParametersViewModel(QObject* parent) : QObject(parent)
 {
@@ -90,4 +90,4 @@ void ParametersViewModel::clear()
     nodeFamily_.clear();
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

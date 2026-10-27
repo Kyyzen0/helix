@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Templates
-import Enzo
+import Helix
 
 // The strip between two panes.
 //

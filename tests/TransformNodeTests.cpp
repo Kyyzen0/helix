@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -39,8 +39,8 @@ TEST_CASE_METHOD(NMReset, "Rotate is read in degrees")
     auto& nm = nt::nm();
 
     // A grid feeding a transform that turns a quarter circle about Y
-    const nt::NodeId grid = nm.createNode("enzo::grid");
-    const nt::NodeId transform = nm.createNode("enzo::transform");
+    const nt::NodeId grid = nm.createNode("helix::grid");
+    const nt::NodeId transform = nm.createNode("helix::transform");
     nm.connectNodes(grid, 0, transform, 0);
 
     nm.getNode(transform).getParameter("rotate").lock()->setFloat(90.f, 1);
@@ -60,8 +60,8 @@ TEST_CASE_METHOD(NMReset, "Scale multiplies each axis independently")
     nt::NodeLoader::loadNodes();
     auto& nm = nt::nm();
 
-    const nt::NodeId grid = nm.createNode("enzo::grid");
-    const nt::NodeId transform = nm.createNode("enzo::transform");
+    const nt::NodeId grid = nm.createNode("helix::grid");
+    const nt::NodeId transform = nm.createNode("helix::transform");
     nm.connectNodes(grid, 0, transform, 0);
 
     auto scale = nm.getNode(transform).getParameter("scale").lock();
@@ -83,8 +83,8 @@ TEST_CASE_METHOD(NMReset, "A point selection leaves the other points where they 
     nt::NodeLoader::loadNodes();
     auto& nm = nt::nm();
 
-    const nt::NodeId grid = nm.createNode("enzo::grid");
-    const nt::NodeId transform = nm.createNode("enzo::transform");
+    const nt::NodeId grid = nm.createNode("helix::grid");
+    const nt::NodeId transform = nm.createNode("helix::transform");
     nm.connectNodes(grid, 0, transform, 0);
 
     // Lift only the first point of the grid

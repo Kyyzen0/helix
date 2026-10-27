@@ -9,7 +9,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace enzo::async {
+namespace helix::async {
 
 /**
  * @class CookResult
@@ -73,4 +73,4 @@ class CookResult
     std::unordered_set<nt::NodeId> timeDependent_;
 };
 
-} // namespace enzo::async
+} // namespace helix::async

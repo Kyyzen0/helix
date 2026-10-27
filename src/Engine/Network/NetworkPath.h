@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 
-namespace enzo {
+namespace helix {
 /**
  * @brief A path that references a network entity, either a node or a parameter on a node.
  *
@@ -69,4 +69,4 @@ class NetworkPath : public Path
      */
     static size_t parameterDelimiter(std::string_view pathString);
 };
-} // namespace enzo
+} // namespace helix

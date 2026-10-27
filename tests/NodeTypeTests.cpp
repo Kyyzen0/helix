@@ -2,7 +2,7 @@
 #include "Engine/Network/NodeType.h"
 #include <catch2/catch_test_macros.hpp>
 
-using namespace enzo;
+using namespace helix;
 
 TEST_CASE("A node type with only single ports has no multi input port")
 {

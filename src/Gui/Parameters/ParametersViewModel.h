@@ -7,14 +7,14 @@
 #include <boost/signals2/connection.hpp>
 #include <optional>
 
-namespace enzo::nt {
+namespace helix::nt {
 class Node;
 }
-namespace enzo::prm {
+namespace helix::prm {
 class Template;
 }
 
-namespace enzo::ui {
+namespace helix::ui {
 
 class ParameterItem;
 
@@ -79,4 +79,4 @@ class ParametersViewModel : public QObject
     boost::signals2::scoped_connection parameterChangedSubscription_;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

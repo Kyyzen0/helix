@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -24,13 +24,13 @@ std::shared_ptr<const geo::Mesh> cookRat(const std::string& detail)
     nt::NodeLoader::loadNodes();
     auto& nm = nt::nm();
 
-    const nt::NodeId nodeId = nm.createNode("enzo::modelRat");
+    const nt::NodeId nodeId = nm.createNode("helix::modelRat");
     nt::Node& node = nm.getNode(nodeId);
     node.getParameter("detail").lock()->setString(detail);
 
     nm.cook(nodeId);
 
-    std::shared_ptr<const enzo::NodePacket> packet = node.getOutputPacket(0);
+    std::shared_ptr<const helix::NodePacket> packet = node.getOutputPacket(0);
     REQUIRE(packet->size() == 1);
     return std::dynamic_pointer_cast<const geo::Mesh>(packet->getPrimitive(0));
 }

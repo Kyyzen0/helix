@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/Core/Types.h"
-namespace enzo::prm {
+namespace helix::prm {
 enum class RangeFlag
 {
     UNLOCKED,
@@ -30,4 +30,4 @@ class Range
     RangeFlag minFlag_;
     RangeFlag maxFlag_;
 };
-} // namespace enzo::prm
+} // namespace helix::prm

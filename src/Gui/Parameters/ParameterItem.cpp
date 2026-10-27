@@ -12,7 +12,7 @@
 #include "Engine/UndoRedo/ChangeParameterCommand.h"
 #include <algorithm>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 
@@ -440,4 +440,4 @@ void ParameterItem::setMeta(bool enabled, bool hidden)
     Q_EMIT metaChanged();
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

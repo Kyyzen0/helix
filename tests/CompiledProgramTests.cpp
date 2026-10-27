@@ -1,7 +1,7 @@
 #include "Engine/Daslang/Runtime.h"
 #include <catch2/catch_test_macros.hpp>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 std::shared_ptr<daslang::CompiledProgram> compileScript(const String& source)

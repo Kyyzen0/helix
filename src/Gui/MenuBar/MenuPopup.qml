@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import Enzo
+import Helix
 import "../Components"
 
 // One level of menu entries floating beneath its title, including any nested

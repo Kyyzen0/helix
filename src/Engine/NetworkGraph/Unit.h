@@ -5,7 +5,7 @@
 #include <functional>
 #include <string>
 
-namespace enzo::nt {
+namespace helix::nt {
 
 /**
  * @brief A point in the network graph, either a node output or a parameter.
@@ -31,12 +31,12 @@ struct Unit
     bool operator==(const Unit& other) const = default;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt
 
 // Hashing lives in one place so a Unit can key an unordered container.
-template <> struct std::hash<enzo::nt::Unit>
+template <> struct std::hash<helix::nt::Unit>
 {
-    std::size_t operator()(const enzo::nt::Unit& unit) const noexcept
+    std::size_t operator()(const helix::nt::Unit& unit) const noexcept
     {
         std::size_t seed = 0;
         boost::hash_combine(seed, unit.nodeId);

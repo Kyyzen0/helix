@@ -16,8 +16,8 @@ namespace {
 // sealed arc's walls and caps anchor to.
 struct Ring
 {
-    std::vector<enzo::Offset> rim;
-    enzo::Offset axisPoint = 0;
+    std::vector<helix::Offset> rim;
+    helix::Offset axisPoint = 0;
 };
 
 // The shape of the cylinder, read once from the parameters.
@@ -39,7 +39,7 @@ struct CylinderSettings
 
 // Returns the rotation in degrees that stands the cylinder up along the named
 // axis. The rings are built along Y, so Y itself needs no rotation.
-enzo::Vector3 getAxisRotation(const std::string& axis)
+helix::Vector3 getAxisRotation(const std::string& axis)
 {
     if (axis == "x") return {0, 0, -90};
     if (axis == "z") return {90, 0, 0};
@@ -48,7 +48,7 @@ enzo::Vector3 getAxisRotation(const std::string& axis)
 
 // Adds one horizontal ring of points, at 0 for the bottom of the cylinder and
 // at 1 for the top.
-Ring addRing(enzo::geo::Mesh& mesh, const CylinderSettings& settings, float heightFraction)
+Ring addRing(helix::geo::Mesh& mesh, const CylinderSettings& settings, float heightFraction)
 {
     const float radius = std::lerp(settings.bottomRadius, settings.topRadius, heightFraction);
     const float ringY = (heightFraction - 0.5f) * settings.height;
@@ -57,7 +57,7 @@ Ring addRing(enzo::geo::Mesh& mesh, const CylinderSettings& settings, float heig
     // step short of the full turn.
     const int rimPointCount = settings.columns + settings.isArc;
 
-    std::vector<enzo::Vector3> positions;
+    std::vector<helix::Vector3> positions;
     positions.reserve(rimPointCount);
     for (int columnIndex = 0; columnIndex < rimPointCount; ++columnIndex)
     {
@@ -74,7 +74,7 @@ Ring addRing(enzo::geo::Mesh& mesh, const CylinderSettings& settings, float heig
 }
 
 // Adds the band of quads running around the side between two rings.
-void addSideFaces(enzo::geo::Mesh& mesh, const Ring& lower, const Ring& upper, int columns)
+void addSideFaces(helix::geo::Mesh& mesh, const Ring& lower, const Ring& upper, int columns)
 {
     const size_t rimPointCount = lower.rim.size();
     for (int columnIndex = 0; columnIndex < columns; ++columnIndex)
@@ -91,7 +91,7 @@ void addSideFaces(enzo::geo::Mesh& mesh, const Ring& lower, const Ring& upper, i
 
 // Adds the two flat walls running from the axis to the rim that seal the open
 // sides of a closed arc.
-void addArcWalls(enzo::geo::Mesh& mesh, const Ring& lower, const Ring& upper)
+void addArcWalls(helix::geo::Mesh& mesh, const Ring& lower, const Ring& upper)
 {
     mesh.addFace({lower.axisPoint, lower.rim.front(), upper.rim.front(), upper.axisPoint});
     mesh.addFace({lower.rim.back(), lower.axisPoint, upper.axisPoint, upper.rim.back()});
@@ -101,8 +101,8 @@ void addArcWalls(enzo::geo::Mesh& mesh, const Ring& lower, const Ring& upper)
 /// @return The offset of the cap face.
 /// @note An unwelded cap gets its own copy of the rim, leaving the edge between
 /// the cap and the side sharp.
-enzo::Offset addCap(
-    enzo::geo::Mesh& mesh,
+helix::Offset addCap(
+    helix::geo::Mesh& mesh,
     const CylinderSettings& settings,
     const Ring& rimRing,
     float heightFraction,
@@ -111,7 +111,7 @@ enzo::Offset addCap(
 {
     const Ring capRing = settings.weldCaps ? rimRing : addRing(mesh, settings, heightFraction);
 
-    std::vector<enzo::Offset> capPoints = capRing.rim;
+    std::vector<helix::Offset> capPoints = capRing.rim;
     if (settings.sealArc) capPoints.push_back(capRing.axisPoint);
 
     // The rims run the same way round at both ends, so the top has to be
@@ -121,7 +121,7 @@ enzo::Offset addCap(
     return mesh.addFace(capPoints);
 }
 
-class Cylinder : public enzo::nt::NodeImpl
+class Cylinder : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -161,7 +161,7 @@ CylinderSettings Cylinder::readSettings() const
 
 void Cylinder::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -215,4 +215,4 @@ void Cylinder::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(cylinder, Cylinder)
+HELIX_REGISTER_NODE(cylinder, Cylinder)

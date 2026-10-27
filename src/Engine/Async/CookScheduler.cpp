@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace enzo::async {
+namespace helix::async {
 
 namespace {
 
@@ -237,4 +237,4 @@ bool CookScheduler::olderCookRunning_(std::uint64_t serial) const
     return false;
 }
 
-} // namespace enzo::async
+} // namespace helix::async

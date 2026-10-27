@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-namespace enzo::nt {
+namespace helix::nt {
 
 /// @brief Bundles several commands into a single atomic undo unit.
 class UndoGroup : public UndoCommand
@@ -43,4 +43,4 @@ class UndoGroup : public UndoCommand
     std::vector<std::unique_ptr<UndoCommand>> commands_;
 };
 
-} // namespace enzo::nt
+} // namespace helix::nt

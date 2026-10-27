@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace enzo {
+namespace helix {
 
 namespace {
 // The fixed instance template every ramp carries. Each control point holds a
@@ -118,7 +118,7 @@ prm::Direction prm::Template::getDirection() const { return direction_; }
 
 const std::vector<prm::Template>& prm::Template::getChildren() const { return children_; }
 
-const prm::Template& prm::Template::getChild(const enzo::String& token) const
+const prm::Template& prm::Template::getChild(const helix::String& token) const
 {
     for (const Template& child : children_)
         if (child.getToken() == token) return child;
@@ -246,4 +246,4 @@ const bool prm::Template::isContainer() const { return containerTypes_.contains(
 
 bool prm::Template::isMultiParm() const { return multiParmTypes_.contains(getType()); }
 
-} // namespace enzo
+} // namespace helix

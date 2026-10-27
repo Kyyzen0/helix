@@ -12,7 +12,7 @@
 #include <optional>
 #include <vector>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief View-model backing the network editor.
 ///
@@ -195,4 +195,4 @@ class NetworkViewModel : public QObject
     int selectedCount_ = 0;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

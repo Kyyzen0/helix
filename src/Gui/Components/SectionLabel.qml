@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // A small uppercase label naming a group of things.
 //

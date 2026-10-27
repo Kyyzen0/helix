@@ -3,10 +3,10 @@
 #include <cstdint>
 #include <vector>
 
-namespace enzo::util {
+namespace helix::util {
 
 /**
- * @class enzo::util::UnionFind
+ * @class helix::util::UnionFind
  * @brief Disjoint-set data structure for tracking connected components.
  *
  * Operates on dense integer IDs from zero to elementCount minus one. Each
@@ -46,4 +46,4 @@ class UnionFind
     std::size_t componentCount_;
 };
 
-} // namespace enzo::util
+} // namespace helix::util

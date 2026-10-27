@@ -7,7 +7,7 @@
 
 #include <exception>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 
@@ -67,4 +67,4 @@ QQmlPropertyMap* Theme::getThemePropertyMap(const QString& group)
     return createdMap;
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

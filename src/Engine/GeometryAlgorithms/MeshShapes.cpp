@@ -1,7 +1,7 @@
 #include "Engine/GeometryAlgorithms/MeshShapes.h"
 #include "Engine/Primitives/Mesh.h"
 
-namespace enzo::utils {
+namespace helix::utils {
 
 std::shared_ptr<geo::Mesh> buildCube(const Vector3& size, const Vector3& center)
 {
@@ -40,4 +40,4 @@ std::shared_ptr<geo::Mesh> buildCube(const Vector3& size, const Vector3& center)
     return mesh;
 }
 
-} // namespace enzo::utils
+} // namespace helix::utils

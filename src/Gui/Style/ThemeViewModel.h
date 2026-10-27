@@ -5,7 +5,7 @@
 #include <QStringList>
 #include <QVariant>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief View-model backing the theme page of the settings window.
 ///
@@ -105,4 +105,4 @@ class ThemeViewModel : public QObject
     QHash<QString, QVariant> pending_;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

@@ -3,7 +3,7 @@
 #include <QQmlPropertyMap>
 #include <qqmlregistration.h>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief The YAML theme, exposed to QML as the `Theme` singleton.
 class Theme : public QQmlPropertyMap
@@ -30,4 +30,4 @@ class Theme : public QQmlPropertyMap
     QQmlPropertyMap* getThemePropertyMap(const QString& group);
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

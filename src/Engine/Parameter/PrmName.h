@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/Core/Types.h"
-namespace enzo::prm {
+namespace helix::prm {
 class Name
 {
   public:
@@ -17,4 +17,4 @@ class Name
     String label_;
 };
 
-} // namespace enzo::prm
+} // namespace helix::prm

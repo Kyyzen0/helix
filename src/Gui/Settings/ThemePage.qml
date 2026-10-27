@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 import "../Components"
 
 // The page that picks the theme and edits its palette.

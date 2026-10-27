@@ -3,10 +3,10 @@
 
 struct TimelineSerializable
 {
-    enzo::intT startFrame = 1;
-    enzo::intT endFrame = 240;
-    enzo::floatT fps = 24;
-    enzo::floatT frame = 1;
+    helix::intT startFrame = 1;
+    helix::intT endFrame = 240;
+    helix::floatT fps = 24;
+    helix::floatT frame = 1;
 
     template <class Archive> void serialize(Archive& ar)
     {

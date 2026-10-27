@@ -6,7 +6,7 @@
 #include <cmath>
 #include <stdexcept>
 
-using namespace enzo;
+using namespace helix;
 
 TEST_CASE("Delete faces")
 {

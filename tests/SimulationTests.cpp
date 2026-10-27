@@ -15,7 +15,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 
@@ -139,7 +139,7 @@ TEST_CASE_METHOD(SimulationReset, "The store keeps the keyframes of a parameter"
 TEST_CASE_METHOD(SimulationReset, "A keyframed parameter takes the value its track holds")
 {
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::transform");
+    const nt::NodeId nodeId = addNode("helix::transform");
     auto translate = nm.getNode(nodeId).getParameter("translate").lock();
 
     auto& store = sim::KeyframeStore::instance();
@@ -162,7 +162,7 @@ TEST_CASE_METHOD(SimulationReset, "A keyframed parameter takes the value its tra
 TEST_CASE_METHOD(SimulationReset, "The components of a parameter animate on their own")
 {
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::transform");
+    const nt::NodeId nodeId = addNode("helix::transform");
     auto translate = nm.getNode(nodeId).getParameter("translate").lock();
 
     auto& store = sim::KeyframeStore::instance();
@@ -183,7 +183,7 @@ TEST_CASE_METHOD(SimulationReset, "The components of a parameter animate on thei
 TEST_CASE_METHOD(SimulationReset, "Taking the keys off one component leaves the others alone")
 {
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::transform");
+    const nt::NodeId nodeId = addNode("helix::transform");
 
     auto& store = sim::KeyframeStore::instance();
     store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
@@ -199,7 +199,7 @@ TEST_CASE_METHOD(SimulationReset, "Taking the keys off one component leaves the 
 TEST_CASE_METHOD(SimulationReset, "A keyframed parameter is marked as reading the time")
 {
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::transform");
+    const nt::NodeId nodeId = addNode("helix::transform");
 
     auto& store = sim::KeyframeStore::instance();
     store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
@@ -210,7 +210,7 @@ TEST_CASE_METHOD(SimulationReset, "A keyframed parameter is marked as reading th
 TEST_CASE_METHOD(SimulationReset, "Taking the keyframes away stops the value reading the time")
 {
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::transform");
+    const nt::NodeId nodeId = addNode("helix::transform");
 
     auto& store = sim::KeyframeStore::instance();
     store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
@@ -225,7 +225,7 @@ TEST_CASE_METHOD(SimulationReset, "Taking the keyframes away stops the value rea
 TEST_CASE_METHOD(SimulationReset, "Taking the keyframes away puts the old value back")
 {
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::transform");
+    const nt::NodeId nodeId = addNode("helix::transform");
     auto translate = nm.getNode(nodeId).getParameter("translate").lock();
     translate->setFloat(3.f);
 
@@ -241,7 +241,7 @@ TEST_CASE_METHOD(SimulationReset, "Taking the keyframes away puts the old value 
 TEST_CASE_METHOD(SimulationReset, "A parameter that holds keyframes gives the same value every time")
 {
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::transform");
+    const nt::NodeId nodeId = addNode("helix::transform");
 
     auto& store = sim::KeyframeStore::instance();
     store.setKeyframe({nodeId, "translate", 0}, 1.f, 0.f);
@@ -470,7 +470,7 @@ TEST_CASE_METHOD(SimulationReset, "The spring sheet run twice gives the same ans
 TEST_CASE_METHOD(SimulationReset, "The simulation node makes as many particles as it says")
 {
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::simulation");
+    const nt::NodeId nodeId = addNode("helix::simulation");
 
     nm.getNode(nodeId).getParameter("particle_count").lock()->setInt(12);
     nm.cook(nodeId);
@@ -482,7 +482,7 @@ TEST_CASE_METHOD(SimulationReset, "The simulation node makes as many particles a
 TEST_CASE_METHOD(SimulationReset, "The simulation node makes a spring sheet of the size it says")
 {
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::simulation");
+    const nt::NodeId nodeId = addNode("helix::simulation");
 
     nm.getNode(nodeId).getParameter("spring_columns").lock()->setInt(5);
     nm.getNode(nodeId).getParameter("spring_rows").lock()->setInt(3);
@@ -495,7 +495,7 @@ TEST_CASE_METHOD(SimulationReset, "The simulation node makes a spring sheet of t
 TEST_CASE_METHOD(SimulationReset, "The simulation node cooks again when the frame moves")
 {
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::simulation");
+    const nt::NodeId nodeId = addNode("helix::simulation");
 
     nm.getNode(nodeId).getParameter("particle_count").lock()->setInt(4);
     nm.setFrame(1);
@@ -510,7 +510,7 @@ TEST_CASE_METHOD(SimulationReset, "The simulation node cooks again when the fram
 TEST_CASE_METHOD(SimulationReset, "Keyframing a setting of the simulation node moves the simulation")
 {
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::simulation");
+    const nt::NodeId nodeId = addNode("helix::simulation");
 
     nm.getNode(nodeId).getParameter("particle_count").lock()->setInt(1);
     nm.getNode(nodeId).getParameter("particle_gravity").lock()->setFloat(0.f, 1);
@@ -537,7 +537,7 @@ TEST_CASE_METHOD(SimulationReset, "Keyframing a setting of the simulation node m
 TEST_CASE_METHOD(SimulationReset, "The simulation node gives the same points twice")
 {
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::simulation");
+    const nt::NodeId nodeId = addNode("helix::simulation");
 
     nm.getNode(nodeId).getParameter("particle_count").lock()->setInt(6);
     nm.setFrame(15);
@@ -559,7 +559,7 @@ TEST_CASE_METHOD(SimulationReset, "The simulation node gives the same points twi
 TEST_CASE_METHOD(SimulationReset, "The scene and its keyframes travel together through a save")
 {
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::transform");
+    const nt::NodeId nodeId = addNode("helix::transform");
     nm.getNode(nodeId).setPath("/keyframed_transform");
 
     auto& store = sim::KeyframeStore::instance();
@@ -570,7 +570,7 @@ TEST_CASE_METHOD(SimulationReset, "The scene and its keyframes travel together t
     nm.setEndFrame(60);
     nm.setFps(30);
 
-    const std::string path = "/tmp/enzo_simulation_keyframes_roundtrip.json";
+    const std::string path = "/tmp/helix_simulation_keyframes_roundtrip.json";
     nt::Serializer serializer;
     serializer.save(nm, path);
 
@@ -596,11 +596,11 @@ TEST_CASE_METHOD(SimulationReset, "The scene and its keyframes travel together t
 
 TEST_CASE_METHOD(SimulationReset, "The focused particles node makes as many particles as it says")
 {
-    if (!nt::NodeTypeTable::getNodeType("enzo::particles"))
+    if (!nt::NodeTypeTable::getNodeType("helix::particles"))
         SKIP("the focused simulation nodes need the node loader to find nested node folders");
 
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::particles");
+    const nt::NodeId nodeId = addNode("helix::particles");
 
     nm.getNode(nodeId).getParameter("count").lock()->setInt(9);
     nm.cook(nodeId);
@@ -611,11 +611,11 @@ TEST_CASE_METHOD(SimulationReset, "The focused particles node makes as many part
 
 TEST_CASE_METHOD(SimulationReset, "The focused springs node makes a sheet of the size it says")
 {
-    if (!nt::NodeTypeTable::getNodeType("enzo::springs"))
+    if (!nt::NodeTypeTable::getNodeType("helix::springs"))
         SKIP("the focused simulation nodes need the node loader to find nested node folders");
 
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::springs");
+    const nt::NodeId nodeId = addNode("helix::springs");
 
     nm.getNode(nodeId).getParameter("columns").lock()->setInt(6);
     nm.getNode(nodeId).getParameter("rows").lock()->setInt(4);
@@ -627,11 +627,11 @@ TEST_CASE_METHOD(SimulationReset, "The focused springs node makes a sheet of the
 
 TEST_CASE_METHOD(SimulationReset, "The focused particles node cooks again when the frame moves")
 {
-    if (!nt::NodeTypeTable::getNodeType("enzo::particles"))
+    if (!nt::NodeTypeTable::getNodeType("helix::particles"))
         SKIP("the focused simulation nodes need the node loader to find nested node folders");
 
     auto& nm = nt::nm();
-    const nt::NodeId nodeId = addNode("enzo::particles");
+    const nt::NodeId nodeId = addNode("helix::particles");
 
     nm.getNode(nodeId).getParameter("count").lock()->setInt(4);
     nm.setFrame(1);

@@ -13,7 +13,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace enzo {
+namespace helix {
 
 namespace {
 
@@ -226,4 +226,4 @@ const nt::NodeType& nt::Node::getType() const { return nodeType_; }
 bool nt::Node::takesInput() const { return !nodeType_.inputPorts.empty(); }
 unsigned int nt::Node::getMaxOutputs() const { return nodeType_.maxOutputs; }
 
-} // namespace enzo
+} // namespace helix

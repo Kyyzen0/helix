@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // A small chip naming the kind of a parameter.
 //

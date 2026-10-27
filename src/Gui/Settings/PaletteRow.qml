@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 import "../Components"
 
 // One palette value, named on the left and edited on the right.

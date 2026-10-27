@@ -10,15 +10,15 @@ MenuBar {
     FileDialog {
         id: openDialog
         title: "Open Scene"
-        nameFilters: ["Helix files (*.enzo)", "All files (*)"]
+        nameFilters: ["Helix files (*.kut)", "All files (*)"]
         onAccepted: scene.open(selectedFile)
     }
     FileDialog {
         id: saveDialog
         title: "Save Scene As"
         fileMode: FileDialog.SaveFile
-        defaultSuffix: "enzo"
-        nameFilters: ["Helix files (*.enzo)", "All files (*)"]
+        defaultSuffix: "kut"
+        nameFilters: ["Helix files (*.kut)", "All files (*)"]
         onAccepted: scene.saveAs(selectedFile)
     }
     PlaceholderDialog {

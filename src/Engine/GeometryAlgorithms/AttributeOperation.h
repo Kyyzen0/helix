@@ -4,7 +4,7 @@
 #include <optional>
 #include <span>
 
-namespace enzo::utils {
+namespace helix::utils {
 
 /// @brief How a new value combines with the value already on an attribute.
 enum class AttributeOperation
@@ -40,4 +40,4 @@ void applyOperation(
     std::span<const Vector3> newValues
 );
 
-} // namespace enzo::utils
+} // namespace helix::utils

@@ -7,8 +7,8 @@
 #include <memory>
 #include <vector>
 
-using namespace enzo;
-using namespace enzo::gfx;
+using namespace helix;
+using namespace helix::gfx;
 
 namespace {
 

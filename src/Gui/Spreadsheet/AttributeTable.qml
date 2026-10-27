@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import Enzo
+import Helix
 import "../Components"
 
 // Attribute table of the selected primitive. Column headers and values are

@@ -7,7 +7,7 @@
 #include <optional>
 #include <vector>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief Node links of the network as a flat list for the wire layer.
 ///
@@ -64,4 +64,4 @@ class NodeLinkListModel : public QAbstractListModel
     std::vector<nt::NodeLink> nodeLinks_;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

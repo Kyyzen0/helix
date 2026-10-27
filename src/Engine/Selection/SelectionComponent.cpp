@@ -7,13 +7,13 @@
 #include <sstream>
 
 namespace {
-std::shared_ptr<enzo::IndexSet> parseBlockContent(std::string_view content)
+std::shared_ptr<helix::IndexSet> parseBlockContent(std::string_view content)
 {
-    if (enzo::utils::trim(content) == "*")
+    if (helix::utils::trim(content) == "*")
     {
-        return std::make_shared<enzo::WildcardIndexSet>();
+        return std::make_shared<helix::WildcardIndexSet>();
     }
-    std::set<enzo::Index> indices;
+    std::set<helix::Index> indices;
     std::stringstream stream{std::string(content)};
     std::string token;
     while (stream >> token)
@@ -22,10 +22,10 @@ std::shared_ptr<enzo::IndexSet> parseBlockContent(std::string_view content)
         size_t dash = token.find('-');
         if (dash != std::string::npos && dash > 0 && dash + 1 < token.size())
         {
-            enzo::Index low = std::stoull(token.substr(0, dash));
-            enzo::Index high = std::stoull(token.substr(dash + 1));
+            helix::Index low = std::stoull(token.substr(0, dash));
+            helix::Index high = std::stoull(token.substr(dash + 1));
             if (low > high) std::swap(low, high);
-            for (enzo::Index i = low; i <= high; ++i)
+            for (helix::Index i = low; i <= high; ++i)
             {
                 indices.insert(i);
             }
@@ -34,11 +34,11 @@ std::shared_ptr<enzo::IndexSet> parseBlockContent(std::string_view content)
         // Plain single index
         indices.insert(std::stoull(token));
     }
-    return std::make_shared<enzo::ExplicitIndexSet>(std::move(indices));
+    return std::make_shared<helix::ExplicitIndexSet>(std::move(indices));
 }
 } // namespace
 
-namespace enzo {
+namespace helix {
 
 std::unique_ptr<SelectionComponent> SelectionComponent::fromString(std::string_view string)
 {
@@ -273,4 +273,4 @@ bool GroupSelectionComponent::isWholePrim(const geo::Primitive& prim) const
     return handle.getValue(0);
 }
 
-} // namespace enzo
+} // namespace helix

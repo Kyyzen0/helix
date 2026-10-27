@@ -1,5 +1,5 @@
 import QtQuick
-import Enzo
+import Helix
 
 // The link cutter, which the left button becomes while 'c' is held.
 QtObject {

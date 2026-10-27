@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 bool contains(const std::vector<nt::Unit>& units, const nt::Unit& target)

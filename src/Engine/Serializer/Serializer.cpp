@@ -17,7 +17,7 @@
 #include <numeric>
 #include <unordered_map>
 
-ParameterSerializable toSerializable(enzo::prm::Parameter& parameter)
+ParameterSerializable toSerializable(helix::prm::Parameter& parameter)
 {
     ParameterSerializable model;
     model.name = parameter.getName();
@@ -38,13 +38,13 @@ ParameterSerializable toSerializable(enzo::prm::Parameter& parameter)
 
     switch (parameter.getValueType())
     {
-    case enzo::prm::ValueType::Float:
+    case helix::prm::ValueType::Float:
         model.floatValues = parameter.evalFloats();
         break;
-    case enzo::prm::ValueType::Int:
+    case helix::prm::ValueType::Int:
         model.intValues = parameter.evalInts();
         break;
-    case enzo::prm::ValueType::String:
+    case helix::prm::ValueType::String:
         model.stringValues = parameter.evalStrings();
         break;
     }
@@ -58,20 +58,20 @@ ParameterSerializable toSerializable(enzo::prm::Parameter& parameter)
     return model;
 }
 
-ParameterSerializable toSerializable(std::string name, const enzo::prm::PrmValues& values)
+ParameterSerializable toSerializable(std::string name, const helix::prm::PrmValues& values)
 {
     ParameterSerializable model;
     model.name = std::move(name);
-    if (auto floats = std::get_if<std::vector<enzo::floatT>>(&values))
+    if (auto floats = std::get_if<std::vector<helix::floatT>>(&values))
         model.floatValues = *floats;
-    else if (auto ints = std::get_if<std::vector<enzo::intT>>(&values))
+    else if (auto ints = std::get_if<std::vector<helix::intT>>(&values))
         model.intValues = *ints;
-    else if (auto strings = std::get_if<std::vector<enzo::String>>(&values))
+    else if (auto strings = std::get_if<std::vector<helix::String>>(&values))
         model.stringValues = *strings;
     return model;
 }
 
-void applySerializable(enzo::prm::Parameter& parameter, const ParameterSerializable& model)
+void applySerializable(helix::prm::Parameter& parameter, const ParameterSerializable& model)
 {
     if (parameter.getTemplate().isMultiParm())
     {
@@ -96,13 +96,13 @@ void applySerializable(enzo::prm::Parameter& parameter, const ParameterSerializa
 
     switch (parameter.getValueType())
     {
-    case enzo::prm::ValueType::Float:
+    case helix::prm::ValueType::Float:
         if (!model.floatValues.empty()) parameter.setValues(model.floatValues);
         break;
-    case enzo::prm::ValueType::Int:
+    case helix::prm::ValueType::Int:
         if (!model.intValues.empty()) parameter.setValues(model.intValues);
         break;
-    case enzo::prm::ValueType::String:
+    case helix::prm::ValueType::String:
         if (!model.stringValues.empty()) parameter.setValues(model.stringValues);
         break;
     }
@@ -114,14 +114,14 @@ void applySerializable(enzo::prm::Parameter& parameter, const ParameterSerializa
             parameter.setExpression(*model.expressions[component], component);
 }
 
-void applySerializable(enzo::nt::Node& node, const std::vector<ParameterSerializable>& models)
+void applySerializable(helix::nt::Node& node, const std::vector<ParameterSerializable>& models)
 {
     for (const ParameterSerializable& model : models)
         if (auto parameter = node.getParameter(model.name).lock())
             applySerializable(*parameter, model);
 }
 
-namespace enzo::nt {
+namespace helix::nt {
 
 void Serializer::save(NetworkManager& networkManager, std::string filePath)
 {
@@ -228,4 +228,4 @@ void Serializer::load(NetworkManager& networkManager, std::string filePath)
     load(sim::KeyframeStore::instance());
 }
 
-} // namespace enzo::nt
+} // namespace helix::nt

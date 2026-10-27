@@ -15,7 +15,7 @@
 
 namespace {
 
-class Delete : public enzo::nt::NodeImpl
+class Delete : public helix::nt::NodeImpl
 {
   public:
     using NodeImpl::NodeImpl;
@@ -25,7 +25,7 @@ class Delete : public enzo::nt::NodeImpl
 
 void Delete::cook()
 {
-    using namespace enzo;
+    using namespace helix;
 
     if (!outputRequested(0)) return;
 
@@ -34,7 +34,7 @@ void Delete::cook()
     const String selectionStr = evalParmString("selection", 0);
     const bool invert = evalParmBool("invert");
     const bool keepPoints = evalParmBool("keep_points");
-    enzo::Selection selection(selectionStr);
+    helix::Selection selection(selectionStr);
     selection.setInverted(invert);
 
     for (auto prim : selection.getPrims(packet))
@@ -73,4 +73,4 @@ void Delete::cook()
 
 } // namespace
 
-ENZO_REGISTER_NODE(delete, Delete)
+HELIX_REGISTER_NODE(delete, Delete)

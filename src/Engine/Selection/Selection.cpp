@@ -4,7 +4,7 @@
 #include <icecream.hpp>
 #include <sstream>
 
-namespace enzo {
+namespace helix {
 
 Selection::Selection(std::string expression)
 {
@@ -198,4 +198,4 @@ std::vector<Offset> Selection::getVertices(geo::PrimPtr prim)
     return result;
 }
 
-} // namespace enzo
+} // namespace helix

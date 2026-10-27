@@ -1,7 +1,7 @@
 version: 1
 
 name: attributeNoise
-namespace: enzo
+namespace: helix
 label: Attribute Noise
 tags: [attribute, noise]
 
@@ -11,7 +11,7 @@ outputs: 1
 
 implementation:
   kind: cpp
-  library: enzoOps
+  library: helixOps
   constructor: attributeNoise
 
 icon: icon.svg

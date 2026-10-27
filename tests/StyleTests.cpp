@@ -1,7 +1,7 @@
 #include "Engine/Parameter/StyleAccess.h"
 #include <catch2/catch_test_macros.hpp>
 
-using namespace enzo;
+using namespace helix;
 
 TEST_CASE("Owners read as a space separated list of names")
 {

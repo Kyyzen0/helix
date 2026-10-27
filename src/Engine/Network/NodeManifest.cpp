@@ -18,7 +18,7 @@
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
-namespace enzo::nt {
+namespace helix::nt {
 
 namespace {
 
@@ -277,7 +277,7 @@ NodeImplementation readImplementation(const YAML::Node& implementation, const st
         return ScriptImplementation{
             // A user node runs the shared script implementation, so the library
             // and the constructor only need naming when they differ.
-            .library = readString(implementation, "library", "enzoOps"),
+            .library = readString(implementation, "library", "helixOps"),
             .constructor = readString(implementation, "constructor", "userNode"),
             .source = requireString(implementation, "source", "script implementation"),
         };
@@ -500,4 +500,4 @@ NodeManifest NodeManifest::loadFromFile(const std::filesystem::path& path)
     }
 }
 
-} // namespace enzo::nt
+} // namespace helix::nt

@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace enzo::sim {
+namespace helix::sim {
 
 namespace {
 
@@ -147,4 +147,4 @@ std::vector<Particle> simulateParticles(
     return solver.getParticles();
 }
 
-} // namespace enzo::sim
+} // namespace helix::sim

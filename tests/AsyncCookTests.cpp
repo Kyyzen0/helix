@@ -20,7 +20,7 @@
 #include <thread>
 #include <vector>
 
-using namespace enzo;
+using namespace helix;
 
 namespace {
 

@@ -5,7 +5,7 @@
 #include <cereal/cereal.hpp>
 #include <vector>
 
-namespace enzo::sim {
+namespace helix::sim {
 
 /// @brief How a value moves from one keyframe to the next.
 ///
@@ -57,9 +57,9 @@ struct Keyframe
  * Example
  *
  * ```
- * enzo::sim::KeyframeTrack track;
- * track.addKeyframe(1.f, 0.f, enzo::sim::Interpolation::Linear);
- * track.addKeyframe(11.f, 10.f, enzo::sim::Interpolation::Linear);
+ * helix::sim::KeyframeTrack track;
+ * track.addKeyframe(1.f, 0.f, helix::sim::Interpolation::Linear);
+ * track.addKeyframe(11.f, 10.f, helix::sim::Interpolation::Linear);
  * track.evaluate(6.f); // 5
  * ```
  */
@@ -209,4 +209,4 @@ class KeyframeTrack
     floatT baseValue_ = 0;
 };
 
-} // namespace enzo::sim
+} // namespace helix::sim
