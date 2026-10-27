@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=Helix
-Comment=Node-based procedural 3D modeling application
-Exec=helix
-Icon=com.helix3d.Helix
-Terminal=false
-Type=Application
-Categories=Graphics;3DGraphics;
-Keywords=3D;modeling;procedural;nodes;VFX;animation;
