@@ -2,7 +2,9 @@
 #include "Graphics/ViewportRenderer.h"
 #include "GraphicsTestUtils.h"
 #include <catch2/catch_test_macros.hpp>
+#include <chrono>
 #include <memory>
+#include <thread>
 
 using namespace helix::gfx;
 
@@ -77,13 +79,23 @@ TEST_CASE("A viewport renderer keeps its texture until the frame size changes")
     frame.backgroundColor = {1.f, 0.f, 1.f, 1.f};
     REQUIRE(renderer.render(frame).texture == first.texture);
 
+    // The texture that was replaced stays valid until the frame that was recorded after the
+    // swap has finished, which is the frame a host may still have in flight.
     frame.pixelSize = {128, 64};
-    const RenderedImage resized = renderer.render(frame);
-    REQUIRE(resized.texture != first.texture);
-    REQUIRE(resized.size == frame.pixelSize);
-
-    // The texture that was replaced stays valid for the frames a host still has in flight.
-    REQUIRE(first.texture->width() == 64);
+    {
+        ScopedAutoreleasePool pool;
+        MTL::CommandBuffer* commandBuffer = device->getCommandQueue()->commandBuffer();
+        const RenderedImage resized = renderer.encode(frame, commandBuffer);
+        REQUIRE(resized.texture != first.texture);
+        REQUIRE(resized.size == frame.pixelSize);
+        REQUIRE(first.texture->width() == 64);
+        REQUIRE(renderer.retiredResourceCount() > 0);
+        commandBuffer->commit();
+        commandBuffer->waitUntilCompleted();
+    }
+    for (int i = 0; i < 200 && renderer.retiredResourceCount() != 0; ++i)
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    REQUIRE(renderer.retiredResourceCount() == 0);
 }
 
 TEST_CASE("A viewport renderer draws a frame with no pixels into no texture")
@@ -343,6 +355,88 @@ TEST_CASE("A viewport renderer records into the command buffer of its host")
     // Compares without printing the megabytes a failed vector comparison would.
     const bool same = pixels == reference.pixels;
     REQUIRE(same);
+}
+
+TEST_CASE("A viewport renderer keeps replaced buffers alive until the frames that read them have finished")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+
+    // Two geometries of different sizes, so each swap replaces buffers of another length.
+    std::shared_ptr<DisplayGeometry> small = makeTriangle();
+    auto large = std::make_shared<DisplayGeometry>(*small);
+    for (int i = 0; i < 500; ++i)
+    {
+        large->positions.push_back({0.f, 0.f, 0.f});
+        large->normals.push_back({0.f, 1.f, 0.f});
+    }
+    large->pointPositions = {{0.f, 0.f, 0.f}, {1.f, 0.f, 1.f}};
+    large->cameraTransforms = {glm::mat4(1.f)};
+
+    FrameState frame = makeFrame(64, 48);
+    frame.wireframeVisible = false;
+
+    // The reference is drawn by a renderer that waits for each frame.
+    frame.geometry = small;
+    const PresentedFrame reference = ViewportRenderer(*device).renderToPixels(frame);
+
+    // A host commits its command buffers without waiting, like the scene graph of Qt Quick does
+    // while the previous frame is still on the GPU.
+    ViewportRenderer hosted(*device);
+    RenderedImage image;
+    NS::SharedPtr<MTL::CommandBuffer> lastOwner;
+    {
+        ScopedAutoreleasePool pool;
+        for (int i = 0; i < 60; ++i)
+        {
+            // The size changes now and then, which replaces the targets as well.
+            frame.pixelSize = {64, std::uint32_t(i % 20 == 19 ? 40 : 48)};
+            frame.geometry = i % 2 == 0 ? small : large;
+            MTL::CommandBuffer* commandBuffer = device->getCommandQueue()->commandBuffer();
+            image = hosted.encode(frame, commandBuffer);
+            // Every swap after the first replaced buffers, and this frame holds them: it has not
+            // been committed, so none can have been released.
+            if (i > 0) REQUIRE(hosted.retiredResourceCount() > 0);
+            commandBuffer->commit();
+            lastOwner = NS::RetainPtr(commandBuffer);
+        }
+        // The last frame goes back to the small geometry at the reference size.
+        frame.pixelSize = {64, 48};
+        frame.geometry = small;
+        MTL::CommandBuffer* commandBuffer = device->getCommandQueue()->commandBuffer();
+        image = hosted.encode(frame, commandBuffer);
+        commandBuffer->commit();
+        lastOwner = NS::RetainPtr(commandBuffer);
+    }
+    lastOwner->waitUntilCompleted();
+    REQUIRE(lastOwner->status() == MTL::CommandBufferStatusCompleted);
+
+    std::vector<std::uint8_t> pixels(64 * 48 * 4);
+    image.texture->getBytes(pixels.data(), 64 * 4, MTL::Region::Make2D(0, 0, 64, 48), 0);
+    const bool same = pixels == reference.pixels;
+    REQUIRE(same);
+
+    // The handlers that release the buffers run on another thread, just after the wait ends.
+    for (int i = 0; i < 200 && hosted.retiredResourceCount() != 0; ++i)
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    REQUIRE(hosted.retiredResourceCount() == 0);
+}
+
+TEST_CASE("A viewport renderer releases the buffers it replaced once the frame that held them has finished")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    FrameState frame = makeFrame(64, 48);
+    frame.geometry = makeTriangle();
+    renderer.renderToPixels(frame);
+    REQUIRE(renderer.retiredResourceCount() == 0);
+
+    // Replacing geometry hands the old buffers to the frame that is recorded.
+    frame.geometry = makeTriangle();
+    renderer.renderToPixels(frame);
+    for (int i = 0; i < 200 && renderer.retiredResourceCount() != 0; ++i)
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    REQUIRE(renderer.retiredResourceCount() == 0);
 }
 
 TEST_CASE("A viewport renderer hands out a texture before the first frame is drawn")

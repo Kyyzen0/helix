@@ -7,8 +7,9 @@
 #include "Graphics/Passes/PointPass.h"
 #include "Graphics/PresentedFrame.h"
 #include "Graphics/RenderedImage.h"
+#include <cstddef>
 #include <cstdint>
-#include <deque>
+#include <atomic>
 #include <memory>
 
 namespace helix::gfx {
@@ -47,6 +48,12 @@ class ViewportRenderer
     /// @throws std::runtime_error when the frame could not be recorded.
     RenderedImage encode(const FrameState& frame, MTL::CommandBuffer* commandBuffer);
 
+    /// @brief The number of replaced GPU resources not yet released: the ones waiting for the next
+    /// recorded frame and the ones held by a frame the GPU has not finished.
+    ///
+    /// @note Meant for tests. It may be read from any thread.
+    std::size_t retiredResourceCount() const;
+
     /// @brief Makes the targets fit the size and returns the texture the next frame is drawn into.
     ///
     /// A host calls it before it draws, to have a texture to show. The contents are undefined until
@@ -68,13 +75,6 @@ class ViewportRenderer
         glm::uvec2 size{0, 0};
     };
 
-    /// @brief A set of targets that was replaced and is kept for the frames still in flight.
-    struct RetiredTargets
-    {
-        Targets targets;
-        std::uint64_t retiredAtFrame = 0;
-    };
-
     Targets createTargets(glm::uvec2 size) const;
     NS::SharedPtr<MTL::Texture> createTexture(
         glm::uvec2 size, MTL::PixelFormat format, NS::UInteger samples, MTL::StorageMode storage, MTL::TextureUsage usage, const char* name
@@ -90,8 +90,14 @@ class ViewportRenderer
     PointPass pointPass_;
     CameraPrimPass cameraPrimPass_;
     Targets targets_;
-    std::deque<RetiredTargets> retiredTargets_;
-    std::uint64_t frameIndex_ = 0;
+    /// @brief Resources replaced since the last recorded frame (buffers of the geometry, textures of
+    /// the targets). A frame that was recorded earlier but has not finished may still read them, and
+    /// a host command buffer does not retain what it reads, so the next recorded frame takes them
+    /// and keeps them until the GPU has finished it.
+    RetiredResources retired_;
+    /// @brief How many resources the command buffers in flight hold. Shared with their handlers,
+    /// which can outlive the renderer.
+    std::shared_ptr<std::atomic<std::size_t>> inFlightCount_;
     /// @brief The geometry the passes hold on the GPU.
     std::shared_ptr<const DisplayGeometry> uploadedGeometry_;
 };

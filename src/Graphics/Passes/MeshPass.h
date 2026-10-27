@@ -14,7 +14,9 @@ class MeshPass
     MeshPass(GraphicsDevice& device, NS::UInteger sampleCount);
 
     /// @brief Replaces the drawn mesh with the geometry.
-    void upload(MTL::Device* device, const DisplayGeometry& geometry);
+    ///
+    /// @param retired receives the buffers that were replaced, which a recorded frame may still read.
+    void upload(MTL::Device* device, const DisplayGeometry& geometry, RetiredResources& retired);
 
     /// @brief Draws the mesh with the encoder of the frame.
     void draw(MTL::RenderCommandEncoder* encoder, bool wireframeVisible);

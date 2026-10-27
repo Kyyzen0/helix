@@ -3,6 +3,7 @@
 #include "Graphics/Metal.h"
 #include "Graphics/Shaders/ShaderTypes.h"
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 namespace helix::gfx {
@@ -74,6 +75,12 @@ struct GpuArray
 /// @throws std::runtime_error when the bytes are larger than the device allows in a buffer.
 NS::SharedPtr<MTL::Buffer> createSharedBuffer(MTL::Device* device, const char* name, const void* bytes, std::size_t size);
 
+/// @brief GPU resources that were replaced while a recorded frame may still read them.
+///
+/// The renderer hands them to the command buffer that was recorded last, which keeps them alive
+/// until the GPU has finished with it.
+using RetiredResources = std::vector<NS::SharedPtr<NS::Object>>;
+
 /// @brief Returns a GPU array holding the values.
 template <typename Value>
 GpuArray createGpuArray(MTL::Device* device, const char* name, const std::vector<Value>& values)
@@ -84,6 +91,21 @@ GpuArray createGpuArray(MTL::Device* device, const char* name, const std::vector
 
     array.buffer = createSharedBuffer(device, name, values.data(), values.size() * sizeof(Value));
     return array;
+}
+
+/// @brief Replaces the array in `slot` with one holding the values.
+///
+/// The buffer that was there is moved to `retired` instead of being released, because a frame
+/// that was recorded but did not finish may still draw from it: a host command buffer does not
+/// retain the buffers it reads. The slot is left as it was when the new buffer cannot be made.
+template <typename Value>
+void replaceGpuArray(
+    GpuArray& slot, MTL::Device* device, const char* name, const std::vector<Value>& values, RetiredResources& retired
+)
+{
+    GpuArray fresh = createGpuArray(device, name, values);
+    if (slot.buffer) retired.push_back(slot.buffer);
+    slot = std::move(fresh);
 }
 
 } // namespace helix::gfx

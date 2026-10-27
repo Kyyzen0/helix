@@ -29,7 +29,7 @@ ends; the multisampled colour and depth are memoryless on Apple GPUs.
 | Class | Role |
 | --- | --- |
 | `gfx::GraphicsDevice` | Wraps an `MTL::Device` (the scene graph's, or the system default), loads `helix.metallib`, hands out shader functions and a lazily made command queue. Several can exist. |
-| `gfx::ViewportRenderer` | Owns the four passes and the targets. `render` (own queue, waits), `renderToPixels` (adds a read back), `encode` (into a host command buffer), `prepareTarget`. Pipelines are built once; geometry is uploaded only when the frame's geometry pointer changes. Replaced targets stay alive four frames. |
+| `gfx::ViewportRenderer` | Owns the four passes and the targets. `render` (own queue, waits), `renderToPixels` (adds a read back), `encode` (into a host command buffer), `prepareTarget`. Pipelines are built once; geometry is uploaded only when the frame's geometry pointer changes. Resources it replaces (geometry buffers, targets) are handed to the command buffer of the next recorded frame, see "Lifetime of GPU resources". |
 | `GridPass`, `MeshPass`, `PointPass`, `CameraPrimPass` | Same split as before, each building its `MTL::RenderPipelineState`s and drawing with the frame's encoder. `PassSetup` holds the shared helpers. |
 | `Shaders/*.metal`, `ShaderTypes.h` | The shaders and the `FrameConstants` struct, shared by C++ and MSL so the layout cannot drift. |
 | `MetalImplementation.cpp` | The one file that defines `NS_/MTL_/CA_PRIVATE_IMPLEMENTATION`. |
@@ -65,6 +65,30 @@ build tree. Without any, a development build compiles the `.metal` sources with 
 (`HELIX_METAL_SHADER_DIR`, or the source tree), which is how the renderer tests were run where the
 offline compiler was missing. `metal-cpp` is pinned in `cmake/versions.cmake`.
 
+## Lifetime of GPU resources
+
+Qt's Metal backend creates its command buffers with `commandBufferWithUnretainedReferences`, so a
+command buffer that `encode` recorded into does not retain the buffers and textures it reads: they
+must outlive the GPU work by other means.
+
+- Pipeline and depth states, the grid, the disc corners and the camera frame live as long as the
+  renderer and are never replaced.
+- What is replaced while a frame may still read it is not released at once. `MeshPass`,
+  `PointPass` and `CameraPrimPass` `upload` move each replaced buffer into a `RetiredResources`
+  list instead of dropping it (`replaceGpuArray`), and `prepareTarget` does the same with the
+  textures of a resized target set.
+- At the end of `encode`, the renderer moves that list into a completed handler of the command
+  buffer it recorded (`addCompletedHandler`). The handler owns the resources and releases them on
+  the thread Metal calls it from, once the GPU has finished that buffer. Queue order makes the
+  frames recorded before it finish first, so this is exact, not a count of frames. The handler
+  touches no member of the renderer (only a shared counter, `retiredResourceCount`, for tests).
+- `render` and `renderToPixels` go through `encode` and then wait, so their handler has run (or
+  is about to) when they return.
+- The retired resources wait for the next `encode`. A renderer that records no further frame keeps
+  them until it is destroyed.
+- Not covered: destroying the renderer while a frame recorded with it is still on the GPU. The host
+  must have finished its frames first (`ViewportNode` releases on `sceneGraphInvalidated`).
+
 ## Assumptions about Qt 6.10 that a Mac must confirm
 
 Qt was not installed where this was written; `QtGraphicsBridge.mm` and `ViewportNode.cpp` are written
@@ -80,7 +104,7 @@ from the documentation and were only syntax checked against stand-in headers.
    `<QtQuick/qsgtexture_platform.h>` (Qt 6.4+). The older spelling is
    `window->createTextureFromNativeObject(QQuickWindow::NativeObjectTexture, &texture, 0, size)`; if
    the first does not compile, swap that one call.
-5. The wrapped texture is not retained by Qt; the renderer keeps replaced textures four frames.
+5. The wrapped texture is not retained by Qt, and Qt 6.10.3 creates its command buffers with unretained references, so a command buffer does not keep what it reads alive either; see "Lifetime of GPU resources".
 6. Our texture is RGBA8 with straight alpha only if the background alpha is below 1; Qt expects
    premultiplied alpha, so a translucent background may look off.
 

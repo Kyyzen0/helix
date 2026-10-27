@@ -61,15 +61,15 @@ MeshPass::MeshPass(GraphicsDevice& device, NS::UInteger sampleCount)
     );
 }
 
-void MeshPass::upload(MTL::Device* device, const DisplayGeometry& geometry)
+void MeshPass::upload(MTL::Device* device, const DisplayGeometry& geometry, RetiredResources& retired)
 {
     const DisplayTopology& topology = geometry.topology;
-    positions_ = createGpuArray(device, "Mesh positions", geometry.positions);
-    normals_ = createGpuArray(device, "Mesh normals", geometry.normals);
+    replaceGpuArray(positions_, device, "Mesh positions", geometry.positions, retired);
+    replaceGpuArray(normals_, device, "Mesh normals", geometry.normals, retired);
 
-    triangleIndices_ = createGpuArray(device, "Mesh triangles", topology.triangleIndices);
-    edgeIndices_ = createGpuArray(device, "Mesh edges", topology.edgeIndices);
-    lineIndices_ = createGpuArray(device, "Mesh open faces", topology.lineIndices);
+    replaceGpuArray(triangleIndices_, device, "Mesh triangles", topology.triangleIndices, retired);
+    replaceGpuArray(edgeIndices_, device, "Mesh edges", topology.edgeIndices, retired);
+    replaceGpuArray(lineIndices_, device, "Mesh open faces", topology.lineIndices, retired);
 }
 
 void MeshPass::draw(MTL::RenderCommandEncoder* encoder, bool wireframeVisible)

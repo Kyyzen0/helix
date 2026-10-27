@@ -13,12 +13,6 @@ namespace helix::gfx {
 
 namespace {
 
-/// @brief How many frames a replaced set of targets is kept for.
-///
-/// A host records a few frames ahead of the GPU, and the scene graph of Qt Quick does not hold
-/// a reference of its own on the texture it samples, so the old texture outlives the swap.
-constexpr std::uint64_t retiredFrameCount = 4;
-
 FrameConstants getFrameConstants(const FrameState& frame)
 {
     glm::mat4 view = frame.camera.getViewMatrix();
@@ -57,8 +51,14 @@ ViewportRenderer::ViewportRenderer(GraphicsDevice& device)
       gridPass_(device, sampleCount_),
       meshPass_(device, sampleCount_),
       pointPass_(device, sampleCount_),
-      cameraPrimPass_(device, sampleCount_)
+      cameraPrimPass_(device, sampleCount_),
+      inFlightCount_(std::make_shared<std::atomic<std::size_t>>(0))
 {
+}
+
+std::size_t ViewportRenderer::retiredResourceCount() const
+{
+    return retired_.size() + inFlightCount_->load();
 }
 
 ViewportRenderer::~ViewportRenderer() = default;
@@ -132,7 +132,9 @@ RenderedImage ViewportRenderer::prepareTarget(glm::uvec2 size)
     {
         ScopedAutoreleasePool pool;
         Targets fresh = createTargets(size);
-        if (targets_.color) retiredTargets_.push_back({std::move(targets_), frameIndex_});
+        // The texture the host samples may still be read by a frame in flight.
+        for (const NS::SharedPtr<MTL::Texture>* texture : {&targets_.multisample, &targets_.depth, &targets_.color})
+            if (*texture) retired_.push_back(*texture);
         targets_ = std::move(fresh);
     }
     return {targets_.color.get(), targets_.size};
@@ -145,9 +147,9 @@ void ViewportRenderer::uploadGeometry(const FrameState& frame)
     const DisplayGeometry noGeometry;
     const DisplayGeometry& geometry = frame.geometry ? *frame.geometry : noGeometry;
     MTL::Device* device = device_.getDevice();
-    meshPass_.upload(device, geometry);
-    pointPass_.upload(device, geometry);
-    cameraPrimPass_.upload(device, geometry);
+    meshPass_.upload(device, geometry, retired_);
+    pointPass_.upload(device, geometry, retired_);
+    cameraPrimPass_.upload(device, geometry, retired_);
     uploadedGeometry_ = frame.geometry;
 }
 
@@ -163,10 +165,6 @@ RenderedImage ViewportRenderer::encode(const FrameState& frame, MTL::CommandBuff
     const RenderedImage image = prepareTarget(frame.pixelSize);
     uploadGeometry(frame);
     const FrameConstants frameConstants = getFrameConstants(frame);
-
-    ++frameIndex_;
-    while (!retiredTargets_.empty() && frameIndex_ - retiredTargets_.front().retiredAtFrame > retiredFrameCount)
-        retiredTargets_.pop_front();
 
     MTL::RenderPassDescriptor* pass = MTL::RenderPassDescriptor::renderPassDescriptor();
 
@@ -210,6 +208,26 @@ RenderedImage ViewportRenderer::encode(const FrameState& frame, MTL::CommandBuff
     pointPass_.draw(encoder, frame.pointsVisible);
     cameraPrimPass_.draw(encoder, frame.viewCameraIndex);
     encoder->endEncoding();
+
+    // The command buffer of a host holds no reference on what it reads (Qt creates its buffers
+    // with unretained references), so what was replaced since the last frame stays alive until
+    // this one has finished: every frame recorded before it is ordered before it on the queue.
+    // The handler runs on another thread and touches nothing of the renderer.
+    if (!retired_.empty())
+    {
+        auto held = std::make_shared<RetiredResources>(std::move(retired_));
+        retired_.clear();
+        const std::size_t count = held->size();
+        std::shared_ptr<std::atomic<std::size_t>> inFlight = inFlightCount_;
+        inFlight->fetch_add(count);
+        commandBuffer->addCompletedHandler(
+            [held = std::move(held), inFlight, count](MTL::CommandBuffer*)
+            {
+                held->clear();
+                inFlight->fetch_sub(count);
+            }
+        );
+    }
     return image;
 }
 

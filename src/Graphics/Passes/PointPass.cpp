@@ -29,10 +29,10 @@ PointPass::PointPass(GraphicsDevice& device, NS::UInteger sampleCount)
     pipeline_ = createPipeline(device, settings, sampleCount);
 }
 
-void PointPass::upload(MTL::Device* device, const DisplayGeometry& geometry)
+void PointPass::upload(MTL::Device* device, const DisplayGeometry& geometry, RetiredResources& retired)
 {
-    pointPositions_ = createGpuArray(device, "Point positions", geometry.pointPositions);
-    soloPointPositions_ = createGpuArray(device, "Solo point positions", geometry.soloPointPositions);
+    replaceGpuArray(pointPositions_, device, "Point positions", geometry.pointPositions, retired);
+    replaceGpuArray(soloPointPositions_, device, "Solo point positions", geometry.soloPointPositions, retired);
 }
 
 void PointPass::draw(MTL::RenderCommandEncoder* encoder, bool pointsVisible)

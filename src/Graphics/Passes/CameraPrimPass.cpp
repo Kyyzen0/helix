@@ -47,9 +47,9 @@ CameraPrimPass::CameraPrimPass(GraphicsDevice& device, NS::UInteger sampleCount)
     pipeline_ = createPipeline(device, settings, sampleCount);
 }
 
-void CameraPrimPass::upload(MTL::Device* device, const DisplayGeometry& geometry)
+void CameraPrimPass::upload(MTL::Device* device, const DisplayGeometry& geometry, RetiredResources& retired)
 {
-    transforms_ = createGpuArray(device, "Camera transforms", geometry.cameraTransforms);
+    replaceGpuArray(transforms_, device, "Camera transforms", geometry.cameraTransforms, retired);
 }
 
 void CameraPrimPass::draw(MTL::RenderCommandEncoder* encoder, std::optional<std::size_t> hiddenCamera)
