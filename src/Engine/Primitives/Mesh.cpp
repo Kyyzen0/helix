@@ -239,6 +239,7 @@ Offset geo::Mesh::addFace(const std::vector<Offset>& pointOffsets, bool closed)
     closedFaceHandle_.addValue(closed);
     validFaceHandle_.addValue(true);
     soloPointsDirty_ = true;
+    faceStartsDirty_.store(true);
 
     // resize other attributes
     // TODO: this seems terribly inefficient
