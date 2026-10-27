@@ -1,47 +1,52 @@
 #pragma once
-#include "Graphics/VulkanHandles.h"
-#include "Graphics/VulkanImage.h"
-#include <string>
-#include <vector>
-
-// The official binaries of Qt for macOS do not carry the Vulkan module, and
-// their scene graph runs on Metal rather than on Vulkan. The instance of the
-// graphics device therefore cannot be handed to them, and the parts of this
-// bridge that do it are left out there.
-#ifndef __APPLE__
-#include <QVulkanInstance>
-#endif
+#include "Graphics/Metal.h"
+#include <QSize>
+#include <functional>
 
 class QQuickWindow;
 class QSGTexture;
 
-namespace enzo::ui {
+namespace helix::ui {
 
-/// @brief A bridge sharing the graphics device and its images with Qt Quick windows.
+/// @brief The Metal specifics of the Qt Quick scene graph, which the viewport hands its frames to.
+///
+/// The scene graph runs on Metal through Qt's rendering hardware interface. The viewport draws
+/// with the Metal device the scene graph itself uses, so a texture it makes can be sampled by the
+/// scene graph with no copy.
+///
+/// Every function but `selectMetal` belongs to the render thread of the window.
 class QtGraphicsBridge
 {
   public:
-    /// @brief Returns the instance extensions Qt Quick needs on top of the graphics device's own.
-    static std::vector<std::string> getInstanceExtensions();
-
-    /// @brief Wraps the graphics device's Vulkan instance for Qt.
+    /// @brief Makes Qt Quick draw with Metal.
     ///
-    /// @throws std::runtime_error when Qt cannot adopt the Vulkan instance.
-    explicit QtGraphicsBridge(const gfx::VulkanHandles& handles);
+    /// @pre No window has been created yet.
+    static void selectMetal();
 
-    /// @brief Makes the window draw with the shared device.
+    /// @brief Returns whether the scene graph of the window runs on Metal.
+    static bool usesMetal(QQuickWindow* window);
+
+    /// @brief Returns the Metal device of the scene graph, or null when it does not run on Metal.
+    static MTL::Device* getDevice(QQuickWindow* window);
+
+    /// @brief Records commands into the command buffer the scene graph is recording the frame into.
     ///
-    /// @pre The window has not rendered yet.
-    void adoptDevice(QQuickWindow* window);
+    /// Qt closes and reopens its own state around the call. The commands run on the queue of the
+    /// scene graph, ahead of the passes it records afterwards, so Metal orders them before any
+    /// sampling of the texture they draw into.
+    ///
+    /// @pre The scene graph is between its start of the frame and its first render pass, which is
+    /// where `QQuickWindow::beforeRendering` is emitted.
+    /// @return whether the scene graph had a command buffer to record into.
+    static bool recordCommands(QQuickWindow* window, const std::function<void(MTL::CommandBuffer*)>& record);
 
-    /// @brief Returns a scene graph texture showing the image, owned by the caller.
-    static QSGTexture* wrapImage(QQuickWindow* window, const gfx::VulkanImage& image);
-
-  private:
-    gfx::VulkanHandles handles_;
-#ifndef __APPLE__
-    QVulkanInstance vulkanInstance_;
-#endif
+    /// @brief Returns a scene graph texture showing the Metal texture, owned by the caller.
+    ///
+    /// The scene graph does not retain the Metal texture, so the caller keeps it alive for as long
+    /// as the scene graph texture, and a few frames after.
+    ///
+    /// @param hasAlpha whether the texture is blended by its alpha.
+    static QSGTexture* wrapTexture(QQuickWindow* window, MTL::Texture* texture, QSize size, bool hasAlpha);
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

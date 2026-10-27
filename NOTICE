@@ -18,8 +18,10 @@ The macOS port, the asynchronous cooking scheduler, the timeline, the simulation
 node family, the user node authoring support, the viewport work and the interface
 redesign were carried out for this fork by the Helix contributors.
 
-The scene format is unchanged, so files saved by Helix open in enzo and the other
-way round.
+Scenes are saved with the `.kut` extension. The content format is otherwise
+unchanged, and node types are stored as `helix::<name>`. A file saved by enzo, with its
+`enzo::<name>` type names, opens in Helix once its extension is renamed to `.kut`; the
+reverse is not supported.
 
 ---
 
@@ -27,8 +29,7 @@ This product bundles or depends on third party software, each under its own
 license:
 
   daslang (daScript)   https://github.com/GaijinEntertainment/daScript
-  DiligentCore         https://github.com/DiligentGraphics/DiligentCore
-  MoltenVK             https://github.com/KhronosGroup/MoltenVK
+  metal-cpp            https://developer.apple.com/metal/cpp/ (Apache License 2.0)
   Qt                   https://www.qt.io
   TBB, Boost, Eigen, GLM, Manifold, argparse, yaml-cpp, Catch2, cereal,
   icecream-cpp, FastNoise2

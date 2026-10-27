@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Configures enzo for macOS.
+# Configures helix for macOS.
 #
 # The build tree cannot live inside the repository on this machine: the
 # sandbox forbids removing files, and CMake's try_compile has to delete its
@@ -27,7 +27,7 @@ source "${REPO_ROOT}/toolchain/env.sh"
 
 # A short path keeps the generated ninja files, and the paths the compiler
 # records inside them, readable.
-BUILD_ROOT="$(python3 -c 'import tempfile;print(tempfile.gettempdir())')/enzo-build-${BUILD_TYPE}"
+BUILD_ROOT="$(python3 -c 'import tempfile;print(tempfile.gettempdir())')/helix-build-${BUILD_TYPE}"
 mkdir -p "${BUILD_ROOT}"
 
 # The repository keeps a link to the build tree, so the usual commands work
@@ -36,7 +36,7 @@ ln -sfn "${BUILD_ROOT}" "${BUILD_DIR}"
 
 cmake -S "${REPO_ROOT}" -B "${BUILD_ROOT}" -G Ninja \
     -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
-    -DENZO_SUPERBUILD=OFF \
+    -DHELIX_SUPERBUILD=OFF \
     "$@"
 
 echo

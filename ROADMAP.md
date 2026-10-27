@@ -91,7 +91,7 @@ simply has no point cloud primitive for them to live in.
 
 ### 3. Interchange with the VFX pipeline
 
-enzo aims at VFX, where the interchange formats are USD, Alembic and glTF.
+Helix aims at VFX, where the interchange formats are USD, Alembic and glTF.
 Exporting a procedural model is what turns a generator into a pipeline tool.
 Importing a USD assembly is what lets a procedural model live inside a shot.
 
@@ -106,7 +106,7 @@ A static graph is limited. What a procedural tool eventually needs:
 
 ### 5. Rendering and shading
 
-enzo renders nothing. A path tracer, or at least a physically based preview
+Helix renders nothing. A path tracer, or at least a physically based preview
 renderer, closes the loop between generating a model and seeing it. A shading
 language in the spirit of OSL would make the material programmable the same way
 the graph is.
@@ -130,8 +130,8 @@ turns scrubbing into a lookup and makes a long simulation interactive.
 ### 3. GPU cooking
 
 TBB is the parallel backend today. Heavy geometry work belongs on the GPU, and
-Diligent already exposes a compute API. Moving the expensive attribute
-operations to compute shaders is the single biggest performance lever left.
+Metal exposes compute shaders, and the renderer already loads a Metal library. Moving the
+expensive attribute operations to compute shaders is the single biggest performance lever left.
 
 ### 4. A growing simulation family
 
@@ -149,13 +149,10 @@ what turns a tool into a component of a pipeline.
 
 ## Cross cutting
 
-### Metal directly, instead of Vulkan through MoltenVK
+### ~~Metal directly, instead of Vulkan through MoltenVK~~
 
-macOS has no native Vulkan driver, so the viewport currently translates Vulkan
-onto Metal through MoltenVK. DiligentCore ships a `GraphicsEngineMetal`
-backend in the same source tree, so talking to Metal directly removes the
-translation layer and a runtime dependency, and gives control over the Metal
-features the renderer can use.
+Done: the viewport is drawn with Metal through `metal-cpp`, and the Vulkan,
+DiligentCore and MoltenVK stack is gone. See `docs/METAL-RENDERER.md`.
 
 ### A performance program
 
@@ -169,9 +166,9 @@ above, not a separate project.
 - a command palette, searching nodes, parameters and actions at once
 - documentation and tutorials, which the project has wanted from the start
 - versioned scene files, before scenes exist in the wild
-- renaming the `enzo::` C++ namespace and the `.enzo` scene extension to
-  match the project, so files stay interchangeable with the upstream project
-  only if that is a deliberate choice rather than an oversight
+- ~~versioning the node type namespace~~ done: nodes are published as `helix::<name>`, and
+  scenes storing the old `enzo::<name>` still load (`nt::normalizeTypeName`, removable once
+  old scenes are no longer supported)
 
 ---
 
@@ -182,7 +179,7 @@ The foundation first, because both tracks are blocked on it:
 1. keyframes and F-curves
 2. cook caching and dirty propagation
 3. the two tracks in parallel, each taking the items its own order lists
-4. Metal directly
+4. ~~Metal directly~~ done
 5. interchange and rendering, which are what make the tool usable outside its
    own ecosystem
 

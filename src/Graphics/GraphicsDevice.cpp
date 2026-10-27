@@ -1,274 +1,229 @@
-// The macOS and MoltenVK specifics of this file.
+// How the shaders are found.
 //
-// macOS has no Vulkan driver of its own. Every Vulkan device there comes from MoltenVK,
-// which translates Vulkan onto Metal, and that changes the calls below in these ways:
+// The shaders are compiled into `helix.metallib` at build time (see `CMakeLists.txt`), and the
+// library is looked for, in this order, at:
 //
-// 1. The Vulkan loader
-//    The engine opens the loader by its leaf name, which the dynamic loader finds through
-//    the run path of the program, through DYLD_LIBRARY_PATH or in the system folders. A
-//    macOS build tree keeps the loader in a folder of its own, so the loader has to be on
-//    the run path of the program or in /usr/local/lib for the engine to find it.
-//    prepareVulkanLoader() opens the loader the same way the engine opens it, so that the
-//    version it offers and the name of the driver can be read, and so that a host that
-//    keeps the loader elsewhere is told where the engine looks for it.
+// 1. the path the caller passes, which is the only place looked at when it is given;
+// 2. the path in the environment variable `HELIX_METALLIB`;
+// 3. `../Resources/helix.metallib` beside the executable, which is the Resources folder of
+//    the application bundle, and of the build tree, whose tests sit in `Contents/bin`;
+// 4. the path of the build tree, which is baked in as `HELIX_DEV_METALLIB`.
 //
-// 2. Diligent::IEngineFactoryVk::CreateDeviceAndContextsVk
-//    The engine holds back the errors it reports rather than throwing them, so a host
-//    that wants to name the reason of a missing device reads it from the last message.
-//    The messages below name MoltenVK and say what to install.
-//
-// 3. Diligent::EngineVkCreateInfo::GraphicsAPIVersion
-//    The version asked of the driver is the smaller of the one the loader offers and
-//    Vulkan 1.3, which is what the viewport draws with. A desktop driver usually offers
-//    more, and asking for it would let the engine take paths that MoltenVK does not
-//    reach. A loader that announces nothing is taken at Vulkan 1.0, which the
-//    extensions carry. MoltenVK 1.4.2 offers Vulkan 1.4.357, and the instance it makes
-//    for this program is a 1.3 one.
-//
-// 4. The instance extensions
-//    Diligent adds VK_KHR_portability_enumeration on macOS and sets
-//    VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR on the instance, which the Vulkan
-//    loader of 1.3.216 and later insists on before it lists a portability driver. The
-//    loader keeps that extension to itself and hands the driver the rest. Diligent's
-//    build defines VK_USE_PLATFORM_METAL_EXT on Apple, so it adds VK_EXT_metal_surface as
-//    well, which is what a surface of MoltenVK needs. The viewport draws into an image
-//    that the host samples rather than into a swap chain, so no surface is made here.
-//
-// 5. The device extensions
-//    Diligent asks for VK_KHR_swapchain whenever the instance carries VK_KHR_surface.
-//    MoltenVK has no swap chain of its own, but it answers the extension, so the device
-//    is created either way.
-//
-// 6. The device features
-//    Diligent asks only for the features the device reports, so the smaller feature set
-//    of MoltenVK needs nothing here.
-//
-// 7. The driver properties
-//    The name of the driver is only in the properties of the Vulkan device, which the
-//    engine does not hand out. The loader is asked for the calls that read them, and
-//    only when the device holds VK_KHR_driver_properties, which MoltenVK does.
+// A machine that lacks the offline Metal compiler cannot build the library. A development build
+// there still runs: when no library is found, the `.metal` sources in `HELIX_METAL_SHADER_DIR`
+// (or in the source tree, baked in as `HELIX_DEV_SHADER_DIR`) are compiled by the Metal runtime
+// instead. That costs some startup time and is never the way a packaged build runs.
 
 #include "Graphics/GraphicsDevice.h"
-#include "Graphics/DiligentObjects.h"
-#include "Graphics/VulkanCapabilities.h"
-#include "Graphics/VulkanLoader.h"
-#include <cstring>
-#include <iostream>
+
+#include <algorithm>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <mach-o/dyld.h>
+#include <sstream>
 #include <stdexcept>
 
-#include <CommandQueueVk.h>
-#include <EngineFactoryVk.h>
-#include <RenderDeviceVk.h>
-
-namespace enzo::gfx {
+namespace helix::gfx {
 
 namespace {
 
-GraphicsDevice* processDevice = nullptr;
+namespace fs = std::filesystem;
 
-/// @brief The last error the engine reported, kept to name it in the message of the host.
-std::string lastEngineError;
+constexpr const char* metallibName = "helix.metallib";
 
-/// @brief Prints Diligent's warnings and errors, and drops its info messages.
-void printDiligentMessage(
-    Diligent::DEBUG_MESSAGE_SEVERITY severity,
-    const Diligent::Char* message,
-    const Diligent::Char*,
-    const Diligent::Char*,
-    int
-)
+/// @brief Returns the text of NS::Error, or "unknown error" when there is none.
+std::string describeError(const NS::Error* error)
 {
-    if (severity == Diligent::DEBUG_MESSAGE_SEVERITY_INFO) return;
-    if (message) lastEngineError = message;
-    std::cerr << "graphics device: " << message << "\n";
+    if (!error || !error->localizedDescription()) return "unknown error";
+    return error->localizedDescription()->utf8String();
 }
 
-/// @brief Returns the entry point of the loader for a call of the instance.
-template <typename Function>
-Function getInstanceFunction(void* library, VkInstance instance, const char* name)
+/// @brief Returns the folder of the running executable, empty when it is unknown.
+fs::path getExecutableDir()
 {
-    const auto getInstanceProcAddr =
-        reinterpret_cast<PFN_vkGetInstanceProcAddr>(detail::findSymbol(library, "vkGetInstanceProcAddr"));
-    if (!getInstanceProcAddr) return nullptr;
-    return reinterpret_cast<Function>(getInstanceProcAddr(instance, name));
+    uint32_t size = 0;
+    _NSGetExecutablePath(nullptr, &size);
+    std::string buffer(size, '\0');
+    if (_NSGetExecutablePath(buffer.data(), &size) != 0) return {};
+    buffer.resize(std::char_traits<char>::length(buffer.c_str()));
+
+    std::error_code ignored;
+    const fs::path executable = fs::weakly_canonical(buffer, ignored);
+    return executable.parent_path();
 }
 
-/// @brief Returns the name the driver of the device gives itself.
+/// @brief Returns the places the metallib is looked for, in order.
+std::vector<fs::path> getMetallibCandidates()
+{
+    std::vector<fs::path> candidates;
+    if (const char* fromEnvironment = std::getenv("HELIX_METALLIB"); fromEnvironment && *fromEnvironment)
+        candidates.emplace_back(fromEnvironment);
+
+    const fs::path executableDir = getExecutableDir();
+    if (!executableDir.empty()) candidates.push_back(executableDir / ".." / "Resources" / metallibName);
+
+#ifdef HELIX_DEV_METALLIB
+    candidates.emplace_back(HELIX_DEV_METALLIB);
+#endif
+    return candidates;
+}
+
+/// @brief Returns the folder of the shader sources of a development build, empty when none is known.
+fs::path getShaderSourceDir()
+{
+    if (const char* fromEnvironment = std::getenv("HELIX_METAL_SHADER_DIR"); fromEnvironment && *fromEnvironment)
+        return fromEnvironment;
+#ifdef HELIX_DEV_SHADER_DIR
+    return HELIX_DEV_SHADER_DIR;
+#else
+    return {};
+#endif
+}
+
+/// @brief Returns the whole text of the file.
+std::string readFile(const fs::path& path)
+{
+    std::ifstream stream(path, std::ios::binary);
+    if (!stream) throw std::runtime_error("Could not read the shader file " + path.string());
+    std::ostringstream text;
+    text << stream.rdbuf();
+    return text.str();
+}
+
+/// @brief Compiles every `.metal` file of the folder with the Metal runtime compiler.
 ///
-/// The name is only in the driver properties, which the engine does not hand out, so the
-/// loader is asked for the calls that read them.
-std::string readDriverName(
-    const VulkanLoaderStatus& loader, Diligent::IRenderDevice* device, std::string& adapterDescription
-)
+/// The runtime compiler has no include path, so the include of `ShaderTypes.h` is replaced by
+/// the text of the file.
+std::vector<NS::SharedPtr<MTL::Library>> compileSources(MTL::Device* device, const fs::path& dir)
 {
-    adapterDescription = device->GetAdapterInfo().Description;
+    const std::string includeLine = "#include \"ShaderTypes.h\"";
+    const std::string sharedTypes = readFile(dir / "ShaderTypes.h");
 
-    if (!loader.library) return {};
-
-    Diligent::RefCntAutoPtr<Diligent::IRenderDeviceVk> vulkanDevice{
-        device, Diligent::IID_RenderDeviceVk
-    };
-    if (!vulkanDevice) return {};
-
-    const VkInstance instance = vulkanDevice->GetVkInstance();
-    const VkPhysicalDevice physicalDevice = vulkanDevice->GetVkPhysicalDevice();
-
-    // The driver properties are only read when the device holds the extension that carries
-    // them, since the driver would not know the structure otherwise.
-    const auto enumerateExtensions = getInstanceFunction<PFN_vkEnumerateDeviceExtensionProperties>(
-        loader.library, instance, "vkEnumerateDeviceExtensionProperties"
-    );
-    if (!enumerateExtensions) return {};
-
-    uint32_t extensionCount = 0;
-    if (enumerateExtensions(physicalDevice, nullptr, &extensionCount, nullptr) != VK_SUCCESS) return {};
-    std::vector<VkExtensionProperties> extensions(extensionCount);
-    if (enumerateExtensions(physicalDevice, nullptr, &extensionCount, extensions.data()) != VK_SUCCESS)
+    std::vector<fs::path> sources;
+    for (const fs::directory_entry& entry : fs::directory_iterator(dir))
     {
-        return {};
+        if (entry.path().extension() == ".metal") sources.push_back(entry.path());
     }
+    std::ranges::sort(sources);
 
-    bool hasDriverProperties = false;
-    for (const VkExtensionProperties& extension : extensions)
+    std::vector<NS::SharedPtr<MTL::Library>> libraries;
+    for (const fs::path& path : sources)
     {
-        if (std::strcmp(extension.extensionName, VK_KHR_DRIVER_PROPERTIES_EXTENSION_NAME) == 0)
+        std::string source = readFile(path);
+        if (const std::size_t at = source.find(includeLine); at != std::string::npos)
+            source.replace(at, includeLine.size(), sharedTypes);
+
+        NS::SharedPtr<MTL::CompileOptions> options = NS::TransferPtr(MTL::CompileOptions::alloc()->init());
+        options->setLanguageVersion(MTL::LanguageVersion3_0);
+
+        NS::Error* error = nullptr;
+        NS::SharedPtr<MTL::Library> library =
+            NS::TransferPtr(device->newLibrary(toNsString(source.c_str()), options.get(), &error));
+        if (!library)
         {
-            hasDriverProperties = true;
-            break;
+            throw std::runtime_error(
+                "Could not compile the shader " + path.filename().string() + ": " + describeError(error)
+            );
         }
+        libraries.push_back(library);
     }
-    if (!hasDriverProperties) return {};
-
-    auto getProperties2 = getInstanceFunction<PFN_vkGetPhysicalDeviceProperties2>(
-        loader.library, instance, "vkGetPhysicalDeviceProperties2"
-    );
-    if (!getProperties2)
-    {
-        getProperties2 = getInstanceFunction<PFN_vkGetPhysicalDeviceProperties2>(
-            loader.library, instance, "vkGetPhysicalDeviceProperties2KHR"
-        );
-    }
-    if (!getProperties2) return {};
-
-    VkPhysicalDeviceDriverProperties driverProperties{};
-    driverProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES;
-    VkPhysicalDeviceProperties2 properties{};
-    properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-    properties.pNext = &driverProperties;
-    getProperties2(physicalDevice, &properties);
-    return std::string(driverProperties.driverName);
+    return libraries;
 }
 
 } // namespace
 
-GraphicsDevice::GraphicsDevice(const std::vector<std::string>& instanceExtensions)
+bool GraphicsDevice::isMetalAvailable()
 {
-    if (processDevice)
-    {
-        throw std::runtime_error("A graphics device already exists in this process");
-    }
-
-    // Opens the loader the way the engine opens it, so that the version it offers and the
-    // name of the driver can be read, and so that a host that keeps the loader elsewhere
-    // says so.
-    loaderStatus_ = prepareVulkanLoader();
-    if (!loaderStatus_.loaded)
-    {
-        throw std::runtime_error(describeVulkanFailure(loaderStatus_, "the Vulkan loader could not be opened"));
-    }
-
-    std::vector<const char*> instanceExtensionNames;
-    for (const std::string& extension : instanceExtensions)
-    {
-        instanceExtensionNames.push_back(extension.c_str());
-    }
-
-    Diligent::EngineVkCreateInfo createInfo;
-    const uint32_t version = chooseVulkanVersion(loaderStatus_.version);
-    createInfo.GraphicsAPIVersion = {vulkanVersionMajor(version), vulkanVersionMinor(version)};
-    createInfo.InstanceExtensionCount = static_cast<Diligent::Uint32>(instanceExtensionNames.size());
-    createInfo.ppInstanceExtensionNames = instanceExtensionNames.data();
-
-    diligent_ = std::make_unique<DiligentObjects>();
-    Diligent::IEngineFactoryVk* factory = Diligent::GetEngineFactoryVk();
-    factory->SetMessageCallback(printDiligentMessage);
-    lastEngineError.clear();
-    try
-    {
-        factory->CreateDeviceAndContextsVk(createInfo, &diligent_->device, &diligent_->context);
-    }
-    catch (const std::runtime_error& error)
-    {
-        // The engine reports a driver that is missing or a device that cannot be made in
-        // a way that names neither the driver nor what to do about it.
-        throw std::runtime_error(describeVulkanFailure(loaderStatus_, error.what()));
-    }
-    if (!diligent_->device)
-    {
-        // The engine holds back its errors rather than throwing them, so the last one it
-        // reported is the reason of the failure.
-        const std::string reason = lastEngineError.empty() ? "the driver offered no device"
-                                                           : lastEngineError;
-        throw std::runtime_error(describeVulkanFailure(loaderStatus_, reason));
-    }
-
-    features_.driverName = readDriverName(loaderStatus_, diligent_->device, features_.adapterDescription);
-    features_.portabilityDriver = isPortabilityDriver(features_.driverName);
-
-    // The device runs the smaller of the version of the instance and the one the driver
-    // offers, which is the version the viewport draws with.
-    Diligent::RefCntAutoPtr<Diligent::IRenderDeviceVk> vulkanDevice{
-        diligent_->device, Diligent::IID_RenderDeviceVk
-    };
-    if (vulkanDevice) features_.apiVersion = vulkanDevice->GetVkVersion();
-
-    processDevice = this;
+    ScopedAutoreleasePool pool;
+    MTL::Device* device = MTL::CreateSystemDefaultDevice();
+    if (!device) return false;
+    device->release();
+    return true;
 }
 
-GraphicsDevice::~GraphicsDevice()
+GraphicsDevice::GraphicsDevice(MTL::Device* device, const std::string& shaderLibraryPath)
 {
-    diligent_->context->Flush();
-    diligent_->device->IdleGPU();
+    ScopedAutoreleasePool pool;
+    device_ = device ? NS::RetainPtr(device) : NS::TransferPtr(MTL::CreateSystemDefaultDevice());
+    if (!device_) throw std::runtime_error(noDeviceMessage);
 
-    processDevice = nullptr;
+    features_.deviceName = device_->name() ? device_->name()->utf8String() : "";
+    features_.unifiedMemory = device_->hasUnifiedMemory();
+    features_.appleGpu = device_->supportsFamily(MTL::GPUFamilyApple1);
+
+    loadLibraries(shaderLibraryPath);
 }
 
-GraphicsDevice& GraphicsDevice::get()
+GraphicsDevice::~GraphicsDevice() = default;
+
+MTL::CommandQueue* GraphicsDevice::getCommandQueue()
 {
-    if (!processDevice)
+    if (!commandQueue_)
     {
-        throw std::runtime_error("No graphics device exists in this process");
+        commandQueue_ = NS::TransferPtr(device_->newCommandQueue());
+        if (!commandQueue_) throw std::runtime_error("The Metal device could not make a command queue");
     }
-    return *processDevice;
+    return commandQueue_.get();
 }
 
-const std::string& GraphicsDevice::getLastEngineError() { return lastEngineError; }
-
-void GraphicsDevice::clearLastEngineError() { lastEngineError.clear(); }
-
-GraphicsDevice::DiligentObjects& GraphicsDevice::getDiligentObjects() const { return *diligent_; }
-
-VulkanHandles GraphicsDevice::getVulkanHandles() const
+NS::SharedPtr<MTL::Function> GraphicsDevice::getFunction(const char* name) const
 {
-    Diligent::RefCntAutoPtr<Diligent::IRenderDeviceVk> vulkanDevice{
-        diligent_->device, Diligent::IID_RenderDeviceVk
-    };
-
-    // Takes the queue from the context, since every context shares the one queue Diligent creates.
-    Diligent::ICommandQueue* queue = diligent_->context->LockCommandQueue();
-    Diligent::RefCntAutoPtr<Diligent::ICommandQueueVk> vulkanQueue{
-        queue, Diligent::IID_CommandQueueVk
-    };
-    VulkanHandles vulkanHandles;
-    vulkanHandles.queue = vulkanQueue->GetVkQueue();
-    vulkanHandles.queueFamilyIndex = vulkanQueue->GetQueueFamilyIndex();
-    diligent_->context->UnlockCommandQueue();
-
-    vulkanHandles.instance = vulkanDevice->GetVkInstance();
-    vulkanHandles.physicalDevice = vulkanDevice->GetVkPhysicalDevice();
-    vulkanHandles.device = vulkanDevice->GetVkDevice();
-    vulkanHandles.apiVersion = vulkanDevice->GetVkVersion();
-    return vulkanHandles;
+    ScopedAutoreleasePool pool;
+    for (const NS::SharedPtr<MTL::Library>& library : libraries_)
+    {
+        // newFunction returns an object the caller owns, or null when the library lacks the name.
+        if (MTL::Function* function = library->newFunction(toNsString(name)))
+            return NS::TransferPtr(function);
+    }
+    return {};
 }
 
-} // namespace enzo::gfx
+void GraphicsDevice::loadLibraries(const std::string& shaderLibraryPath)
+{
+    // A path the caller names is the only place looked at, so a typo is an error rather than
+    // a silent fall back on another library.
+    std::vector<fs::path> candidates;
+    if (!shaderLibraryPath.empty())
+        candidates.emplace_back(shaderLibraryPath);
+    else
+        candidates = getMetallibCandidates();
+
+    std::string tried;
+    for (const fs::path& candidate : candidates)
+    {
+        std::error_code ignored;
+        if (!fs::is_regular_file(candidate, ignored))
+        {
+            tried += "\n  " + candidate.lexically_normal().string();
+            continue;
+        }
+
+        NS::Error* error = nullptr;
+        NS::SharedPtr<MTL::Library> library =
+            NS::TransferPtr(device_->newLibrary(toNsString(candidate.c_str()), &error));
+        if (!library)
+        {
+            throw std::runtime_error(
+                "Could not load the shaders from " + candidate.string() + ": " + describeError(error)
+            );
+        }
+        libraries_.push_back(library);
+        return;
+    }
+
+    // A development build without a compiled library compiles the sources instead.
+    const fs::path sourceDir = shaderLibraryPath.empty() ? getShaderSourceDir() : fs::path();
+    std::error_code ignored;
+    if (!sourceDir.empty() && fs::is_directory(sourceDir, ignored))
+    {
+        libraries_ = compileSources(device_.get(), sourceDir);
+        return;
+    }
+
+    throw std::runtime_error(
+        std::string("The shader library ") + metallibName + " was not found. Looked at:" + tried
+    );
+}
+
+} // namespace helix::gfx

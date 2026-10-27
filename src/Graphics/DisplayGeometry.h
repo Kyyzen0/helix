@@ -6,11 +6,11 @@
 #include <string>
 #include <vector>
 
-namespace enzo {
+namespace helix {
 class NodePacket;
 }
 
-namespace enzo::gfx {
+namespace helix::gfx {
 
 /// @brief The index lists that say how display vertices join up.
 struct DisplayTopology
@@ -50,4 +50,4 @@ struct DisplayGeometry
  */
 void buildDisplayGeometry(DisplayGeometry& geometry, const NodePacket& packet);
 
-} // namespace enzo::gfx
+} // namespace helix::gfx

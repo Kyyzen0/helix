@@ -6,7 +6,7 @@
 # is needed on a machine where the archive carries files that cannot be
 # written, such as git and editor metadata.
 #
-#   enzo_add_archive_dependency(<name>
+#   helix_add_archive_dependency(<name>
 #       URL <url>
 #       URL_HASH <hash>
 #       [DEPENDS <dep>...]
@@ -15,14 +15,14 @@
 
 include(ExternalProject)
 
-function(enzo_add_archive_dependency name)
+function(helix_add_archive_dependency name)
     cmake_parse_arguments(ARG "" "URL;URL_HASH" "DEPENDS;CMAKE_ARGS" ${ARGN})
 
     if(ARG_UNPARSED_ARGUMENTS)
-        message(FATAL_ERROR "enzo_add_archive_dependency: unknown arguments ${ARG_UNPARSED_ARGUMENTS}")
+        message(FATAL_ERROR "helix_add_archive_dependency: unknown arguments ${ARG_UNPARSED_ARGUMENTS}")
     endif()
 
-    set(source "${ENZO_SOURCE_ROOT}/${name}")
+    set(source "${HELIX_SOURCE_ROOT}/${name}")
 
     if(EXISTS "${source}/CMakeLists.txt")
         message(STATUS "Building ${name} from the source in ${source}")

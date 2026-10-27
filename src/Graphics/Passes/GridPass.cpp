@@ -1,10 +1,8 @@
 #include "Graphics/Passes/GridPass.h"
-#include "Graphics/Passes/PassSetup.h"
-#include "Graphics/Shaders/Grid.h"
 #include <glm/vec3.hpp>
 #include <vector>
 
-namespace enzo::gfx {
+namespace helix::gfx {
 
 namespace {
 
@@ -32,51 +30,34 @@ std::vector<glm::vec3> buildGridVertices()
 
 } // namespace
 
-GridPass::GridPass(
-    Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants, Diligent::Uint8 sampleCount
-)
+GridPass::GridPass(GraphicsDevice& device, NS::UInteger sampleCount)
 {
-    // Vertex buffer
-    vertices_ = createGpuArray(device, "Grid vertices", Diligent::BIND_VERTEX_BUFFER, buildGridVertices());
+    ScopedAutoreleasePool pool;
+    vertices_ = createGpuArray(device.getDevice(), "Grid vertices", buildGridVertices());
 
-    // Pipeline
-    Diligent::GraphicsPipelineStateCreateInfo pipelineInfo;
-    pipelineInfo.PSODesc.Name = "Grid";
+    // Reads the position from vertex buffer 0.
+    MTL::VertexDescriptor* layout = MTL::VertexDescriptor::vertexDescriptor();
+    addVertexAttribute(layout, 0, MTL::VertexFormatFloat3, 0, 0);
+    addVertexBuffer(layout, 0, sizeof(glm::vec3), false);
 
-    Diligent::GraphicsPipelineDesc& graphics = pipelineInfo.GraphicsPipeline;
-    graphics.PrimitiveTopology = Diligent::PRIMITIVE_TOPOLOGY_LINE_LIST;
-    graphics.RasterizerDesc.CullMode = Diligent::CULL_MODE_NONE;
+    PipelineSettings settings;
+    settings.name = "Grid";
+    settings.vertexFunction = "gridVertex";
+    settings.fragmentFunction = "gridFragment";
+    settings.topology = MTL::PrimitiveTopologyClassLine;
+    settings.vertexLayout = layout;
     // Skips the depth test and write so the mesh always draws over the grid.
-    graphics.DepthStencilDesc.DepthEnable = false;
-
-    // Blends the faded lines over the background and leaves the target opaque.
-    Diligent::RenderTargetBlendDesc& blend = graphics.BlendDesc.RenderTargets[0];
-    blend.BlendEnable = true;
-    blend.SrcBlend = Diligent::BLEND_FACTOR_SRC_ALPHA;
-    blend.DestBlend = Diligent::BLEND_FACTOR_INV_SRC_ALPHA;
-    blend.RenderTargetWriteMask = Diligent::COLOR_MASK_RGB;
-
-    const Diligent::LayoutElement positionElement{0, 0, 3, Diligent::VT_FLOAT32, false};
-    graphics.InputLayout.LayoutElements = &positionElement;
-    graphics.InputLayout.NumElements = 1;
-
-    Diligent::RefCntAutoPtr<Diligent::IShader> vertexShader =
-        createShader(device, shaders::gridSource, Diligent::SHADER_TYPE_VERTEX, "vertexMain");
-    Diligent::RefCntAutoPtr<Diligent::IShader> pixelShader =
-        createShader(device, shaders::gridSource, Diligent::SHADER_TYPE_PIXEL, "pixelMain");
-    pipelineInfo.pVS = vertexShader;
-    pipelineInfo.pPS = pixelShader;
-    pipeline_ = createPipeline(device, pipelineInfo, frameConstants, sampleCount);
+    settings.depthCompare = MTL::CompareFunctionAlways;
+    settings.depthWrite = false;
+    settings.blendOver = true;
+    pipeline_ = createPipeline(device, settings, sampleCount);
 }
 
-void GridPass::draw(Diligent::IDeviceContext* context)
+void GridPass::draw(MTL::RenderCommandEncoder* encoder)
 {
-    setVertexBuffers(context, {vertices_.buffer});
-    setPipeline(context, pipeline_);
-
-    Diligent::DrawAttribs drawAttribs;
-    drawAttribs.NumVertices = vertices_.count;
-    context->Draw(drawAttribs);
+    bindPipeline(encoder, pipeline_);
+    encoder->setVertexBuffer(vertices_.buffer.get(), 0, 0);
+    encoder->drawPrimitives(MTL::PrimitiveTypeLine, NS::UInteger(0), NS::UInteger(vertices_.count));
 }
 
-} // namespace enzo::gfx
+} // namespace helix::gfx

@@ -4,7 +4,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
-namespace enzo::gfx {
+namespace helix::gfx {
 
 /// @brief The camera a viewport looks through, orbiting a centre point.
 class ViewportCamera
@@ -52,4 +52,4 @@ class ViewportCamera
     float pitch_ = glm::radians(20.f);
 };
 
-} // namespace enzo::gfx
+} // namespace helix::gfx

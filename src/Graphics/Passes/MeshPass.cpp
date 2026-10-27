@@ -1,142 +1,102 @@
 #include "Graphics/Passes/MeshPass.h"
-#include "Graphics/Passes/PassSetup.h"
-#include "Graphics/Shaders/Mesh.h"
+#include <glm/vec3.hpp>
 
-namespace enzo::gfx {
+namespace helix::gfx {
 
 namespace {
 
-/// @brief The parts that differ between the pipelines of the mesh pass.
-struct PipelineSettings
-{
-    const char* name;
-    Diligent::PRIMITIVE_TOPOLOGY topology;
-    Diligent::IShader* pixelShader;
-    /// @brief Whether the faces get a depth bias so the wireframe draws on top.
-    bool pushedBack;
-};
-
 Pipeline createMeshPipeline(
-    Diligent::IRenderDevice* device,
-    Diligent::IBuffer* frameConstants,
-    Diligent::IShader* vertexShader,
-    Diligent::Uint8 sampleCount,
-    const PipelineSettings& settings,
-    bool depthOnly = false
+    GraphicsDevice& device,
+    MTL::VertexDescriptor* layout,
+    NS::UInteger sampleCount,
+    const char* name,
+    const char* fragmentFunction,
+    MTL::PrimitiveTopologyClass topology,
+    bool pushedBack
 )
 {
-    Diligent::GraphicsPipelineStateCreateInfo pipelineInfo;
-    pipelineInfo.PSODesc.Name = settings.name;
-
-    Diligent::GraphicsPipelineDesc& graphics = pipelineInfo.GraphicsPipeline;
-    graphics.PrimitiveTopology = settings.topology;
-    graphics.RasterizerDesc.CullMode = Diligent::CULL_MODE_NONE;
-    graphics.DepthStencilDesc.DepthFunc = Diligent::COMPARISON_FUNC_LESS_EQUAL;
-    if (settings.pushedBack)
+    PipelineSettings settings;
+    settings.name = name;
+    settings.vertexFunction = "meshVertex";
+    settings.fragmentFunction = fragmentFunction;
+    settings.topology = topology;
+    settings.vertexLayout = layout;
+    settings.depthCompare = MTL::CompareFunctionLessEqual;
+    if (pushedBack)
     {
-        graphics.RasterizerDesc.DepthBias = 1;
-        graphics.RasterizerDesc.SlopeScaledDepthBias = 1.f;
+        // Pushes the faces back so the wireframe draws on top.
+        settings.depthBias = 1.f;
+        settings.slopeScaledDepthBias = 1.f;
     }
-
-    // Reads positions from buffer slot 0 and normals from slot 1.
-    const Diligent::LayoutElement layoutElements[] = {
-        {0, 0, 3, Diligent::VT_FLOAT32, false},
-        {1, 1, 3, Diligent::VT_FLOAT32, false},
-    };
-    graphics.InputLayout.LayoutElements = layoutElements;
-    graphics.InputLayout.NumElements = 2;
-
-    pipelineInfo.pVS = vertexShader;
-    pipelineInfo.pPS = settings.pixelShader;
-    return createPipeline(device, pipelineInfo, frameConstants, sampleCount, depthOnly);
+    return createPipeline(device, settings, sampleCount);
 }
 
 } // namespace
 
-MeshPass::MeshPass(
-    Diligent::IRenderDevice* device, Diligent::IBuffer* frameConstants, Diligent::Uint8 sampleCount
-)
+MeshPass::MeshPass(GraphicsDevice& device, NS::UInteger sampleCount)
 {
-    Diligent::RefCntAutoPtr<Diligent::IShader> vertexShader =
-        createShader(device, shaders::meshSource, Diligent::SHADER_TYPE_VERTEX, "vertexMain");
-    Diligent::RefCntAutoPtr<Diligent::IShader> shadedPixelShader =
-        createShader(device, shaders::meshSource, Diligent::SHADER_TYPE_PIXEL, "shadedPixelMain");
-    Diligent::RefCntAutoPtr<Diligent::IShader> wireframePixelShader =
-        createShader(device, shaders::meshSource, Diligent::SHADER_TYPE_PIXEL, "wireframePixelMain");
+    ScopedAutoreleasePool pool;
+
+    // Reads positions from vertex buffer 0 and normals from buffer 1.
+    MTL::VertexDescriptor* layout = MTL::VertexDescriptor::vertexDescriptor();
+    addVertexAttribute(layout, 0, MTL::VertexFormatFloat3, 0, 0);
+    addVertexBuffer(layout, 0, sizeof(glm::vec3), false);
+    addVertexAttribute(layout, 1, MTL::VertexFormatFloat3, 0, 1);
+    addVertexBuffer(layout, 1, sizeof(glm::vec3), false);
 
     // The prepass fills the depth of the mesh before it is shaded, so that the pixels a
     // face hides are never shaded at all. It takes the same depth bias as the faces, so
     // that the depth it writes is the depth the faces are drawn at.
     depthPrepassPipeline_ = createMeshPipeline(
-        device,
-        frameConstants,
-        vertexShader,
-        sampleCount,
-        {"Mesh depth prepass", Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, nullptr, true},
-        /*depthOnly = */ true
+        device, layout, sampleCount, "Mesh depth prepass", nullptr, MTL::PrimitiveTopologyClassTriangle, true
     );
     shadedTrianglePipeline_ = createMeshPipeline(
-        device,
-        frameConstants,
-        vertexShader,
-        sampleCount,
-        {"Mesh faces", Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shadedPixelShader, true}
+        device, layout, sampleCount, "Mesh faces", "meshShadedFragment", MTL::PrimitiveTopologyClassTriangle, true
     );
     shadedLinePipeline_ = createMeshPipeline(
-        device,
-        frameConstants,
-        vertexShader,
-        sampleCount,
-        {"Mesh open faces", Diligent::PRIMITIVE_TOPOLOGY_LINE_LIST, shadedPixelShader, false}
+        device, layout, sampleCount, "Mesh open faces", "meshShadedFragment", MTL::PrimitiveTopologyClassLine, false
     );
     wireframePipeline_ = createMeshPipeline(
-        device,
-        frameConstants,
-        vertexShader,
-        sampleCount,
-        {"Mesh wireframe", Diligent::PRIMITIVE_TOPOLOGY_LINE_LIST, wireframePixelShader, false}
+        device, layout, sampleCount, "Mesh wireframe", "meshWireframeFragment", MTL::PrimitiveTopologyClassLine, false
     );
 }
 
-void MeshPass::upload(Diligent::IRenderDevice* device, const DisplayGeometry& geometry)
+void MeshPass::upload(MTL::Device* device, const DisplayGeometry& geometry)
 {
     const DisplayTopology& topology = geometry.topology;
-    positions_ = createGpuArray(device, "Mesh positions", Diligent::BIND_VERTEX_BUFFER, geometry.positions);
-    normals_ = createGpuArray(device, "Mesh normals", Diligent::BIND_VERTEX_BUFFER, geometry.normals);
+    positions_ = createGpuArray(device, "Mesh positions", geometry.positions);
+    normals_ = createGpuArray(device, "Mesh normals", geometry.normals);
 
-    triangleIndices_ =
-        createGpuArray(device, "Mesh triangles", Diligent::BIND_INDEX_BUFFER, topology.triangleIndices);
-    edgeIndices_ = createGpuArray(device, "Mesh edges", Diligent::BIND_INDEX_BUFFER, topology.edgeIndices);
-    lineIndices_ = createGpuArray(device, "Mesh open faces", Diligent::BIND_INDEX_BUFFER, topology.lineIndices);
+    triangleIndices_ = createGpuArray(device, "Mesh triangles", topology.triangleIndices);
+    edgeIndices_ = createGpuArray(device, "Mesh edges", topology.edgeIndices);
+    lineIndices_ = createGpuArray(device, "Mesh open faces", topology.lineIndices);
 }
 
-void MeshPass::draw(Diligent::IDeviceContext* context, bool wireframeVisible)
+void MeshPass::draw(MTL::RenderCommandEncoder* encoder, bool wireframeVisible)
 {
-    if (!positions_.buffer) return;
+    if (!positions_.buffer || !normals_.buffer) return;
 
-    setVertexBuffers(context, {positions_.buffer, normals_.buffer});
+    encoder->setVertexBuffer(positions_.buffer.get(), 0, 0);
+    encoder->setVertexBuffer(normals_.buffer.get(), 0, 1);
 
     // The depth of the mesh is filled first, so that the pixels a face hides are not
     // shaded.
-    drawIndexed(context, depthPrepassPipeline_, triangleIndices_);
-    drawIndexed(context, shadedTrianglePipeline_, triangleIndices_);
-    drawIndexed(context, shadedLinePipeline_, lineIndices_);
-    if (wireframeVisible) drawIndexed(context, wireframePipeline_, edgeIndices_);
+    drawIndexed(encoder, depthPrepassPipeline_, MTL::PrimitiveTypeTriangle, triangleIndices_);
+    drawIndexed(encoder, shadedTrianglePipeline_, MTL::PrimitiveTypeTriangle, triangleIndices_);
+    drawIndexed(encoder, shadedLinePipeline_, MTL::PrimitiveTypeLine, lineIndices_);
+    if (wireframeVisible) drawIndexed(encoder, wireframePipeline_, MTL::PrimitiveTypeLine, edgeIndices_);
 }
 
 void MeshPass::drawIndexed(
-    Diligent::IDeviceContext* context, const Pipeline& pipeline, const GpuArray& indices
+    MTL::RenderCommandEncoder* encoder, const Pipeline& pipeline, MTL::PrimitiveType type, const GpuArray& indices
 )
 {
     if (!indices.buffer) return;
 
-    context->SetIndexBuffer(indices.buffer, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    setPipeline(context, pipeline);
-
-    Diligent::DrawIndexedAttribs drawAttribs;
-    drawAttribs.NumIndices = indices.count;
-    drawAttribs.IndexType = Diligent::VT_UINT32;
-    context->DrawIndexed(drawAttribs);
+    bindPipeline(encoder, pipeline);
+    encoder->drawIndexedPrimitives(
+        type, NS::UInteger(indices.count), MTL::IndexTypeUInt32, indices.buffer.get(), NS::UInteger(0)
+    );
 }
 
-} // namespace enzo::gfx
+} // namespace helix::gfx

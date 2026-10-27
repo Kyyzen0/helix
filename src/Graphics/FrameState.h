@@ -7,7 +7,7 @@
 #include <memory>
 #include <optional>
 
-namespace enzo::gfx {
+namespace helix::gfx {
 
 /// @brief Everything one viewport frame is drawn from.
 struct FrameState
@@ -30,4 +30,4 @@ struct FrameState
     bool operator==(const FrameState&) const = default;
 };
 
-} // namespace enzo::gfx
+} // namespace helix::gfx

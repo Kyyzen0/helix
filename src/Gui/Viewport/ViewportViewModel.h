@@ -5,7 +5,7 @@
 #include <boost/signals2/connection.hpp>
 #include <memory>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 /// @brief The view model that turns the display node's output into viewport geometry.
 class ViewportViewModel : public QObject
@@ -43,4 +43,4 @@ class ViewportViewModel : public QObject
     boost::signals2::scoped_connection networkClearedSubscription_;
 };
 
-} // namespace enzo::ui
+} // namespace helix::ui

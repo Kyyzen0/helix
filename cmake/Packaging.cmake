@@ -1,87 +1,30 @@
-# Turns the installed tree into RPM, DEB, tar.gz, MSI, EXE installer and ZIP
-# packages, and gathers the Qt and third party libraries the application loads
-# at runtime.
+# Turns the installed tree into a tar.gz package of the application bundle, and
+# gathers the Qt and third party libraries the application loads at runtime.
 
-set(CPACK_PROJECT_CONFIG_FILE ${CMAKE_SOURCE_DIR}/cmake/CPackProjectConfig.cmake)
-
-if(WIN32)
-    set(CPACK_GENERATOR "WIX;NSIS;ZIP")
-elseif(APPLE)
-    set(CPACK_GENERATOR "TGZ")
-else()
-    set(CPACK_GENERATOR "RPM;DEB;TGZ")
-endif()
+set(CPACK_GENERATOR "TGZ")
 
 set(CPACK_PACKAGE_NAME Helix)
-set(CPACK_PACKAGE_VENDOR "Enzo Software")
+set(CPACK_PACKAGE_VENDOR "The Helix contributors")
 set(CPACK_PACKAGE_CONTACT "Parker Britt <parker@parkerbritt.com>")
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/Kyyzen0/helix")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Node based procedural 3D modeling framework")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "Helix")
-# The WiX generator only accepts a licence with a .txt or .rtf extension.
 configure_file(${CMAKE_SOURCE_DIR}/LICENSE ${CMAKE_BINARY_DIR}/LICENSE.txt COPYONLY)
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_BINARY_DIR}/LICENSE.txt)
 set(CPACK_PACKAGE_EXECUTABLES ${AppExec} "Helix")
 set(CPACK_STRIP_FILES ON)
 
-# Names the archive and package files after the platform they were built for,
-# so artifacts from every job can sit in one release.
-if(WIN32)
-    set(CPACK_SYSTEM_NAME windows-${CMAKE_SYSTEM_PROCESSOR})
-elseif(APPLE)
-    set(CPACK_SYSTEM_NAME macos-${CMAKE_SYSTEM_PROCESSOR})
-else()
-    set(CPACK_SYSTEM_NAME linux-${CMAKE_SYSTEM_PROCESSOR})
-endif()
-
-# Brands the Windows executable and both installers with the app icon and the
-# header and welcome images.
-if(WIN32)
-    set(ENZO_WINDOWS_PACKAGING_DIR "${CMAKE_SOURCE_DIR}/packaging/windows")
-    set(ENZO_WINDOWS_ICON "${ENZO_WINDOWS_PACKAGING_DIR}/enzo.ico")
-
-    configure_file(${ENZO_WINDOWS_PACKAGING_DIR}/enzo.rc.in ${CMAKE_BINARY_DIR}/enzo.rc)
-    target_sources(${AppExec} PRIVATE ${CMAKE_BINARY_DIR}/enzo.rc)
-
-    # Offers to run the launcher when the installer finishes, and shows its
-    # icon in the installed programs list.
-    set(CPACK_NSIS_MUI_FINISHPAGE_RUN "${AppExec}.exe")
-    # Writes the backslash as four, since CPack copies the value into its
-    # config file without escaping it.
-    set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\${AppExec}.exe")
-
-    # Doubles the backslashes of the NSIS image paths, since makensis needs
-    # native paths and CPack copies the values into its config file unescaped.
-    file(TO_NATIVE_PATH "${ENZO_WINDOWS_PACKAGING_DIR}" ENZO_NSIS_PACKAGING_DIR)
-    string(REPLACE "\\" "\\\\" ENZO_NSIS_PACKAGING_DIR "${ENZO_NSIS_PACKAGING_DIR}")
-
-    set(CPACK_NSIS_IGNORE_LICENSE_PAGE ON)
-    set(CPACK_NSIS_MUI_ICON "${ENZO_NSIS_PACKAGING_DIR}\\\\enzo.ico")
-    set(CPACK_NSIS_MUI_UNIICON "${ENZO_NSIS_PACKAGING_DIR}\\\\enzo.ico")
-    set(CPACK_NSIS_MUI_HEADERIMAGE "${ENZO_NSIS_PACKAGING_DIR}\\\\nsis-header.bmp")
-    set(CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP "${ENZO_NSIS_PACKAGING_DIR}\\\\nsis-welcome.bmp")
-    set(CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP "${ENZO_NSIS_PACKAGING_DIR}\\\\nsis-welcome.bmp")
-
-    set(CPACK_WIX_PRODUCT_ICON "${ENZO_WINDOWS_ICON}")
-    set(CPACK_WIX_UI_BANNER "${ENZO_WINDOWS_PACKAGING_DIR}/wix-banner.bmp")
-    set(CPACK_WIX_UI_DIALOG "${ENZO_WINDOWS_PACKAGING_DIR}/wix-dialog.bmp")
-    set(CPACK_WIX_UI_REF EnzoUI_InstallDir)
-    set(CPACK_WIX_EXTRA_SOURCES "${ENZO_WINDOWS_PACKAGING_DIR}/EnzoUI.wxs")
-endif()
+# Names the archive after the platform it was built for.
+set(CPACK_SYSTEM_NAME macos-${CMAKE_SYSTEM_PROCESSOR})
 
 # The executable sits one folder deeper than the libraries, so it reaches them
 # through the folder above it.
-if(APPLE)
-    # A bundle keeps its executable in MacOS and its libraries in Frameworks and
-    # lib, both of which sit next to MacOS inside Contents.
-    set_target_properties(${AppExec} PROPERTIES
-        INSTALL_RPATH "@loader_path/../Frameworks;@loader_path/../lib"
-    )
-else()
-    set_target_properties(${AppExec} PROPERTIES
-        INSTALL_RPATH "$ORIGIN/../lib;$ORIGIN/../../lib"
-    )
-endif()
+#
+# A bundle keeps its executable in MacOS and its libraries in Frameworks and
+# lib, both of which sit next to MacOS inside Contents.
+set_target_properties(${AppExec} PROPERTIES
+    INSTALL_RPATH "@loader_path/../Frameworks;@loader_path/../lib"
+)
 
 include(CPack)
 
@@ -89,128 +32,82 @@ include(CPack)
 # time, along with a qt.conf pointing at them.
 qt_generate_deploy_qml_app_script(
     TARGET ${AppExec}
-    OUTPUT_SCRIPT ENZO_QT_DEPLOY_SCRIPT
+    OUTPUT_SCRIPT HELIX_QT_DEPLOY_SCRIPT
 )
 
 # Sets the destinations in the install script itself, since Qt reads them when
 # the deployment runs rather than when it is generated.
-if(APPLE)
-    # A bundle keeps its frameworks, plugins and resources in the folders the
-    # system expects to find them in.
-    install(CODE "
-        set(QT_DEPLOY_BIN_DIR \"${ENZO_BIN_DIR}\")
-        set(QT_DEPLOY_LIB_DIR \"${ENZO_APP_DIR}Frameworks\")
-        set(QT_DEPLOY_LIBEXEC_DIR \"${ENZO_APP_DIR}Helpers\")
-        set(QT_DEPLOY_PLUGINS_DIR \"${ENZO_APP_DIR}PlugIns\")
-        set(QT_DEPLOY_QML_DIR \"${ENZO_APP_DIR}Resources/qml\")
-        set(QT_DEPLOY_TRANSLATIONS_DIR \"${ENZO_APP_DIR}Resources/translations\")
-    ")
-else()
-    install(CODE "
-        set(QT_DEPLOY_BIN_DIR \"${ENZO_BIN_DIR}\")
-        set(QT_DEPLOY_LIB_DIR \"${ENZO_LIB_DIR}\")
-        set(QT_DEPLOY_LIBEXEC_DIR \"${ENZO_APP_DIR}libexec\")
-        set(QT_DEPLOY_PLUGINS_DIR \"${ENZO_APP_DIR}plugins\")
-        set(QT_DEPLOY_QML_DIR \"${ENZO_APP_DIR}qml\")
-        set(QT_DEPLOY_TRANSLATIONS_DIR \"${ENZO_APP_DIR}translations\")
-    ")
-endif()
-install(SCRIPT ${ENZO_QT_DEPLOY_SCRIPT})
+#
+# A bundle keeps its frameworks, plugins and resources in the folders the
+# system expects to find them in.
+install(CODE "
+    set(QT_DEPLOY_BIN_DIR \"${HELIX_BIN_DIR}\")
+    set(QT_DEPLOY_LIB_DIR \"${HELIX_APP_DIR}Frameworks\")
+    set(QT_DEPLOY_LIBEXEC_DIR \"${HELIX_APP_DIR}Helpers\")
+    set(QT_DEPLOY_PLUGINS_DIR \"${HELIX_APP_DIR}PlugIns\")
+    set(QT_DEPLOY_QML_DIR \"${HELIX_APP_DIR}Resources/qml\")
+    set(QT_DEPLOY_TRANSLATIONS_DIR \"${HELIX_APP_DIR}Resources/translations\")
+")
+install(SCRIPT ${HELIX_QT_DEPLOY_SCRIPT})
 
-# Installs enzo's own binaries after the Qt deployment, so they land with their
+# Installs helix's own binaries after the Qt deployment, so they land with their
 # install runpath.
-if(APPLE)
-    # The bundle carries the executable, so it is installed as a whole into the
-    # folder the bundle belongs in.
-    install(TARGETS ${AppExec} enzoEngine
-        RUNTIME_DEPENDENCY_SET enzoRuntime
-        BUNDLE DESTINATION ${ENZO_BUNDLE_DIR}
-        LIBRARY DESTINATION ${ENZO_LIB_DIR}
-        ARCHIVE DESTINATION ${ENZO_LIB_DIR}
-    )
+#
+# The bundle carries the executable, so it is installed as a whole into the
+# folder the bundle belongs in.
+install(TARGETS ${AppExec} helixEngine
+    RUNTIME_DEPENDENCY_SET helixRuntime
+    BUNDLE DESTINATION ${HELIX_BUNDLE_DIR}
+    LIBRARY DESTINATION ${HELIX_LIB_DIR}
+    ARCHIVE DESTINATION ${HELIX_LIB_DIR}
+)
+
+# The compiled viewport shaders, which the renderer loads from the Resources folder of the
+# bundle. Their absence is an error at install time, since a bundle without them cannot draw.
+if(HELIX_HAS_METAL_COMPILER)
+    install(FILES ${HELIX_METALLIB} DESTINATION ${HELIX_APP_DIR}Resources)
 else()
-    install(TARGETS ${AppExec} enzoEngine
-        RUNTIME_DEPENDENCY_SET enzoRuntime
-        RUNTIME DESTINATION ${ENZO_BIN_DIR}
-        LIBRARY DESTINATION ${ENZO_LIB_DIR}
-        ARCHIVE DESTINATION ${ENZO_LIB_DIR}
-    )
+    install(CODE "message(FATAL_ERROR \"The bundle needs helix.metallib, which this build did not compile\")")
 endif()
 
-# Installs the remaining shared dependencies by reading the imports of the
-# installed binaries, since windeployqt brings only Qt.
-if(WIN32)
-    set(ENZO_DEP_BIN_DIRS "")
-    foreach(prefix IN LISTS CMAKE_PREFIX_PATH)
-        list(APPEND ENZO_DEP_BIN_DIRS "${prefix}/bin")
-    endforeach()
-
-    install(RUNTIME_DEPENDENCY_SET enzoRuntime
-        DIRECTORIES ${ENZO_DEP_BIN_DIRS}
-        # Enzo's own libraries have their own install rules. The api-ms and
-        # ext-ms names are Windows api sets rather than files on disk.
-        PRE_EXCLUDE_REGEXES "^enzo.*\\.dll$" "api-ms-" "ext-ms-"
-        POST_EXCLUDE_REGEXES "[Ss]ystem32"
-        RUNTIME DESTINATION ${ENZO_BIN_DIR}
-    )
-elseif(APPLE)
-    # The shared libraries the dependencies built, so the bundle carries them
-    # and the loader finds them next to the libraries enzo itself installed.
-    #
-    # The Qt libraries are left out, since the Qt deployment copies them into
-    # the bundle's own framework folder.
-    set(ENZO_DEP_LIB_FILES "")
-    if(ENZO_DEPS_PREFIX)
-        file(GLOB ENZO_DEP_LIB_FILES "${ENZO_DEPS_PREFIX}/lib/*.dylib")
-    endif()
-    if(ENZO_DEP_LIB_FILES)
-        install(FILES ${ENZO_DEP_LIB_FILES} DESTINATION ${ENZO_LIB_DIR})
-    endif()
+# The shared libraries the dependencies built, so the bundle carries them and
+# the loader finds them next to the libraries helix itself installed.
+#
+# The Qt libraries are left out, since the Qt deployment copies them into the
+# bundle's own framework folder.
+set(HELIX_DEP_LIB_FILES "")
+if(HELIX_DEPS_PREFIX)
+    file(GLOB HELIX_DEP_LIB_FILES "${HELIX_DEPS_PREFIX}/lib/*.dylib")
+endif()
+if(HELIX_DEP_LIB_FILES)
+    install(FILES ${HELIX_DEP_LIB_FILES} DESTINATION ${HELIX_LIB_DIR})
 endif()
 
-
-# Puts the launcher on PATH, so the desktop entry and a shell both reach it by
-# name.
-if(UNIX)
-    install(CODE "
-        set(root \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
-        file(MAKE_DIRECTORY \"\${root}/bin\")
-        file(REMOVE \"\${root}/bin/${AppExec}\")
-        file(CREATE_LINK \"../${ENZO_BIN_DIR}/${AppExec}\" \"\${root}/bin/${AppExec}\" SYMBOLIC)
-    ")
-endif()
-
-# Installs the desktop entry, metadata and icon Linux desktops read.
-if(UNIX)
-    install(FILES flatpak/com.helix3d.Helix.desktop
-        DESTINATION share/applications
-    )
-    install(FILES flatpak/com.helix3d.Helix.metainfo.xml
-        DESTINATION share/metainfo
-    )
-    install(FILES static/icons/icon-main-white-square.svg
-        DESTINATION share/icons/hicolor/scalable/apps
-        RENAME com.helix3d.Helix.svg
-    )
-endif()
+# Puts the launcher on PATH, so a shell reaches it by name.
+install(CODE "
+    set(root \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
+    file(MAKE_DIRECTORY \"\${root}/bin\")
+    file(REMOVE \"\${root}/bin/${AppExec}\")
+    file(CREATE_LINK \"../${HELIX_BIN_DIR}/${AppExec}\" \"\${root}/bin/${AppExec}\" SYMBOLIC)
+")
 
 # Installs the licence into the folder holding bin and lib.
-cmake_path(SET ENZO_APP_ROOT NORMALIZE "${ENZO_APP_DIR}.")
+cmake_path(SET HELIX_APP_ROOT NORMALIZE "${HELIX_APP_DIR}.")
 install(FILES ${CMAKE_BINARY_DIR}/LICENSE.txt
-    DESTINATION ${ENZO_APP_ROOT}
+    DESTINATION ${HELIX_APP_ROOT}
 )
 
 # The fonts and icons the application reads at runtime. The theme is compiled
 # into the binary.
 install(DIRECTORY static/
-    DESTINATION ${ENZO_APP_DIR}share
+    DESTINATION ${HELIX_APP_DIR}share
     PATTERN "theme" EXCLUDE
 )
 
-# Installs daslib beside enzo/bin, where the runtime looks for the standard
+# Installs daslib beside helix/bin, where the runtime looks for the standard
 # library.
 install(DIRECTORY ${DAS_DASLIB_DIR}/
-    DESTINATION ${ENZO_APP_DIR}daslib
+    DESTINATION ${HELIX_APP_DIR}daslib
 )
 
 # Signs the bundle, once every file in it is in place.
@@ -219,10 +116,7 @@ install(DIRECTORY ${DAS_DASLIB_DIR}/
 # that breaks the signatures they carry. macOS refuses to load a library whose
 # signature no longer matches, so the application would be killed before it
 # opens a window.
-if(APPLE)
-    install(CODE "
-        set(bundle \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${ENZO_BUNDLE_DIR}/${CMAKE_PROJECT_NAME}.app\")
-        include(\"${CMAKE_CURRENT_SOURCE_DIR}/cmake/SignBundle.cmake\")
-    ")
-endif()
-
+install(CODE "
+    set(bundle \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${HELIX_BUNDLE_DIR}/${CMAKE_PROJECT_NAME}.app\")
+    include(\"${CMAKE_CURRENT_SOURCE_DIR}/cmake/SignBundle.cmake\")
+")

@@ -3,7 +3,7 @@
 #include <QQuickWindow>
 #include <algorithm>
 
-namespace enzo::ui {
+namespace helix::ui {
 
 namespace {
 
@@ -149,4 +149,4 @@ void ViewportItem::geometryChange(const QRectF& newGeometry, const QRectF& oldGe
     update();
 }
 
-} // namespace enzo::ui
+} // namespace helix::ui

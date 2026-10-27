@@ -9,7 +9,7 @@ on:
 
 # Gates the packaging steps to pushes on main.
 env:
-  ENZO_PACKAGE: ${{ github.ref == 'refs/heads/main' }}
+  HELIX_PACKAGE: ${{ github.ref == 'refs/heads/main' }}
 
 # Pushing a fix abandons the run it supersedes rather than queueing behind it.
 concurrency:
@@ -17,46 +17,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux:
-    runs-on: ubuntu-latest
+  # The version every package and the release are named after. A release
+  # already carrying that tag, draft or not, marks it as cut.
+  version:
+    runs-on: macos-15
     outputs:
-      version: ${{ steps.version.outputs.value }}
+      value: ${{ steps.version.outputs.value }}
       published: ${{ steps.version.outputs.published }}
-    # Rocky 9 sets the oldest glibc the packages support. A binary linked
-    # against the runner's own glibc would refuse to start on anything older.
-    container: rockylinux/rockylinux:9
-    env:
-      CC: /opt/rh/gcc-toolset-13/root/usr/bin/gcc
-      CXX: /opt/rh/gcc-toolset-13/root/usr/bin/g++
-      APPIMAGE_EXTRACT_AND_RUN: 1
 
     steps:
-      - name: Install build tools
-        run: |
-          dnf install -y dnf-plugins-core epel-release
-          dnf config-manager --set-enabled crb
-          dnf install -y \
-            gcc-toolset-13 git make patchelf rpm-build file which xz \
-            desktop-file-utils \
-            python3 python3-pip \
-            mesa-libGL-devel mesa-libEGL-devel fontconfig-devel \
-            libxkbcommon-x11-devel xcb-util-image-devel xcb-util-keysyms-devel \
-            xcb-util-renderutil-devel xcb-util-wm-devel xcb-util-cursor-devel
-          pip3 install --quiet cmake==3.31.6 ninja==1.11.1.3
-
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
-      # The version every package and the release are named after. A release
-      # already carrying that tag, draft or not, marks it as cut.
       - id: version
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           version=$(sed -n 's/^project(helix VERSION \([0-9.]*\)).*/\1/p' CMakeLists.txt)
           echo "value=$version" >> "$GITHUB_OUTPUT"
-          curl -sS -H "Authorization: Bearer $GH_TOKEN" \
+          curl -sSf -H "Authorization: Bearer $GH_TOKEN" \
             "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases?per_page=100" > releases.json
           if python3 -c "import json,sys; sys.exit(0 if any(
                 r['tag_name'] == 'v$version' for r in json.load(open('releases.json'))) else 1)"; then
@@ -64,162 +42,35 @@ jobs:
           fi
           rm -f releases.json
 
-      - name: Cache dependency prefix
-        uses: actions/cache@v4
-        with:
-          path: |
-            build-super/deps
-            build-super/superbuild/Stamp
-          key: linux-deps-v1-${{ hashFiles('cmake/versions.cmake') }}
-
-      - name: Build
-        run: |
-          cmake -S . -B build-super -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DENZO_SUPERBUILD=ON \
-            -DCMAKE_INSTALL_PREFIX=/usr
-          cmake --build build-super
-
-      # The build compiles the test suite, but nothing runs it. This step runs
-      # it, so a test that does not pass shows up in the log of the build.
-      #
-      # The step does not hold the build: a failing test is reported here, and
-      # the other platforms keep their own verdict.
-      - name: Run the tests
-        continue-on-error: true
-        run: |
-          tests=build-super/enzo-build/helix/bin/tests
-          if [ ! -x "$tests" ]; then
-            echo "the test binary was not found at $tests"
-            find build-super -name tests -type f -executable
-            exit 1
-          fi
-          timeout 900 "$tests" || echo "the test suite did not pass"
-
-      - name: Package
-        if: env.ENZO_PACKAGE == 'true'
-        run: |
-          cd build-super/enzo-build
-          cpack -G "RPM;DEB;TGZ" -B "$GITHUB_WORKSPACE/dist"
-
-      - name: Build AppImage
-        if: env.ENZO_PACKAGE == 'true'
-        run: |
-          cmake --install build-super/enzo-build --prefix "$GITHUB_WORKSPACE/appdir-prefix"
-          curl -sSfL -o /usr/local/bin/appimagetool \
-            https://github.com/AppImage/appimagetool/releases/download/1.9.0/appimagetool-x86_64.AppImage
-          chmod +x /usr/local/bin/appimagetool
-          ./packaging/make-appimage.sh "$GITHUB_WORKSPACE/appdir-prefix" \
-            "$GITHUB_WORKSPACE/dist/helix-${{ steps.version.outputs.value }}-linux-x86_64.AppImage"
-
-      - uses: actions/upload-artifact@v4
-        if: env.ENZO_PACKAGE == 'true'
-        with:
-          name: linux-packages
-          if-no-files-found: error
-          path: dist
-
-  windows:
-    runs-on: windows-2022
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Install WiX
-        run: choco install wixtoolset --no-progress -y
-
-      - name: Cache dependency prefix
-        uses: actions/cache@v4
-        with:
-          path: |
-            build-super/deps
-            build-super/superbuild/Stamp
-          key: windows-deps-v1-${{ hashFiles('cmake/versions.cmake') }}
-
-      - name: Build
-        shell: cmd
-        run: |
-          cmake -S . -B build-super -G Ninja ^
-            -DCMAKE_BUILD_TYPE=Release ^
-            -DENZO_SUPERBUILD=ON
-          cmake --build build-super
-
-      # Installs the Vulkan loader and a software Vulkan driver, since the
-      # runner has no GPU.
-      - name: Install Vulkan
-        uses: jakoch/install-vulkan-sdk-action@v1.6.0
-        with:
-          install_runtime: true
-          install_lavapipe: true
-          github_token: ${{ github.token }}
-
-      # Starts the installed tree, where the libraries, plugins and qml modules
-      # sit apart from the build directory they were compiled in.
-      - name: Smoke test
-        shell: pwsh
-        timeout-minutes: 15
-        run: |
-          cmake --install build-super/enzo-build --prefix "$PWD/stage"
-          $exe = "$PWD/stage/bin/helix.exe"
-
-          # A runner has no console window, so Qt writes its messages to the
-          # debugger rather than stderr unless it is told otherwise.
-          $env:QT_FORCE_STDERR_LOGGING = "1"
-
-          $app = Start-Process $exe -PassThru -NoNewWindow `
-            -RedirectStandardOutput smoke-out.txt -RedirectStandardError smoke-err.txt
-          Start-Sleep -Seconds 60
-          if (-not $app.HasExited) { $app.Kill(); Get-Content smoke-out.txt, smoke-err.txt; exit 0 }
-          Get-Content smoke-out.txt, smoke-err.txt
-
-          # Page heap puts an unmapped page after every allocation, so the
-          # second run faults where the memory is written rather than later.
-          $debuggers = "C:/Program Files (x86)/Windows Kits/10/Debuggers/x64"
-          if (Test-Path "$debuggers/cdb.exe") {
-            & "$debuggers/gflags.exe" /p /enable helix.exe /full
-            $env:_NT_SYMBOL_PATH = "$PWD/build-super/enzo-build/enzo/bin"
-            & "$debuggers/cdb.exe" -g -G -c ".lastevent; kb; q" $exe
-            & "$debuggers/gflags.exe" /p /disable helix.exe
-          }
-          throw "helix exited on startup with $($app.ExitCode)"
-
-      - name: Package
-        if: env.ENZO_PACKAGE == 'true'
-        shell: cmd
-        run: |
-          cd build-super\enzo-build
-          cpack -G "WIX;NSIS;ZIP" -B "%GITHUB_WORKSPACE%\dist"
-
-      # Prints the makensis output, which CPack only names by path on failure.
-      - name: Show NSIS log
-        if: failure() && env.ENZO_PACKAGE == 'true'
-        shell: pwsh
-        run: Get-ChildItem dist -Recurse -Filter NSISOutput.log | Get-Content -Tail 60
-
-      - uses: actions/upload-artifact@v4
-        if: env.ENZO_PACKAGE == 'true'
-        with:
-          name: windows-packages
-          if-no-files-found: error
-          path: dist
-
   macos:
+    # macos-15 is an Apple silicon (arm64) runner. Helix builds for arm64 only,
+    # and the step below fails the job if the runner is anything else.
     runs-on: macos-15
 
     steps:
+      - name: Require Apple silicon
+        run: |
+          test "$(uname -m)" = "arm64" || { echo "the runner is $(uname -m), not arm64"; exit 1; }
+
       - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      # The pinned versions of cmake, ninja and MoltenVK land inside the
-      # repository, so the build does not depend on what the runner carries and
-      # a sandboxed host can run it without a package manager.
+      # The pinned versions of cmake and ninja land inside the repository, so the
+      # build does not depend on what the runner carries and a sandboxed host can
+      # run it without a package manager.
       - name: Bootstrap the toolchain
         run: ./scripts/bootstrap-macos.sh
+
+      # The viewport shaders are compiled into a Metal library at build time. Xcode 26
+      # and later ship the Metal compiler as a separate component, which an image may
+      # not carry yet, so it is installed when it is missing.
+      - name: Metal compiler
+        run: |
+          if ! xcrun -sdk macosx metal --version; then
+            xcodebuild -downloadComponent MetalToolchain
+            xcrun -sdk macosx metal --version
+          fi
 
       - name: Cache dependency prefix
         uses: actions/cache@v4
@@ -227,31 +78,46 @@ jobs:
           path: |
             build-super/deps
             build-super/superbuild/Stamp
-          key: macos-deps-v1-${{ hashFiles('cmake/versions.cmake') }}
+          key: macos-arm64-deps-v3-${{ hashFiles('cmake/versions.cmake') }}
 
       - name: Build
         run: |
           source toolchain/env.sh
           cmake -S . -B build-super -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DENZO_SUPERBUILD=ON
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DHELIX_SUPERBUILD=ON
           cmake --build build-super
 
-      # Starts the installed bundle, where the libraries, the plugins and the
-      # qml modules sit apart from the build directory they were compiled in.
-      #
-      # The Vulkan loader and the driver of MoltenVK come from the toolchain
-      # the bootstrap script installed, so no package manager is needed.
+      # The build compiles the test suite, and this step runs it. A test that
+      # does not pass fails the build.
+      - name: Run the tests
+        run: |
+          source toolchain/env.sh
+          tests=build-super/helix-build/helix.app/Contents/bin/tests
+          if [ ! -x "$tests" ]; then
+            echo "the test binary was not found at $tests"
+            find build-super -name tests -type f -perm -u+x
+            exit 1
+          fi
+
+          # A runner does not always carry timeout, so the suite runs without
+          # one when neither name is there.
+          limit=()
+          if command -v timeout > /dev/null; then
+            limit=(timeout 900)
+          elif command -v gtimeout > /dev/null; then
+            limit=(gtimeout 900)
+          fi
+          ${limit[@]+"${limit[@]}"} "$tests"
+
+      # Starts the installed bundle, where the libraries, the plugins, the qml modules
+      # and the compiled shaders sit apart from the build directory they were built in.
       - name: Smoke test
         timeout-minutes: 15
         run: |
           source toolchain/env.sh
-          cmake --install build-super/enzo-build --prefix "$PWD/stage"
-
-          # The Vulkan loader has to sit in the bundle, since the loader path
-          # of a signed application ignores the library path of the
-          # environment.
-          ./scripts/install-vulkan-loader.sh "$PWD/stage/helix.app"
+          cmake --install build-super/helix-build --prefix "$PWD/stage"
 
           exe="$PWD/stage/helix.app/Contents/MacOS/helix"
 
@@ -269,50 +135,52 @@ jobs:
           fi
           cat smoke-out.txt smoke-err.txt
 
-          # A runner has no Metal device, so the driver cannot offer a Vulkan
-          # device. The application has to fail there and not before, which
-          # shows that every library of the bundle was found and loaded.
-          if grep -q "No Vulkan device could be created" smoke-err.txt; then
-            echo "the application reached the graphics device, which the runner cannot provide"
+          # A hosted runner is a virtual machine and may have no Metal device. The
+          # application checks for one before it builds anything and then stops with
+          # exactly this message, which is the only early exit the smoke test accepts.
+          # It still shows that every library of the bundle was found and loaded, since
+          # that happens before the check. Any other exit, such as a missing library or
+          # a crash on startup, fails the job.
+          if grep -qx "No Metal device available" smoke-err.txt; then
+            echo "the runner has no Metal device, so the viewport could not start"
             exit 0
           fi
           echo "helix exited on startup"
           exit 1
 
       - name: Package
-        if: env.ENZO_PACKAGE == 'true'
+        if: env.HELIX_PACKAGE == 'true'
         run: |
-          cd build-super/enzo-build
+          cd build-super/helix-build
           cpack -G TGZ -B "$GITHUB_WORKSPACE/dist"
 
       - uses: actions/upload-artifact@v4
-        if: env.ENZO_PACKAGE == 'true'
+        if: env.HELIX_PACKAGE == 'true'
         with:
           name: macos-packages
           if-no-files-found: error
           path: dist
 
   release:
-    needs: [linux, windows, macos]
-    if: github.ref == 'refs/heads/main' && needs.linux.outputs.published != 'true'
-    runs-on: ubuntu-latest
+    needs: [version, macos]
+    if: github.ref == 'refs/heads/main' && needs.version.outputs.published != 'true'
+    runs-on: macos-15
     permissions:
       contents: write
 
     steps:
-      # Flattens both jobs' artifacts into one folder.
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
           merge-multiple: true
 
       - name: List packages
-        run: find artifacts -type f -printf '%P  %s\n'
+        run: find artifacts -type f -exec stat -f '%N  %z' {} +
 
       # Tags the commit with the project version as it publishes the draft
       # release.
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ needs.linux.outputs.version }}
+          tag_name: v${{ needs.version.outputs.value }}
           draft: true
           files: artifacts/*

@@ -4,7 +4,7 @@
 #include <glm/geometric.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace enzo::gfx {
+namespace helix::gfx {
 
 namespace {
 
@@ -99,4 +99,4 @@ glm::mat4 ViewportCamera::getProjectionMatrix(float aspect) const
     return glm::perspectiveRH_ZO(fieldOfView, aspect, nearPlane, farPlane);
 }
 
-} // namespace enzo::gfx
+} // namespace helix::gfx

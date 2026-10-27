@@ -1,95 +1,81 @@
 #pragma once
-#include "Graphics/VulkanHandles.h"
-#include "Graphics/VulkanLoader.h"
-#include <memory>
+#include "Graphics/Metal.h"
 #include <string>
 #include <vector>
 
-namespace enzo::gfx {
+namespace helix::gfx {
 
-/// @brief What the driver of a graphics device can do.
+/// @brief What the Metal device of a graphics device can do.
 struct GraphicsDeviceFeatures
 {
-    /// @brief The Vulkan version the device runs, packed as `VK_MAKE_API_VERSION`.
-    uint32_t apiVersion = 0;
+    /// @brief The name of the GPU, such as "Apple M4".
+    std::string deviceName;
 
-    /// @brief The name the driver gives itself, which is "MoltenVK" on macOS.
-    std::string driverName;
-
-    /// @brief The description of the adapter, which is the name of the Metal device on macOS.
-    std::string adapterDescription;
-
-    /// @brief Whether the driver is a portability subset driver.
+    /// @brief Whether the CPU and the GPU share their memory, which every Apple silicon Mac does.
     ///
-    /// A portability subset driver offers a reduced set of features, which is how MoltenVK
-    /// reaches the Metal feature set of macOS.
-    bool portabilityDriver = false;
+    /// The renderer then keeps its geometry in shared buffers that the CPU fills in place,
+    /// with no staging copy.
+    bool unifiedMemory = false;
+
+    /// @brief Whether the GPU is an Apple GPU, which keeps multisampled targets in tile memory.
+    bool appleGpu = false;
 };
 
-/// @brief The one Vulkan device in the process, shared by the host and every viewport.
+/// @brief The Metal device the viewport renderers draw with, and the shaders they draw with.
 ///
-/// @note Destroy every host object using the device first, since destroying
-/// this destroys the Vulkan device and instance.
+/// A host that already has a Metal device, such as the scene graph of Qt Quick, hands it in so
+/// that every texture the renderer makes can be used with it. Any number of graphics devices can
+/// exist at once, each one holding its own shader libraries.
 class GraphicsDevice
 {
   public:
-    /// @brief Creates the device.
+    /// @brief The message of the error thrown when the machine has no Metal device.
     ///
-    /// @param instanceExtensions the extra instance extensions the host needs.
-    /// @throws std::runtime_error when a device already exists or no Vulkan device is found.
-    explicit GraphicsDevice(const std::vector<std::string>& instanceExtensions = {});
+    /// The application prints the same message, which the smoke test of the CI looks for.
+    static constexpr const char* noDeviceMessage = "No Metal device available";
+
+    /// @brief Returns whether the machine has a Metal device.
+    static bool isMetalAvailable();
+
+    /// @brief Creates the device and loads the shaders.
+    ///
+    /// @param device the Metal device to draw with, or null for the default device of the machine.
+    /// @param shaderLibraryPath the metallib to load. When empty, the library is looked for in
+    /// `HELIX_METALLIB`, then in the resources of the application bundle, then in the build tree.
+    /// When no library is found, a development build compiles the shader sources instead
+    /// (see `GraphicsDevice.cpp`).
+    ///
+    /// @throws std::runtime_error with `noDeviceMessage` when no device exists, or with the
+    /// reason when the shaders cannot be loaded.
+    explicit GraphicsDevice(MTL::Device* device = nullptr, const std::string& shaderLibraryPath = {});
     ~GraphicsDevice();
 
     GraphicsDevice(const GraphicsDevice&) = delete;
     GraphicsDevice& operator=(const GraphicsDevice&) = delete;
 
-    /// @brief Returns the device of this process.
+    /// @brief Returns the Metal device.
+    MTL::Device* getDevice() const { return device_.get(); }
+
+    /// @brief Returns the queue frames are submitted on when the renderer draws by itself.
     ///
-    /// @throws std::runtime_error when no device exists.
-    static GraphicsDevice& get();
+    /// The queue is made on first use, since a host that records into its own command buffer never
+    /// needs one.
+    MTL::CommandQueue* getCommandQueue();
 
-    /// @brief Returns the handles a host adopts to share the device.
-    VulkanHandles getVulkanHandles() const;
+    /// @brief Returns the shader function of that name, or null when no library holds it.
+    NS::SharedPtr<MTL::Function> getFunction(const char* name) const;
 
-    /// @brief Returns what the driver of the device can do.
+    /// @brief Returns what the device can do.
     const GraphicsDeviceFeatures& getFeatures() const { return features_; }
 
-    /// @brief Returns what the host offers as a Vulkan loader.
-    const VulkanLoaderStatus& getLoaderStatus() const { return loaderStatus_; }
-
-    /// @brief Returns whether the device was lost.
-    ///
-    /// A device is lost when the driver takes it away, which happens on macOS when the
-    /// Metal device of the machine goes away with it.
-    bool isDeviceLost() const { return deviceLost_; }
-
-    /// @brief Marks the device as lost, so that the host can build another one.
-    void markDeviceLost() { deviceLost_ = true; }
-
-    /// @brief Returns the last error the engine reported, empty when it reported none.
-    ///
-    /// The engine holds back some of its errors rather than throwing them, so this is
-    /// where a host reads what went wrong.
-    static const std::string& getLastEngineError();
-
-    /// @brief Forgets the last error the engine reported.
-    static void clearLastEngineError();
-
-    struct DiligentObjects;
-
-    /// @brief Returns the Diligent device and context the renderer draws with.
-    ///
-    /// @note The type is complete only inside enzoGraphics, through `Graphics/DiligentObjects.h`.
-    DiligentObjects& getDiligentObjects() const;
-
   private:
-    std::unique_ptr<DiligentObjects> diligent_;
-    /// @brief What the host offered as a Vulkan loader.
-    VulkanLoaderStatus loaderStatus_;
-    /// @brief What the driver of the device can do.
+    /// @brief Loads the metallib, or compiles the sources of a development build.
+    void loadLibraries(const std::string& shaderLibraryPath);
+
+    NS::SharedPtr<MTL::Device> device_;
+    NS::SharedPtr<MTL::CommandQueue> commandQueue_;
+    std::vector<NS::SharedPtr<MTL::Library>> libraries_;
     GraphicsDeviceFeatures features_;
-    /// @brief Whether the driver took the device away.
-    bool deviceLost_ = false;
 };
 
-} // namespace enzo::gfx
+} // namespace helix::gfx
