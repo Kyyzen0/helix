@@ -294,7 +294,7 @@ class Primitive
     virtual const attr::attribVector& getAttributeStore(const attr::AttributeOwner& owner) const;
     virtual attr::attribVector& getGroupStore(const attr::AttributeOwner& owner);
     virtual const attr::attribVector& getGroupStore(const attr::AttributeOwner& owner) const;
-    attr::attribVector deepCopyAttributes(attr::attribVector source);
+    attr::attribVector deepCopyAttributes(const attr::attribVector& source);
 
     /**
      * @brief Returns the number of elements in the given owner's store.

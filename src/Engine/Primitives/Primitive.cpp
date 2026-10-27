@@ -330,14 +330,14 @@ void geo::Primitive::incrementVersion()
     path_ += "_02";
 }
 
-attr::attribVector geo::Primitive::deepCopyAttributes(attr::attribVector originalVector)
+attr::attribVector geo::Primitive::deepCopyAttributes(const attr::attribVector& originalVector)
 {
     attr::attribVector copied;
     const size_t sourceSize = originalVector.size();
 
     copied.reserve(sourceSize);
 
-    for (const std::shared_ptr<attr::Attribute> sourceAttrib : originalVector)
+    for (const std::shared_ptr<attr::Attribute>& sourceAttrib : originalVector)
     {
         if (sourceAttrib)
         {
