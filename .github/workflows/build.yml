@@ -111,6 +111,46 @@ jobs:
           fi
           ${limit[@]+"${limit[@]}"} "$tests"
 
+      # A test that aborts leaves only "SIGABRT" in the log. macOS writes a crash
+      # report with the stack of every thread, so this prints where each one was.
+      - name: Show the crash report
+        if: failure()
+        run: |
+          sleep 15
+          report=$(ls -t "$HOME"/Library/Logs/DiagnosticReports/tests* 2>/dev/null | head -1)
+          if [ -z "$report" ]; then
+            echo "no crash report was written"
+            ls -la "$HOME/Library/Logs/DiagnosticReports" 2>&1 | head -20
+            exit 0
+          fi
+          echo "report: $report"
+          python3 -I - "$report" <<'EOF'
+          import json, sys
+          text = open(sys.argv[1], errors="replace").read()
+          lines = text.split("\n", 1)
+          try:
+              header = json.loads(lines[0])
+              body = json.loads(lines[1])
+          except Exception as error:
+              print("could not parse the report:", error)
+              print(text[:6000])
+              sys.exit(0)
+          print("exception:", json.dumps(body.get("exception")), "termination:", json.dumps(body.get("termination")))
+          images = body.get("usedImages", [])
+          def name(index):
+              if 0 <= index < len(images):
+                  return images[index].get("name", "?")
+              return "?"
+          for number, thread in enumerate(body.get("threads", [])):
+              frames = thread.get("frames", [])
+              if not thread.get("triggered") and len(frames) < 3:
+                  continue
+              limit = 40 if thread.get("triggered") else 14
+              print("\nthread %d%s %s" % (number, " (crashed)" if thread.get("triggered") else "", thread.get("name", "")))
+              for frame in frames[:limit]:
+                  print("  %-28s %s" % (name(frame.get("imageIndex", -1)), frame.get("symbol", "?")))
+          EOF
+
       # Starts the installed bundle, where the libraries, the plugins, the qml modules
       # and the compiled shaders sit apart from the build directory they were built in.
       - name: Smoke test
