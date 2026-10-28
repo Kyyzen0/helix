@@ -204,6 +204,9 @@ Runtime::Runtime()
     PULL_MODULE(ExpressionModule);
     PULL_MODULE(GeometryModule);
     das::Module::Initialize();
+
+    // daslang binds its environment per thread, so keep it to rebind on other threads.
+    environment_ = das::daScriptEnvironment::getBound();
 }
 
 Runtime::~Runtime() { das::Module::ShutdownStandalone(); }
@@ -211,6 +214,18 @@ Runtime::~Runtime() { das::Module::ShutdownStandalone(); }
 std::shared_ptr<CompiledProgram>
 Runtime::compile(const String& name, const String& source, String& error)
 {
+    // The environment is not thread safe, so one compile runs at a time.
+    static std::mutex compileMutex;
+    std::lock_guard lock(compileMutex);
+
+    // Binds the runtime's environment to this thread for the compile and simulate. Ownership
+    // stays as it is: the thread that built the runtime owns the environment and frees it at
+    // shutdown, so claiming it here would risk a second free.
+    das::daScriptEnvironmentGuard environmentGuard(
+        environment_,
+        das::daScriptEnvironment::getOwned()
+    );
+
     das::TextPrinter logs;
     das::ModuleGroup libraryGroup;
 
