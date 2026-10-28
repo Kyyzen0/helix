@@ -233,6 +233,9 @@ TEST_CASE_METHOD(NMReset, "Loading a scene updates the network once at the end")
     serializer.save(nm, path);
     nm._reset();
 
+    // The connections are scoped: the handlers capture this test's locals, so they
+    // have to be gone before the next test emits a signal on the same manager.
+    //
     // An update refreshes the display geometry, so counting its signal counts
     // updates. The display is set when the grid appears, and the count restarts
     // there, leaving the parameters and links restored after it to be counted.
@@ -240,8 +243,8 @@ TEST_CASE_METHOD(NMReset, "Loading a scene updates the network once at the end")
     int lockedEvents = 0;
     int events = 0;
     bool armed = false;
-    auto countUpdates = nm.displayGeoChanged.connect([&](auto) { ++updates; });
-    auto armDisplay = nm.nodeCreated.connect([&](nt::NodeId nodeId) {
+    boost::signals2::scoped_connection countUpdates = nm.displayGeoChanged.connect([&](auto) { ++updates; });
+    boost::signals2::scoped_connection armDisplay = nm.nodeCreated.connect([&](nt::NodeId nodeId) {
         ++events;
         if (nt::UpdateLock::isLocked()) ++lockedEvents;
         if (armed || nm.getNode(nodeId).getType().getName() != "grid") return;
@@ -249,7 +252,7 @@ TEST_CASE_METHOD(NMReset, "Loading a scene updates the network once at the end")
         nm.setDisplayNode(nodeId);
         updates = 0;
     });
-    auto countLinks = nm.nodeLinkCreated.connect([&](nt::NodeLink) {
+    boost::signals2::scoped_connection countLinks = nm.nodeLinkCreated.connect([&](nt::NodeLink) {
         ++events;
         if (nt::UpdateLock::isLocked()) ++lockedEvents;
     });
