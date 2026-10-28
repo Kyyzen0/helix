@@ -98,6 +98,15 @@ class Primitive
     {
         applyTransform(transform.getMatrix(), transformClass);
     }
+    /**
+     * @brief Gives the intrinsic attributes a store of their own and rebinds the primitive's
+     * handles to it, when a copy still shares them.
+     *
+     * Copies share their attribute stores with the original until written (copy on write).
+     * Subclasses that keep handles on intrinsic attributes override this and call it before
+     * each write. Called by @ref tryAddAttribute before it returns a shared intrinsic attribute.
+     */
+    virtual void ensureWritable() {}
     virtual bool canMerge() const { return false; }
     virtual void merge(std::shared_ptr<Primitive> other) {}
     void incrementVersion();
@@ -294,7 +303,7 @@ class Primitive
     virtual const attr::attribVector& getAttributeStore(const attr::AttributeOwner& owner) const;
     virtual attr::attribVector& getGroupStore(const attr::AttributeOwner& owner);
     virtual const attr::attribVector& getGroupStore(const attr::AttributeOwner& owner) const;
-    attr::attribVector deepCopyAttributes(attr::attribVector source);
+    attr::attribVector deepCopyAttributes(const attr::attribVector& source);
 
     /**
      * @brief Returns the number of elements in the given owner's store.

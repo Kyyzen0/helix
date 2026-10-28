@@ -5,7 +5,10 @@
 #include "Engine/Network/Node.h"
 #include "Engine/Network/NodeLoader.h"
 #include "Engine/Parameter/NodeParameter.h"
+#include <atomic>
 #include <catch2/catch_test_macros.hpp>
+#include <thread>
+#include <vector>
 
 using namespace helix;
 
@@ -382,4 +385,97 @@ TEST_CASE("RandVector keeps the values that saved scenes were built with")
     REQUIRE(evalFloatExpression("randVector(float3(1.0, 2.0, 3.0)).x") == 0.050245285f);
     REQUIRE(evalFloatExpression("randVector(float3(1.0, 2.0, 3.0)).y") == 0.272974133f);
     REQUIRE(evalFloatExpression("randVector(float3(1.0, 2.0, 3.0)).z") == 0.590052545f);
+}
+
+TEST_CASE("Evaluating the same expression twice gives the same result")
+{
+    expr::ExpressionEngine& engine = expr::ExpressionEngine::instance();
+
+    // The second call runs the cached program rather than compiling again
+    floatT first = 0;
+    floatT second = 0;
+    String error;
+    REQUIRE(engine.evalFloat("3 * 4 + 0.5", nullptr, first, error));
+    REQUIRE(engine.evalFloat("3 * 4 + 0.5", nullptr, second, error));
+    REQUIRE(first == 12.5f);
+    REQUIRE(second == first);
+}
+
+TEST_CASE("The same text evaluates independently for each return type")
+{
+    expr::ExpressionEngine& engine = expr::ExpressionEngine::instance();
+
+    // One expression text cached for float and for int must not be mixed up
+    floatT floatResult = 0;
+    intT intResult = 0;
+    String error;
+    REQUIRE(engine.evalFloat("7", nullptr, floatResult, error));
+    REQUIRE(engine.evalInt("7", nullptr, intResult, error));
+    REQUIRE(floatResult == 7.0f);
+    REQUIRE(intResult == 7);
+}
+
+TEST_CASE_METHOD(NMReset, "Changing a parameter's expression takes the new value")
+{
+    auto& nm = nt::nm();
+
+    nt::NodeId node = nm.createNode("helix::transform");
+    auto translate = nm.getNode(node).getParameter("translate").lock();
+
+    translate->setExpression("2 + 3");
+    REQUIRE(translate->evalFloat() == 5.0f);
+    REQUIRE(translate->evalFloat() == 5.0f);
+
+    // A new expression replaces the cached one, and the old text still works
+    translate->setExpression("10 * 2");
+    REQUIRE(translate->evalFloat() == 20.0f);
+    translate->setExpression("2 + 3");
+    REQUIRE(translate->evalFloat() == 5.0f);
+}
+
+TEST_CASE("An invalid expression keeps reporting its error")
+{
+    expr::ExpressionEngine& engine = expr::ExpressionEngine::instance();
+
+    // A failed compile is not cached, so every call reports the same failure
+    for (int attempt = 0; attempt < 2; ++attempt)
+    {
+        floatT result = 1;
+        String error;
+        REQUIRE_FALSE(engine.evalFloat("5 +", nullptr, result, error));
+        REQUIRE_FALSE(error.empty());
+    }
+}
+
+TEST_CASE("Several threads evaluate expressions at once")
+{
+    expr::ExpressionEngine& engine = expr::ExpressionEngine::instance();
+
+    // Each thread runs its own expression repeatedly, plus one shared by all
+    constexpr int threadCount = 8;
+    constexpr int iterations = 200;
+    std::atomic<int> failures{0};
+
+    std::vector<std::thread> threads;
+    for (int threadIndex = 0; threadIndex < threadCount; ++threadIndex)
+    {
+        threads.emplace_back([&, threadIndex] {
+            const String own = std::to_string(threadIndex) + " * 2 + 1";
+            for (int i = 0; i < iterations; ++i)
+            {
+                floatT ownResult = 0;
+                floatT sharedResult = 0;
+                String error;
+                if (!engine.evalFloat(own, nullptr, ownResult, error) ||
+                    ownResult != float(threadIndex * 2 + 1))
+                    ++failures;
+                if (!engine.evalFloat("40 + 2", nullptr, sharedResult, error) ||
+                    sharedResult != 42.0f)
+                    ++failures;
+            }
+        });
+    }
+    for (std::thread& thread : threads) thread.join();
+
+    REQUIRE(failures == 0);
 }

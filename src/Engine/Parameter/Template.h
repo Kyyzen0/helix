@@ -34,9 +34,9 @@ class Template
         Range range = Range()
     );
     // get name and get token are identical
-    helix::String getName() const;
-    helix::String getToken() const;
-    helix::String getLabel() const;
+    const helix::String& getName() const;
+    const helix::String& getToken() const;
+    const helix::String& getLabel() const;
     const prm::Default getDefault(unsigned int index = 0) const;
     const prm::Range& getRange(unsigned int index = 0) const;
     /**

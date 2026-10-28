@@ -5,6 +5,10 @@
 #include <variant>
 #include <vector>
 
+namespace das {
+struct daScriptEnvironment;
+}
+
 namespace helix::expr {
 class ExpressionContext;
 }
@@ -124,6 +128,8 @@ class Runtime
      * @brief Compiles source text into a reusable script.
      * @return The compiled script, or null when compilation fails.
      * @note On failure the daslang diagnostics are written to @p error.
+     * @note Safe to call from any thread: compiles run one at a time, each bound to the
+     * environment this runtime created, since daslang binds its environment per thread.
      */
     std::shared_ptr<CompiledProgram>
     compile(const String& name, const String& source, String& error);
@@ -134,6 +140,9 @@ class Runtime
   private:
     Runtime();
     ~Runtime();
+
+    /// @brief The daslang environment bound by the thread that built the runtime.
+    das::daScriptEnvironment* environment_ = nullptr;
 };
 
 } // namespace helix::daslang

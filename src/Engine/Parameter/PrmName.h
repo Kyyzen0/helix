@@ -9,8 +9,8 @@ class Name
     Name(String token);
     Name();
 
-    String getToken() const;
-    String getLabel() const;
+    const String& getToken() const;
+    const String& getLabel() const;
 
   private:
     String token_;

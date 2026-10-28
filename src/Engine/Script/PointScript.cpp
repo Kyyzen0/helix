@@ -448,11 +448,17 @@ bool PointScript::addWrittenAttributes(geo::Primitive& output, String& error) co
     for (const AttributeBinding& binding : bindings_)
     {
         if (!binding.written) continue;
-        if (!output.tryAddAttribute(attr::AttributeOwner::POINT, binding.name, binding.type))
+        const std::shared_ptr<attr::Attribute> attribute =
+            output.tryAddAttribute(attr::AttributeOwner::POINT, binding.name, binding.type);
+        if (!attribute)
         {
             error = "can't write to attribute @" + binding.name;
             return false;
         }
+        // Gives the attribute a store of its own now: the threads that run the script bind their
+        // handles to it afterwards and must not clone it concurrently. An intrinsic one (@P) was
+        // detached by tryAddAttribute, together with the mesh handles that follow it.
+        attribute->detach();
     }
     return true;
 }

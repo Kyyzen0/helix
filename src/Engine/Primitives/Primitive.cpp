@@ -144,9 +144,13 @@ std::shared_ptr<attr::Attribute> geo::Primitive::tryAddAttribute(
     bool isInternal
 )
 {
-    return addToStore(
+    std::shared_ptr<attr::Attribute> attribute = addToStore(
         getAttributeStore(owner), getElementCount(owner), name, type, intrinsic, isInternal
     );
+    // The caller is about to write through this attribute. If it is an intrinsic one that a copy
+    // shares, the primitive's own handles must follow it to its new store.
+    if (attribute && attribute->isIntrinsic() && attribute->isStoreShared()) ensureWritable();
+    return attribute;
 }
 
 attr::attribVector& geo::Primitive::getAttributeStore(const attr::AttributeOwner& owner)
@@ -330,14 +334,14 @@ void geo::Primitive::incrementVersion()
     path_ += "_02";
 }
 
-attr::attribVector geo::Primitive::deepCopyAttributes(attr::attribVector originalVector)
+attr::attribVector geo::Primitive::deepCopyAttributes(const attr::attribVector& originalVector)
 {
     attr::attribVector copied;
     const size_t sourceSize = originalVector.size();
 
     copied.reserve(sourceSize);
 
-    for (const std::shared_ptr<attr::Attribute> sourceAttrib : originalVector)
+    for (const std::shared_ptr<attr::Attribute>& sourceAttrib : originalVector)
     {
         if (sourceAttrib)
         {

@@ -25,6 +25,7 @@ class Camera : public Primitive
 
     Matrix4 getTransform() const;
     void setTransform(const Matrix4& xform);
+    void ensureWritable() override;
 
   private:
     attr::AttributeHandle<Matrix4> transformHandle_;

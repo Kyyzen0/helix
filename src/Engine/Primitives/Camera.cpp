@@ -11,7 +11,8 @@ geo::Camera::Camera(std::string_view path)
 
 geo::Camera::Camera(const Camera& other)
     : Primitive(other), transformHandle_{attr::AttributeHandle<Matrix4>(
-                            getAttribByName(attr::AttributeOwner::PRIMITIVE, "transform", true)
+                            getAttribByName(attr::AttributeOwner::PRIMITIVE, "transform", true),
+                            attr::shareStore
                         )}
 {
 }
@@ -21,14 +22,27 @@ geo::Camera& geo::Camera::operator=(const Camera& rhs)
     if (this == &rhs) return *this;
     Primitive::operator=(rhs);
     transformHandle_ = attr::AttributeHandle<Matrix4>(
-        getAttribByName(attr::AttributeOwner::PRIMITIVE, "transform", true)
+        getAttribByName(attr::AttributeOwner::PRIMITIVE, "transform", true), attr::shareStore
     );
     return *this;
 }
 
+void geo::Camera::ensureWritable()
+{
+    const std::shared_ptr<attr::Attribute> transform =
+        getAttribByName(attr::AttributeOwner::PRIMITIVE, "transform", true);
+    if (!transform->isStoreShared()) return;
+    // The read write handle detaches the store, then the member follows it.
+    transformHandle_ = attr::AttributeHandle<Matrix4>(transform);
+}
+
 Matrix4 geo::Camera::getTransform() const { return transformHandle_.getValue(0); }
 
-void geo::Camera::setTransform(const Matrix4& xform) { transformHandle_.setValue(0, xform); }
+void geo::Camera::setTransform(const Matrix4& xform)
+{
+    ensureWritable();
+    transformHandle_.setValue(0, xform);
+}
 
 void geo::Camera::applyTransform(const Matrix4& mat, TransformClass transformClass)
 {

@@ -663,3 +663,25 @@ TEST_CASE("Creating a group twice keeps a single group")
     attr::AttributeHandleBool handle(mesh.getGroupByName(attr::AttrOwner::FACE, "g"));
     REQUIRE(handle.getValue(1) == true);
 }
+
+TEST_CASE("ajout de face apres lecture des face starts")
+{
+    geo::Mesh mesh;
+    const auto p0 = mesh.addPoint(Vector3(0, 0, 0));
+    const auto p1 = mesh.addPoint(Vector3(1, 0, 0));
+    const auto p2 = mesh.addPoint(Vector3(0, 1, 0));
+    const auto p3 = mesh.addPoint(Vector3(1, 1, 0));
+    mesh.addFace({p0, p1, p2});
+
+    // Lecture : met en cache les decalages.
+    const auto before = mesh.getFaceStartVertices();
+    REQUIRE(before.size() == 1);
+    REQUIRE(before[0] == 0);
+
+    mesh.addFace({p0, p1, p3, p2});
+
+    const auto after = mesh.getFaceStartVertices();
+    REQUIRE(after.size() == 2);
+    REQUIRE(after[0] == 0);
+    REQUIRE(after[1] == 3);
+}

@@ -1,5 +1,6 @@
 #include "Engine/Daslang/Runtime.h"
 #include <catch2/catch_test_macros.hpp>
+#include <thread>
 
 using namespace helix;
 
@@ -97,4 +98,26 @@ def countCalls(var result : int64&) {
     REQUIRE(clone);
     REQUIRE(clone->run("countCalls", arguments, nullptr, 0, error));
     REQUIRE(result == 1);
+}
+
+TEST_CASE("compile from a thread other than the one that created the runtime")
+{
+    // Builds the runtime here first, so the compile below runs on a different thread
+    daslang::Runtime::instance();
+
+    std::shared_ptr<daslang::CompiledProgram> script;
+    String error;
+    std::thread([&] {
+        script = daslang::Runtime::instance().compile(
+            "otherThreadTest",
+            "options gen2\n[export]\ndef answer() : int64 {\n    return 42l\n}\n",
+            error
+        );
+    }).join();
+
+    INFO(error);
+    REQUIRE(script);
+    intT result = 0;
+    REQUIRE(script->evalInt("answer", nullptr, result, error));
+    REQUIRE(result == 42);
 }

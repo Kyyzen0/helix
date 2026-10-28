@@ -82,7 +82,6 @@ void nt::Node::initParameters()
 
 void nt::Node::dirtyNode(bool dirtyDescendents)
 {
-    std::cout << "Dirtying node: " << nodeId_ << "\n";
     dirty_ = true;
     nodeDirtied(nodeId_, dirtyDescendents);
 }
@@ -97,7 +96,6 @@ bool nt::Node::isDirty() { return dirty_; }
 
 void nt::Node::cook(nt::CookContext& context)
 {
-    std::cout << "Cooking node: " << nodeId_ << "\n";
     if (!dirty_) return;
 
     // The implementation lives only as long as the cook, so nothing it holds

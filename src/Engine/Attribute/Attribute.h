@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/Core/Types.h"
+#include <atomic>
 #include <memory>
 #include <optional>
 #include <string>
@@ -49,7 +50,30 @@ class Attribute
         bool intrinsic = false,
         bool isInternal = false
     );
+    /**
+     * @brief Copies the attribute without copying its values.
+     *
+     * The copy and the original share one store until either of them is written to. The write
+     * paths (@ref resize, @ref compact and the read write @ref AttributeHandle) call @ref detach
+     * first, so a write never reaches the other holder.
+     */
     Attribute(const Attribute& other);
+    Attribute& operator=(const Attribute& other);
+    /**
+     * @brief Gives this attribute a store of its own when it shares one.
+     *
+     * Does nothing when the store is already exclusive. Safe to call from several threads on the
+     * same attribute: the store is cloned once.
+     *
+     * @note Handles bound before the call keep pointing at the shared store. Rebind them.
+     */
+    void detach();
+    /**
+     * @brief Returns whether the store may be shared with another attribute.
+     *
+     * @note Errs on the side of true: the original of a copy stays flagged until it detaches.
+     */
+    bool isStoreShared() const { return storeShared_.load(std::memory_order_acquire); }
     /**
      * @brief Returns the attribute type this attribute stores.
      */
@@ -97,6 +121,12 @@ class Attribute
     template <typename T> friend class AttributeHandleRO;
 
   private:
+    void markShared() const
+    {
+        if (!storeShared_.load(std::memory_order_relaxed))
+            storeShared_.store(true, std::memory_order_release);
+    }
+
     bool internal_ = false;
     bool intrinsic_ = false;
 
@@ -112,6 +142,10 @@ class Attribute
         std::shared_ptr<StoreContainer<helix::boolT>>,
         std::shared_ptr<StoreContainer<helix::Matrix4>>>;
     StoreVariant store_;
+    // Set on both sides of a copy. The flag, not use_count(), decides when to clone: a mesh holds
+    // several references on its stores through its handles, so use_count() would clone on every
+    // write.
+    mutable std::atomic<bool> storeShared_{false};
 };
 
 using attribVector = std::vector<std::shared_ptr<attr::Attribute>>;

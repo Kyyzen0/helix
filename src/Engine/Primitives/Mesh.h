@@ -1,5 +1,7 @@
 #pragma once
 #include "Engine/Primitives/Primitive.h"
+#include <atomic>
+#include <mutex>
 #include <span>
 #include <tbb/spin_mutex.h>
 #include <unordered_set>
@@ -49,6 +51,17 @@ class Mesh : public Primitive
     bool canMerge() const override { return true; }
     void merge(std::shared_ptr<Primitive> other) override;
     bool hasPoints() const override { return true; }
+
+    /**
+     * @brief Gives the intrinsic attributes a store of their own when a copy shares them, and
+     * rebinds the member handles to the new stores.
+     *
+     * Every method that writes calls it first. Costs one flag test when nothing is shared.
+     */
+    void ensureWritable() override { ensureWritable_(); }
+
+    /// @brief Returns whether every member handle reads the store of its attribute.
+    bool intrinsicHandlesBound() const;
 
     /**
      * @brief Adds a single face. Avoid for multiple faces in a loop as a single call to @ref
@@ -281,12 +294,25 @@ class Mesh : public Primitive
     const attr::attribVector& getGroupStore(const attr::AttributeOwner& owner) const override;
 
   private:
+    // Copy on write: a copy shares the stores of the intrinsic attributes until one side writes.
+    void ensureWritable_()
+    {
+        if (intrinsicsShared_.load(std::memory_order_acquire)) ensureWritableSlow_();
+    }
+    void ensureWritableSlow_();
+    // Detaches and rebinds the point positions only, for writers that leave the topology alone.
+    void ensurePositionWritable_()
+    {
+        if (positionShared_.load(std::memory_order_acquire)) ensurePositionWritableSlow_();
+    }
+    void ensurePositionWritableSlow_();
+    void bindIntrinsicHandles_(bool detach);
     void mergeAppend(std::shared_ptr<attr::Attribute> dst, std::shared_ptr<attr::Attribute> src);
     template <typename T>
     void mergeAppendImpl(std::shared_ptr<attr::Attribute> dst, std::shared_ptr<attr::Attribute> src)
     {
         auto dstHandle = attr::AttributeHandle<T>(dst);
-        auto srcHandle = attr::AttributeHandle<T>(src);
+        auto srcHandle = attr::AttributeHandleRO<T>(src);
 
         const Offset srcCount = srcHandle.getSize();
         const Offset dstCount = dstHandle.getSize();
@@ -316,6 +342,12 @@ class Mesh : public Primitive
 
     mutable std::atomic<bool> faceStartsDirty_{true};
     mutable tbb::spin_mutex faceStartsMutex_;
+
+    // Set on a mesh and on its copies: their intrinsic attributes may share stores.
+    mutable std::atomic<bool> intrinsicsShared_{false};
+    // Set with intrinsicsShared_, and cleared alone once the positions have their own store.
+    mutable std::atomic<bool> positionShared_{false};
+    mutable std::mutex detachMutex_;
 
     // intrinsic handles
     helix::attr::AttributeHandleInt vertexCountFaceHandle_;

@@ -1,10 +1,9 @@
 #include "Engine/Async/CookPlan.h"
 
 #include <algorithm>
-#include <map>
-#include <set>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 
 namespace helix::async {
 
@@ -17,9 +16,9 @@ CookPlan CookPlan::build(
     CookPlan plan;
 
     // Walk up from the targets to find every node the cook has to cover.
-    // The map keeps the walk in a fixed order, so the plan never depends on
-    // the order the graph happens to hand its links over in.
-    std::map<nt::NodeId, std::vector<nt::NodeLink>> inputs;
+    // The levels are sorted below, so the plan never depends on the order the
+    // walk or the graph happens to hand its links over in.
+    std::unordered_map<nt::NodeId, std::vector<nt::NodeLink>> inputs;
     std::vector<nt::NodeId> pending(targets.begin(), targets.end());
 
     while (!pending.empty())
@@ -30,31 +29,40 @@ CookPlan CookPlan::build(
         if (inputs.count(nodeId)) continue;
 
         std::vector<nt::NodeLink> nodeInputs = inputsOf(nodeId);
-        inputs.emplace(nodeId, nodeInputs);
-
         for (const nt::NodeLink& nodeLink : nodeInputs)
             pending.push_back(nodeLink.sourceNode);
+        inputs.emplace(nodeId, std::move(nodeInputs));
     }
 
-    // Count, for each node, how many of its feeders are also part of the cook.
-    // A node that feeds another through two inputs still counts once, so the
-    // levels are computed over the shape of the graph and not over its wiring.
-    std::map<nt::NodeId, std::set<nt::NodeId>> feeders;
+    // Count, for each node, how many of its feeders are also part of the cook,
+    // and record the reverse edges once so a finished node only has to visit
+    // the nodes it feeds. A node that feeds another through two inputs still
+    // counts once, so the levels are computed over the shape of the graph and
+    // not over its wiring.
+    std::unordered_map<nt::NodeId, unsigned int> waitingOn;
+    std::unordered_map<nt::NodeId, std::vector<nt::NodeId>> dependents;
+    waitingOn.reserve(inputs.size());
+    dependents.reserve(inputs.size());
+    std::vector<nt::NodeId> feeders;
     for (const auto& [nodeId, nodeInputs] : inputs)
     {
+        feeders.clear();
         for (const nt::NodeLink& nodeLink : nodeInputs)
-            if (inputs.count(nodeLink.sourceNode)) feeders[nodeId].insert(nodeLink.sourceNode);
+            if (inputs.count(nodeLink.sourceNode)) feeders.push_back(nodeLink.sourceNode);
+        std::sort(feeders.begin(), feeders.end());
+        feeders.erase(std::unique(feeders.begin(), feeders.end()), feeders.end());
+
+        waitingOn[nodeId] = static_cast<unsigned int>(feeders.size());
+        for (const nt::NodeId feeder : feeders)
+            dependents[feeder].push_back(nodeId);
     }
 
     // A node with no feeder left is ready to cook, so it starts a level.
-    std::map<nt::NodeId, unsigned int> waitingOn;
-    for (const auto& [nodeId, nodeInputs] : inputs)
-        waitingOn[nodeId] = static_cast<unsigned int>(feeders[nodeId].size());
-
     std::vector<nt::NodeId> ready;
     for (const auto& [nodeId, count] : waitingOn)
         if (count == 0) ready.push_back(nodeId);
 
+    plan.entries_.reserve(inputs.size());
     size_t placed = 0;
     while (!ready.empty())
     {
@@ -76,11 +84,10 @@ CookPlan CookPlan::build(
         std::vector<nt::NodeId> nextReady;
         for (const nt::NodeId nodeId : ready)
         {
-            for (const auto& [otherId, otherFeeders] : feeders)
-            {
-                if (!otherFeeders.count(nodeId)) continue;
+            const auto fed = dependents.find(nodeId);
+            if (fed == dependents.end()) continue;
+            for (const nt::NodeId otherId : fed->second)
                 if (--waitingOn[otherId] == 0) nextReady.push_back(otherId);
-            }
         }
         ready = std::move(nextReady);
     }

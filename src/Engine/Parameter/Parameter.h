@@ -21,8 +21,8 @@ class Parameter
     Parameter(Template prmTemplate);
     virtual ~Parameter() = default;
 
-    std::string getName() const;
-    std::string getLabel() const;
+    const std::string& getName() const;
+    const std::string& getLabel() const;
     helix::prm::Type getType() const;
     helix::prm::ValueType getValueType() const;
     unsigned int getVectorSize() const;

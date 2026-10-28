@@ -354,7 +354,7 @@ cutMeshByPlane(const geo::Mesh& mesh, const Vector3& planePoint, const Vector3& 
             return distance < 0;
         });
     if (!hasPointPastPlane) return std::nullopt;
-    const geo::FaceNormalHandle faceNormals = mesh.getFaceNormal();
+    const geo::FaceNormalHandle faceNormals = mesh.getFaceNormal(true);
 
     // Clip every face, finding each point by the source point or source edge it sits on so
     // neighbouring faces share it.

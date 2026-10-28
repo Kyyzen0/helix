@@ -60,12 +60,11 @@ prm::Parameter::Parameter(Template prmTemplate) : template_{prmTemplate}
     }
     }
 
-    std::cout << "created new parameter: " << prmTemplate.getName() << "\n";
 }
 
-std::string prm::Parameter::getName() const { return template_.getName(); }
+const std::string& prm::Parameter::getName() const { return template_.getName(); }
 
-std::string prm::Parameter::getLabel() const { return template_.getLabel(); }
+const std::string& prm::Parameter::getLabel() const { return template_.getLabel(); }
 
 floatT prm::Parameter::evalFloat(unsigned int index) const
 {

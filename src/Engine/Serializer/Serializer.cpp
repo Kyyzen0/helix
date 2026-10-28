@@ -125,7 +125,6 @@ namespace helix::nt {
 
 void Serializer::save(NetworkManager& networkManager, std::string filePath)
 {
-    std::cout << "serializing\n";
     std::ofstream file(filePath);
     cereal::JSONOutputArchive save(file);
 
@@ -173,6 +172,11 @@ void Serializer::save(NetworkManager& networkManager, std::string filePath)
 
 void Serializer::load(NetworkManager& networkManager, std::string filePath)
 {
+    // Holds one lock for the whole load, so the network updates once at the end
+    // instead of after every parameter and link restored. The lock releases on an
+    // exception too.
+    auto updateLock = networkManager.lockUpdates();
+
     networkManager.clear();
     UndoDisabler blockAll;
 

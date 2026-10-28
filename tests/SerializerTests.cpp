@@ -215,6 +215,79 @@ TEST_CASE_METHOD(NMReset, "A node inside a scope round trips through save and lo
     REQUIRE(nm.getChildNodeIds(containerPath).size() == 1);
 }
 
+TEST_CASE_METHOD(NMReset, "Loading a scene updates the network once at the end")
+{
+    auto& nm = nt::nm();
+
+    // A small network whose parameters and links all dirty nodes while loading
+    nt::NodeId grid = nm.createNode("helix::grid");
+    nt::NodeId first = nm.createNode("helix::transform");
+    nt::NodeId second = nm.createNode("helix::transform");
+    nm.getNode(first).getParameter("translate").lock()->setFloat(2.0f);
+    nm.getNode(second).getParameter("translate").lock()->setFloat(3.0f);
+    nm.connectNodes(grid, 0, first, 0);
+    nm.connectNodes(first, 0, second, 0);
+
+    const std::string path = "/tmp/helix_serializer_update_count.json";
+    nt::Serializer serializer;
+    serializer.save(nm, path);
+    nm._reset();
+
+    // The connections are scoped: the handlers capture this test's locals, so they
+    // have to be gone before the next test emits a signal on the same manager.
+    //
+    // An update refreshes the display geometry, so counting its signal counts
+    // updates. The display is set when the grid appears, and the count restarts
+    // there, leaving the parameters and links restored after it to be counted.
+    int updates = 0;
+    int lockedEvents = 0;
+    int events = 0;
+    bool armed = false;
+    boost::signals2::scoped_connection countUpdates = nm.displayGeoChanged.connect([&](auto) { ++updates; });
+    boost::signals2::scoped_connection armDisplay = nm.nodeCreated.connect([&](nt::NodeId nodeId) {
+        ++events;
+        if (nt::UpdateLock::isLocked()) ++lockedEvents;
+        if (armed || nm.getNode(nodeId).getType().getName() != "grid") return;
+        armed = true;
+        nm.setDisplayNode(nodeId);
+        updates = 0;
+    });
+    boost::signals2::scoped_connection countLinks = nm.nodeLinkCreated.connect([&](nt::NodeLink) {
+        ++events;
+        if (nt::UpdateLock::isLocked()) ++lockedEvents;
+    });
+
+    serializer.load(nm, path);
+
+    // The network updated once, when the load finished, not once per edit
+    REQUIRE(armed);
+    REQUIRE(updates == 1);
+    REQUIRE(nt::UpdateLock::isUnlocked());
+
+    // Every node and link was restored with the lock held
+    REQUIRE(events == 5);
+    REQUIRE(lockedEvents == events);
+
+    // The display node was cooked by that single update, as it was before
+    REQUIRE(nm.getDisplayNode().has_value());
+    REQUIRE_FALSE(nm.getNode(nm.getDisplayNode().value()).isDirty());
+}
+
+TEST_CASE_METHOD(NMReset, "A failed load releases the update lock")
+{
+    auto& nm = nt::nm();
+
+    const std::string path = "/tmp/helix_serializer_bad_scene.json";
+    {
+        std::ofstream file(path);
+        file << "not a scene";
+    }
+
+    nt::Serializer serializer;
+    REQUIRE_THROWS(serializer.load(nm, path));
+    REQUIRE(nt::UpdateLock::isUnlocked());
+}
+
 TEST_CASE_METHOD(NMReset, "The timeline round trips through save and load")
 {
     auto& nm = nt::nm();
