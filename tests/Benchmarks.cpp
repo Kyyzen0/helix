@@ -7,11 +7,14 @@
 #include "Engine/Parameter/NodeParameter.h"
 #include "Engine/Parameter/Ramp.h"
 #include "Engine/Primitives/Mesh.h"
+#include "Engine/Serializer/Serializer.h"
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
 #include <memory>
 #include <set>
+#include <string>
+#include <vector>
 
 struct NMReset
 {
@@ -328,6 +331,119 @@ TEST_CASE_METHOD(NMReset, "Script attribute reads")
     benchmarkCode("Read every point", R"(v@copy = pointAttrVector("Position", curPt()))");
     benchmarkCode("Read the wrong type on every point", R"(@copy = pointAttr("Position", curPt()))");
     benchmarkCode("Read a missing attribute on every point", R"(@copy = pointAttr("missing", curPt()))");
+}
+
+namespace {
+
+// Returns the x coordinate of the first point a cooked node produced.
+float firstPointX(helix::nt::NodeId node)
+{
+    using namespace helix;
+    const auto packet = nt::nm().getNode(node).getOutputPacket(0);
+    REQUIRE(packet != nullptr);
+    const auto mesh = std::dynamic_pointer_cast<const geo::Mesh>(packet->getPrimitive(0));
+    REQUIRE(mesh != nullptr);
+    return mesh->getPointPos(0).x();
+}
+
+// Wires a grid and a chain of transform nodes in series, and makes the last one the display node.
+// Returns the transforms in order, the first one being right below the grid.
+std::vector<helix::nt::NodeId> addTransformChain(int length, int gridSide)
+{
+    using namespace helix;
+    auto& nm = nt::nm();
+
+    nt::NodeId previous = addGrid(gridSide, gridSide);
+    std::vector<nt::NodeId> chain;
+    for (int i = 0; i < length; ++i)
+    {
+        const nt::NodeId transform = nm.createNode("helix::transform");
+        nm.connectNodes(previous, 0, transform, 0);
+        chain.push_back(transform);
+        previous = transform;
+    }
+    nm.setDisplayNode(chain.back());
+    return chain;
+}
+
+} // namespace
+
+// The latency of a parameter change is what docs/PERFORMANCE.md targets. Each run changes a value
+// that no earlier run used, so the change really dirties the graph, and then cooks the display
+// node on the calling thread.
+TEST_CASE_METHOD(NMReset, "Parameter change latency in a chain")
+{
+    using namespace helix;
+    auto& nm = nt::nm();
+
+    const std::vector<nt::NodeId> chain = addTransformChain(100, 100);
+    const nt::NodeId display = chain.back();
+    nm.cook(display);
+
+    // Outside the measure: the change must reach the end of the chain.
+    const auto translateOfFirst = nm.getNode(chain.front()).getParameter("translate").lock();
+    const float before = firstPointX(display);
+    translateOfFirst->setFloat(3.0f, 0);
+    nm.cook(display);
+    REQUIRE(firstPointX(display) != before);
+
+    float value = 10.0f;
+    BENCHMARK("Change a float parameter in a 100 node chain and cook")
+    {
+        value += 1.0f;
+        translateOfFirst->setFloat(value, 0);
+        nm.cook(display);
+    };
+}
+
+// Each of the 100 transforms reads a driver node through an expression, so a change of the driver
+// goes through the evaluation of 100 expressions before the cook.
+TEST_CASE_METHOD(NMReset, "Parameter change latency through expressions")
+{
+    using namespace helix;
+    auto& nm = nt::nm();
+
+    // The first transform made is named transform1, which the expressions read.
+    const nt::NodeId driver = nm.createNode("helix::transform");
+    const std::vector<nt::NodeId> chain = addTransformChain(100, 100);
+    const nt::NodeId display = chain.back();
+    for (nt::NodeId reader : chain)
+        nm.getNode(reader).getParameter("translate").lock()->setExpression(
+            "prm(\"transform1.translate\") + 0.01"
+        );
+    nm.cook(display);
+
+    // Outside the measure: the change of the driver must reach the end of the chain.
+    const auto translateOfDriver = nm.getNode(driver).getParameter("translate").lock();
+    const float before = firstPointX(display);
+    translateOfDriver->setFloat(3.0f, 0);
+    nm.cook(display);
+    REQUIRE(firstPointX(display) != before);
+
+    float value = 10.0f;
+    BENCHMARK("Change a float parameter read by 100 expressions and cook")
+    {
+        value += 1.0f;
+        translateOfDriver->setFloat(value, 0);
+        nm.cook(display);
+    };
+}
+
+// Loading clears the network first, so each run starts from the same state.
+TEST_CASE_METHOD(NMReset, "Scene load")
+{
+    using namespace helix;
+    auto& nm = nt::nm();
+
+    addTransformChain(99, 10);
+    const std::string path = "/tmp/helix_bench_scene_100_nodes.json";
+    nt::Serializer serializer;
+    serializer.save(nm, path);
+
+    serializer.load(nm, path);
+    REQUIRE(nm.nodes().size() == 100);
+
+    BENCHMARK("Load a scene of 100 nodes") { serializer.load(nm, path); };
 }
 
 // The performance measurements live in their own file, because the bench target
