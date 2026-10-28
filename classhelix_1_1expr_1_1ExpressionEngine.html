@@ -138,7 +138,7 @@ static <a class="el" href="classhelix_1_1expr_1_1ExpressionEngine.html">Expressi
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Evaluator for parameter expressions written in daslang. </p>
 <p>A bare expression such as "5 + 5" is wrapped in a function, compiled through <a class="el" href="classhelix_1_1daslang_1_1Runtime.html" title="Shared host for the daslang runtime.">daslang::Runtime</a>, and run to produce a parameter value.</p>
-<dl class="section note"><dt>Note</dt><dd>Compiled expressions are cached so repeated evaluation during cooking stays cheap. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Compiled expressions are cached so repeated evaluation during cooking stays cheap. The engine is safe to call from several threads at once, e.g. cook workers and the interface: a daslang context runs one function at a time, so every thread evaluates on its own clone of the compiled program, and only compiling and cloning (a cache miss) take the engine's lock. </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a5c12a50f99b529b594690789377fd4ff" name="a5c12a50f99b529b594690789377fd4ff"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5c12a50f99b529b594690789377fd4ff">&#9670;&#160;</a></span>evalFloat()</h2>

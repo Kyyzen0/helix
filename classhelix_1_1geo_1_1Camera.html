@@ -144,6 +144,9 @@ Matrix4&#160;</td><td class="memItemRight" valign="bottom"><b>getTransform</b> (
 <tr class="memitem:a648f4125f7ef46f1b37aef43ebb654d4" id="r_a648f4125f7ef46f1b37aef43ebb654d4"><td class="memItemLeft" align="right" valign="top"><a id="a648f4125f7ef46f1b37aef43ebb654d4" name="a648f4125f7ef46f1b37aef43ebb654d4"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setTransform</b> (const Matrix4 &amp;xform)</td></tr>
 <tr class="separator:a648f4125f7ef46f1b37aef43ebb654d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21861d2466cf167423fb72137b75eb80" id="r_a21861d2466cf167423fb72137b75eb80"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a21861d2466cf167423fb72137b75eb80">ensureWritable</a> () override</td></tr>
+<tr class="memdesc:a21861d2466cf167423fb72137b75eb80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gives the intrinsic attributes a store of their own and rebinds the primitive's handles to it, when a copy still shares them.  <br /></td></tr>
+<tr class="separator:a21861d2466cf167423fb72137b75eb80"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classhelix_1_1geo_1_1Primitive"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classhelix_1_1geo_1_1Primitive')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classhelix_1_1geo_1_1Primitive.html">helix::geo::Primitive</a></td></tr>
 <tr class="memitem:a24b276982443abce0e3530f789625cef inherit pub_methods_classhelix_1_1geo_1_1Primitive" id="r_a24b276982443abce0e3530f789625cef"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>Primitive</b> (std::string_view path=&quot;/prim&quot;)</td></tr>
@@ -279,9 +282,9 @@ virtual attr::attribVector &amp;&#160;</td><td class="memItemRight" valign="bott
 <tr class="memitem:a92e2537b9e9db525fd97cf141246d5a6 inherit pro_methods_classhelix_1_1geo_1_1Primitive" id="r_a92e2537b9e9db525fd97cf141246d5a6"><td class="memItemLeft" align="right" valign="top">
 virtual const attr::attribVector &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getGroupStore</b> (const <a class="el" href="Types_8h.html#a95d21ed81b6a20f87aa2f2e2a9813faf">attr::AttributeOwner</a> &amp;owner) const</td></tr>
 <tr class="separator:a92e2537b9e9db525fd97cf141246d5a6 inherit pro_methods_classhelix_1_1geo_1_1Primitive"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7a6cb9280600cf676fea54eb564e09ad inherit pro_methods_classhelix_1_1geo_1_1Primitive" id="r_a7a6cb9280600cf676fea54eb564e09ad"><td class="memItemLeft" align="right" valign="top">
-attr::attribVector&#160;</td><td class="memItemRight" valign="bottom"><b>deepCopyAttributes</b> (attr::attribVector source)</td></tr>
-<tr class="separator:a7a6cb9280600cf676fea54eb564e09ad inherit pro_methods_classhelix_1_1geo_1_1Primitive"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addc5aa5da327a952c3f2602768c84923 inherit pro_methods_classhelix_1_1geo_1_1Primitive" id="r_addc5aa5da327a952c3f2602768c84923"><td class="memItemLeft" align="right" valign="top">
+attr::attribVector&#160;</td><td class="memItemRight" valign="bottom"><b>deepCopyAttributes</b> (const attr::attribVector &amp;source)</td></tr>
+<tr class="separator:addc5aa5da327a952c3f2602768c84923 inherit pro_methods_classhelix_1_1geo_1_1Primitive"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed65defa33d4b6da60842d9e379fd71c inherit pro_methods_classhelix_1_1geo_1_1Primitive" id="r_aed65defa33d4b6da60842d9e379fd71c"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classhelix_1_1geo_1_1Primitive.html#aed65defa33d4b6da60842d9e379fd71c">getElementCount</a> (const <a class="el" href="Types_8h.html#a95d21ed81b6a20f87aa2f2e2a9813faf">attr::AttributeOwner</a> &amp;owner) const</td></tr>
 <tr class="memdesc:aed65defa33d4b6da60842d9e379fd71c inherit pro_methods_classhelix_1_1geo_1_1Primitive"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of elements in the given owner's store.  <br /></td></tr>
 <tr class="separator:aed65defa33d4b6da60842d9e379fd71c inherit pro_methods_classhelix_1_1geo_1_1Primitive"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -361,6 +364,36 @@ attr::attribVector&#160;</td><td class="memItemRight" valign="bottom"><b>primiti
 </div><div class="memdoc">
 
 <p>Implements <a class="el" href="classhelix_1_1geo_1_1Primitive.html">helix::geo::Primitive</a>.</p>
+
+</div>
+</div>
+<a id="a21861d2466cf167423fb72137b75eb80" name="a21861d2466cf167423fb72137b75eb80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21861d2466cf167423fb72137b75eb80">&#9670;&#160;</a></span>ensureWritable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void helix::geo::Camera::ensureWritable </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gives the intrinsic attributes a store of their own and rebinds the primitive's handles to it, when a copy still shares them. </p>
+<p>Copies share their attribute stores with the original until written (copy on write). Subclasses that keep handles on intrinsic attributes override this and call it before each write. Called by <a class="el" href="classhelix_1_1geo_1_1Primitive.html#a517fd7485b1bac3e5f6f7ad6e274d901">tryAddAttribute</a> before it returns a shared intrinsic attribute. </p>
+
+<p>Reimplemented from <a class="el" href="classhelix_1_1geo_1_1Primitive.html#ac388c47b258999cb08f8958f707a553a">helix::geo::Primitive</a>.</p>
 
 </div>
 </div>

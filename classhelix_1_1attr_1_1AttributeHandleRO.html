@@ -179,10 +179,11 @@ template&lt;typename T &gt; </div>
 <p>Construct a new typed handle linked to a target attribute.    </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">attribute</td><td>The target attribute this handle will modify    </td></tr>
+    <tr><td class="paramname">attribute</td><td>The target attribute this handle will modify</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section note"><dt>Note</dt><dd>Gives the attribute a store of its own first when it shares one (copy on write). Handles bound earlier to the same attribute keep the shared store.    </dd></dl>
 
 </div>
 </div>

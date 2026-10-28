@@ -154,6 +154,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>applyTransfor
 <tr class="memitem:a12f95e8cd5d2a81a4694d21ec6384440" id="r_a12f95e8cd5d2a81a4694d21ec6384440"><td class="memItemLeft" align="right" valign="top"><a id="a12f95e8cd5d2a81a4694d21ec6384440" name="a12f95e8cd5d2a81a4694d21ec6384440"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>applyTransform</b> (const <a class="el" href="classhelix_1_1Transform.html">Transform</a> &amp;transform, TransformClass transformClass)</td></tr>
 <tr class="separator:a12f95e8cd5d2a81a4694d21ec6384440"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac388c47b258999cb08f8958f707a553a" id="r_ac388c47b258999cb08f8958f707a553a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac388c47b258999cb08f8958f707a553a">ensureWritable</a> ()</td></tr>
+<tr class="memdesc:ac388c47b258999cb08f8958f707a553a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gives the intrinsic attributes a store of their own and rebinds the primitive's handles to it, when a copy still shares them.  <br /></td></tr>
+<tr class="separator:ac388c47b258999cb08f8958f707a553a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab22b5df21c4acbd091c34b32bcb3c79" id="r_aab22b5df21c4acbd091c34b32bcb3c79"><td class="memItemLeft" align="right" valign="top"><a id="aab22b5df21c4acbd091c34b32bcb3c79" name="aab22b5df21c4acbd091c34b32bcb3c79"></a>
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>canMerge</b> () const</td></tr>
 <tr class="separator:aab22b5df21c4acbd091c34b32bcb3c79"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -275,9 +278,9 @@ virtual attr::attribVector &amp;&#160;</td><td class="memItemRight" valign="bott
 <tr class="memitem:a92e2537b9e9db525fd97cf141246d5a6" id="r_a92e2537b9e9db525fd97cf141246d5a6"><td class="memItemLeft" align="right" valign="top"><a id="a92e2537b9e9db525fd97cf141246d5a6" name="a92e2537b9e9db525fd97cf141246d5a6"></a>
 virtual const attr::attribVector &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getGroupStore</b> (const <a class="el" href="Types_8h.html#a95d21ed81b6a20f87aa2f2e2a9813faf">attr::AttributeOwner</a> &amp;owner) const</td></tr>
 <tr class="separator:a92e2537b9e9db525fd97cf141246d5a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7a6cb9280600cf676fea54eb564e09ad" id="r_a7a6cb9280600cf676fea54eb564e09ad"><td class="memItemLeft" align="right" valign="top"><a id="a7a6cb9280600cf676fea54eb564e09ad" name="a7a6cb9280600cf676fea54eb564e09ad"></a>
-attr::attribVector&#160;</td><td class="memItemRight" valign="bottom"><b>deepCopyAttributes</b> (attr::attribVector source)</td></tr>
-<tr class="separator:a7a6cb9280600cf676fea54eb564e09ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addc5aa5da327a952c3f2602768c84923" id="r_addc5aa5da327a952c3f2602768c84923"><td class="memItemLeft" align="right" valign="top"><a id="addc5aa5da327a952c3f2602768c84923" name="addc5aa5da327a952c3f2602768c84923"></a>
+attr::attribVector&#160;</td><td class="memItemRight" valign="bottom"><b>deepCopyAttributes</b> (const attr::attribVector &amp;source)</td></tr>
+<tr class="separator:addc5aa5da327a952c3f2602768c84923"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed65defa33d4b6da60842d9e379fd71c" id="r_aed65defa33d4b6da60842d9e379fd71c"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aed65defa33d4b6da60842d9e379fd71c">getElementCount</a> (const <a class="el" href="Types_8h.html#a95d21ed81b6a20f87aa2f2e2a9813faf">attr::AttributeOwner</a> &amp;owner) const</td></tr>
 <tr class="memdesc:aed65defa33d4b6da60842d9e379fd71c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of elements in the given owner's store.  <br /></td></tr>
 <tr class="separator:aed65defa33d4b6da60842d9e379fd71c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -475,6 +478,36 @@ template&lt;typename T &gt; </div>
 <p>Compacts storage, removing entries marked invalid so offsets are contiguous again. </p>
 
 <p>Reimplemented in <a class="el" href="classhelix_1_1geo_1_1Mesh.html#af780f4ddcae36a68457ffbae31aca272">helix::geo::Mesh</a>.</p>
+
+</div>
+</div>
+<a id="ac388c47b258999cb08f8958f707a553a" name="ac388c47b258999cb08f8958f707a553a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac388c47b258999cb08f8958f707a553a">&#9670;&#160;</a></span>ensureWritable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void helix::geo::Primitive::ensureWritable </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gives the intrinsic attributes a store of their own and rebinds the primitive's handles to it, when a copy still shares them. </p>
+<p>Copies share their attribute stores with the original until written (copy on write). Subclasses that keep handles on intrinsic attributes override this and call it before each write. Called by <a class="el" href="#a517fd7485b1bac3e5f6f7ad6e274d901">tryAddAttribute</a> before it returns a shared intrinsic attribute. </p>
+
+<p>Reimplemented in <a class="el" href="classhelix_1_1geo_1_1Camera.html#a21861d2466cf167423fb72137b75eb80">helix::geo::Camera</a>, and <a class="el" href="classhelix_1_1geo_1_1Mesh.html#a5c9544c6c4c2bb376f8efc3c3d1ca749">helix::geo::Mesh</a>.</p>
 
 </div>
 </div>

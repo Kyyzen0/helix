@@ -160,7 +160,9 @@ static <a class="el" href="classhelix_1_1daslang_1_1Runtime.html">Runtime</a> &a
 
 <p>Compiles source text into a reusable script. </p>
 <dl class="section return"><dt>Returns</dt><dd>The compiled script, or null when compilation fails. </dd></dl>
-<dl class="section note"><dt>Note</dt><dd>On failure the daslang diagnostics are written to <code>error</code>. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>On failure the daslang diagnostics are written to <code>error</code>. </dd>
+<dd>
+Safe to call from any thread: compiles run one at a time, each bound to the environment this runtime created, since daslang binds its environment per thread. </dd></dl>
 
 </div>
 </div>

@@ -25,8 +25,8 @@ var searchData=
   ['append_22',['append',['../classhelix_1_1Path.html#acc6006b8f1a9e5e63090fe70f23d0765',1,'helix::Path']]],
   ['applytoparameters_23',['applyToParameters',['../classhelix_1_1sim_1_1KeyframeStore.html#a82f13a959bcdc96eb8718ca114c87699',1,'helix::sim::KeyframeStore']]],
   ['attachstyle_24',['attachStyle',['../StyleAccess_8h.html#acc132edf0a685e2360ffedb1054d60c4',1,'helix::prm::style']]],
-  ['attribute_25',['Attribute',['../classhelix_1_1attr_1_1Attribute.html#acbae1a74ca8b969aaeb9ec5f22ff121f',1,'helix::attr::Attribute']]],
-  ['attributehandle_26',['AttributeHandle',['../classhelix_1_1attr_1_1AttributeHandle.html#a9b9968e8792667ae515d7606f8860ab1',1,'helix::attr::AttributeHandle']]],
+  ['attribute_25',['Attribute',['../classhelix_1_1attr_1_1Attribute.html#acbae1a74ca8b969aaeb9ec5f22ff121f',1,'helix::attr::Attribute::Attribute(std::string name, attr::AttributeType type, bool intrinsic=false, bool isInternal=false)'],['../classhelix_1_1attr_1_1Attribute.html#a82eac65c491347e9a2aa660cb73c2916',1,'helix::attr::Attribute::Attribute(const Attribute &amp;other)']]],
+  ['attributehandle_26',['AttributeHandle',['../classhelix_1_1attr_1_1AttributeHandle.html#a9b9968e8792667ae515d7606f8860ab1',1,'helix::attr::AttributeHandle::AttributeHandle(std::shared_ptr&lt; Attribute &gt; attribute)'],['../classhelix_1_1attr_1_1AttributeHandle.html#a60d19f56acafa8fc2ce11d3aa2f4d174',1,'helix::attr::AttributeHandle::AttributeHandle(std::shared_ptr&lt; Attribute &gt; attribute, ShareStoreTag)']]],
   ['attributehandlero_27',['AttributeHandleRO',['../classhelix_1_1attr_1_1AttributeHandleRO.html#aeca3a51300924ff042d2e1869a37544e',1,'helix::attr::AttributeHandleRO']]],
   ['attributetypes_28',['attributeTypes',['../structhelix_1_1prm_1_1style_1_1Attribute.html#ac0ea35fb1c97e5bf5c3a881ce4b346e1',1,'helix::prm::style::Attribute']]]
 ];
