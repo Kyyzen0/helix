@@ -1,6 +1,9 @@
 #include "Engine/Attribute/Attribute.h"
 #include "Engine/Core/Types.h"
+#include <algorithm>
+#include <array>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <stdexcept>
 
@@ -46,13 +49,47 @@ attr::Attribute::Attribute(
 
 unsigned int attr::Attribute::Attribute::getTypeSize() const { return typeSize_; }
 
+namespace {
+
+// Serialises the cloning of a shared store. A global array of mutexes indexed by the attribute's
+// address keeps Attribute small and its copy constructor free of any mutex.
+std::mutex& detachMutexFor(const void* attribute)
+{
+    static std::array<std::mutex, 64> mutexes;
+    return mutexes[(reinterpret_cast<std::uintptr_t>(attribute) >> 6) % mutexes.size()];
+}
+
+} // namespace
+
+void attr::Attribute::detach()
+{
+    if (!storeShared_.load(std::memory_order_acquire)) return;
+
+    std::lock_guard lock(detachMutexFor(this));
+    // Another thread may have detached this attribute while this one waited.
+    if (!storeShared_.load(std::memory_order_acquire)) return;
+
+    std::visit(
+        [](auto& storePtr) {
+            using Vec = typename std::decay_t<decltype(storePtr)>::element_type;
+            // Clones before replacing so a throwing allocation leaves the attribute untouched.
+            std::shared_ptr<Vec> clone = std::make_shared<Vec>(*storePtr);
+            storePtr = std::move(clone);
+        },
+        store_
+    );
+    storeShared_.store(false, std::memory_order_release);
+}
+
 void attr::Attribute::resize(size_t size)
 {
+    detach();
     std::visit([&](auto& storePtr) { storePtr->resize(size); }, store_);
 }
 
 void attr::Attribute::compact(const std::vector<bool>& keep)
 {
+    detach();
     std::visit(
         [&](auto& storePtr) {
             auto& store = *storePtr;
@@ -79,21 +116,24 @@ bool attr::Attribute::isIntrinsic() const { return intrinsic_; }
 bool attr::Attribute::isInternal() const { return internal_; }
 
 attr::Attribute::Attribute(const Attribute& other)
+    : internal_{other.internal_}, intrinsic_{other.intrinsic_}, type_{other.type_},
+      typeSize_{other.typeSize_}, name_{other.name_}, store_{other.store_}, storeShared_{true}
 {
-    type_ = other.type_;
+    other.markShared();
+}
+
+attr::Attribute& attr::Attribute::operator=(const Attribute& other)
+{
+    if (this == &other) return *this;
     internal_ = other.internal_;
     intrinsic_ = other.intrinsic_;
-    name_ = other.name_;
+    type_ = other.type_;
     typeSize_ = other.typeSize_;
-
-    std::visit(
-        [&](const auto& storePtr) {
-            using StorePtr = std::decay_t<decltype(storePtr)>;
-            using Vec = typename StorePtr::element_type;
-            store_ = std::make_shared<Vec>(*storePtr);
-        },
-        other.store_
-    );
+    name_ = other.name_;
+    store_ = other.store_;
+    other.markShared();
+    storeShared_.store(true, std::memory_order_release);
+    return *this;
 }
 
 Vector3 attr::Attribute::getVector3(Offset offset) const

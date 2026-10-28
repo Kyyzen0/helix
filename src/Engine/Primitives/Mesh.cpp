@@ -7,6 +7,7 @@
 #include "Engine/GeometryAlgorithms/Normals.h"
 #include "Engine/Primitives/Primitive.h"
 #include "icecream.hpp"
+#include <cassert>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -31,41 +32,43 @@ geo::Mesh::Mesh(std::string_view path)
 
 geo::Mesh::Mesh(const Mesh& other)
     : Primitive(other),
-      // attributes
+      // attributes: the copy shares their stores until one side writes
       vertexAttributes_{deepCopyAttributes(other.vertexAttributes_)},
       faceAttributes_{deepCopyAttributes(other.faceAttributes_)},
       // groups
       vertexGroups_{deepCopyAttributes(other.vertexGroups_)},
-      faceGroups_{deepCopyAttributes(other.faceGroups_)},
+      faceGroups_{deepCopyAttributes(other.faceGroups_)}, intrinsicsShared_{true},
 
-      // handles
-      vertexCountFaceHandle_{
-          attr::AttributeHandleInt(getAttribByName(attr::AttrOwner::FACE, "vertexCount", true))
-      },
-      closedFaceHandle_{
-          attr::AttributeHandleBool(getAttribByName(attr::AttrOwner::FACE, "closed", true))
-      },
-      pointOffsetVertexHandle_{
-          attr::AttributeHandleInt(getAttribByName(attr::AttrOwner::VERTEX, "point", true))
-      },
-      posPointHandle_{attr::AttributeHandleVector3(
-          getAttribByName(attr::AttrOwner::POINT, attr::names::position, true)
+      // handles, bound to the shared stores (see ensureWritable_)
+      vertexCountFaceHandle_{attr::AttributeHandleInt(
+          getAttribByName(attr::AttrOwner::FACE, "vertexCount", true), attr::shareStore
       )},
-      validFaceHandle_{
-          attr::AttributeHandleBool(getAttribByName(attr::AttrOwner::FACE, "__valid", true))
-      },
-      validVertexHandle_{
-          attr::AttributeHandleBool(getAttribByName(attr::AttrOwner::VERTEX, "__valid", true))
-      },
-      validPointHandle_{
-          attr::AttributeHandleBool(getAttribByName(attr::AttrOwner::POINT, "__valid", true))
-      },
+      closedFaceHandle_{attr::AttributeHandleBool(
+          getAttribByName(attr::AttrOwner::FACE, "closed", true), attr::shareStore
+      )},
+      pointOffsetVertexHandle_{attr::AttributeHandleInt(
+          getAttribByName(attr::AttrOwner::VERTEX, "point", true), attr::shareStore
+      )},
+      posPointHandle_{attr::AttributeHandleVector3(
+          getAttribByName(attr::AttrOwner::POINT, attr::names::position, true), attr::shareStore
+      )},
+      validFaceHandle_{attr::AttributeHandleBool(
+          getAttribByName(attr::AttrOwner::FACE, "__valid", true), attr::shareStore
+      )},
+      validVertexHandle_{attr::AttributeHandleBool(
+          getAttribByName(attr::AttrOwner::VERTEX, "__valid", true), attr::shareStore
+      )},
+      validPointHandle_{attr::AttributeHandleBool(
+          getAttribByName(attr::AttrOwner::POINT, "__valid", true), attr::shareStore
+      )},
 
       // other
       soloPoints_{other.soloPoints_}, soloPointsDirty_{other.soloPointsDirty_},
       needsDefrag_{other.needsDefrag_}, vertexFaces_{other.vertexFaces_},
       faceStarts_{other.faceStarts_}, faceStartsDirty_{other.faceStartsDirty_.load()}
 {
+    // The original's attributes were flagged by their own copy constructors.
+    other.intrinsicsShared_.store(true, std::memory_order_release);
 }
 
 geo::Mesh& geo::Mesh::operator=(const geo::Mesh& rhs)
@@ -82,22 +85,10 @@ geo::Mesh& geo::Mesh::operator=(const geo::Mesh& rhs)
     vertexGroups_ = deepCopyAttributes(rhs.vertexGroups_);
     faceGroups_ = deepCopyAttributes(rhs.faceGroups_);
 
-    // handles
-    vertexCountFaceHandle_ =
-        attr::AttributeHandleInt(getAttribByName(attr::AttrOwner::FACE, "vertexCount", true));
-    closedFaceHandle_ =
-        attr::AttributeHandleBool(getAttribByName(attr::AttrOwner::FACE, "closed", true));
-    pointOffsetVertexHandle_ =
-        attr::AttributeHandleInt(getAttribByName(attr::AttrOwner::VERTEX, "point", true));
-    posPointHandle_ = attr::AttributeHandleVector3(
-        getAttribByName(attr::AttrOwner::POINT, attr::names::position, true)
-    );
-    validFaceHandle_ =
-        attr::AttributeHandleBool(getAttribByName(attr::AttrOwner::FACE, "__valid", true));
-    validVertexHandle_ =
-        attr::AttributeHandleBool(getAttribByName(attr::AttrOwner::VERTEX, "__valid", true));
-    validPointHandle_ =
-        attr::AttributeHandleBool(getAttribByName(attr::AttrOwner::POINT, "__valid", true));
+    // handles, bound to the shared stores
+    bindIntrinsicHandles_(false);
+    intrinsicsShared_.store(true, std::memory_order_release);
+    rhs.intrinsicsShared_.store(true, std::memory_order_release);
 
     // other
     soloPoints_ = rhs.soloPoints_;
@@ -111,11 +102,56 @@ geo::Mesh& geo::Mesh::operator=(const geo::Mesh& rhs)
     return *this;
 }
 
+void geo::Mesh::bindIntrinsicHandles_(bool detach)
+{
+    // The read write constructor detaches a shared store, the tagged one leaves it shared.
+    const auto bind = [&]<typename Handle>(Handle& handle,
+                                           attr::AttributeOwner owner,
+                                           std::string_view name) {
+        const std::shared_ptr<attr::Attribute> attribute = getAttribByName(owner, name, true);
+        handle = detach ? Handle(attribute) : Handle(attribute, attr::shareStore);
+    };
+    bind(vertexCountFaceHandle_, attr::AttrOwner::FACE, "vertexCount");
+    bind(closedFaceHandle_, attr::AttrOwner::FACE, "closed");
+    bind(pointOffsetVertexHandle_, attr::AttrOwner::VERTEX, "point");
+    bind(posPointHandle_, attr::AttrOwner::POINT, attr::names::position);
+    bind(validFaceHandle_, attr::AttrOwner::FACE, "__valid");
+    bind(validVertexHandle_, attr::AttrOwner::VERTEX, "__valid");
+    bind(validPointHandle_, attr::AttrOwner::POINT, "__valid");
+}
+
+void geo::Mesh::ensureWritableSlow_()
+{
+    // Two threads may write the same mesh, e.g. setPointPos from a parallel loop.
+    std::lock_guard lock(detachMutex_);
+    if (!intrinsicsShared_.load(std::memory_order_acquire)) return;
+
+    bindIntrinsicHandles_(true);
+    assert(intrinsicHandlesBound());
+    intrinsicsShared_.store(false, std::memory_order_release);
+}
+
+bool geo::Mesh::intrinsicHandlesBound() const
+{
+    const auto bound = [&](const auto& handle, attr::AttributeOwner owner, std::string_view name) {
+        const std::shared_ptr<const attr::Attribute> attribute = getAttribByName(owner, name, true);
+        return attribute && handle.isBoundTo(*attribute);
+    };
+    return bound(vertexCountFaceHandle_, attr::AttrOwner::FACE, "vertexCount") &&
+           bound(closedFaceHandle_, attr::AttrOwner::FACE, "closed") &&
+           bound(pointOffsetVertexHandle_, attr::AttrOwner::VERTEX, "point") &&
+           bound(posPointHandle_, attr::AttrOwner::POINT, attr::names::position) &&
+           bound(validFaceHandle_, attr::AttrOwner::FACE, "__valid") &&
+           bound(validVertexHandle_, attr::AttrOwner::VERTEX, "__valid") &&
+           bound(validPointHandle_, attr::AttrOwner::POINT, "__valid");
+}
+
 void geo::Mesh::mergeAppend(
     std::shared_ptr<attr::Attribute> dst,
     std::shared_ptr<attr::Attribute> src
 )
 {
+    ensureWritable_();
     if (!dst) throw std::runtime_error("Dst empty.");
     if (!src) throw std::runtime_error("Src empty.");
 
@@ -131,6 +167,7 @@ void geo::Mesh::applyTransform(const Matrix4& mat, TransformClass transformClass
 {
     if ((transformClass & TransformClass::POINT) != TransformClass::NONE)
     {
+        ensureWritable_();
         const Offset numPoints = getNumPoints();
         tbb::parallel_for(
             tbb::blocked_range<size_t>(0, numPoints),
@@ -158,6 +195,7 @@ void geo::Mesh::merge(std::shared_ptr<Primitive> other)
 
 void geo::Mesh::merge(Mesh& other)
 {
+    ensureWritable_();
     // Copy points from other to self.
     const std::vector<Offset> newPoints = addPoints(other.posPointHandle_.getSpan());
 
@@ -228,6 +266,7 @@ void geo::Mesh::merge(Mesh& other)
 
 Offset geo::Mesh::addFace(const std::vector<Offset>& pointOffsets, bool closed)
 {
+    ensureWritable_();
     const Offset faceNum = vertexCountFaceHandle_.getSize();
     for (Offset pointOffset : pointOffsets)
     {
@@ -273,6 +312,7 @@ std::vector<Offset> geo::Mesh::addFaces(
     bool closed
 )
 {
+    ensureWritable_();
     const Offset firstFaceOffset = vertexCountFaceHandle_.getSize();
     const Offset firstVertOffset = pointOffsetVertexHandle_.getSize();
     const size_t numFacesToAdd = vertexCounts.size();
@@ -332,6 +372,7 @@ std::vector<Offset> geo::Mesh::addFaces(
 void geo::Mesh::deleteFaces(const std::vector<Offset>& faceOffsets, bool andPoints)
 {
     if (faceOffsets.empty()) return;
+    ensureWritable_();
 
     // Invalidate each face and its vertices.
     // When cascading to points, remember which points those vertices referenced.
@@ -374,6 +415,7 @@ void geo::Mesh::deleteAllFaces(bool andPoints) { deleteFaces(getFaces().toVector
 void geo::Mesh::deletePoints(const std::vector<Offset>& pointOffsets, bool andFaces)
 {
     if (pointOffsets.empty()) return;
+    ensureWritable_();
 
     std::unordered_set<Offset> deletedPoints(pointOffsets.begin(), pointOffsets.end());
 
@@ -412,6 +454,7 @@ void geo::Mesh::deletePoints(const std::vector<Offset>& pointOffsets, bool andFa
 void geo::Mesh::deleteVertices(const std::vector<Offset>& vertOffsets)
 {
     if (vertOffsets.empty()) return;
+    ensureWritable_();
 
     // Mark vertices invalid and remember which faces lost vertices
     std::unordered_set<Offset> affectedFaces;
@@ -455,6 +498,7 @@ void geo::Mesh::defragment()
     Primitive::defragment();
 
     if (!needsDefrag_) return;
+    ensureWritable_();
 
     // Update each face's vertex count in case any vertices were deleted
     const Offset oldFaceCount = vertexCountFaceHandle_.getSize();
@@ -527,6 +571,7 @@ void geo::Mesh::defragment()
 
 Offset geo::Mesh::addPoint(const Vector3& pos)
 {
+    ensureWritable_();
     const Offset pointOffset = posPointHandle_.getSize();
 
     posPointHandle_.addValue(pos);
@@ -538,6 +583,7 @@ Offset geo::Mesh::addPoint(const Vector3& pos)
 
 std::vector<Offset> geo::Mesh::addPoints(std::span<const Vector3> positions)
 {
+    ensureWritable_();
     const Offset firstPointOffset = posPointHandle_.getSize();
     const size_t numPointsToAdd = positions.size();
     const Offset newPointCount = firstPointOffset + numPointsToAdd;
@@ -570,6 +616,7 @@ std::vector<Offset> geo::Mesh::addPoints(std::span<const Vector3> positions)
 std::vector<Offset>
 geo::Mesh::duplicatePoints(std::span<const Offset> srcPointOffsets, bool copyAttributes)
 {
+    ensureWritable_();
     // Gather the source positions, then let addPoints grow the stores in one shot
     std::vector<Vector3> positions;
     positions.reserve(srcPointOffsets.size());
@@ -644,6 +691,7 @@ Offset geo::Mesh::getVertexFace(Offset vertexOffset) const { return vertexFaces_
 
 void geo::Mesh::setPointPos(const Offset offset, const Vector3& pos)
 {
+    ensureWritable_();
     posPointHandle_.setValue(offset, pos);
 }
 

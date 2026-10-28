@@ -39,6 +39,18 @@ namespace helix::attr {
  * Together, attributes define the schema and storage, while handles
  * provide the typed access that nodes and tools use to operate on data directly.
  */
+/**
+ * @brief Tag for the handle constructor that binds without detaching a shared store.
+ *
+ * Reserved for the copy constructors of primitives, which bind their members to the store they
+ * share with the original. Whoever binds this way must call Attribute::detach and rebind before
+ * the first write.
+ */
+struct ShareStoreTag
+{
+};
+inline constexpr ShareStoreTag shareStore{};
+
 template <typename T> class AttributeHandle
 {
   public:
@@ -49,14 +61,33 @@ template <typename T> class AttributeHandle
      *
      * @param attribute The target attribute this handle will modify
      *
+     * @note Gives the attribute a store of its own first when it shares one (copy on write).
+     *       Handles bound earlier to the same attribute keep the shared store.
      */
     AttributeHandle(std::shared_ptr<Attribute> attribute)
+    {
+        if (attribute == nullptr)
+            throw std::runtime_error("Cannot pass empty pointer to AttributeHandle constructor");
+        attribute->detach();
+        type_ = attribute->getType();
+        name_ = attribute->getName();
+        data_ = std::get<std::shared_ptr<StoreContainer<T>>>(attribute->store_);
+    }
+
+    /// @brief Binds to the attribute's store without detaching it. See @ref ShareStoreTag.
+    AttributeHandle(std::shared_ptr<Attribute> attribute, ShareStoreTag)
     {
         if (attribute == nullptr)
             throw std::runtime_error("Cannot pass empty pointer to AttributeHandle constructor");
         type_ = attribute->getType();
         name_ = attribute->getName();
         data_ = std::get<std::shared_ptr<StoreContainer<T>>>(attribute->store_);
+    }
+
+    /// @brief Returns whether this handle reads the attribute's current store.
+    bool isBoundTo(const Attribute& attribute) const
+    {
+        return data_ == std::get<std::shared_ptr<StoreContainer<T>>>(attribute.store_);
     }
 
     /**
@@ -230,7 +261,7 @@ class AttributeHandleRO
   private:
     std::string name_;
 
-    std::shared_ptr<StoreContainer<T>> data_;
+    std::shared_ptr<const StoreContainer<T>> data_;
 
     // int typeID_;
 };

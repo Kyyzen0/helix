@@ -29,7 +29,7 @@ std::vector<Vector3> getPointVectorsFromVertices(
     const std::shared_ptr<attr::Attribute>& vertexAttribute
 )
 {
-    const attr::AttributeHandle<Vector3> vertexValues(vertexAttribute);
+    const attr::AttributeHandleRO<Vector3> vertexValues(vertexAttribute);
     const std::span<const intT> vertexPoints = mesh.vertexPointSpan();
 
     std::vector<Vector3> pointValues(mesh.getNumPoints(), Vector3::Zero());
@@ -66,7 +66,7 @@ std::vector<Vector3> getPointVectors(geo::Primitive& prim, const std::string& na
         prim.getAttribByName(attr::AttributeOwner::POINT, name);
     if (!isPopulatedVector(pointAttribute)) return {};
 
-    return attr::AttributeHandle<Vector3>(pointAttribute).getAllValues();
+    return attr::AttributeHandleRO<Vector3>(pointAttribute).getAllValues();
 }
 
 /**
