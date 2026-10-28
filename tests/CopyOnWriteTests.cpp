@@ -295,6 +295,66 @@ TEST_CASE("Writing the source mesh after it was copied leaves the copy unchanged
     REQUIRE(source.intrinsicHandlesBound());
 }
 
+TEST_CASE("Transforming a copy detaches the positions and keeps sharing the topology", "[copyOnWrite]")
+{
+    geo::Mesh source = makeGrid(2, 2);
+    const std::vector<Vector3> before = positionsOf(source);
+    geo::Mesh copy = source;
+
+    Matrix4 translation = Matrix4::Identity();
+    translation(0, 3) = 3.f;
+    copy.applyTransform(translation, TransformClass::POINT);
+
+    REQUIRE(copy.pointPosSpan().data() != source.pointPosSpan().data());
+    REQUIRE(copy.vertexPointSpan().data() == source.vertexPointSpan().data());
+    REQUIRE(copy.getFacePoints(0).data() == source.getFacePoints(0).data());
+    requireSameVectors(positionsOf(source), before);
+    REQUIRE(copy.getPointPos(1) == before[1] + Vector3(3, 0, 0));
+    REQUIRE(copy.intrinsicHandlesBound());
+
+    // setPointPos takes the same granular path.
+    geo::Mesh moved = source;
+    moved.setPointPos(0, Vector3(1, 2, 3));
+    REQUIRE(moved.vertexPointSpan().data() == source.vertexPointSpan().data());
+    REQUIRE(source.getPointPos(0) == before[0]);
+}
+
+TEST_CASE("Topology edits after a transform detach the rest and write correctly", "[copyOnWrite]")
+{
+    geo::Mesh source = makeGrid(2, 1);
+    const std::vector<Vector3> before = positionsOf(source);
+    const std::vector<intT> countsBefore = vertexCountsOf(source);
+    const Offset sourceFaces = source.getNumFaces();
+    const Offset sourceVerts = source.getNumVerts();
+
+    geo::Mesh copy = source;
+    Matrix4 translation = Matrix4::Identity();
+    translation(1, 3) = 2.f;
+    copy.applyTransform(translation, TransformClass::POINT);
+    REQUIRE(copy.vertexPointSpan().data() == source.vertexPointSpan().data());
+
+    copy.addPoint(Vector3(9, 9, 9));
+    const std::vector<Offset> flat{0, 1, 2, 3, 4, 5};
+    const std::vector<Offset> counts{4, 2};
+    copy.addFaces(flat, counts);
+
+    REQUIRE(copy.vertexPointSpan().data() != source.vertexPointSpan().data());
+    REQUIRE(copy.getNumFaces() == sourceFaces + 2);
+    REQUIRE(copy.getNumVerts() == sourceVerts + 6);
+    const std::vector<intT> countsAfter = vertexCountsOf(copy);
+    REQUIRE(countsAfter[sourceFaces] == 4);
+    REQUIRE(countsAfter[sourceFaces + 1] == 2);
+    REQUIRE(copy.getVertexPoint(sourceVerts + 4) == 4);
+    REQUIRE(copy.getPointPos(1) == before[1] + Vector3(0, 2, 0));
+    REQUIRE(copy.getPointPos(before.size()) == Vector3(9, 9, 9));
+    REQUIRE(copy.intrinsicHandlesBound());
+
+    REQUIRE(source.getNumFaces() == sourceFaces);
+    REQUIRE(source.getNumVerts() == sourceVerts);
+    REQUIRE(vertexCountsOf(source) == countsBefore);
+    requireSameVectors(positionsOf(source), before);
+}
+
 TEST_CASE("Moving one point of a copy detaches the points only once", "[copyOnWrite]")
 {
     geo::Mesh source = makeGrid(1, 1);

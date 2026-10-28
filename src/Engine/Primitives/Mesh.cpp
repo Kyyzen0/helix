@@ -37,7 +37,7 @@ geo::Mesh::Mesh(const Mesh& other)
       faceAttributes_{deepCopyAttributes(other.faceAttributes_)},
       // groups
       vertexGroups_{deepCopyAttributes(other.vertexGroups_)},
-      faceGroups_{deepCopyAttributes(other.faceGroups_)}, intrinsicsShared_{true},
+      faceGroups_{deepCopyAttributes(other.faceGroups_)}, intrinsicsShared_{true}, positionShared_{true},
 
       // handles, bound to the shared stores (see ensureWritable_)
       vertexCountFaceHandle_{attr::AttributeHandleInt(
@@ -69,6 +69,7 @@ geo::Mesh::Mesh(const Mesh& other)
 {
     // The original's attributes were flagged by their own copy constructors.
     other.intrinsicsShared_.store(true, std::memory_order_release);
+    other.positionShared_.store(true, std::memory_order_release);
 }
 
 geo::Mesh& geo::Mesh::operator=(const geo::Mesh& rhs)
@@ -88,7 +89,9 @@ geo::Mesh& geo::Mesh::operator=(const geo::Mesh& rhs)
     // handles, bound to the shared stores
     bindIntrinsicHandles_(false);
     intrinsicsShared_.store(true, std::memory_order_release);
+    positionShared_.store(true, std::memory_order_release);
     rhs.intrinsicsShared_.store(true, std::memory_order_release);
+    rhs.positionShared_.store(true, std::memory_order_release);
 
     // other
     soloPoints_ = rhs.soloPoints_;
@@ -128,7 +131,22 @@ void geo::Mesh::ensureWritableSlow_()
 
     bindIntrinsicHandles_(true);
     assert(intrinsicHandlesBound());
+    positionShared_.store(false, std::memory_order_release);
     intrinsicsShared_.store(false, std::memory_order_release);
+}
+
+void geo::Mesh::ensurePositionWritableSlow_()
+{
+    std::lock_guard lock(detachMutex_);
+    if (!positionShared_.load(std::memory_order_acquire)) return;
+
+    // The read write constructor detaches the store, then the handle follows it. The topology
+    // keeps sharing its stores, and intrinsicsShared_ stays set for the full detach later.
+    posPointHandle_ = attr::AttributeHandleVector3(
+        getAttribByName(attr::AttrOwner::POINT, attr::names::position, true)
+    );
+    assert(intrinsicHandlesBound());
+    positionShared_.store(false, std::memory_order_release);
 }
 
 bool geo::Mesh::intrinsicHandlesBound() const
@@ -167,7 +185,7 @@ void geo::Mesh::applyTransform(const Matrix4& mat, TransformClass transformClass
 {
     if ((transformClass & TransformClass::POINT) != TransformClass::NONE)
     {
-        ensureWritable_();
+        ensurePositionWritable_();
         const Offset numPoints = getNumPoints();
         tbb::parallel_for(
             tbb::blocked_range<size_t>(0, numPoints),
@@ -691,7 +709,7 @@ Offset geo::Mesh::getVertexFace(Offset vertexOffset) const { return vertexFaces_
 
 void geo::Mesh::setPointPos(const Offset offset, const Vector3& pos)
 {
-    ensureWritable_();
+    ensurePositionWritable_();
     posPointHandle_.setValue(offset, pos);
 }
 

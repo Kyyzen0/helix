@@ -300,6 +300,12 @@ class Mesh : public Primitive
         if (intrinsicsShared_.load(std::memory_order_acquire)) ensureWritableSlow_();
     }
     void ensureWritableSlow_();
+    // Detaches and rebinds the point positions only, for writers that leave the topology alone.
+    void ensurePositionWritable_()
+    {
+        if (positionShared_.load(std::memory_order_acquire)) ensurePositionWritableSlow_();
+    }
+    void ensurePositionWritableSlow_();
     void bindIntrinsicHandles_(bool detach);
     void mergeAppend(std::shared_ptr<attr::Attribute> dst, std::shared_ptr<attr::Attribute> src);
     template <typename T>
@@ -339,6 +345,8 @@ class Mesh : public Primitive
 
     // Set on a mesh and on its copies: their intrinsic attributes may share stores.
     mutable std::atomic<bool> intrinsicsShared_{false};
+    // Set with intrinsicsShared_, and cleared alone once the positions have their own store.
+    mutable std::atomic<bool> positionShared_{false};
     mutable std::mutex detachMutex_;
 
     // intrinsic handles
