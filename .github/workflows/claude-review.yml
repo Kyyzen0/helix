@@ -2,6 +2,9 @@
 # Modèle repris de la doc officielle (section « Run a skill ») :
 # https://code.claude.com/docs/en/github-actions
 # Lecture seule sur le code : Claude ne pousse rien, il commente.
+# La restriction est appliquée au niveau du jeton : on passe GITHUB_TOKEN (limité aux permissions du job ci-dessous)
+# via `github_token`. Sans cela, l'action échange l'OIDC contre un jeton d'application GitHub aux droits d'écriture
+# par défaut, indépendants du bloc `permissions` du job.
 # Sur un dépôt public, GitHub ne transmet pas les secrets aux PR de forks : la relecture ne tourne que sur les branches du dépôt.
 name: Claude Code Review
 on:
@@ -16,7 +19,7 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write # nécessaire pour poster les commentaires de relecture
       issues: read
       id-token: write
     steps:
@@ -26,6 +29,7 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           plugin_marketplaces: "https://github.com/anthropics/claude-plugins-official.git"
           plugins: "code-review@claude-plugins-official"
           prompt: "/code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
