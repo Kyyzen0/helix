@@ -1,6 +1,6 @@
 # Réponse à @claude dans les issues et les PR (mode interactif).
 # Modèle repris de la doc officielle : https://code.claude.com/docs/en/github-actions
-# Authentification : secret CLAUDE_CODE_OAUTH_TOKEN (abonnement), généré avec `claude setup-token`.
+# Authentification : secret CLAUDE_CODE_OAUTH_TOKEN.
 name: Claude Code
 on:
   issue_comment:
@@ -29,5 +29,5 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          # Borne le travail par exécution (quota d'abonnement)
+          # Borne le travail par exécution
           claude_args: "--max-turns 12"
