@@ -1,193 +1,162 @@
 # Helix roadmap
 
-Helix is a procedural modeling tool **and** an animation tool. The two are not
-separate products: a procedural model that cannot be animated is a static asset
-generator, and an animation system that cannot be authored procedurally is a
-keyframe editor with extra steps. The same graph, the same attributes and the
-same cook serve both.
-
-This document states where the work goes, and why in that order. It is the
-reference the roadmap is measured against.
-
-## Where the project comes from
+This document states where the work goes, and in what order. The principles
+it serves are in [VISION.md](VISION.md): AI native, everything is a graph,
+stable by design, made for Apple silicon, native to the Mac. When the roadmap
+and the vision disagree, the vision wins and this document is updated.
 
 Helix is a fork of [enzo](https://github.com/parkerbritt/enzo) by
 [ParkerBritt](https://github.com/ParkerBritt), MIT licensed. The engine
-architecture, the node system, the attribute based data model and the parameter
-system are his work and remain the foundation everything below is built on. See
-[NOTICE](NOTICE).
+architecture, the node system, the attribute based data model and the
+parameter system are his work and remain the foundation everything below is
+built on. See [NOTICE](NOTICE).
 
 ---
 
-## The shared foundation
+## Where Helix stands
 
-Neither track can go far without these. They are the reason the two tracks are
-compatible rather than competing.
+Done in the tree:
 
-### Keyframes and F-curves
+- **macOS arm64 port**: a native Apple silicon build, an `.app` bundle and a CI
+  job on `macos-15`.
+- **Metal viewport** through `metal-cpp`, in place of Vulkan through MoltenVK.
+  See [docs/METAL-RENDERER.md](docs/METAL-RENDERER.md).
+- **Async cooking** on a worker pool, with cancellation and coalescing.
+- **Timeline** with playback, scrubbing, looping and a frame range.
+- **Keyframes, first version.** A parameter component holds a track of
+  keyframes with step, linear or smooth interpolation, and every track is a
+  pure function of the frame (`src/Engine/Simulation/Keyframe.h`,
+  `KeyframeStore.h`). Tangents and a curve editor are still to come.
+- **Simulation nodes**: particles and springs, keyframable from the timeline.
+- **Sweep node**, **user node authoring** from script or expression source,
+  and copy on write attributes.
+- **M0, the engine without Qt.** `HELIX_BUILD_GUI=OFF` builds the engine, the
+  nodes, the Metal graphics and the tests without Qt, and the `HelixCore`
+  facade gives a Swift application a plain C++ API over the engine. Swift
+  imports it through C++ interoperability (`apple/HelixCoreSmoke`). See
+  [build-macos.md](build-macos.md).
 
-The upstream project has no keyframe system at all. The timeline exposes the
-current frame, but a parameter cannot hold a curve yet, so a procedural model
-cannot be animated at all.
+Known gaps found on the way, to fix as the work below touches them:
 
-This is the single missing piece that the animation track is built on, and the
-modeling track needs it too, because a modeled asset that will be animated
-later has to be authored with that in mind.
-
-What it needs:
-
-- a parameter holds keyframes, each with a time, a value and an interpolation
-- interpolation modes: stepped, linear, bezier, and the usual easing set
-- an editable curve, with handles, in the timeline
-- evaluation of the whole graph at a given frame, resolved through the same
-  attribute context everything else uses
-
-The engine already exposes time to scripts and expressions: the daslang
-builtins `frame()` and `time()` record a time dependency through
-`ExpressionContext::recordTimeDependency()`, and the graph carries a time
-dependency on top of that. The keyframe system is built on those, not beside
-them.
-
-### Cook caching and dirty propagation
-
-Async cooking made the cook interruptible and parallel. The next step is to
-stop cooking what did not change.
-
-- hash the inputs of a node, skip the subtree when the hash matches
-- propagate dirtiness downstream from the edited node
-- keep the last completed result visible while a new one computes
-
-This pays for both tracks at once: it is what makes a heavy procedural scene
-feel interactive, and it is what makes scrubbing a timeline cheap.
-
-### Attributes stay the common currency
-
-The upstream idea is a unified context where everything is primitives and
-attributes. UV coordinates, textures, simulation outputs and animated
-parameters are all attributes, so they all flow through the same spreadsheet,
-the same selection and the same evaluation.
-
-A modeling track that adds UVs as a special case, and an animation track that
-adds curves as a special case, would each break that idea. Neither should.
+- The node loader does not find node types in nested folders, so the focused
+  simulation nodes (`nodes/simulation/particles`, `springs`) are skipped by
+  their tests.
+- The display node is not saved in a scene file, so a reopened scene shows
+  nothing until one is chosen.
+- The engine prints debug output (`ic|`) in release builds.
+- The `bison` shipped by the toolchain script crashes on recent macOS; the
+  build uses the parsers committed in daslang instead.
 
 ---
 
-## Track one, procedural modeling
+## Track one, the native Mac application
 
-### 1. UV coordinates, textures and materials
+The interface moves from Qt and QML to Swift and SwiftUI, over the C++ engine
+and the `HelixCore` facade. Each milestone is a usable step, and the Qt
+interface keeps working until the last one removes it.
 
-The engine has no notion of any of the three today: there is no `texcoord`,
-no `uv` and no texture in `src/Engine/Primitives/` or `src/Engine/Attribute/`.
-For a tool aimed at procedural modeling, that is the largest single gap.
+| Milestone | What it delivers |
+| --- | --- |
+| ~~M0, the base~~ | Done: the engine builds and is tested without Qt, and the `HelixCore` facade is importable from Swift. |
+| **M1, the walking skeleton** | A Swift app that opens a `.kut` document and shows the cooked display geometry in a Metal viewport (`MTKView`), with trackpad orbit, pan and zoom. Every layer is crossed once, end to end. |
+| **M1.5, Helix MCP** | A Model Context Protocol server over the facade, so an AI agent can create, inspect and change a scene, and check the result as data and as a viewport capture. |
+| **M2, the node editor** | Show, select, move and connect nodes; create them from a search palette. |
+| **M3, the inspector** | Every parameter type, with undo through the macOS `UndoManager`. |
+| **M4, timeline and spreadsheet** | Playback, keyframes from the interface, and the attribute spreadsheet as a native table. |
+| **M5, finish** | Settings, icon, document types, packaging, signing and notarization, then the Qt interface is removed. |
 
-- `uv` as an attribute of the mesh, with a per-corner or per-point layout
-- a texture and a material model on top of the attribute system
-- unwrapping nodes, and a procedural unwrap that follows the graph
-
-### 2. Point clouds as a primitive
-
-The renderer already has a `PointPass`, so points can be drawn. The engine
-simply has no point cloud primitive for them to live in.
-
-### 3. Interchange with the VFX pipeline
-
-Helix aims at VFX, where the interchange formats are USD, Alembic and glTF.
-Exporting a procedural model is what turns a generator into a pipeline tool.
-Importing a USD assembly is what lets a procedural model live inside a shot.
-
-### 4. A graph that can express more
-
-A static graph is limited. What a procedural tool eventually needs:
-
-- **node templates**, a reusable subgraph with its own exposed parameters
-- **subgraph instancing**, so a shape built once is reused
-- **loops** and **conditionals**, so the graph is a program and not just a
-  wiring diagram
-
-### 5. Rendering and shading
-
-Helix renders nothing. A path tracer, or at least a physically based preview
-renderer, closes the loop between generating a model and seeing it. A shading
-language in the spirit of OSL would make the material programmable the same way
-the graph is.
+What the native application gets from the platform rather than reimplementing:
+documents with autosave and versions, menus and standard shortcuts, the
+trackpad, dark mode, full screen and window tabs.
 
 ---
 
-## Track two, animation
+## Track two, AI native
 
-### 1. F-curves and a curve editor
+The facade is the one API for people and machines. An AI can do anything the
+interface can, and can check what it did.
 
-The keyframe system above is the data. The curve editor is the interface, and
-it is where animation actually becomes craft: handles, tangents, ease in and
-ease out, a graph view next to the timeline.
-
-### 2. A simulation cache
-
-The simulation nodes integrate over time, so evaluating frame 250 from scratch
-means two hundred and fifty steps. A disk cache, in the spirit of Alembic,
-turns scrubbing into a lookup and makes a long simulation interactive.
-
-### 3. GPU cooking
-
-TBB is the parallel backend today. Heavy geometry work belongs on the GPU, and
-Metal exposes compute shaders, and the renderer already loads a Metal library. Moving the
-expensive attribute operations to compute shaders is the single biggest performance lever left.
-
-### 4. A growing simulation family
-
-The first solver nodes are particles and springs. A useful library grows from
-there: cloth, soft bodies, fluids, and crowd or particle systems that read the
-same attributes the rest of the engine uses.
-
-### 5. A stable scripting API
-
-The engine is already decoupled from the interface, which makes a headless
-mode nearly free. A stable API over that, for batch work and automation, is
-what turns a tool into a component of a pipeline.
+1. **MCP server** over the facade (M1.5 above), shipped inside the app and
+   usable headlessly.
+2. **Results as data**: attribute queries, counts and bounds on any node's
+   output, so an agent reads what the graph produced.
+3. **Results as images**: viewport captures and renders on request, from any
+   camera, at any frame.
+4. **Intent grouped undo**: the changes an agent makes are one undoable step
+   that names what it meant to do.
+5. **Sandboxed scripts**: code an agent writes runs without access to the rest
+   of the machine.
+6. **A readable scene format**: scene files stay diffable, so a person can
+   review what an agent changed.
 
 ---
 
-## Cross cutting
+## Track three, everything is a graph
 
-### ~~Metal directly, instead of Vulkan through MoltenVK~~
+The data model grows so that 3D, 2D, animation and simulation all live in the
+same graph.
 
-Done: the viewport is drawn with Metal through `metal-cpp`, and the Vulkan,
-DiligentCore and MoltenVK stack is gone. See `docs/METAL-RENDERER.md`.
+1. **Interchange**: glTF import first (meshes, normals, UVs, materials, then
+   skins and animation clips), then glTF and USD export, then USD import.
+   Helix is useful next to other tools before it replaces any of them.
+2. **UVs, textures and materials**: `uv` as a vertex attribute, a material
+   model on top of the attribute system, and textured shading in the viewport.
+3. **Skeletal animation**: skeletons as geometry (joints are points, bones are
+   lines, transforms are attributes), four skin influences per point as
+   attributes, a deform node, and glTF clips sampled at the current frame as
+   a pure function of time.
+4. **Keyframes, second version**: bezier tangents, a curve editor next to the
+   timeline, and keyframed transforms for skeletons.
+5. **2D**: curves, vector shapes and text as geometry, and image operations as
+   GPU nodes of the same graph.
+6. **A graph that can express more**: node templates with exposed parameters,
+   subgraph instancing, loops and conditionals.
+7. **A growing simulation family**: cloth, soft bodies, fluids and crowds, all
+   reading and writing the same attributes.
 
-### A performance program
+---
 
-`docs/PERFORMANCE.md` already states the targets: first interactive frame
-under 2 s, interactive latency under 100 ms, viewport frame time under 16 ms
-for 500 k triangles. Those numbers are the acceptance criteria for the work
-above, not a separate project.
+## Track four, stable and fast on Apple silicon
 
-### Quality of life
+The reference machine is a Mac mini M4. Everything above must run well on it.
 
-- a command palette, searching nodes, parameters and actions at once
-- documentation and tutorials, which the project has wanted from the start
-- versioned scene files, before scenes exist in the wild
-- ~~versioning the node type namespace~~ done: nodes are published as `helix::<name>`, and
-  scenes storing the old `enzo::<name>` still load (`nt::normalizeTypeName`, removable once
-  old scenes are no longer supported)
+1. **Stability**
+   - Atomic saves (done in the facade), autosave and versions through the
+     document model.
+   - Cooking isolated from the interface, then in a separate process (XPC), so
+     a node that crashes or hangs is reported on that node and the app keeps
+     running.
+   - The GPU tests run on every change instead of being skipped when no Metal
+     device is found.
+2. **Cook caching and dirty propagation**: hash the inputs of a node, skip the
+   subtree when nothing changed, and keep the last result visible while a new
+   one computes. This makes heavy scenes interactive and scrubbing cheap.
+3. **One scheduler, the right cores**: one worker pool instead of the cook
+   threads, TBB and manifold competing, sized on the performance cores, with
+   quality of service set for interactive and background work.
+4. **GPU cooking**: the expensive attribute operations move to Metal compute
+   shaders, sharing unified memory with the CPU without copies.
+5. **A memory budget**: on demand evaluation, a disk cache for simulations, and
+   streaming for large data, within the memory of a base model machine.
+6. **Rendering**: a physically based renderer on Metal, using hardware ray
+   tracing on the chips that have it.
+7. **Measured targets** ([docs/PERFORMANCE.md](docs/PERFORMANCE.md)): first
+   interactive frame under 2 s, interactive latency under 100 ms, viewport
+   frame time under 16 ms for 500 k triangles, checked on the reference
+   machine.
 
 ---
 
 ## Order of work
 
-The foundation first, because both tracks are blocked on it:
+1. ~~M0, the engine without Qt and the facade~~ done
+2. M1, the walking skeleton of the native app
+3. M1.5, Helix MCP, so the AI track is exercised from the start
+4. glTF import with UVs and textured viewport shading
+5. M2 to M4, the native interface, with cook caching and the scheduler work
+   alongside
+6. Skeletal animation and keyframes, second version
+7. M5, then the stability and rendering items that remain
 
-1. keyframes and F-curves
-2. cook caching and dirty propagation
-3. the two tracks in parallel, each taking the items its own order lists
-4. ~~Metal directly~~ done
-5. interchange and rendering, which are what make the tool usable outside its
-   own ecosystem
-
-## Status
-
-In flight at the time of writing: the macOS port, the async cooking scheduler,
-the timeline, the first simulation nodes, the sweep node, user node authoring
-and the interface redesign. Everything else above is planned.
-
-The project is a work in progress, and so is the application it is based on.
-Expect rough edges, and expect the interface to still be moving.
+Each step ships with tests, and is checked on the reference machine before the
+next one starts.

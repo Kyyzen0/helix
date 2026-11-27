@@ -106,9 +106,10 @@ Helix once its extension is renamed to `.kut` (the loader does not check the ext
 "All files" choice of the open dialog also opens it unrenamed). Helix saves `helix::<name>`
 type names, which enzo does not know, so the reverse direction is not supported.
 
-**[ROADMAP.md](ROADMAP.md)** states where the work goes next, and why in that order.
-Helix is a procedural modeling tool *and* an animation tool, so the roadmap has a
-shared foundation and two tracks that build on it.
+**[VISION.md](VISION.md)** states what Helix is for: a native Apple application where a
+person and an AI create 3D, 2D, animation and simulation with the same tools, on an
+ordinary Mac. **[ROADMAP.md](ROADMAP.md)** states where the work goes next, and why in
+that order.
 
 ---
 
