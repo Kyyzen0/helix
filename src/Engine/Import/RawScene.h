@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Core/Types.h"
 #include "Engine/Primitives/Material.h"
+#include "Engine/Primitives/Skeleton.h"
 #include <array>
 #include <cstdint>
 #include <memory>
@@ -53,6 +54,11 @@ struct RawMesh
     std::vector<std::uint32_t> indices;
     /// @brief Index into RawScene::materials, or -1 when the mesh has none.
     int material = -1;
+    /// @brief Four joints per vertex (an index into RawSkeleton::joints) and their four weights,
+    /// or empty when the mesh is not skinned. The weights of a vertex sum to 1, and an unused
+    /// influence is joint 0 with weight 0.
+    std::vector<std::uint32_t> skinJoints;
+    std::vector<float> skinWeights;
 };
 
 /// @brief One placement of a mesh in the scene. A mesh used twice has two instances.
@@ -61,6 +67,38 @@ struct RawInstance
     std::size_t mesh = 0;
     /// @brief The transform of the whole hierarchy above the mesh, column major.
     Matrix4 world = Matrix4::Identity();
+};
+
+/// @brief One joint of a skeleton, in the space of the file.
+struct RawJoint
+{
+    std::string name;
+    /// @brief Index of the parent joint in RawSkeleton::joints, or -1 for a root. A parent always
+    /// comes before its children.
+    int parent = -1;
+    /// @brief The transform of the joint relative to its parent at rest.
+    Matrix4 restLocal = Matrix4::Identity();
+    /// @brief For a root, the transform of the nodes above it that are not joints. Identity for
+    /// a joint that has a parent joint.
+    Matrix4 parentBase = Matrix4::Identity();
+    /// @brief The transform of the joint at rest in the space of the file, parentBase included.
+    Matrix4 restWorld = Matrix4::Identity();
+    /// @brief What the file says takes the skinned mesh to the space of the joint: the inverse
+    /// bind matrix of a glTF, the offset matrix of Assimp's bones.
+    Matrix4 inverseBind = Matrix4::Identity();
+};
+
+/// @brief The joints of a file and the clips that animate them.
+struct RawSkeleton
+{
+    std::vector<RawJoint> joints;
+    std::vector<std::shared_ptr<const geo::AnimationClip>> clips;
+    /// @brief Vertices that more than four joints pull on, which keep their four strongest.
+    std::size_t overInfluencedVertices = 0;
+    /// @brief Tracks that are cubic splines in the file, played as straight lines between keys.
+    std::size_t cubicTracks = 0;
+    /// @brief Tracks of the file that name no joint and are left out.
+    std::size_t unmatchedTracks = 0;
 };
 
 struct RawMaterial
@@ -83,9 +121,12 @@ struct RawScene
     std::vector<RawMesh> meshes;
     std::vector<RawInstance> instances;
     std::vector<RawMaterial> materials;
+    /// @brief The joints and clips of the file. Empty when no mesh is skinned.
+    RawSkeleton skeleton;
     /// @brief The axis the file declares up, or Auto when its format says nothing.
     UpAxis declaredUp = UpAxis::Auto;
-    /// @brief Skins, animations and the like the file holds and the import leaves out.
+    /// @brief The animations the file holds and the meshes it skins, counted before the import
+    /// keeps them (the clips and joints of `skeleton` are what it kept).
     std::size_t animationCount = 0;
     std::size_t skinnedMeshCount = 0;
     /// @brief Points and lines the file holds and the import leaves out.

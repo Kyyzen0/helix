@@ -35,7 +35,8 @@ geo::Mesh::Mesh(std::string_view path)
 geo::Mesh::Mesh(const Mesh& other)
     : Primitive(other),
       // attributes: the copy shares their stores until one side writes
-      materials_{other.materials_}, vertexAttributes_{deepCopyAttributes(other.vertexAttributes_)},
+      materials_{other.materials_}, skeleton_{other.skeleton_},
+      vertexAttributes_{deepCopyAttributes(other.vertexAttributes_)},
       faceAttributes_{deepCopyAttributes(other.faceAttributes_)},
       // groups
       vertexGroups_{deepCopyAttributes(other.vertexGroups_)},
@@ -81,6 +82,7 @@ geo::Mesh& geo::Mesh::operator=(const geo::Mesh& rhs)
     Primitive::operator=(rhs);
 
     materials_ = rhs.materials_;
+    skeleton_ = rhs.skeleton_;
 
     // attributes
     vertexAttributes_ = deepCopyAttributes(rhs.vertexAttributes_);
@@ -284,6 +286,9 @@ std::shared_ptr<const geo::Material> geo::Mesh::materialOfFace(Offset face) cons
 void geo::Mesh::merge(Mesh& other)
 {
     ensureWritable_();
+    // Joint indices of two skeletons do not line up, so a merge does not combine them: the mesh
+    // keeps its own names and clips, and adopts the other's only when it has none.
+    if (!skeleton_) skeleton_ = other.skeleton_;
     const Offset firstNewFace = getNumFaces();
     const Offset firstNewVertex = getNumVerts();
     const Offset firstNewPoint = getNumPoints();

@@ -165,7 +165,7 @@ enum MCPTools {
 
             // The results.
             tool("geometry_summary",
-                 "Cooks a node and reports its counts, its bounds, its attributes and its materials, as data. materials lists each material once (name, linear base_color RGBA, and for a base colour texture its width, height and source; missing_texture says why a texture the file referred to could not be loaded). The viewport draws the base colour and picture of the materials (render_view's materials argument). An attribute with \"mixed_types\": true has different types on different primitives: its type and components are the first primitive's, and read_attribute refuses it.",
+                 "Cooks a node and reports its counts, its bounds, its attributes and its materials, as data. materials lists each material once (name, linear base_color RGBA, and for a base colour texture its width, height and source; missing_texture says why a texture the file referred to could not be loaded). The viewport draws the base colour and picture of the materials (render_view's materials argument). An attribute with \"mixed_types\": true has different types on different primitives: its type and components are the first primitive's, and read_attribute refuses it. A node that produced a skeleton (the second output of geometryImport on a rigged file, or a skeletonPose node) also reports skeleton: its joints, its roots and its clips (name, duration in seconds, channels), whose names are what the clip parameter of skeletonPose takes.",
                  ["node": nodeReference("The node to cook. The display node when left out.")],
                  readOnly: true, MCPHandlers.geometrySummary),
             tool("read_attribute",
