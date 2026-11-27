@@ -191,9 +191,10 @@ extension HelixDocument: NodeEditorEditing {
                     return failure(status)
                 }
             }
-            // A scene that shows nothing yet shows the first node made, so the viewport is not
-            // left empty after the first step.
-            if helix.core.displayNode() == 0 { _ = helix.core.setDisplayNode(result.id) }
+            // The node made is the one the viewport shows (as in Houdini), so a person sees what
+            // they just added, and a scene that showed nothing is not left empty. A type with no
+            // output (nothing to show) leaves the display where it was, unless there is none.
+            if type.outputCount > 0 || helix.core.displayNode() == 0 { _ = helix.core.setDisplayNode(result.id) }
             return EditOutcome(error: nil, createdNode: result.id)
         }
     }

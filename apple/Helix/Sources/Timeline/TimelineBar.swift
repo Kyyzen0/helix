@@ -6,50 +6,57 @@ struct TimelineBar: View {
     @ObservedObject var model: TimelineModel
     @AppStorage(TimelineSetting.loopKey) private var loop = true
     @Environment(\.theme) private var theme
+    @Environment(\.interfaceSize) private var size
 
     var body: some View {
         VStack(spacing: 0) {
             Divider()
-            controls
-                .padding(.horizontal, 10)
-                .padding(.top, 5)
+            // The controls give up their labels and the meter, in this order, before the bar
+            // would be wider than the window.
+            ViewThatFits(in: .horizontal) {
+                controls(compact: false)
+                controls(compact: true)
+            }
+            .padding(.horizontal, size.points(12))
+            .padding(.top, size.points(6))
             TimelineRulerView(model: model)
-                .frame(height: 30)
-                .padding(.horizontal, 6)
-                .padding(.bottom, 3)
+                .frame(height: size.rulerHeight)
+                .padding(.horizontal, size.points(10))
+                .padding(.bottom, size.points(6))
         }
+        .frame(maxWidth: .infinity)
         .background(theme.bar)
+        .clipped()
     }
 
-    private var controls: some View {
-        HStack(spacing: 6) {
+    private func controls(compact: Bool) -> some View {
+        HStack(spacing: size.points(8)) {
             transport
             Toggle(isOn: $loop) {
                 Image(systemName: "repeat")
             }
             .toggleStyle(.button)
-            .controlSize(.small)
             .help(Text("Loop the playback"))
             .accessibilityLabel(Text("Loop"))
 
-            Divider().frame(height: 16)
+            Divider().frame(height: size.points(18))
 
-            labelled("Frame", width: 56) {
+            labelled("Frame", width: 64) {
                 NumberField(text: NumberText.format(model.time.frame), accessibilityName: String(localized: "Frame")) {
                     model.commitFrame($0)
                 }
             }
-            labelled("Start", width: 52) {
+            labelled("Start", width: 60) {
                 NumberField(text: String(model.time.start), accessibilityName: String(localized: "Start frame")) {
                     model.commitStart($0)
                 }
             }
-            labelled("End", width: 52) {
+            labelled("End", width: 60) {
                 NumberField(text: String(model.time.end), accessibilityName: String(localized: "End frame")) {
                     model.commitEnd($0)
                 }
             }
-            labelled("fps", width: 48) {
+            labelled("fps", width: 56) {
                 NumberField(text: NumberText.format(model.time.fps), accessibilityName: String(localized: "Frames per second")) {
                     model.commitFps($0)
                 }
@@ -57,20 +64,19 @@ struct TimelineBar: View {
 
             if let message = model.message {
                 Text(message)
-                    .font(.caption)
+                    .uiFont(.caption)
                     .foregroundStyle(.red)
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
             Spacer(minLength: 4)
-            if let meter = model.meterText {
+            if let meter = model.meterText, !compact {
                 Text(meter)
-                    .font(.caption.monospacedDigit())
+                    .uiFont(.caption, monospaced: true)
                     .foregroundStyle(.secondary)
                     .help(Text("The frame rate of the scene, and how many frames a second were really shown"))
             }
         }
-        .controlSize(.small)
     }
 
     private var transport: some View {
@@ -87,7 +93,7 @@ struct TimelineBar: View {
 
     private func button(_ symbol: String, _ name: LocalizedStringKey, _ help: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: symbol).frame(width: 18, height: 16)
+            Image(systemName: symbol).frame(width: size.points(22), height: size.points(20))
         }
         .buttonStyle(.borderless)
         .help(Text(help))
@@ -96,8 +102,8 @@ struct TimelineBar: View {
 
     private func labelled<Field: View>(_ title: LocalizedStringKey, width: CGFloat, @ViewBuilder _ field: () -> Field) -> some View {
         HStack(spacing: 3) {
-            Text(title).font(.caption).foregroundStyle(.secondary)
-            field().frame(width: width)
+            Text(title).uiFont(.callout).foregroundStyle(.secondary)
+            field().frame(width: size.points(width))
         }
     }
 }
@@ -108,9 +114,10 @@ struct TimelineRulerView: View {
     @Environment(\.theme) private var theme
     @ObservedObject var model: TimelineModel
     @FocusState private var focused: Bool
+    @Environment(\.interfaceSize) private var interface
 
     /// The height of the row the numbers are in, above the row of diamonds.
-    private static let numberRow: CGFloat = 13
+    private var numberRow: CGFloat { interface.points(17) }
 
     /// The height of the bar of cached frames, along the bottom of the ruler.
     private static let cacheBar: CGFloat = 3
@@ -123,7 +130,7 @@ struct TimelineRulerView: View {
                     .allowsHitTesting(false)
                 ForEach(model.diamonds.filter { $0.frame >= Double(ruler.first) && $0.frame <= Double(ruler.last) }) { diamond in
                     DiamondView(model: model, diamond: diamond, ruler: ruler)
-                        .position(x: ruler.x(of: diamond.frame), y: Self.numberRow + 8)
+                        .position(x: ruler.x(of: diamond.frame), y: numberRow + interface.points(9))
                 }
             }
             .contentShape(Rectangle())
@@ -174,13 +181,13 @@ struct TimelineRulerView: View {
         let line = theme.rulerLine
         for frame in ruler.minorFrames() {
             let x = ruler.x(of: Double(frame))
-            context.stroke(Path { $0.move(to: CGPoint(x: x, y: Self.numberRow - 2)); $0.addLine(to: CGPoint(x: x, y: Self.numberRow + 2)) }, with: .color(line.opacity(0.6)), lineWidth: 1)
+            context.stroke(Path { $0.move(to: CGPoint(x: x, y: numberRow - 2)); $0.addLine(to: CGPoint(x: x, y: numberRow + 2)) }, with: .color(line.opacity(0.6)), lineWidth: 1)
         }
         for frame in ruler.labelledFrames(from: model.time.start) where frame >= ruler.first && frame <= ruler.last {
             let x = ruler.x(of: Double(frame))
-            context.stroke(Path { $0.move(to: CGPoint(x: x, y: Self.numberRow - 4)); $0.addLine(to: CGPoint(x: x, y: size.height)) }, with: .color(line.opacity(0.35)), lineWidth: 1)
-            let label = Text(String(frame)).font(.system(size: 9).monospacedDigit()).foregroundColor(theme.textSecondary)
-            context.draw(label, at: CGPoint(x: x + 3, y: 6), anchor: .leading)
+            context.stroke(Path { $0.move(to: CGPoint(x: x, y: numberRow - 4)); $0.addLine(to: CGPoint(x: x, y: size.height)) }, with: .color(line.opacity(0.35)), lineWidth: 1)
+            let label = Text(String(frame)).font(.system(size: interface.points(11)).monospacedDigit()).foregroundColor(theme.textSecondary)
+            context.draw(label, at: CGPoint(x: x + 4, y: numberRow / 2), anchor: .leading)
         }
         // The end of the range, which a step of ten does not always reach.
         let endX = ruler.x(of: Double(model.time.end))

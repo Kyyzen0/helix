@@ -123,8 +123,13 @@ private struct WindowTheme: NSViewRepresentable {
 /// makes SwiftUI, AppKit controls and the title bars follow, in every window at once.
 @MainActor
 enum ThemeAppearance {
+    /// An appearance that wins over the theme and the system, for the commands that draw a window
+    /// in a given appearance (`--render-window`). Nil in the app.
+    static var override: NSAppearance?
+
     static func apply(_ theme: Theme) {
-        let appearance: NSAppearance? = theme.forcedDark.map { NSAppearance(named: $0 ? .darkAqua : .aqua) } ?? nil
+        let appearance: NSAppearance? = override
+            ?? theme.forcedDark.map { NSAppearance(named: $0 ? .darkAqua : .aqua) } ?? nil
         guard NSApplication.shared.appearance?.name != appearance?.name else { return }
         NSApplication.shared.appearance = appearance
     }

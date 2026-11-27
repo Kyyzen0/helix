@@ -114,6 +114,12 @@ final class NodeEditorModel: ObservableObject {
     var pointer: CGPoint?
     /// Whether the graph is to be framed as soon as the view has a size, as a window opens.
     private var framePending = false
+    /// Whether the view keeps showing the whole graph as its size settles (a window opening, a
+    /// pane being resized) until the person moves the view themselves.
+    private var followsFraming = false
+    /// How much the interface is scaled (Settings ▸ General), which the framing zooms in by so a
+    /// small graph reads at that size.
+    var interfaceScale: CGFloat = 1
 
     private var messageGeneration = 0
 
@@ -137,6 +143,7 @@ final class NodeEditorModel: ObservableObject {
     func reload(_ graph: EditorGraph, frame: Bool = false) {
         self.graph = graph
         if frame {
+            followsFraming = true
             if viewSize.width > 0, viewSize.height > 0 { frameAll() } else { framePending = true }
         }
         selectedNodes = selectedNodes.filter { graph.node($0) != nil }
@@ -186,17 +193,33 @@ final class NodeEditorModel: ObservableObject {
     func setViewSize(_ size: CGSize) {
         guard size != viewSize else { return }
         viewSize = size
-        if framePending, size.width > 0, size.height > 0 {
+        if (framePending || followsFraming), size.width > 0, size.height > 0 {
             framePending = false
             frameAll()
         }
     }
 
+    /// Takes the interface size of Settings: a view that shows the whole graph frames it again,
+    /// and one the person moved zooms by the change, so the cards read larger or smaller.
+    func setInterfaceScale(_ scale: CGFloat) {
+        guard scale != interfaceScale, scale > 0 else { return }
+        let ratio = scale / interfaceScale
+        interfaceScale = scale
+        guard viewSize.width > 0, viewSize.height > 0 else { return }
+        if followsFraming {
+            frameAll()
+        } else {
+            transform = transform.zoomed(by: ratio, around: CGPoint(x: viewSize.width / 2, y: viewSize.height / 2))
+        }
+    }
+
     func pan(by delta: CGPoint) {
+        followsFraming = false
         transform = transform.panned(by: delta)
     }
 
     func zoom(by factor: CGFloat, around point: CGPoint) {
+        followsFraming = false
         transform = transform.zoomed(by: factor, around: point)
     }
 
@@ -214,7 +237,7 @@ final class NodeEditorModel: ObservableObject {
             transform = ViewTransform(offset: CGPoint(x: viewSize.width / 2, y: viewSize.height / 2), zoom: 1)
             return
         }
-        transform = .framing(bounds, in: viewSize)
+        transform = .framing(bounds, in: viewSize, maxFramedZoom: 1.5 * max(interfaceScale, 1))
     }
 
     /// Pans, if it has to, so the card of a node is in the view.
@@ -413,18 +436,22 @@ final class NodeEditorModel: ObservableObject {
 
     /// Makes a node of a type, where the palette was opened or under the selected node, and
     /// selects it.
-    func addNode(_ type: EditorNodeType) {
-        let request = palette ?? PaletteRequest(
-            anchor: .zero,
-            canvas: transform.canvasPoint(CGPoint(x: viewSize.width / 2, y: viewSize.height / 2))
-        )
+    ///
+    /// A node made from a menu at a point of the view (`viewPoint`) goes there; one made from the
+    /// shelf or the menu bar goes under the selected node, or in the middle of the view.
+    func addNode(_ type: EditorNodeType, at viewPoint: CGPoint? = nil) {
+        let canvas = viewPoint.map(transform.canvasPoint)
+            ?? palette?.canvas
+            ?? transform.canvasPoint(CGPoint(x: viewSize.width / 2, y: viewSize.height / 2))
         palette = nil
-        let placement = NodePlacement.place(type, at: request.canvas, selection: selectedNodes, in: graph)
+        let placement = NodePlacement.place(type, at: canvas, selection: selectedNodes, in: graph)
+        let wasEmpty = graph.nodes.isEmpty
         let outcome = editing?.create(type, at: placement.position, wiredFrom: placement.wiredFrom) ?? .done
         finish(outcome)
         if let created = outcome.createdNode {
             select(nodes: [created])
-            reveal(created)
+            // The first node of a scene is framed, so it is where it can be read.
+            if wasEmpty { frameAll() } else { reveal(created) }
         }
     }
 }

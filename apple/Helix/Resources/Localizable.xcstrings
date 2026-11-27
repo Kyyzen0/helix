@@ -154,40 +154,6 @@
         }
       }
     },
-    "Add a node (Tab in the node editor, ⌘K)": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add a node (Tab in the node editor, ⌘K)"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ajouter un nœud (Tab dans l’éditeur de nœuds, ⌘K)"
-          }
-        }
-      }
-    },
-    "Add Node": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add Node"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ajouter un nœud"
-          }
-        }
-      }
-    },
     "Add node": {
       "extractionState": "manual",
       "localizations": {
@@ -1310,23 +1276,6 @@
         }
       }
     },
-    "Import…": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Import…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Importer…"
-          }
-        }
-      }
-    },
     "Inspector": {
       "extractionState": "manual",
       "localizations": {
@@ -1735,23 +1684,6 @@
         }
       }
     },
-    "Node": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Node"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nœud"
-          }
-        }
-      }
-    },
     "Node editor": {
       "extractionState": "manual",
       "localizations": {
@@ -1969,23 +1901,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Position"
-          }
-        }
-      }
-    },
-    "Press Tab to add a node": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Press Tab to add a node"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Appuyez sur Tab pour ajouter un nœud"
           }
         }
       }
@@ -2483,23 +2398,6 @@
         }
       }
     },
-    "The node the viewport shows": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The node the viewport shows"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le nœud affiché dans la vue 3D"
-          }
-        }
-      }
-    },
     "The number of the row": {
       "extractionState": "manual",
       "localizations": {
@@ -2959,6 +2857,635 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%@ points": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ points"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ points"
+          }
+        }
+      }
+    },
+    "%@ triangles": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ triangles"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ triangles"
+          }
+        }
+      }
+    },
+    "%@: %@ points, %@ triangles": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@ points, %@ triangles"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %@ points, %@ triangles"
+          }
+        }
+      }
+    },
+    "1 point": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 point"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 point"
+          }
+        }
+      }
+    },
+    "1 triangle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 triangle"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 triangle"
+          }
+        }
+      }
+    },
+    "A grid bent by a sine wave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A grid bent by a sine wave"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une grille ondulée par une sinusoïde"
+          }
+        }
+      }
+    },
+    "A grid raised into hills by noise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A grid raised into hills by noise"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une grille soulevée en collines par du bruit"
+          }
+        }
+      }
+    },
+    "A single node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A single node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un seul nœud"
+          }
+        }
+      }
+    },
+    "Add": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter"
+          }
+        }
+      }
+    },
+    "Add a node or import a 3D model": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a node or import a 3D model"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter un nœud ou importer un modèle 3D"
+          }
+        }
+      }
+    },
+    "Add a node with the buttons above, Tab, or a right click — or drop a 3D file here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a node with the buttons above, Tab, or a right click — or drop a 3D file here."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoutez un nœud avec les boutons ci-dessus, Tab ou un clic droit — ou glissez un fichier 3D ici."
+          }
+        }
+      }
+    },
+    "Add a node: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a node: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter un nœud : %@"
+          }
+        }
+      }
+    },
+    "Add a Node…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a Node…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter un nœud…"
+          }
+        }
+      }
+    },
+    "Add Example": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Example"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter un exemple"
+          }
+        }
+      }
+    },
+    "Animation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animation"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animation"
+          }
+        }
+      }
+    },
+    "Cube": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cube"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cube"
+          }
+        }
+      }
+    },
+    "Examples": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Examples"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exemples"
+          }
+        }
+      }
+    },
+    "Geometry size": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geometry size"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taille de la géométrie"
+          }
+        }
+      }
+    },
+    "Import a 3D model (⌘I)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import a 3D model (⌘I)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importer un modèle 3D (⌘I)"
+          }
+        }
+      }
+    },
+    "Import a 3D model, add a node, or start from an example.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import a 3D model, add a node, or start from an example."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importez un modèle 3D, ajoutez un nœud ou partez d’un exemple."
+          }
+        }
+      }
+    },
+    "Import a 3D Model…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import a 3D Model…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importer un modèle 3D…"
+          }
+        }
+      }
+    },
+    "Interface Size": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interface Size"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taille de l’interface"
+          }
+        }
+      }
+    },
+    "Large": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Large"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grande"
+          }
+        }
+      }
+    },
+    "Medium": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moyenne"
+          }
+        }
+      }
+    },
+    "Modify": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modify"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifier"
+          }
+        }
+      }
+    },
+    "New Scene": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Scene"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouvelle scène"
+          }
+        }
+      }
+    },
+    "Open a Scene…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open a Scene…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir une scène…"
+          }
+        }
+      }
+    },
+    "Others": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Others"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autres"
+          }
+        }
+      }
+    },
+    "Resize the viewport": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resize the viewport"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redimensionner la vue 3D"
+          }
+        }
+      }
+    },
+    "Search": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher"
+          }
+        }
+      }
+    },
+    "Search every node (⌘K or Tab)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search every node (⌘K or Tab)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher parmi tous les nœuds (⌘K ou Tab)"
+          }
+        }
+      }
+    },
+    "Simulation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simulation"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simulation"
+          }
+        }
+      }
+    },
+    "Small": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Petite"
+          }
+        }
+      }
+    },
+    "Terrain": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terrain"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relief"
+          }
+        }
+      }
+    },
+    "The example could not be built.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The example could not be built."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’exemple n’a pas pu être construit."
+          }
+        }
+      }
+    },
+    "The size of the node editor, the timeline, the spreadsheet and the inspector. It applies at once.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The size of the node editor, the timeline, the spreadsheet and the inspector. It applies at once."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La taille de l’éditeur de nœuds, de la chronologie, du tableur et de l’inspecteur. Elle s’applique immédiatement."
+          }
+        }
+      }
+    },
+    "Waves": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waves"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vagues"
           }
         }
       }

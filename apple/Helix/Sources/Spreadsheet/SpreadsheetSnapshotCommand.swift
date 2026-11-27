@@ -62,7 +62,11 @@ enum SpreadsheetSnapshotCommand {
             if case .failed(let message) = model.state { print("error: \(message)") }
 
             let palette = themeOptions.palette(dark: dark)
-            let content = SpreadsheetView(model: model)
+            let content = VStack(spacing: 0) {
+                HStack { SpreadsheetHeader(model: model) }.padding(.horizontal, 10).padding(.vertical, 6)
+                Divider()
+                SpreadsheetView(model: model)
+            }
                 .background(ThemeColors(palette).window)
                 .themeEnvironment(palette)
             guard let image = OffscreenRender.image(of: content, width: width, height: height, dark: palette.isDark) else {

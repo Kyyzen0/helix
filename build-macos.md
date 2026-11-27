@@ -459,6 +459,20 @@ the playhead moves; a hidden table does not cook anything.
 `Helix --render-spreadsheet <in.kut> <node> <out.png> [width height] [--owner points|vertices|faces|primitives] [--dark]`
 draws the table of one node to a PNG with no window.
 
+### The window, the welcome screen and the interface size
+
+**Launch.** A launch with nothing to open makes a new, empty scene in a window, as most document apps do, and not the Open panel: the app registers `NSShowAppCentricOpenPanelInsteadOfUntitledFile = NO` as a default at startup (`HelixApp.init`). A launch that opens a file (Finder, the Dock, a command-line path) opens that file and no untitled scene. When a file is opened while the empty untitled scene is the only one (the engine holds one scene at a time), the untitled scene gives the engine up and its window closes (`EngineHost.claim`, `HelixDocument.isPristineUntitled`). With `HELIX_DEBUG_LAUNCH=1` the app writes `helix-launch: untitled scene` and `helix-launch: window WxH of WxH` (the window against its screen) to standard error, which `Scripts/launch-smoke.py` checks.
+
+**The window.** A new window is 85 percent of the visible frame of the screen, centred, and never smaller than 1100 by 720 points (`Sources/WindowPlacement.swift`, through `defaultWindowPlacement`); SwiftUI then restores the size and position the person left it at. The viewport takes 60 percent of the height and the bottom pane (node editor or spreadsheet) the rest; the divider drags, each part keeps a minimum, and the share is kept (`viewportFraction`). The inspector column is 340 points wide at first (300 to 520), shown until the person hides it. The timeline bar runs along the bottom of the content and gives up its labels and its meter, in this order, before it would be wider than the window.
+
+**The welcome screen.** While the scene holds no node the viewport shows the welcome (`Sources/Welcome`): the logo, « Nouvelle scène », and the buttons *Importer un modèle 3D…* (⌘I), *Ajouter un nœud…* (⌘K) and *Ouvrir une scène…* (⌘O), then three examples (Cube, Waves, Terrain) that build a small graph into the scene through the facade, as one step of undo (`StarterExample`). On a short pane it gives up its logo and its subtitle, then its examples. A 3D file dropped on the window imports as before.
+
+**Making nodes.** The node categories (Primitives, Modify, Animation, Simulation, Others) come from the tags and the names of the types (`NodeCategory`, in `NodeEditor/NodeCategories.swift`); the import node is not in one, choosing it asks for the file. They show as a shelf of menu buttons beside the Network/Spreadsheet switch, as the *Add* menu of the toolbar and of the menu bar (*Ajouter*), and as the context menu of the empty canvas, which puts the node where the pointer is. A node made this way goes under the selected node and is wired to it, or in the middle of the view, becomes the node the viewport shows, and is selected, so the inspector shows its parameters. An empty network says how to start. The node editor frames the graph when a scene opens, when a file is imported or an example added, and when the first node is made, and keeps it framed as the window settles until the person pans or zooms.
+
+**Interface size.** *Settings > General > Interface Size* (Small, Medium, Large; Medium is the standard size of macOS) scales the drawing of the node editor, the timeline, the spreadsheet (row height and font) and the inspector (text and controls), live and in every window. It is `interfaceSize` in the user defaults (`Sources/InterfaceSize.swift`: `InterfaceSize`, the `uiFont` text styles and `CountFormat`). Counts in the toolbar and the spreadsheet tabs are abbreviated (« 1,03 M points · 1,95 M triangles »).
+
+`Helix --render-window <in.kut | 3D file | --new-scene> <out.png> [width height] [--pane network|spreadsheet] [--select <node>] [--size small|medium|large] [--show-inspector yes|no] [--example cube|waves|terrain] [--add <node type>]... [--theme ...] [--appearance light|dark] [--language en|fr]` lays out the whole document window, title bar and toolbar included, in an off screen window and writes a picture of it. The Metal viewport is the one part a window snapshot does not read, so the engine draws the picture of the viewport at the size the layout gave it and it is put in its place. The choices of the run travel in the argument domain of the defaults, so nothing is written to the preferences. Sizes to check: 1100 x 720 (the minimum), 1280 x 800, 1728 x 1117, 2560 x 1440. One caveat of the pictures: AppKit menu buttons inside the inspector are drawn light in a dark picture.
+
 ### Node errors
 
 A node that fails to cook says why. `throwError` records the message on the node, and so does an
@@ -530,7 +544,7 @@ standard library only):
 python3 -I apple/Helix/Scripts/mcp-smoke.py /path/to/Helix.app/Contents/MacOS/Helix
 ```
 
-`apple/Helix/Scripts/launch-smoke.py` launches the built app five times (plain, with a `.kut`, with a
+`apple/Helix/Scripts/launch-smoke.py` launches the built app five times (plain, which must open an untitled scene in a window of about 85 percent of the screen and no Open panel, with a `.kut`, with a
 `.glb`, with a `.gltf` that has a `.bin` and a picture beside it, in French), kills it each time, and fails if it dies within 6 seconds or if the opened file
 did not become a scene that imports the file where it is, not a copy, with its textures (it reads the line `HELIX_DEBUG_LAUNCH=1` makes the app write to standard
 error). It opens a window each time, so it cannot run in a sandbox:

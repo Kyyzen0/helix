@@ -135,7 +135,9 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
                 try EngineHost.shared.makeEmptyScene()
                 pendingOpenedImport = true
             } else {
-                try EngineHost.shared.makeDefaultScene()
+                // A new scene is empty: the welcome screen offers what to start from.
+                try EngineHost.shared.makeEmptyScene()
+                Self.logUntitledScene()
             }
         } catch {
             EngineHost.shared.release(self)
@@ -168,8 +170,15 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         // The copy is not needed once the real file is imported (or has failed to be).
         if real != nil, let staged = importURL { try? FileManager.default.removeItem(at: staged.deletingLastPathComponent()) }
         cookGeometry()
-        refreshEditor(frame: true)
+        showAndSelectDisplayNode()
         Self.logLaunchDebug()
+    }
+
+    /// With `HELIX_DEBUG_LAUNCH=1`, says that an untitled scene opened, which `Scripts/launch-smoke.py`
+    /// reads to check that a plain launch opens a window and not the Open panel.
+    private static func logUntitledScene() {
+        guard ProcessInfo.processInfo.environment["HELIX_DEBUG_LAUNCH"] == "1" else { return }
+        FileHandle.standardError.write(Data("helix-launch: untitled scene\n".utf8)) // l10n-ok: read by launch-smoke.py
     }
 
     /// With `HELIX_DEBUG_LAUNCH=1` in the environment, writes the nodes of the scene that was just
@@ -185,8 +194,8 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         }
         let missing = String(engine: helix.core.lastImportSummary()).contains("Missing:")
         FileHandle.standardError.write(Data(
-            ("helix-launch: scene nodes=\(types.count) types=\(types.joined(separator: ","))"
-                + " paths=\(paths.joined(separator: "|")) missingTexture=\(missing)\n").utf8))
+            ("helix-launch: scene nodes=\(types.count) types=\(types.joined(separator: ","))" // l10n-ok: read by launch-smoke.py
+                + " paths=\(paths.joined(separator: "|")) missingTexture=\(missing)\n").utf8)) // l10n-ok
     }
 
     /// Asks for a 3D file with an open panel, and imports it into this scene.
@@ -227,7 +236,7 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
             presentedError = error
             return error
         }
-        viewport.requestFrame()
+        showAndSelectDisplayNode()
         return nil
     }
 
@@ -303,6 +312,21 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
 
     func requestFrame() {
         viewport.requestFrame()
+    }
+
+    /// Whether this is a new scene nothing was done to: no file behind it and no node. Another
+    /// scene that is opened takes the engine from it (see `EngineHost.claim`), and its window
+    /// closes, as the empty untitled window of any document app does when a file is opened.
+    var isPristineUntitled: Bool {
+        isActive && fileContents == nil && importURL == nil && editor.graph.nodes.isEmpty
+    }
+
+    /// Set when a scene that was opened took the engine from this empty one.
+    @Published private(set) var wasReplaced = false
+
+    func yieldEngine() {
+        wasReplaced = true
+        relinquish()
     }
 
     /// Gives the engine back, once the window is closed.

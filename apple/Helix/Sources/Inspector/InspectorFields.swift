@@ -56,7 +56,7 @@ struct ScrubLabel: View {
 
     var body: some View {
         Text(title)
-            .font(.system(size: 11, weight: .semibold))
+            .font(.system(size: 12, weight: .semibold))
             .foregroundStyle(isEnabled ? tint : Color.secondary)
             .frame(width: 14)
             .contentShape(Rectangle())
@@ -94,7 +94,7 @@ struct ExpressionField: View {
     var body: some View {
         Button(action: onEdit) {
             Text(text)
-                .font(.system(size: 11, design: .monospaced))
+                .font(.system(size: 12, design: .monospaced))
                 .foregroundStyle(hasError ? Color.red : theme.accent)
                 .lineLimit(1)
                 .truncationMode(.middle)
@@ -125,7 +125,7 @@ struct ExpressionDraftField: View {
 
     var body: some View {
         TextField("", text: $text, prompt: Text("Expression"))
-            .font(.system(size: 11, design: .monospaced))
+            .font(.system(size: 12, design: .monospaced))
             .textFieldStyle(.roundedBorder)
             .focused($focused)
             .onSubmit(onCommit)

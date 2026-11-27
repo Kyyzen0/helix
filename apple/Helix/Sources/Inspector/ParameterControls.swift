@@ -28,8 +28,7 @@ struct ToggleControl: View {
                     Toggle(parameter.label, isOn: binding)
                         .labelsHidden()
                         .toggleStyle(.switch)
-                        .controlSize(.small)
-                default:
+                                default:
                     Toggle(parameter.label, isOn: binding)
                         .labelsHidden()
                         .toggleStyle(.checkbox)
@@ -179,7 +178,7 @@ struct CodeEditor: View {
     var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
             TextEditor(text: $draft)
-                .font(.system(size: 11, design: .monospaced))
+                .font(.system(size: 12, design: .monospaced))
                 .scrollContentBackground(.hidden)
                 .padding(4)
                 .frame(minHeight: 110)
@@ -188,8 +187,7 @@ struct CodeEditor: View {
                 .accessibilityLabel(Text(label))
             Button("Apply") { onApply(draft) }
                 .keyboardShortcut(.return, modifiers: .command)
-                .controlSize(.small)
-                .disabled(draft == text)
+                        .disabled(draft == text)
         }
         .onAppear { draft = text }
         .onChange(of: text) { _, shown in draft = shown }

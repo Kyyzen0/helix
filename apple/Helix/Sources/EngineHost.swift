@@ -79,7 +79,11 @@ final class EngineHost {
 
     /// Gives the engine to a document, or refuses when another document holds it.
     func claim(for document: AnyObject) throws {
-        if let owner, owner !== document { throw HelixError.busy }
+        if let owner, owner !== document {
+            // An empty untitled scene gives way to the one that is being opened.
+            guard let empty = owner as? HelixDocument, empty.isPristineUntitled else { throw HelixError.busy }
+            empty.yieldEngine()
+        }
         try startEngine()
         owner = document
     }

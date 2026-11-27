@@ -5,8 +5,21 @@ struct InspectorView: View {
     @ObservedObject var model: InspectorModel
     /// Whether the rows scroll. A picture of the panel draws them all at their full height.
     var scrolls = true
+    @Environment(\.interfaceSize) private var size
+    @Environment(\.theme) private var theme
 
     var body: some View {
+        content
+            .font(.system(size: size.points(13)))
+            // The column takes the colour and the appearance of the theme, not the material of the system.
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(theme.window)
+            .environment(\.colorScheme, theme.palette.isDark ? .dark : .light)
+            .foregroundStyle(Color(theme.palette.text))
+    }
+
+    @ViewBuilder
+    private var content: some View {
         switch model.content {
         case .none:
             InspectorPlaceholder(text: String(localized: "No node selected"), symbol: "slider.horizontal.3")
@@ -53,6 +66,7 @@ struct InspectorNodeView: View {
             Divider()
             if scrolls {
                 ScrollView { rows }
+                    .scrollContentBackground(.hidden)
             } else {
                 rows
             }
@@ -70,8 +84,8 @@ struct InspectorHeader: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(node.name).font(.headline).lineLimit(1)
-                    Text(node.typeLabel).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    Text(node.name).uiFont(.headline).lineLimit(1)
+                    Text(node.typeLabel).uiFont(.caption).foregroundStyle(.secondary).lineLimit(1)
                 }
                 Spacer()
                 Button { model.setDisplay() } label: {
@@ -104,7 +118,7 @@ struct DiagnosticBanner: View {
             Image(systemName: isError ? "exclamationmark.octagon.fill" : "exclamationmark.triangle.fill")
                 .foregroundStyle(tint)
             Text(text)
-                .font(.callout)
+                .uiFont(.callout)
                 .fixedSize(horizontal: false, vertical: true)
                 .textSelection(.enabled)
             Spacer(minLength: 0)
@@ -146,7 +160,7 @@ struct SectionHeading: View {
                 if !icon.isEmpty {
                     Image(systemName: InspectorIcons.symbol(forNodeIcon: icon)).foregroundStyle(.secondary)
                 }
-                Text(label).font(.subheadline.weight(.semibold))
+                Text(label).uiFont(.subheadline, weight: .semibold)
             }
         }
         .padding(.top, 6)
