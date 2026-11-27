@@ -54,6 +54,16 @@ class ViewportRenderer
     /// @note Meant for tests. It may be read from any thread.
     std::size_t retiredResourceCount() const;
 
+    /// @brief The number of base colour textures held on the GPU.
+    ///
+    /// @note Meant for tests.
+    std::size_t textureCount() const { return meshPass_.textureCount(); }
+
+    /// @brief The number of base colour textures made since the renderer was.
+    ///
+    /// @note Meant for tests.
+    std::size_t texturesCreated() const { return meshPass_.texturesCreated(); }
+
     /// @brief Makes the targets fit the size and returns the texture the next frame is drawn into.
     ///
     /// A host calls it before it draws, to have a texture to show. The contents are undefined until

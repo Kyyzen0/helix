@@ -581,6 +581,9 @@ struct ViewportFrameOptions
     float geometryBlue = 0.68f;
     WireframeMode wireframe = WireframeMode::Auto;
     bool pointsVisible = false;
+    /// @brief Whether the faces are drawn with the base colour and texture of their material.
+    /// When false they take the geometry colour above.
+    bool materialsVisible = true;
 };
 
 /// @brief The texture one viewport frame was recorded into.

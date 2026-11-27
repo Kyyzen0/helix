@@ -46,6 +46,21 @@ enum WireframeSetting: String, CaseIterable, Identifiable {
     }
 }
 
+/// Whether the viewport draws the base colour and the picture of the materials: the View menu setting.
+///
+/// Kept in the user defaults like the wireframe, so every window shares it. Materials are shown
+/// until the user hides them.
+enum MaterialsSetting {
+    static let defaultsKey = "materialsVisible"
+
+    /// The setting the user chose, and `true` before they chose any.
+    static var isVisible: Bool {
+        let defaults = UserDefaults.standard
+        // bool(forKey:) also reads the YES and NO of a launch argument, which arrives as text.
+        return defaults.object(forKey: defaultsKey) == nil ? true : defaults.bool(forKey: defaultsKey)
+    }
+}
+
 /// What the document and the menu use to reach the viewport of a window.
 ///
 /// The camera itself lives in the facade. The controller only holds the view, so that a request

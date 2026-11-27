@@ -17,6 +17,7 @@ struct HelixApp: App {
 struct HelixCommands: Commands {
     @FocusedObject private var document: HelixDocument?
     @AppStorage(WireframeSetting.defaultsKey) private var wireframe = WireframeSetting.auto
+    @AppStorage(MaterialsSetting.defaultsKey) private var materialsVisible = true
 
     var body: some Commands {
         CommandGroup(replacing: .appInfo) {
@@ -38,6 +39,8 @@ struct HelixCommands: Commands {
             }
             Button("Cycle Wireframe") { wireframeBinding.wrappedValue = wireframe.next }
                 .keyboardShortcut("w", modifiers: .shift)
+            Toggle("Materials", isOn: materialsBinding)
+                .keyboardShortcut("m", modifiers: .shift)
         }
     }
 }
@@ -49,6 +52,19 @@ extension HelixCommands {
             get: { wireframe },
             set: { setting in
                 wireframe = setting
+                document?.viewport.redraw()
+            }
+        )
+    }
+}
+
+extension HelixCommands {
+    /// Shows or hides the materials and asks the viewport of the window in front to draw again.
+    private var materialsBinding: Binding<Bool> {
+        Binding(
+            get: { materialsVisible },
+            set: { visible in
+                materialsVisible = visible
                 document?.viewport.redraw()
             }
         )

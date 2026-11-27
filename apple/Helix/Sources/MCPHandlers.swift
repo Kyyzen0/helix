@@ -519,6 +519,7 @@ enum MCPHandlers {
         let pixelWidth = UInt32(min(width, maxImageSide))
         let pixelHeight = UInt32(min(height, maxImageSide))
 
+        let materialsVisible = try arguments.bool("materials") ?? true
         let azimuth = try arguments.number("azimuth")
         let elevation = try arguments.number("elevation")
         var wireframe = helix.core.WireframeMode.Auto
@@ -557,6 +558,7 @@ enum MCPHandlers {
         options.backgroundGreen = ViewportRenderer.background.green
         options.backgroundBlue = ViewportRenderer.background.blue
         options.wireframe = wireframe
+        options.materialsVisible = materialsVisible
 
         let file = FileManager.default.temporaryDirectory.appending(path: "helix-mcp-\(UUID().uuidString).png")
         defer { try? FileManager.default.removeItem(at: file) }

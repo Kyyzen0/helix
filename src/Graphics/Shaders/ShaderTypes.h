@@ -8,18 +8,27 @@
 #define HELIX_SHADER_MAT4 metal::float4x4
 #define HELIX_SHADER_VEC4 metal::float4
 #define HELIX_SHADER_VEC2 metal::float2
+#define HELIX_SHADER_UINT uint
 #else
+#include <cstdint>
 #include <glm/mat4x4.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
 #define HELIX_SHADER_MAT4 glm::mat4
 #define HELIX_SHADER_VEC4 glm::vec4
 #define HELIX_SHADER_VEC2 glm::vec2
+#define HELIX_SHADER_UINT std::uint32_t
 #endif
 
 // The slot of the argument table the frame constants are bound to, in the vertex
 // and the fragment stage. The vertex buffers take the slots below it.
 #define HELIX_FRAME_CONSTANTS_SLOT 10
+
+// The slot the fragment stage reads the material of a draw from, and the texture and the sampler
+// slots of the base colour.
+#define HELIX_MATERIAL_CONSTANTS_SLOT 11
+#define HELIX_BASE_COLOR_TEXTURE_SLOT 0
+#define HELIX_BASE_COLOR_SAMPLER_SLOT 0
 
 #ifndef __METAL_VERSION__
 namespace helix::gfx {
@@ -41,7 +50,21 @@ struct FrameConstants
     float wireframeOpacity;
 };
 
+/// What one draw of the mesh is shaded with, set per batch of faces.
+struct MaterialConstants
+{
+    /// The base colour factor, in linear light. It multiplies the texture.
+    HELIX_SHADER_VEC4 baseColor;
+    /// 1 to shade with the base colour and the texture, 0 to shade with the colour of the frame.
+    HELIX_SHADER_UINT useMaterial;
+    /// 1 when a base colour texture is bound, 0 when the factor alone is used.
+    HELIX_SHADER_UINT hasTexture;
+    HELIX_SHADER_UINT padding0;
+    HELIX_SHADER_UINT padding1;
+};
+
 #ifndef __METAL_VERSION__
 static_assert(sizeof(FrameConstants) == 144, "FrameConstants must match the layout the shaders read");
+static_assert(sizeof(MaterialConstants) == 32, "MaterialConstants must match the layout the shaders read");
 } // namespace helix::gfx
 #endif

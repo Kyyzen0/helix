@@ -5,6 +5,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreGraphics/CoreGraphics.h>
 #include <ImageIO/ImageIO.h>
+#include <algorithm>
 #include <catch2/catch_test_macros.hpp>
 #include <cmath>
 #include <cstdint>
@@ -331,4 +332,196 @@ TEST_CASE_METHOD(
     core::orbitViewportTo(30.f, 35.f);
     core::orbitViewportTo(std::nanf(""), 0.f);
     REQUIRE(core::frameViewport(4.f / 3.f));
+}
+
+// ---------------------------------------------------------------------------------------------
+// Materials and textures
+// ---------------------------------------------------------------------------------------------
+
+namespace {
+
+struct Colour
+{
+    int r, g, b;
+};
+
+// The mean colour of the square of pixels around (x, y), with x and y as fractions of the picture.
+Colour sampleAt(const DecodedImage& image, float fractionX, float fractionY)
+{
+    const int centerX = int(fractionX * float(image.width));
+    const int centerY = int(fractionY * float(image.height));
+    long red = 0, green = 0, blue = 0, count = 0;
+    for (int y = centerY - 3; y <= centerY + 3; ++y)
+    {
+        for (int x = centerX - 3; x <= centerX + 3; ++x)
+        {
+            const std::size_t index = (std::size_t(y) * image.width + std::size_t(x)) * 4;
+            red += image.rgba[index];
+            green += image.rgba[index + 1];
+            blue += image.rgba[index + 2];
+            ++count;
+        }
+    }
+    return {int(red / count), int(green / count), int(blue / count)};
+}
+
+bool isRed(const Colour& c) { return c.r > c.g + 60 && c.r > c.b + 60; }
+bool isGreen(const Colour& c) { return c.g > c.r + 60 && c.g > c.b + 60; }
+bool isBlue(const Colour& c) { return c.b > c.r + 60 && c.b > c.g + 60; }
+// Bright and without a dominant channel; the factor of the material tints it a little.
+bool isWhitish(const Colour& c)
+{
+    const int high = std::max({c.r, c.g, c.b});
+    const int low = std::min({c.r, c.g, c.b});
+    return low > 90 && low * 10 > high * 6;
+}
+
+// Displays the file, faces it head on, and renders it at 200 x 200 without wireframe.
+DecodedImage renderImported(const fs::path& file, bool materialsVisible, const char* name)
+{
+    const core::CreateNodeResult imported = core::importFile(file.string());
+    REQUIRE(imported.status.ok);
+    REQUIRE(core::setDisplayNode(imported.id).ok);
+    REQUIRE(core::updateViewportGeometry().status.ok);
+    core::resetViewport();
+    // The quad lies on the z = 0 plane and faces +z, so the camera at azimuth 0 looks straight at it.
+    core::orbitViewportTo(0.f, 0.f);
+    REQUIRE(core::frameViewport(1.f));
+
+    core::ViewportFrameOptions options;
+    options.pixelWidth = 200;
+    options.pixelHeight = 200;
+    options.wireframe = core::WireframeMode::Off;
+    options.materialsVisible = materialsVisible;
+    const std::string path = helix::test::tempPath(name);
+    fs::remove(path);
+    REQUIRE(core::renderToImage(path, options, true).ok);
+    return decodePng(path);
+}
+
+fs::path importData(const char* name) { return fs::path(HELIX_TEST_DATA_DIR) / "import" / name; }
+
+// The four quadrants of the picture, drawn upright: red at the top left, green at the top right,
+// blue at the bottom left and white at the bottom right.
+void requireQuadrantsUpright(const DecodedImage& image)
+{
+    REQUIRE(image.width == 200);
+    const Colour topLeft = sampleAt(image, 0.38f, 0.38f);
+    const Colour topRight = sampleAt(image, 0.62f, 0.38f);
+    const Colour bottomLeft = sampleAt(image, 0.38f, 0.62f);
+    const Colour bottomRight = sampleAt(image, 0.62f, 0.62f);
+    INFO("top left " << topLeft.r << "," << topLeft.g << "," << topLeft.b);
+    INFO("top right " << topRight.r << "," << topRight.g << "," << topRight.b);
+    INFO("bottom left " << bottomLeft.r << "," << bottomLeft.g << "," << bottomLeft.b);
+    INFO("bottom right " << bottomRight.r << "," << bottomRight.g << "," << bottomRight.b);
+    REQUIRE(isRed(topLeft));
+    REQUIRE(isGreen(topRight));
+    REQUIRE(isBlue(bottomLeft));
+    REQUIRE(isWhitish(bottomRight));
+}
+
+// Hidden materials: the faces take the geometry colour, so the quad is one flat grey.
+void requireGrey(const DecodedImage& image)
+{
+    const Colour a = sampleAt(image, 0.38f, 0.38f);
+    const Colour b = sampleAt(image, 0.62f, 0.38f);
+    const Colour c = sampleAt(image, 0.38f, 0.62f);
+    const Colour d = sampleAt(image, 0.62f, 0.62f);
+    for (const Colour& colour : {a, b, c, d})
+    {
+        REQUIRE(std::abs(colour.r - a.r) < 24);
+        REQUIRE(std::abs(colour.g - a.g) < 24);
+        REQUIRE(std::abs(colour.b - a.b) < 24);
+    }
+    REQUIRE(std::abs(a.r - a.b) < 40);
+    REQUIRE(a.r > 60);
+}
+
+} // namespace
+
+TEST_CASE_METHOD(ViewportFixture, "The viewport draws the picture of a glb material upright", "[viewport][material]")
+{
+    skipWithoutMetal();
+    requireQuadrantsUpright(renderImported(importData("textured-quad.glb"), true, "helix_material_glb.png"));
+}
+
+TEST_CASE_METHOD(ViewportFixture, "The viewport draws the picture of a gltf with an external file", "[viewport][material]")
+{
+    skipWithoutMetal();
+    requireQuadrantsUpright(renderImported(importData("textured-quad.gltf"), true, "helix_material_gltf.png"));
+}
+
+TEST_CASE_METHOD(ViewportFixture, "The viewport draws the picture of a usd material", "[viewport][material]")
+{
+    skipWithoutMetal();
+    requireQuadrantsUpright(renderImported(importData("textured-quad.usda"), true, "helix_material_usda.png"));
+}
+
+TEST_CASE_METHOD(ViewportFixture, "Hidden materials draw every face in the geometry colour", "[viewport][material]")
+{
+    skipWithoutMetal();
+    const DecodedImage hidden = renderImported(importData("textured-quad.glb"), false, "helix_material_hidden.png");
+    requireGrey(hidden);
+
+    REQUIRE(core::newScene().ok);
+    const DecodedImage shown = renderImported(importData("textured-quad.glb"), true, "helix_material_shown.png");
+    REQUIRE(shown.rgba != hidden.rgba);
+}
+
+TEST_CASE_METHOD(ViewportFixture, "A material with no picture draws in its base colour factor", "[viewport][material]")
+{
+    skipWithoutMetal();
+    // Two quads side by side, the first red and the second blue.
+    const core::CreateNodeResult imported = core::importFile(importData("two-materials.glb").string());
+    REQUIRE(imported.status.ok);
+    REQUIRE(core::setDisplayNode(imported.id).ok);
+    REQUIRE(core::updateViewportGeometry().status.ok);
+    core::resetViewport();
+    core::orbitViewportTo(0.f, 0.f);
+    REQUIRE(core::frameViewport(2.f));
+
+    core::ViewportFrameOptions options;
+    options.pixelWidth = 400;
+    options.pixelHeight = 200;
+    options.wireframe = core::WireframeMode::Off;
+    const std::string path = helix::test::tempPath("helix_material_factor.png");
+    fs::remove(path);
+    REQUIRE(core::renderToImage(path, options, true).ok);
+    const DecodedImage image = decodePng(path);
+    REQUIRE(isRed(sampleAt(image, 0.30f, 0.5f)));
+    REQUIRE(isBlue(sampleAt(image, 0.70f, 0.5f)));
+}
+
+TEST_CASE_METHOD(ViewportFixture, "The adaptive wireframe leaves a textured mesh alone", "[viewport][material]")
+{
+    skipWithoutMetal();
+    const core::CreateNodeResult imported = core::importFile(importData("textured-quad.glb").string());
+    REQUIRE(imported.status.ok);
+    REQUIRE(core::setDisplayNode(imported.id).ok);
+    REQUIRE(core::updateViewportGeometry().status.ok);
+    core::resetViewport();
+    core::orbitViewportTo(0.f, 0.f);
+    REQUIRE(core::frameViewport(1.f));
+
+    const auto render = [](core::WireframeMode mode, bool materials, const char* name) {
+        core::ViewportFrameOptions options;
+        options.pixelWidth = 200;
+        options.pixelHeight = 200;
+        options.wireframe = mode;
+        options.materialsVisible = materials;
+        const std::string path = helix::test::tempPath(name);
+        fs::remove(path);
+        REQUIRE(core::renderToImage(path, options, true).ok);
+        return decodePng(path);
+    };
+    const DecodedImage off = render(core::WireframeMode::Off, true, "helix_material_wire_off.png");
+    const DecodedImage automatic = render(core::WireframeMode::Auto, true, "helix_material_wire_auto.png");
+    const DecodedImage on = render(core::WireframeMode::On, true, "helix_material_wire_on.png");
+    REQUIRE(automatic.rgba == off.rgba);
+    REQUIRE(on.rgba != off.rgba);
+
+    // With the materials hidden the mesh is plain again, and the adaptive wireframe comes back.
+    const DecodedImage plainOff = render(core::WireframeMode::Off, false, "helix_material_wire_plain_off.png");
+    const DecodedImage plainAuto = render(core::WireframeMode::Auto, false, "helix_material_wire_plain_auto.png");
+    REQUIRE(plainAuto.rgba != plainOff.rgba);
 }

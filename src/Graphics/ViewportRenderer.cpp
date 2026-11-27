@@ -56,6 +56,8 @@ float getWireframeOpacity(const FrameState& frame, const MeshPass& mesh, const F
 {
     if (!frame.wireframeVisible) return 0.f;
     if (!frame.wireframeAdaptive) return 1.f;
+    // The edges would draw over the picture of a textured mesh, which they do not help to read.
+    if (frame.materialsVisible && mesh.hasTexturedMaterial()) return 0.f;
     if (mesh.triangleCount() > kWireframeAutoTriangleLimit) return 0.f;
 
     // The size of an edge at the distance of the middle of the mesh, in device pixels: the
@@ -197,6 +199,7 @@ RenderedImage ViewportRenderer::encode(const FrameState& frame, MTL::CommandBuff
     // The work that can fail runs before an encoder is opened, so a failure never leaves one open.
     const RenderedImage image = prepareTarget(frame.pixelSize);
     uploadGeometry(frame);
+    meshPass_.prepareTextures(device_.getDevice(), commandBuffer, frame.materialsVisible);
     FrameConstants frameConstants = getFrameConstants(frame);
     frameConstants.wireframeOpacity = getWireframeOpacity(frame, meshPass_, frameConstants);
 
@@ -238,7 +241,7 @@ RenderedImage ViewportRenderer::encode(const FrameState& frame, MTL::CommandBuff
     encoder->setFragmentBytes(&frameConstants, sizeof(frameConstants), HELIX_FRAME_CONSTANTS_SLOT);
 
     gridPass_.draw(encoder);
-    meshPass_.draw(encoder, frameConstants.wireframeOpacity > 0.f);
+    meshPass_.draw(encoder, frameConstants.wireframeOpacity > 0.f, frame.materialsVisible);
     pointPass_.draw(encoder, frame.pointsVisible);
     cameraPrimPass_.draw(encoder, frame.viewCameraIndex);
     encoder->endEncoding();

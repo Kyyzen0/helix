@@ -205,6 +205,13 @@ def main(binary):
         check(abs(materials[0]["base_color"][0] - 0.9) < 1e-6 and "missing_texture" not in materials[0],
               "and its base colour, with nothing missing")
         check(server.data("geometry_summary", {"node": "box"})["materials"] == [], "a node with no material lists none")
+        shown = render(server, node=textured["node"]["name"], width=160, height=160, azimuth=0, elevation=0)[1]
+        hidden = render(server, node=textured["node"]["name"], width=160, height=160, azimuth=0, elevation=0,
+                        materials=False)[1]
+        check(png_size(shown) == (160, 160) and shown != hidden, "render_view draws materials, and materials false changes the picture")
+        check(render(server, node=textured["node"]["name"], width=160, height=160, azimuth=0, elevation=0,
+                     materials=True)[1] == shown, "materials true is the default")
+        check(server.call("render_view", {"materials": "yes"})["isError"] is True, "a materials value that is not a boolean is an error")
         server.data("delete_node", {"node": textured["node"]["id"]})
 
         path = os.path.join(folder, "smoke.kut")

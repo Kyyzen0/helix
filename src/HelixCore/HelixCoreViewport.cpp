@@ -118,6 +118,7 @@ gfx::FrameState makeFrame(const ViewportFrameOptions& options, const gfx::Viewpo
     frame.wireframeVisible = options.wireframe != WireframeMode::Off;
     frame.wireframeAdaptive = options.wireframe == WireframeMode::Auto;
     frame.pointsVisible = options.pointsVisible;
+    frame.materialsVisible = options.materialsVisible;
     frame.camera = camera;
     return frame;
 }

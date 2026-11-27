@@ -453,3 +453,134 @@ TEST_CASE("A viewport renderer hands out a texture before the first frame is dra
     REQUIRE(renderer.render(frame).texture == target.texture);
     REQUIRE(renderer.prepareTarget({0, 0}).texture == nullptr);
 }
+
+namespace {
+
+/// @brief A picture of four coloured texels: red and green on the top row, blue and white below.
+std::shared_ptr<const helix::geo::Image> makeQuadrantImage()
+{
+    auto image = std::make_shared<helix::geo::Image>();
+    image->width = 2;
+    image->height = 2;
+    image->rgba = {255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 255, 255};
+    image->source = "test quadrants";
+    return image;
+}
+
+/// @brief A ground plane far larger than the view, whose uv run from 0 to 1 across it, with the
+/// material on all of it.
+std::shared_ptr<DisplayGeometry> makeMaterialPlane(const std::shared_ptr<const helix::geo::Material>& material)
+{
+    auto geometry = std::make_shared<DisplayGeometry>();
+    geometry->positions = {{-100.f, 0.f, -100.f}, {100.f, 0.f, -100.f}, {100.f, 0.f, 100.f}, {-100.f, 0.f, 100.f}};
+    geometry->normals = std::vector<glm::vec3>(4, glm::vec3(0.f, 1.f, 0.f));
+    geometry->uvs = {{0.f, 0.f}, {1.f, 0.f}, {1.f, 1.f}, {0.f, 1.f}};
+    geometry->topology.triangleIndices = {0, 1, 2, 0, 2, 3};
+    if (material)
+    {
+        geometry->materials = {material};
+        geometry->batches = {{0, 6, 0}};
+    }
+    else
+    {
+        geometry->batches = {{0, 6, -1}};
+    }
+    return geometry;
+}
+
+std::shared_ptr<const helix::geo::Material> makeTexturedMaterial(const std::shared_ptr<const helix::geo::Image>& image)
+{
+    auto material = std::make_shared<helix::geo::Material>();
+    material->baseColorTexture = image;
+    return material;
+}
+
+} // namespace
+
+TEST_CASE("A viewport renderer makes the texture of a material once and releases it with the geometry")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+    const auto image = makeQuadrantImage();
+    const auto material = makeTexturedMaterial(image);
+
+    FrameState frame = makeFrame(64, 64);
+    frame.wireframeVisible = false;
+    REQUIRE(renderer.textureCount() == 0);
+
+    frame.geometry = makeMaterialPlane(material);
+    renderer.renderToPixels(frame);
+    REQUIRE(renderer.textureCount() == 1);
+    REQUIRE(renderer.texturesCreated() == 1);
+
+    // Another geometry that uses the same picture finds the texture where it is.
+    frame.geometry = makeMaterialPlane(material);
+    renderer.renderToPixels(frame);
+    frame.camera.orbit({40.f, 0.f});
+    renderer.renderToPixels(frame);
+    REQUIRE(renderer.textureCount() == 1);
+    REQUIRE(renderer.texturesCreated() == 1);
+
+    // A picture of the same pixels but another object is another texture, and the first one goes.
+    frame.geometry = makeMaterialPlane(makeTexturedMaterial(makeQuadrantImage()));
+    renderer.renderToPixels(frame);
+    REQUIRE(renderer.textureCount() == 1);
+    REQUIRE(renderer.texturesCreated() == 2);
+
+    // Geometry with no texture releases it. The release goes through the retired resources, which
+    // a frame that finished lets go of.
+    frame.geometry = makeMaterialPlane(nullptr);
+    renderer.renderToPixels(frame);
+    REQUIRE(renderer.textureCount() == 0);
+    REQUIRE(renderer.texturesCreated() == 2);
+    REQUIRE(renderer.retiredResourceCount() == 0);
+}
+
+TEST_CASE("A viewport renderer makes no texture while the materials are hidden")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    FrameState frame = makeFrame(64, 64);
+    frame.wireframeVisible = false;
+    frame.geometry = makeMaterialPlane(makeTexturedMaterial(makeQuadrantImage()));
+    frame.materialsVisible = false;
+    const PresentedFrame hidden = renderer.renderToPixels(frame);
+    REQUIRE(renderer.texturesCreated() == 0);
+
+    frame.materialsVisible = true;
+    const PresentedFrame shown = renderer.renderToPixels(frame);
+    REQUIRE(renderer.texturesCreated() == 1);
+    REQUIRE_FALSE(samePixels(hidden, shown));
+
+    // Hidden again, the frame is what it was, without the texture being dropped or made again.
+    frame.materialsVisible = false;
+    REQUIRE(samePixels(renderer.renderToPixels(frame), hidden));
+    REQUIRE(renderer.texturesCreated() == 1);
+}
+
+TEST_CASE("A viewport renderer draws a factor-only material in its colour and survives missing uvs")
+{
+    std::unique_ptr<GraphicsDevice> device = createDeviceOrSkip();
+    ViewportRenderer renderer(*device);
+
+    auto material = std::make_shared<helix::geo::Material>();
+    material->baseColor = {0.f, 0.f, 1.f, 1.f};
+    FrameState frame = makeFrame(64, 64);
+    frame.wireframeVisible = false;
+    frame.geometry = makeMaterialPlane(material);
+    PresentedFrame presented = renderer.renderToPixels(frame);
+    REQUIRE(renderer.texturesCreated() == 0);
+    const Rgba blue = pixelAt(presented, 32, 56);
+    REQUIRE(blue.b > 60);
+    REQUIRE(blue.r < 20);
+    REQUIRE(blue.g < 20);
+
+    // Geometry built by hand with a picture and no uv draws, whatever the picture shows.
+    auto bare = makeMaterialPlane(makeTexturedMaterial(makeQuadrantImage()));
+    bare->uvs.clear();
+    bare->batches.clear();
+    frame.geometry = bare;
+    presented = renderer.renderToPixels(frame);
+    REQUIRE(differsFrom(pixelAt(presented, 32, 56), black));
+}

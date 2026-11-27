@@ -134,14 +134,15 @@ enum MCPTools {
                   "count": integer("How many elements, 100 by default and 10000 at most.")],
                  required: ["owner", "name"], readOnly: true, MCPHandlers.readAttribute),
             tool("render_view",
-                 "Draws the geometry of a node, framed like the viewport of the app, and returns a PNG image. azimuth and elevation orbit the camera.",
+                 "Draws the geometry of a node, framed like the viewport of the app, and returns a PNG image. azimuth and elevation orbit the camera. Faces are shaded with the base colour factor and base colour picture of their material (opaque only: no alpha, normal, roughness or metallic maps, no vertex colour); materials false draws them all in the default grey.",
                  ["node": nodeReference("The node to draw. The display node when left out."),
                   "width": integer("Width in pixels, 768 by default and 2048 at most."),
                   "height": integer("Height in pixels, 512 by default and 2048 at most."),
                   "azimuth": number("The angle around the vertical axis in degrees. The default view is at -135."),
                   "elevation": number("The angle above the horizontal plane in degrees, held between -89 and 89. The default view is at 20."),
                   "wireframe": ["type": "string", "enum": ["auto", "on", "off"],
-                                "description": "Whether the edges are drawn over the shading, auto by default."]],
+                                "description": "Whether the edges are drawn over the shading, auto by default. auto leaves out the edges of a mesh whose materials have a picture."],
+                  "materials": boolean("Whether the faces are drawn with their materials, true by default. false draws them in the default grey.")],
                  readOnly: true, MCPHandlers.renderView),
         ]
     }
