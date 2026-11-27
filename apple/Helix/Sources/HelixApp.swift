@@ -32,6 +32,15 @@ struct HelixApp: App {
             WindowPlacement.helixDefault(in: context.defaultDisplay.visibleRect)
         }
         .commands { HelixCommands() }
+        // Help > Getting Started.
+        Window("Getting Started", id: GettingStartedWindow.id) {
+            GettingStartedView()
+                .frame(minWidth: 460, minHeight: 360)
+                .themed()
+                .sized()
+        }
+        .defaultSize(width: 580, height: 700)
+        .windowResizability(.contentMinSize)
         // ⌘, opens it.
         Settings {
             SettingsView()
@@ -41,9 +50,16 @@ struct HelixApp: App {
     }
 }
 
+/// The window of Help > Getting Started.
+enum GettingStartedWindow {
+    static let id = "getting-started" // l10n-ok: the identifier of a window
+}
+
 /// The menu items the document group does not give: the viewport, and the About panel.
 struct HelixCommands: Commands {
     @FocusedObject private var document: HelixDocument?
+    @Environment(\.openWindow) private var openWindow
+    @AppStorage(NavigationLegendSetting.hiddenKey) private var navigationLegendHidden = false
     @AppStorage(WireframeSetting.defaultsKey) private var wireframe = WireframeSetting.auto
     @AppStorage(MaterialsSetting.defaultsKey) private var materialsVisible = true
     @AppStorage(InspectorSetting.defaultsKey) private var inspectorShown = true
@@ -55,6 +71,11 @@ struct HelixCommands: Commands {
     var body: some Commands {
         CommandGroup(replacing: .appInfo) {
             Button("About Helix") { AboutPanel.show() }
+        }
+        // The Help menu of macOS has nothing of Helix's in it: a guide, and the legend of the viewport.
+        CommandGroup(replacing: .help) {
+            Button("Getting Started") { openWindow(id: GettingStartedWindow.id) }
+            Button("Show Navigation Help") { navigationLegendHidden = false }
         }
         // The keys F, shift W and shift M belong to the viewport, which handles them itself
         // while it has the keys. A menu shortcut without the command key would also fire while a

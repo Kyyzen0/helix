@@ -24,12 +24,15 @@ struct ThemeColors: Sendable {
     private var system: Bool { palette.followsSystemColors }
     private var dark: Bool { palette.isDark }
 
-    /// The accent colour: the system's, or the one of the theme.
-    var accent: Color { palette.accent.map(Color.init) ?? Color.accentColor }
+    /// The accent colour of the theme, which is the same on every Mac: selection, focus and the
+    /// playhead never take the accent of macOS, which may be the red of an error.
+    var accent: Color { Color(palette.accent) }
     /// What is drawn on the accent: a label on a chip, the glyph of a button that is on.
     var onAccent: Color { Color(palette.onAccent) }
     /// The colour of the display flag and of the bar down the card of the display node.
-    var displayFlag: Color { system ? accent : Color(palette.displayFlag) }
+    var displayFlag: Color { Color(palette.displayFlag) }
+    /// Red is for errors alone: an outline, a badge, a message.
+    var error: Color { .red }
 
     var window: Color { system ? Color(nsColor: .windowBackgroundColor) : Color(palette.window) }
     /// Cards, and the room the timeline sits in.
@@ -81,7 +84,7 @@ extension View {
     /// Puts a palette in the environment, and tints the controls with its accent.
     func themeEnvironment(_ palette: ThemePalette) -> some View {
         environment(\.theme, ThemeColors(palette))
-            .tint(palette.accent.map(Color.init))
+            .tint(Color(palette.accent))
     }
 
     /// Makes the view follow the theme chosen in the Settings window, live.

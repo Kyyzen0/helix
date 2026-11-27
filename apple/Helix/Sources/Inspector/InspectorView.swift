@@ -90,7 +90,7 @@ struct InspectorHeader: View {
                 Spacer()
                 Button { model.setDisplay() } label: {
                     Image(systemName: node.isDisplay ? "flag.fill" : "flag")
-                        .foregroundStyle(node.isDisplay ? theme.accent : Color.secondary)
+                        .foregroundStyle(node.isDisplay ? theme.displayFlag : Color.secondary)
                 }
                 .buttonStyle(.borderless)
                 .help(node.isDisplay ? Text("This node is shown in the viewport") : Text("Show this node in the viewport"))
@@ -107,7 +107,8 @@ struct InspectorHeader: View {
     }
 }
 
-/// An error in red, or a warning in yellow.
+/// An error in red with a triangle, or a warning in orange with a circle: the shape tells them
+/// apart as the colour does.
 struct DiagnosticBanner: View {
     let text: String
     let isError: Bool
@@ -115,7 +116,7 @@ struct DiagnosticBanner: View {
     var body: some View {
         let tint: Color = isError ? .red : .orange
         HStack(alignment: .firstTextBaseline, spacing: 6) {
-            Image(systemName: isError ? "exclamationmark.octagon.fill" : "exclamationmark.triangle.fill")
+            Image(systemName: isError ? "exclamationmark.triangle.fill" : "exclamationmark.circle.fill")
                 .foregroundStyle(tint)
             Text(text)
                 .uiFont(.callout)

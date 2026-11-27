@@ -8,8 +8,8 @@ enum InspectorLoader {
     static func load(node id: UInt64) -> InspectorNode? {
         guard let info = helix.core.listNodes().first(where: { $0.id == id }) else { return nil }
         let typeName = String(engine: info.type)
-        let warnings = info.warnings.map { String(engine: $0) }
-        let error = String(engine: info.error)
+        let warnings = info.warnings.map { String(engineMessage: $0) }
+        let error = String(engineMessage: info.error)
 
         let parameters = Array(helix.core.listParameters(id)).map { convert($0, of: id, type: typeName) }
         let layout = Array(helix.core.listParameterLayout(id)).map { convert($0, type: typeName) }

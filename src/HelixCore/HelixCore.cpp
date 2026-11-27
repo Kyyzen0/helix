@@ -681,6 +681,20 @@ Status setCacheDirectory(const std::string& directory)
     });
 }
 
+Status warmImportCache(const std::string& path)
+{
+    // Not through requireInitialized: nothing of the engine is read, and the flag it reads is not
+    // meant to be looked at from another thread.
+    return guarded([&] {
+        if (path.empty()) return failure("No file was given.");
+        const std::filesystem::path file =
+            std::filesystem::absolute(std::filesystem::path(path)).lexically_normal();
+        // The same default settings importFile reads with, so its read is the cache's.
+        import::importFile(file, import::ImportOptions{});
+        return success();
+    });
+}
+
 CreateNodeResult importFile(const std::string& path)
 {
     CreateNodeResult result;

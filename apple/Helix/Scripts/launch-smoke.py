@@ -18,6 +18,16 @@ The runs, each ending with the process killed (a window flashes on the screen ea
      execute on queue com.apple.main-thread"). The process must be alive after that, have read
      the scene off the main thread, and the saved file must hold the import node.
 
+  7. a launch that makes a node, edits it, drags a value and asks to frame (HELIX_DEBUG_FRAMING_CHECK):
+     only the first node and the explicit request move the camera, an edit and a drag leave it;
+  8. a launch that opens a second scene while one is open (HELIX_DEBUG_OPEN_SECOND), answering the
+     question "Close it and open this one?" with Close and Open, then with Cancel
+     (HELIX_DEBUG_SWITCH): the app must live, the second scene must replace the first in the one
+     case and not open in the other.
+
+A 3D file that was opened is a new untitled scene, not a document of the model's file (run 3), and
+an import reads the file behind a sheet without holding the main thread (run 6).
+
 A plain launch must open a new untitled scene in a window at once ("helix-launch: untitled
 scene" on standard error), not the Open panel; and a launch that opens a file must not leave an
 untitled scene behind it.
@@ -105,10 +115,57 @@ def imported_then_saved(lines):
     return ("helix-launch: import-after-launch imported error=none" in log
             and "helix-launch: import-after-launch autosaved error=none" in log
             and "helix-launch: import-after-launch saved error=none" in log
-            and log.count("helix-launch: snapshot off the main thread") >= 2)
+            and log.count("helix-launch: snapshot off the main thread") >= 2
+            # The file is read behind the sheet, on another thread: the main thread went on running.
+            and "helix-launch: import sheet shown file=textured-quad.glb" in log
+            and "helix-launch: import sheet closed file=textured-quad.glb error=none" in log
+            and "helix-launch: import main thread longest-gap-ms=" in log)
 
 
 imported_then_saved.whole_log = True
+
+
+def framing_follows_the_rule(lines):
+    """The first node frames, an edit and a drag leave the camera alone, Frame frames."""
+    return any(
+        line == "helix-launch: framing first-node=true edit-keeps-camera=true drag-keeps-camera=true explicit=true"
+        for line in lines)
+
+
+framing_follows_the_rule.whole_log = True
+
+
+def second_scene_replaced_the_first(path):
+    """The question was asked about both scenes, answered, and the second scene is the one open."""
+    def check(lines):
+        log = "\n".join(lines)
+        asked = "helix-launch: switch asked current=Waves" in log and "new=textured-quad.glb" in log
+        done = "helix-launch: switch done" in log
+        last_scene = [line for line in lines if line.startswith("helix-launch: scene nodes=")][-1:]
+        return asked and done and bool(last_scene) and "geometryImport" in last_scene[0] and f"paths={path} " in last_scene[0]
+    check.whole_log = True
+    return check
+
+
+def second_scene_was_refused(lines):
+    """The question was asked and cancelled: the first scene is still the one open."""
+    log = "\n".join(lines)
+    scenes = [line for line in lines if line.startswith("helix-launch: scene nodes=")]
+    return ("helix-launch: switch asked current=Waves" in log and "helix-launch: switch cancelled" in log
+            and len(scenes) == 1 and "geometryImport" not in scenes[0])
+
+
+second_scene_was_refused.whole_log = True
+
+
+def opened_as_an_untitled_scene(path):
+    """A 3D file that was opened is a scene with no file of its own, edited, holding the import."""
+    def check(lines):
+        log = "\n".join(lines)
+        return ("fileURL=none" in log and f"was={os.path.basename(path)} " in log and "edited=true" in log
+                and "helix-launch: import sheet shown" in log)
+    check.whole_log = True
+    return check
 
 
 def saved_file_holds_the_import(path):
@@ -135,12 +192,25 @@ def main():
         ("opens a .kut, and no untitled scene", [waves],
          only(lambda l: l.startswith("helix-launch: scene nodes=") and "nodes=0 " not in l)),
         ("opens a .glb, and no untitled scene", [quad], only(imported_from(quad))),
+        ("a .glb opens as a new untitled scene, with no file of its own", [quad], opened_as_an_untitled_scene(quad)),
         ("opens a .gltf with its files", [gltf], only(imported_from(gltf))),
         ("French", ["-AppleLanguages", "(fr)"], untitled),
     ]
     failed = False
     for name, extra, expect in runs:
         problem = launch(binary, extra, expect)
+        print(f"{'FAIL' if problem else 'ok  '} {name}" + (f": {problem}" if problem else ""))
+        failed = failed or problem is not None
+    extra_runs = [
+        ("a node, an edit, a drag and Frame: only the first node and Frame move the camera", [], framing_follows_the_rule,
+         {"HELIX_DEBUG_FRAMING_CHECK": "1"}),
+        ("a second scene: Close and Open replaces the first", [waves], second_scene_replaced_the_first(quad),
+         {"HELIX_DEBUG_OPEN_SECOND": quad, "HELIX_DEBUG_SWITCH": "close"}),
+        ("a second scene: Cancel leaves the first", [waves], second_scene_was_refused,
+         {"HELIX_DEBUG_OPEN_SECOND": quad, "HELIX_DEBUG_SWITCH": "cancel"}),
+    ]
+    for name, extra, expect, env in extra_runs:
+        problem = launch(binary, extra, expect, env, 10.0)
         print(f"{'FAIL' if problem else 'ok  '} {name}" + (f": {problem}" if problem else ""))
         failed = failed or problem is not None
     with tempfile.TemporaryDirectory() as folder:

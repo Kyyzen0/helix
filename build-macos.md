@@ -544,10 +544,12 @@ standard library only):
 python3 -I apple/Helix/Scripts/mcp-smoke.py /path/to/Helix.app/Contents/MacOS/Helix
 ```
 
-`apple/Helix/Scripts/launch-smoke.py` launches the built app five times (plain, which must open an untitled scene in a window of about 85 percent of the screen and no Open panel, with a `.kut`, with a
-`.glb`, with a `.gltf` that has a `.bin` and a picture beside it, in French), kills it each time, and fails if it dies within 6 seconds or if the opened file
-did not become a scene that imports the file where it is, not a copy, with its textures (it reads the line `HELIX_DEBUG_LAUNCH=1` makes the app write to standard
-error). It opens a window each time, so it cannot run in a sandbox:
+`apple/Helix/Scripts/launch-smoke.py` launches the built app ten times (plain, which must open an untitled scene in a window of about 85 percent of the screen and no Open panel, with a `.kut`, with a
+`.glb`, which must become an untitled scene with no file of its own, with a `.gltf` that has a `.bin` and a picture beside it, in French, a node then an edit
+and a drag that must not move the camera, a second scene answered with Close and Open then with Cancel, and an import followed by autosave and save), kills it
+each time, and fails if it dies or if the opened file did not become a scene that imports the file where it is, not a copy, with its textures (it reads the
+lines `HELIX_DEBUG_LAUNCH=1` makes the app write to standard error). The script's docstring lists each run. It opens a window each time, so it cannot run in a
+sandbox:
 
 ```sh
 python3 -I apple/Helix/Scripts/launch-smoke.py /path/to/Helix.app/Contents/MacOS/Helix

@@ -52,6 +52,11 @@ if let flag = arguments.firstIndex(of: RenderWindowSnapshotCommand.flag) {
     exit(RenderWindowSnapshotCommand.run(Array(arguments[(flag + 1)...])))
 }
 
+// And the Getting Started window of the Help menu.
+if let flag = arguments.firstIndex(of: GettingStartedSnapshotCommand.flag) {
+    exit(GettingStartedSnapshotCommand.run(Array(arguments[(flag + 1)...])))
+}
+
 // And the node palette, with a query typed in it.
 if let flag = arguments.firstIndex(of: PaletteSnapshotCommand.flag) {
     exit(PaletteSnapshotCommand.run(Array(arguments[(flag + 1)...])))

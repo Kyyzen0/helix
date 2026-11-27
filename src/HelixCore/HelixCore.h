@@ -312,6 +312,18 @@ Status setCacheDirectory(const std::string& directory);
 /// @note It never writes to the file.
 CreateNodeResult importFile(const std::string& path);
 
+/// @brief Reads a file into the import cache with the settings importFile uses, and creates
+/// nothing, so that the importFile that follows finds the result and returns at once.
+///
+/// This is the one slow part of an import (a large glb takes seconds), made so an application
+/// can run it off its main thread and show progress. It touches no scene, no node and no
+/// engine state: only the import cache, which holds its own lock, so it may run on any thread
+/// while the engine is used from another. A failure is the same status importFile gives. It
+/// does not need initialize to have run.
+/// @note The read cannot be interrupted. A caller that gives up lets it finish; the file then
+/// stays in the cache, which is where the next import of it finds it.
+Status warmImportCache(const std::string& path);
+
 /// @brief A sentence on what the last successful importFile found: the counts, what the file
 /// carries (normals, UVs, colours), the first base colour, and what was left out (animations,
 /// skins). Empty before any import.

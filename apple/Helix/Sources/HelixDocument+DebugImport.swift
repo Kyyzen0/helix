@@ -1,10 +1,11 @@
 import AppKit
 import Foundation
+import HelixCore
 
 /// A debug aid for `Scripts/launch-smoke.py`, off unless asked for in the environment.
 ///
 /// With `HELIX_DEBUG_IMPORT_AFTER_LAUNCH=<path to a 3D file>`, once the untitled scene is shown,
-/// the file is imported the way the Import button does it (`importFile`, one step of undo, so the
+/// the file is imported the way the Import button does it (`importFileShowingProgress`, one step of undo, so the
 /// document becomes edited), then the real autosave is made to run (`autosave(withImplicitCancellability:)`) and,
 /// with `HELIX_DEBUG_SAVE_TO=<path of a .kut>`, an explicit save to that path follows. What
 /// happens is written to standard error as "helix-launch: import-after-launch ..." lines.
@@ -16,7 +17,8 @@ extension HelixDocument {
         Task { @MainActor [weak self] in
             try? await Task.sleep(for: .seconds(3))
             guard let self, self.isActive else { return }
-            let error = self.importFile(URL(fileURLWithPath: path))
+            // Through the sheet and the read off the main thread, as the Import button does it.
+            let error = await self.importFileShowingProgress(URL(fileURLWithPath: path))
             Self.debugLog("import-after-launch imported error=\(error ?? "none")")
             // What the person's import does to the document: it is edited, and AppKit autosaves it.
             guard let document = NSDocumentController.shared.documents.first else { return }
@@ -39,5 +41,33 @@ extension HelixDocument {
 
     nonisolated static func debugLog(_ line: String) {
         FileHandle.standardError.write(Data("helix-launch: \(line)\n".utf8)) // l10n-ok: read by launch-smoke.py
+    }
+
+    /// With `HELIX_DEBUG_FRAMING_CHECK=1`, makes a node, sets one of its parameters and asks to frame,
+    /// and says whether the camera was asked to frame each time. `Scripts/launch-smoke.py` reads it:
+    /// the first node frames, a parameter edit does not, the Frame command does.
+    func scheduleDebugFramingCheck() {
+        guard ProcessInfo.processInfo.environment["HELIX_DEBUG_FRAMING_CHECK"] == "1" else { return }
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(3))
+            guard let self, self.isActive,
+                  let cube = self.editor.paletteTypes.first(where: { $0.name == "helix::cube" }) else { return }
+            var counts = self.viewport.frameRequestCount
+            self.editor.addNode(cube)
+            let firstNodeFrames = self.viewport.frameRequestCount > counts
+            counts = self.viewport.frameRequestCount
+            let node = helix.core.displayNode()
+            // The edit the inspector makes when a value is typed: through `apply`, a step of undo.
+            let outcome = self.apply(.floats(parameter: "size", values: [0: 3]), to: node, named: "Change Size") // l10n-ok: debug check
+            let editKeepsCamera = outcome.error == nil && self.viewport.frameRequestCount == counts
+            // A drag of a slider: the live path, which used to frame at every move.
+            self.beginContinuousEdit(named: "Change Size") // l10n-ok: debug check
+            _ = self.applyLive(.floats(parameter: "size", values: [0: 4]), to: node)
+            self.endContinuousEdit()
+            let dragKeepsCamera = self.viewport.frameRequestCount == counts
+            self.requestFrame()
+            let explicitFrames = self.viewport.frameRequestCount > counts
+            Self.debugLog("framing first-node=\(firstNodeFrames) edit-keeps-camera=\(editKeepsCamera) drag-keeps-camera=\(dragKeepsCamera) explicit=\(explicitFrames)") // l10n-ok: read by launch-smoke.py
+        }
     }
 }

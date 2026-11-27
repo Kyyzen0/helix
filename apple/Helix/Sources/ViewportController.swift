@@ -83,7 +83,12 @@ final class ViewportController {
     /// Called when the renderer cannot draw, with a message for a person.
     var onFailure: ((String) -> Void)?
 
+    /// How many times the camera was asked to frame the geometry. `Scripts/launch-smoke.py` reads it
+    /// (`HELIX_DEBUG_FRAMING_CHECK`) to see that an edit leaves the camera alone.
+    private(set) var frameRequestCount = 0
+
     func requestFrame() {
+        frameRequestCount += 1
         framePending = true
         redraw()
     }

@@ -8,9 +8,13 @@ struct EditOutcome {
     var error: String?
     /// The node an edit made, when it made one.
     var createdNode: UInt64?
+    /// True when the edit was not made yet: the person is being asked first (see
+    /// `GeometryLimits`), and it is made, or not, from the answer. It is no failure.
+    var deferred = false
 
     static let done = EditOutcome()
     static func failed(_ message: String) -> EditOutcome { EditOutcome(error: message) }
+    static let waiting = EditOutcome(deferred: true)
 }
 
 struct NodeMove: Equatable {

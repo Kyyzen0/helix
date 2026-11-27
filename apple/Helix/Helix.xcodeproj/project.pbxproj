@@ -123,6 +123,25 @@
 		D40785433BC1CB74C5EDEF93 /* LocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1251728C91F1884CC929E1D3 /* LocalizationTests.swift */; };
 		0C31451F34F8EBF76113B42F /* Nodes.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5A5B4EEFEE9C40F5977E2242 /* Nodes.xcstrings */; };
 		0B51A42C2E59EBEAFF441EB1 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F48837BE9AD053674144422E /* InfoPlist.xcstrings */; };
+		373287E25809E375DC3A0B93 /* ViewportFraming.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FE7B31C7B09BADBFA0AD8 /* ViewportFraming.swift */; };
+		1FE2E1177263853DB71A1C11 /* ViewportFraming.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FE7B31C7B09BADBFA0AD8 /* ViewportFraming.swift */; };
+		413DD531799142B1084F00E3 /* GeometryLimits.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BE3571F6E8F1B0A4E5E6A1 /* GeometryLimits.swift */; };
+		F63AF034971C918AD0DBD47C /* GeometryLimits.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BE3571F6E8F1B0A4E5E6A1 /* GeometryLimits.swift */; };
+		A199D11D2B63947BF244ADF3 /* SceneNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1BD6C3AD041982A2F44538 /* SceneNames.swift */; };
+		F72D43B43A06CB76E5CF28F3 /* SceneNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1BD6C3AD041982A2F44538 /* SceneNames.swift */; };
+		84153A01327D1AB11BD69F02 /* HelixDocument+Import.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066FE1136491D33B7ED66020 /* HelixDocument+Import.swift */; };
+		5FCACD79F1BD4E41925DD644 /* HelixDocument+Limits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7463D7D41DD6AA951FCB2D10 /* HelixDocument+Limits.swift */; };
+		55D216F306AA169EC8DC7DE4 /* HelixDocument+Window.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CB5EE31D6ABE8CC5ADC8B13 /* HelixDocument+Window.swift */; };
+		6A4AD798ACE52D670CF7B106 /* HelixDocument+SceneSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD224F9577BB06A87DD40E73 /* HelixDocument+SceneSwitch.swift */; };
+		AF89170377223F04E56516FC /* EngineMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A5B5AE168C5DD5808EE1B04 /* EngineMessages.swift */; };
+		8ABA9D9E5BE072E71072716D /* EngineMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A5B5AE168C5DD5808EE1B04 /* EngineMessages.swift */; };
+		1FEFCB73973DD34E3053D0FA /* NavigationLegendSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9AC2854CF5FCF7970405972 /* NavigationLegendSetting.swift */; };
+		9822F07B04BAD830FFB32F34 /* NavigationLegendSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9AC2854CF5FCF7970405972 /* NavigationLegendSetting.swift */; };
+		FF6740B8B4B206786BE7FD5E /* NavigationLegend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FBEBCC1796F1CCCF3D0B1A /* NavigationLegend.swift */; };
+		857BC3D89D030F3D138BFB30 /* GettingStartedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7B7187C6524B2449932FDA4 /* GettingStartedView.swift */; };
+		FBD256D667F0D28E6253AA69 /* GettingStartedSnapshotCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB7FB90636366C385220250 /* GettingStartedSnapshotCommand.swift */; };
+		2FA8026957AF72298BBEC70E /* UsabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96270FEF5B14C78C43DAB097 /* UsabilityTests.swift */; };
+		F476AC1EB07B22B81C4AFC38 /* Errors.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F14FDC5C1DA23DD13868587C /* Errors.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -225,6 +244,20 @@
 		E5A9B50411E0D8DDF782CF1E /* extract-node-strings.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = extract-node-strings.py; path = Scripts/extract-node-strings.py; sourceTree = "<group>"; };
 		067CB90312FEC64233035C1F /* audit-strings.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = audit-strings.py; path = Scripts/audit-strings.py; sourceTree = "<group>"; };
 		DF47C8F026782561587C6F37 /* mcp-smoke.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = mcp-smoke.py; path = Scripts/mcp-smoke.py; sourceTree = "<group>"; };
+		FA3FE7B31C7B09BADBFA0AD8 /* ViewportFraming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewportFraming.swift; path = Sources/ViewportFraming.swift; sourceTree = "<group>"; };
+		E7BE3571F6E8F1B0A4E5E6A1 /* GeometryLimits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GeometryLimits.swift; path = Sources/GeometryLimits.swift; sourceTree = "<group>"; };
+		7F1BD6C3AD041982A2F44538 /* SceneNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneNames.swift; path = Sources/SceneNames.swift; sourceTree = "<group>"; };
+		066FE1136491D33B7ED66020 /* HelixDocument+Import.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Import.swift"; path = "Sources/HelixDocument+Import.swift"; sourceTree = "<group>"; };
+		7463D7D41DD6AA951FCB2D10 /* HelixDocument+Limits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Limits.swift"; path = "Sources/HelixDocument+Limits.swift"; sourceTree = "<group>"; };
+		0CB5EE31D6ABE8CC5ADC8B13 /* HelixDocument+Window.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Window.swift"; path = "Sources/HelixDocument+Window.swift"; sourceTree = "<group>"; };
+		BD224F9577BB06A87DD40E73 /* HelixDocument+SceneSwitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+SceneSwitch.swift"; path = "Sources/HelixDocument+SceneSwitch.swift"; sourceTree = "<group>"; };
+		0A5B5AE168C5DD5808EE1B04 /* EngineMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EngineMessages.swift; path = Sources/Localization/EngineMessages.swift; sourceTree = "<group>"; };
+		D9AC2854CF5FCF7970405972 /* NavigationLegendSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NavigationLegendSetting.swift; path = Sources/Help/NavigationLegendSetting.swift; sourceTree = "<group>"; };
+		B1FBEBCC1796F1CCCF3D0B1A /* NavigationLegend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NavigationLegend.swift; path = Sources/Help/NavigationLegend.swift; sourceTree = "<group>"; };
+		F7B7187C6524B2449932FDA4 /* GettingStartedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GettingStartedView.swift; path = Sources/Help/GettingStartedView.swift; sourceTree = "<group>"; };
+		BCB7FB90636366C385220250 /* GettingStartedSnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GettingStartedSnapshotCommand.swift; path = Sources/Help/GettingStartedSnapshotCommand.swift; sourceTree = "<group>"; };
+		96270FEF5B14C78C43DAB097 /* UsabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UsabilityTests.swift; path = Tests/UsabilityTests.swift; sourceTree = "<group>"; };
+		F14FDC5C1DA23DD13868587C /* Errors.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Errors.xcstrings; path = Resources/Errors.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -267,6 +300,7 @@
 		4CD87A470DCB16C31E9BC98A /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				96270FEF5B14C78C43DAB097 /* UsabilityTests.swift */,
 				4296C9AEB8D4A12CA3A7B577 /* TimelineTests.swift */,
 				7551655AA18560B454477678 /* ThemeTests.swift */,
 				4591E300901EF8E054A1693A /* WindowUXTests.swift */,
@@ -316,6 +350,14 @@
 		CA452AC6DB53E1C10D6D7F5F /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				FA3FE7B31C7B09BADBFA0AD8 /* ViewportFraming.swift */,
+				E7BE3571F6E8F1B0A4E5E6A1 /* GeometryLimits.swift */,
+				7F1BD6C3AD041982A2F44538 /* SceneNames.swift */,
+				066FE1136491D33B7ED66020 /* HelixDocument+Import.swift */,
+				7463D7D41DD6AA951FCB2D10 /* HelixDocument+Limits.swift */,
+				0CB5EE31D6ABE8CC5ADC8B13 /* HelixDocument+Window.swift */,
+				BD224F9577BB06A87DD40E73 /* HelixDocument+SceneSwitch.swift */,
+				AB31E89A2D31C2263FBF9872 /* Help */,
 				B922C76562850DE614081D7F /* Localization */,
 				05E51A00A465662BD96BD7D1 /* Timeline */,
 				1B46AD3E5DCAA2B2D52C54E1 /* Theme */,
@@ -360,6 +402,7 @@
 		36DD8FEC2A722EA27EAAF5D5 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				F14FDC5C1DA23DD13868587C /* Errors.xcstrings */,
 				14DB42E39D1CB1DB287A6688 /* Info.plist */,
 				23E63BC6190D9F3DD3106758 /* Localizable.xcstrings */,
 				5A5B4EEFEE9C40F5977E2242 /* Nodes.xcstrings */,
@@ -439,10 +482,22 @@
 		B922C76562850DE614081D7F /* Localization */ = {
 			isa = PBXGroup;
 			children = (
+				0A5B5AE168C5DD5808EE1B04 /* EngineMessages.swift */,
 				189459C7825E1561F401E8F1 /* NodeText.swift */,
 				1F75C848D4E793834A2F5220 /* LanguageSetting.swift */,
 			);
 			name = Localization;
+			sourceTree = "<group>";
+		};
+		AB31E89A2D31C2263FBF9872 /* Help */ = {
+			isa = PBXGroup;
+			children = (
+				D9AC2854CF5FCF7970405972 /* NavigationLegendSetting.swift */,
+				B1FBEBCC1796F1CCCF3D0B1A /* NavigationLegend.swift */,
+				F7B7187C6524B2449932FDA4 /* GettingStartedView.swift */,
+				BCB7FB90636366C385220250 /* GettingStartedSnapshotCommand.swift */,
+			);
+			name = Help;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -518,6 +573,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F476AC1EB07B22B81C4AFC38 /* Errors.xcstrings in Resources */,
 				DA4ADC244272174D4FCF5BE5 /* Localizable.xcstrings */,
 				0C31451F34F8EBF76113B42F /* Nodes.xcstrings in Resources */,
 				0B51A42C2E59EBEAFF441EB1 /* InfoPlist.xcstrings in Resources */,
@@ -573,6 +629,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				373287E25809E375DC3A0B93 /* ViewportFraming.swift in Sources */,
+				413DD531799142B1084F00E3 /* GeometryLimits.swift in Sources */,
+				A199D11D2B63947BF244ADF3 /* SceneNames.swift in Sources */,
+				84153A01327D1AB11BD69F02 /* HelixDocument+Import.swift in Sources */,
+				5FCACD79F1BD4E41925DD644 /* HelixDocument+Limits.swift in Sources */,
+				55D216F306AA169EC8DC7DE4 /* HelixDocument+Window.swift in Sources */,
+				6A4AD798ACE52D670CF7B106 /* HelixDocument+SceneSwitch.swift in Sources */,
+				AF89170377223F04E56516FC /* EngineMessages.swift in Sources */,
+				1FEFCB73973DD34E3053D0FA /* NavigationLegendSetting.swift in Sources */,
+				FF6740B8B4B206786BE7FD5E /* NavigationLegend.swift in Sources */,
+				857BC3D89D030F3D138BFB30 /* GettingStartedView.swift in Sources */,
+				FBD256D667F0D28E6253AA69 /* GettingStartedSnapshotCommand.swift in Sources */,
 				546872E86DB82089DD2F10AB /* Theme.swift in Sources */,
 				C6CC4B832F7DEFF5083C027C /* NodeText.swift in Sources */,
 				22E1D196A138ED74D53A7A95 /* LanguageSetting.swift in Sources */,
@@ -658,6 +726,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1FE2E1177263853DB71A1C11 /* ViewportFraming.swift in Sources */,
+				F63AF034971C918AD0DBD47C /* GeometryLimits.swift in Sources */,
+				F72D43B43A06CB76E5CF28F3 /* SceneNames.swift in Sources */,
+				8ABA9D9E5BE072E71072716D /* EngineMessages.swift in Sources */,
+				9822F07B04BAD830FFB32F34 /* NavigationLegendSetting.swift in Sources */,
+				2FA8026957AF72298BBEC70E /* UsabilityTests.swift in Sources */,
 				E0D94FD69520A78F594614F6 /* Theme.swift in Sources */,
 				E43326A96FAD48DF790A5627 /* NodeText.swift in Sources */,
 				278BD0BFA3C5670424A222E4 /* LanguageSetting.swift in Sources */,
@@ -751,6 +825,7 @@
 				INFOPLIST_FILE = Resources/Info.plist;
 				GENERATE_INFOPLIST_FILE = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				COMBINE_HIDPI_IMAGES = YES;
 				HELIX_BUILD_CORE = "$(SRCROOT)/../../build-core";
 				HELIX_DEPS_PREFIX = "$(SRCROOT)/../../build-super/deps";
@@ -797,6 +872,7 @@
 				INFOPLIST_FILE = Resources/Info.plist;
 				GENERATE_INFOPLIST_FILE = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				COMBINE_HIDPI_IMAGES = YES;
 				HELIX_BUILD_CORE = "$(SRCROOT)/../../build-core";
 				HELIX_DEPS_PREFIX = "$(SRCROOT)/../../build-super/deps";

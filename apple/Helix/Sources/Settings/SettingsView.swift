@@ -218,7 +218,7 @@ private struct MiniWindow: View {
                 .overlay(
                     HStack(spacing: 0) {
                         Rectangle().fill(Color(palette.cachedBar)).frame(width: 30, height: 2)
-                        Rectangle().fill(Color(palette.accentOrSystem)).frame(width: 1.5)
+                        Rectangle().fill(Color(palette.accent)).frame(width: 1.5)
                         Spacer(minLength: 0)
                     }
                     .padding(.leading, 6)
@@ -235,7 +235,7 @@ private struct MiniWindow: View {
     private func card(at centre: CGPoint, colors: ThemeColors, accented: Bool = false) -> some View {
         RoundedRectangle(cornerRadius: 2)
             .fill(Color(palette.surface))
-            .overlay(RoundedRectangle(cornerRadius: 2).stroke(accented ? Color(palette.accentOrSystem) : Color(palette.nodeCardStroke), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 2).stroke(accented ? Color(palette.accent) : Color(palette.nodeCardStroke), lineWidth: 1))
             .frame(width: 20, height: 12)
             .position(centre)
     }

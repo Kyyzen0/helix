@@ -41,6 +41,7 @@ EXEMPT = {
     "MCPKeyframeHandlers.swift": "the MCP server speaks to agents, in English",
     "MCPJSON.swift": "the MCP server speaks to agents, in English",
     "main.swift": "command line entry",
+    "EngineMessages.swift": "the English keys of the Errors table, which the engine's own messages are matched with",
     "OffscreenRender.swift": "command line pictures",
 }
 EXEMPT_SUFFIXES = {"SnapshotCommand.swift": "the --render-* commands write to the terminal, in English"}
@@ -50,7 +51,7 @@ LOOKUP_CALLEES = {
     "Text", "Button", "Label", "Toggle", "Picker", "Menu", "Section", "CommandMenu", "DisclosureGroup",
     "TextField", "SecureField", "LocalizedStringKey", "LabeledContent", "Link", "Stepper", "Tab",
     "help", "accessibilityLabel", "accessibilityValue", "accessibilityHint", "navigationTitle",
-    "alert", "confirmationDialog", "TabView",
+    "alert", "confirmationDialog", "TabView", "Window",
 }
 # Helpers of ours that take the text of a control as a LocalizedStringKey, after other arguments.
 LOOKUP_HELPERS = {"button", "labelled"}
