@@ -5,6 +5,7 @@
 #include "Engine/Parameter/Parameter.h"
 #include "Engine/Serializer/ParameterSerializable.h"
 #include "Engine/Serializer/Serializer.h"
+#include "TestPaths.h"
 #include <algorithm>
 #include <catch2/catch_test_macros.hpp>
 #include <fstream>
@@ -151,7 +152,7 @@ TEST_CASE_METHOD(NMReset, "A node path round trips through save and load")
     const std::string savedPath = "/my_renamed_grid";
     nm.getNode(grid).setPath(savedPath);
 
-    const std::string path = "/tmp/helix_serializer_path_roundtrip.json";
+    const std::string path = helix::test::tempPath("helix_serializer_path_roundtrip.json");
     nt::Serializer serializer;
     serializer.save(nm, path);
 
@@ -170,7 +171,7 @@ TEST_CASE_METHOD(NMReset, "A node link round trips through save and load")
     nt::NodeId transform = nm.createNode("helix::transform");
     nt::nm().connectNodes(grid, 0, transform, 0);
 
-    const std::string path = "/tmp/helix_serializer_roundtrip.json";
+    const std::string path = helix::test::tempPath("helix_serializer_roundtrip.json");
     nt::Serializer serializer;
     serializer.save(nm, path);
 
@@ -202,7 +203,7 @@ TEST_CASE_METHOD(NMReset, "A node inside a scope round trips through save and lo
     const Path containerPath = nm.getNode(container).getPath();
     nm.createNode("helix::grid", containerPath);
 
-    const std::string path = "/tmp/helix_serializer_scope_roundtrip.json";
+    const std::string path = helix::test::tempPath("helix_serializer_scope_roundtrip.json");
     nt::Serializer serializer;
     serializer.save(nm, path);
 
@@ -228,7 +229,7 @@ TEST_CASE_METHOD(NMReset, "Loading a scene updates the network once at the end")
     nm.connectNodes(grid, 0, first, 0);
     nm.connectNodes(first, 0, second, 0);
 
-    const std::string path = "/tmp/helix_serializer_update_count.json";
+    const std::string path = helix::test::tempPath("helix_serializer_update_count.json");
     nt::Serializer serializer;
     serializer.save(nm, path);
     nm._reset();
@@ -277,7 +278,7 @@ TEST_CASE_METHOD(NMReset, "A failed load releases the update lock")
 {
     auto& nm = nt::nm();
 
-    const std::string path = "/tmp/helix_serializer_bad_scene.json";
+    const std::string path = helix::test::tempPath("helix_serializer_bad_scene.json");
     {
         std::ofstream file(path);
         file << "not a scene";
@@ -297,7 +298,7 @@ TEST_CASE_METHOD(NMReset, "The timeline round trips through save and load")
     nm.setFps(30);
     nm.setFrame(20);
 
-    const std::string path = "/tmp/helix_serializer_timeline_roundtrip.json";
+    const std::string path = helix::test::tempPath("helix_serializer_timeline_roundtrip.json");
     nt::Serializer serializer;
     serializer.save(nm, path);
 
@@ -312,7 +313,7 @@ TEST_CASE_METHOD(NMReset, "The timeline round trips through save and load")
 
 TEST_CASE_METHOD(NMReset, "Loading a file without a timeline fails")
 {
-    const std::string path = "/tmp/helix_serializer_no_timeline.json";
+    const std::string path = helix::test::tempPath("helix_serializer_no_timeline.json");
     std::ofstream(path) << R"({"networkModel": {"nodes": [], "nodeLinks": []}})";
 
     nt::Serializer serializer;
@@ -365,9 +366,9 @@ TEST_CASE_METHOD(NMReset, "A scene saved with enzo:: type names loads like the h
     const std::vector<std::string> expected = describeNetwork(nm);
     REQUIRE(expected.size() == 2);
 
-    const std::string currentPath = "/tmp/helix_serializer_current_names.json";
-    const std::string legacyPath = "/tmp/helix_serializer_legacy_names.json";
-    const std::string resavedPath = "/tmp/helix_serializer_legacy_resaved.json";
+    const std::string currentPath = helix::test::tempPath("helix_serializer_current_names.json");
+    const std::string legacyPath = helix::test::tempPath("helix_serializer_legacy_names.json");
+    const std::string resavedPath = helix::test::tempPath("helix_serializer_legacy_resaved.json");
     nt::Serializer serializer;
     serializer.save(nm, currentPath);
 
@@ -386,4 +387,92 @@ TEST_CASE_METHOD(NMReset, "A scene saved with enzo:: type names loads like the h
     REQUIRE(resaved.find("enzo") == std::string::npos);
     REQUIRE(resaved.find("helix::grid") != std::string::npos);
     REQUIRE(resaved.find("helix::transform") != std::string::npos);
+}
+
+namespace {
+
+// Returns the path of the node the manager displays, or an empty string when none is.
+std::string displayedPath(helix::nt::NetworkManager& nm)
+{
+    const std::optional<helix::nt::NodeId> display = nm.getDisplayNode();
+    return display ? nm.getNode(*display).getPath().getString() : std::string();
+}
+
+// Removes the display node field from a saved scene, which gives a scene from before it was stored.
+std::string withoutDisplayNode(const std::string& scene)
+{
+    const std::size_t field = scene.find("\"displayNodeIndex\"");
+    REQUIRE(field != std::string::npos);
+    const std::size_t comma = scene.rfind(',', field);
+    const std::size_t end = scene.find_first_of("}\n", scene.find(':', field));
+    REQUIRE(comma != std::string::npos);
+    return scene.substr(0, comma) + scene.substr(end == std::string::npos ? scene.size() : end);
+}
+
+} // namespace
+
+TEST_CASE_METHOD(NMReset, "The display node round trips through save and load")
+{
+    auto& nm = nt::nm();
+    const nt::NodeId grid = nm.createNode("helix::grid");
+    const nt::NodeId transform = nm.createNode("helix::transform");
+    nm.connectNodes(grid, 0, transform, 0);
+
+    // The first node is shown although the second one is the end of the chain, so the file
+    // has to be what decides, not a guess.
+    nm.setDisplayNode(grid);
+    const std::string expected = displayedPath(nm);
+    REQUIRE_FALSE(expected.empty());
+
+    const std::string path = helix::test::tempPath("helix_serializer_display_roundtrip.json");
+    nt::Serializer serializer;
+    serializer.save(nm, path);
+
+    nm._reset();
+    REQUIRE_FALSE(nm.getDisplayNode().has_value());
+    serializer.load(nm, path);
+    REQUIRE(displayedPath(nm) == expected);
+}
+
+TEST_CASE_METHOD(NMReset, "A scene saved with no display node reopens with none")
+{
+    auto& nm = nt::nm();
+    nm.createNode("helix::grid");
+    REQUIRE_FALSE(nm.getDisplayNode().has_value());
+
+    const std::string path = helix::test::tempPath("helix_serializer_display_none.json");
+    nt::Serializer serializer;
+    serializer.save(nm, path);
+
+    nm._reset();
+    serializer.load(nm, path);
+    REQUIRE(nm.nodes().size() == 1);
+    REQUIRE_FALSE(nm.getDisplayNode().has_value());
+}
+
+TEST_CASE_METHOD(
+    NMReset,
+    "A scene from before the display node was saved shows the end of its chain"
+)
+{
+    auto& nm = nt::nm();
+    const nt::NodeId grid = nm.createNode("helix::grid");
+    const nt::NodeId transform = nm.createNode("helix::transform");
+    nm.connectNodes(grid, 0, transform, 0);
+    nm.setDisplayNode(grid);
+
+    const std::string current = helix::test::tempPath("helix_serializer_display_current.json");
+    const std::string legacy = helix::test::tempPath("helix_serializer_display_legacy.json");
+    nt::Serializer serializer;
+    serializer.save(nm, current);
+    const std::string text = withoutDisplayNode(readFile(current));
+    REQUIRE(text.find("displayNodeIndex") == std::string::npos);
+    std::ofstream(legacy) << text;
+
+    nm._reset();
+    REQUIRE_NOTHROW(serializer.load(nm, legacy));
+    REQUIRE(nm.nodes().size() == 2);
+    // The transform has no output wired, the grid has one.
+    REQUIRE(nm.getDisplayNode().has_value());
+    REQUIRE(nm.getNode(*nm.getDisplayNode()).getType().getFullName() == "helix::transform");
 }

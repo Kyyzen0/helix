@@ -43,6 +43,15 @@ set(HELIX_MANIFOLD_URL
 set(HELIX_MANIFOLD_SHA256
     35cb5e0d78882f461ec39b17d8f09c2aceca761356f3ce948e3f3908289b8f2e)
 
+# Assimp reads the glTF family (with Draco), FBX, STL, PLY, Collada, 3DS, 3MF, DXF, X3D and X. It
+# carries its own Draco (Apache-2.0), zlib, pugixml, rapidjson, utf8cpp, poly2tri, clipper and
+# minizip, which are built into the one static library.
+set(HELIX_ASSIMP_VERSION 6.0.6)
+set(HELIX_ASSIMP_URL
+    https://github.com/assimp/assimp/archive/refs/tags/v${HELIX_ASSIMP_VERSION}.tar.gz)
+set(HELIX_ASSIMP_SHA256
+    5f7ed412b76575621df0525a762b31da5874afff352b3a890c6308db4ac7204c)
+
 set(HELIX_FASTNOISE2_VERSION 1.1.1)
 set(HELIX_FASTNOISE2_URL
     https://github.com/Auburn/FastNoise2/archive/refs/tags/v${HELIX_FASTNOISE2_VERSION}.tar.gz)

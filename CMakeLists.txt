@@ -40,8 +40,15 @@ if(HELIX_SUPERBUILD)
     return()
 endif()
 
-# The one file that hands a Metal texture to the Qt Quick scene graph is Objective-C++,
-# since the scene graph takes its Metal objects as Objective-C ids.
+# The Qt interface can be left out, to build the engine, the nodes, the Metal renderer, the
+# core facade and the engine tests without Qt installed:
+#
+#   cmake -DHELIX_SUPERBUILD=OFF -DHELIX_BUILD_GUI=OFF ...
+option(HELIX_BUILD_GUI "Build the Qt interface (the helix application and its tests)" ON)
+
+# Objective-C++ is built in every configuration: the USD reader of the engine uses Model I/O,
+# and (with the Qt interface) the file that hands a Metal texture to the Qt Quick scene graph
+# takes its Metal objects as Objective-C ids.
 enable_language(OBJCXX)
 set(CMAKE_OBJCXX_STANDARD 20)
 set(CMAKE_OBJCXX_STANDARD_REQUIRED ON)
@@ -118,8 +125,16 @@ set(ENGINE_SOURCES
     src/Engine/GeometryAlgorithms/AttributeOperation.cpp
     src/Engine/GeometryAlgorithms/PlaneCut.cpp
     src/Engine/GeometryAlgorithms/ObjReader.cpp
+    src/Engine/Import/AssimpReader.cpp
+    src/Engine/Import/BlenderConverter.cpp
+    src/Engine/Import/ImportFile.cpp
+    src/Engine/Import/MeshBuilder.cpp
+    src/Engine/Import/ModelIOReader.mm
     src/Engine/Util/UnionFind.cpp
 )
+
+# Model I/O is Objective-C and is built with automatic reference counting.
+set_source_files_properties(src/Engine/Import/ModelIOReader.mm PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
 
 set(ENGINE_INCLUDE_DIRECTORIES
     src
@@ -132,9 +147,11 @@ set(ENGINE_INCLUDE_DIRECTORIES
 #
 # The scene graph of Qt Quick runs on Metal on macOS, and the viewport hands it
 # a Metal texture, so Qt needs nothing beyond the Quick module for it.
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets SvgWidgets Quick Qml QuickControls2 ShaderTools)
-qt_standard_project_setup()
-ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
+if(HELIX_BUILD_GUI)
+    find_package(Qt6 REQUIRED COMPONENTS Core Widgets SvgWidgets Quick Qml QuickControls2 ShaderTools)
+    qt_standard_project_setup()
+    ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
+endif()
 
 # glm
 find_package(glm REQUIRED)
@@ -155,6 +172,10 @@ find_package(manifold CONFIG REQUIRED)
 
 # FastNoise2 (noise nodes)
 find_package(FastNoise2 CONFIG REQUIRED)
+
+# assimp (reads glTF and Draco, FBX, STL, PLY, Collada and the other interchange formats).
+# A static library, with its own Draco, built by the superbuild into the dependency prefix.
+find_package(assimp CONFIG REQUIRED)
 
 # yaml-cpp (node manifests and themes)
 include(FetchContent)
@@ -226,6 +247,20 @@ foreach(daslang_target IN LISTS daslang_targets)
     endif()
 endforeach()
 
+# daslang adds -fno-rtti to its release flags. A translation unit built without RTTI that throws
+# or catches a standard exception emits its own hidden copy of the typeinfo of std::exception,
+# std::logic_error and the others, instead of using the one of libc++. Every image that links the
+# archive then ends up with a private copy, and `catch (const std::exception&)` stops matching
+# what another image throws (the engine, the node libraries and the tests are separate images).
+# The whole of daslang is therefore built with RTTI, which also lets the files of Helix that
+# subclass its types be compiled like any other.
+foreach(daslang_target IN LISTS daslang_targets)
+    get_target_property(daslang_target_type ${daslang_target} TYPE)
+    if(NOT daslang_target_type STREQUAL "INTERFACE_LIBRARY" AND NOT daslang_target_type STREQUAL "UTILITY")
+        target_compile_options(${daslang_target} PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-frtti>")
+    endif()
+endforeach()
+
 # daslang exposes its public headers only as a private requirement, so the
 # include path is added by hand.
 list(APPEND ENGINE_INCLUDE_DIRECTORIES ${DASLANG_DIR}/include)
@@ -241,15 +276,6 @@ set(HELIX_DEV_STAGE_DIR "${CMAKE_BINARY_DIR}/helix.app/Contents")
 # daslib sits beside the staged bin directory so daslang resolves its standard
 # library the same way it does from an install.
 file(COPY ${DAS_DASLIB_DIR} DESTINATION ${HELIX_DEV_STAGE_DIR})
-
-# daslang is built without RTTI, so the files that subclass its types match it.
-# Otherwise their typeinfo references daslang symbols that were never emitted.
-set_source_files_properties(
-    src/Engine/Daslang/Runtime.cpp
-    src/Engine/Expression/ExpressionFunctions.cpp
-    src/Engine/Script/GeometryFunctions.cpp
-    PROPERTIES COMPILE_OPTIONS "-fno-rtti"
-)
 
 # Release flags for Apple silicon. They are set here, after the third party
 # libraries above, so they reach helix's own targets (the engine, the graphics
@@ -286,6 +312,10 @@ endif()
 # loads the plugins at runtime rather than linking them.
 add_library(helixEngine SHARED ${ENGINE_SOURCES})
 target_link_libraries(helixEngine PUBLIC glm::glm Eigen3::Eigen TBB::tbb Boost::filesystem Boost::system manifold::manifold libDaScript yaml-cpp::yaml-cpp)
+# The importers are private to the engine: assimp is linked in, and Model I/O is the system's.
+find_library(HELIX_MODELIO_FRAMEWORK ModelIO REQUIRED)
+find_library(HELIX_FOUNDATION_ENGINE_FRAMEWORK Foundation REQUIRED)
+target_link_libraries(helixEngine PRIVATE assimp::assimp ${HELIX_MODELIO_FRAMEWORK} ${HELIX_FOUNDATION_ENGINE_FRAMEWORK})
 target_include_directories(helixEngine PUBLIC ${ENGINE_INCLUDE_DIRECTORIES})
 target_compile_definitions(helixEngine PRIVATE
     HELIX_DEV_LIB_DIR="${HELIX_DEV_LIB_DIR}"
@@ -392,7 +422,24 @@ if(HELIX_HAS_METAL_COMPILER)
     add_dependencies(helixGraphics helixMetalLib)
 endif()
 
+# The facade a native Swift application imports: a small, standard library only header over
+# the engine and the renderer, with no Qt and none of the engine's third party types in it.
+add_library(helixCore STATIC
+    src/HelixCore/HelixCore.cpp
+    src/HelixCore/HelixCoreViewport.cpp
+    src/HelixCore/ImageFile.cpp
+)
+# ImageIO writes the PNG of renderToImage.
+find_library(HELIX_IMAGEIO_FRAMEWORK ImageIO REQUIRED)
+find_library(HELIX_COREGRAPHICS_FRAMEWORK CoreGraphics REQUIRED)
+find_library(HELIX_COREFOUNDATION_FRAMEWORK CoreFoundation REQUIRED)
+target_link_libraries(helixCore PUBLIC helixEngine helixGraphics
+    ${HELIX_IMAGEIO_FRAMEWORK} ${HELIX_COREGRAPHICS_FRAMEWORK} ${HELIX_COREFOUNDATION_FRAMEWORK})
+target_include_directories(helixCore PUBLIC src)
+target_compile_definitions(helixCore PRIVATE HELIX_VERSION="${PROJECT_VERSION}")
 
+
+if(HELIX_BUILD_GUI)
 # QML application
 qt_add_executable(${AppExec}
     src/Gui/main.cpp
@@ -597,7 +644,7 @@ target_include_directories(${AppExec} PRIVATE
     src/Gui/Parameters
     src/Gui/Viewport
 )
-
+endif()
 
 # A macOS install is a bundle, so its content sits inside the bundle.
 set(HELIX_APP_DIR "${CMAKE_PROJECT_NAME}.app/Contents/")
@@ -614,7 +661,9 @@ set(HELIX_BUNDLE_DIR "." CACHE STRING "Folder the application bundle is installe
 # compile nodes
 add_subdirectory(nodes)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Packaging.cmake)
+if(HELIX_BUILD_GUI)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Packaging.cmake)
+endif()
 
 
 
@@ -664,6 +713,7 @@ if(HELIX_BUILD_TESTS)
         tests/NodeTypeTests.cpp
         tests/NodeLoaderTests.cpp
         tests/GeometryImportTests.cpp
+        tests/ImportFormatTests.cpp
         tests/ModelRatNodeTests.cpp
         tests/TransformNodeTests.cpp
         tests/AttributeCreateNodeTests.cpp
@@ -675,7 +725,6 @@ if(HELIX_BUILD_TESTS)
         tests/DuplicateNodeTests.cpp
         tests/CopyToPointsNodeTests.cpp
         tests/TransformTests.cpp
-        tests/ParameterItemTests.cpp
         tests/StyleTests.cpp
         tests/AttributeNoiseNodeTests.cpp
         tests/MountainNodeTests.cpp
@@ -687,11 +736,24 @@ if(HELIX_BUILD_TESTS)
         tests/CookPlanTests.cpp
         tests/CopyOnWriteTests.cpp
         tests/SimulationTests.cpp
-        src/Gui/Parameters/ParameterItem.cpp
+        tests/HelixCoreTests.cpp
+        tests/ExceptionBoundaryTests.cpp
+        tests/ViewportLightingTests.cpp
+        tests/HelixCoreViewportTests.cpp
     )
-    set_target_properties(${TestExec} PROPERTIES AUTOMOC ON)
-    target_link_libraries(${TestExec} PRIVATE helixEngine helixGraphics Qt6::Core Catch2::Catch2WithMain)
+    # The one test of the engine that goes through a Qt type, the item QML holds for a parameter.
+    if(HELIX_BUILD_GUI)
+        target_sources(${TestExec} PRIVATE
+            tests/ParameterItemTests.cpp
+            src/Gui/Parameters/ParameterItem.cpp
+        )
+        set_target_properties(${TestExec} PROPERTIES AUTOMOC ON)
+        target_link_libraries(${TestExec} PRIVATE Qt6::Core)
+    endif()
+    target_link_libraries(${TestExec} PRIVATE helixEngine helixGraphics helixCore Catch2::Catch2WithMain)
     target_include_directories(${TestExec} PRIVATE src)
+    # The small files the import tests read, which tests/data/import/make-test-files.sh writes.
+    target_compile_definitions(${TestExec} PRIVATE HELIX_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/tests/data")
     if(HELIX_HAS_METAL_COMPILER)
         add_dependencies(${TestExec} helixMetalLib)
     endif()
@@ -709,14 +771,15 @@ if(HELIX_BUILD_TESTS)
     target_link_libraries(${BenchExec} PRIVATE helixEngine Catch2::Catch2WithMain)
 
     # GUI unit tests, Qt and yaml-cpp only, no engine
-    add_executable(helixGuiTests
-        tests/gui/ThemeLoaderTests.cpp
-        src/Gui/Style/ThemeLoader.cpp
-    )
-    target_link_libraries(helixGuiTests PRIVATE Qt6::Gui yaml-cpp::yaml-cpp Catch2::Catch2WithMain)
-    target_include_directories(helixGuiTests PRIVATE src)
-    target_compile_definitions(helixGuiTests PRIVATE
-        HELIX_DEV_STATIC_DIR="${CMAKE_SOURCE_DIR}/static"
-    )
+    if(HELIX_BUILD_GUI)
+        add_executable(helixGuiTests
+            tests/gui/ThemeLoaderTests.cpp
+            src/Gui/Style/ThemeLoader.cpp
+        )
+        target_link_libraries(helixGuiTests PRIVATE Qt6::Gui yaml-cpp::yaml-cpp Catch2::Catch2WithMain)
+        target_include_directories(helixGuiTests PRIVATE src)
+        target_compile_definitions(helixGuiTests PRIVATE
+            HELIX_DEV_STATIC_DIR="${CMAKE_SOURCE_DIR}/static"
+        )
+    endif()
 endif()
-

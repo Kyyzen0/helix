@@ -12,9 +12,13 @@ namespace helix::utils {
  *
  * A "f" record closes its face and an "l" record leaves it open.
  *
- * @note Records the mesh has nowhere to put, such as materials, normals, and
- * texture coordinates, are skipped.
+ * @param readTexcoords When true, the "vt" records the faces name are stored as a vertex attribute
+ * called "uv" (a vector whose z is zero), when the file has any. Off by default, which leaves the
+ * mesh exactly as it has always been.
+ *
+ * @note Records the mesh has nowhere to put, such as materials and normals, are skipped. The
+ * normals are skipped on purpose: a mesh from an obj file has always had its normals computed.
  */
-void readObjInto(std::istream& file, geo::Mesh& mesh);
+void readObjInto(std::istream& file, geo::Mesh& mesh, bool readTexcoords = false);
 
 } // namespace helix::utils

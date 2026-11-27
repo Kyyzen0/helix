@@ -81,6 +81,6 @@ prepare() {
     echo "prepared ${dep} in ${dest}"
 }
 
-for dep in argparse boost eigen fastnoise2 glm manifold tbb; do
+for dep in argparse assimp boost eigen fastnoise2 glm manifold tbb; do
     prepare "${dep}"
 done

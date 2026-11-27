@@ -1,0 +1,7 @@
+// Lets Swift import the facade with C++ interoperability (-cxx-interoperability-mode=default).
+// Put this folder on the include path of the Swift compiler (-I src/HelixCore).
+module HelixCore {
+    header "HelixCore.h"
+    requires cplusplus
+    export *
+}

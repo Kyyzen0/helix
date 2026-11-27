@@ -1,0 +1,105 @@
+{
+    "networkModel": {
+        "nodes": [
+            {
+                "typeName": "helix::cube",
+                "path": "/cube1",
+                "posX": 0.0,
+                "posY": 0.0,
+                "parameters": [
+                    {
+                        "name": "size",
+                        "floatValues": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "center",
+                        "floatValues": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "rotate",
+                        "floatValues": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "uniformScale",
+                        "floatValues": [
+                            1.0
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    }
+                ]
+            }
+        ],
+        "nodeLinks": [],
+        "timeline": {
+            "startFrame": 1,
+            "endFrame": 240,
+            "fps": 24.0,
+            "frame": 1.0
+        },
+        "displayNodeIndex": 0
+    },
+    "sim::KeyframeStore::instance()": {
+        "records_": []
+    }
+}

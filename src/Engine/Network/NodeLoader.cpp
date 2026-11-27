@@ -34,11 +34,27 @@ namespace {
 // The file naming a folder as a node.
 constexpr const char* kManifestName = "node.yaml";
 
+// The folders a host named, which are tried before the installed and the development ones.
+std::filesystem::path& nodesDirectoryOverride()
+{
+    static std::filesystem::path directory;
+    return directory;
+}
+
+std::filesystem::path& libraryDirectoryOverride()
+{
+    static std::filesystem::path directory;
+    return directory;
+}
+
 std::filesystem::path getLibraryFile(const std::string& libraryName)
 {
     // TODO: add env var finder
     // TODO: add the node's own bin directory
     const std::string fileName = boost::dll::shared_library::decorate(libraryName).string();
+
+    const std::filesystem::path& named = libraryDirectoryOverride();
+    if (!named.empty() && std::filesystem::exists(named / fileName)) return named / fileName;
 
     const std::filesystem::path installed = getInstallRoot() / "lib" / fileName;
     if (std::filesystem::exists(installed)) return installed;
@@ -142,8 +158,24 @@ std::filesystem::path getUserDataDirectory()
 
 } // namespace
 
+void NodeLoader::setDirectories(
+    const std::filesystem::path& nodesDirectory,
+    const std::filesystem::path& libraryDirectory
+)
+{
+    nodesDirectoryOverride() = nodesDirectory;
+    libraryDirectoryOverride() = libraryDirectory;
+}
+
 std::filesystem::path NodeLoader::getNodesDirectory()
 {
+    const std::filesystem::path& named = nodesDirectoryOverride();
+    if (!named.empty())
+    {
+        if (std::filesystem::is_directory(named)) return named;
+        throw std::runtime_error("The nodes directory " + named.string() + " does not exist");
+    }
+
     const std::filesystem::path installed = getInstallRoot() / "nodes";
     if (std::filesystem::is_directory(installed)) return installed;
 

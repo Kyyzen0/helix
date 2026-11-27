@@ -15,6 +15,7 @@ macOS host needs on top of the ordinary build instructions in the
 | Git | Fetched by CMake, not by the superbuild. |
 | Metal compiler | Part of Xcode. Xcode 26 and later install it apart, with `xcodebuild -downloadComponent MetalToolchain`. The configure step stops with that command when it is missing. |
 | Network access | For the dependency archives, the Qt download and the `metal-cpp` archive from developer.apple.com. |
+| Blender (optional) | Only to open `.blend` files, and only at run time. Not needed to build or to run the tests, whose `.blend` test is skipped without it. |
 
 Homebrew is not needed and is deliberately not used. Every tool the build
 requires is downloaded into `toolchain/` by
@@ -80,6 +81,130 @@ A run from the build tree works as well, without an install step:
 ```sh
 build-super/helix-build/helix.app/Contents/MacOS/helix
 ```
+
+## Building the engine without Qt
+
+The engine (`helixEngine`), the nodes (`helixOps`), the Metal renderer
+(`helixGraphics`), the `helixCore` facade and the `tests` target need no Qt.
+`-DHELIX_BUILD_GUI=OFF` leaves the Qt interface out: no Qt is searched for or
+linked, the `helix` application, `helixGuiTests` and the one engine test that
+goes through a Qt type (`ParameterItemTests.cpp`) are not built. Objective-C++ is enabled in
+both configurations, since the USD reader of the engine uses Model I/O. The default is `ON`,
+which is the build described above.
+
+With the dependencies of an earlier superbuild already in `build-super/deps`,
+nothing needs to be built again but Helix itself. A prefix built before Assimp joined the
+superbuild lacks it: build that one dependency into the prefix, from the source the superbuild
+holds (or let `cmake --build build-super --target assimp` fetch it), with the options of
+`superbuild/deps/assimp.cmake`. This configures a build folder
+`build-core` straight against them, with the sources of the fetched libraries
+that the superbuild already holds (no network is needed):
+
+```sh
+source toolchain/env.sh
+D="$PWD/build-super"
+cmake -S . -B build-core -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DHELIX_SUPERBUILD=OFF \
+    -DHELIX_BUILD_GUI=OFF \
+    -DCMAKE_PREFIX_PATH="$D/deps" \
+    -DHELIX_DEPS_PREFIX="$D/deps" \
+    -DFETCHCONTENT_FULLY_DISCONNECTED=ON \
+    -DFETCHCONTENT_SOURCE_DIR_YAML-CPP="$D/helix-build/_deps/yaml-cpp-src" \
+    -DFETCHCONTENT_SOURCE_DIR_CATCH2="$D/helix-build/_deps/catch2-src" \
+    -DFETCHCONTENT_SOURCE_DIR_METALCPP="$D/helix-build/_deps/metalcpp-src"
+cmake --build build-core --target tests helixCore helixOps
+build-core/helix.app/Contents/bin/tests
+```
+
+Without an earlier superbuild, `cmake -S . -B build-super -G Ninja
+-DHELIX_SUPERBUILD=ON -DHELIX_BUILD_GUI=OFF` builds the dependencies as
+usual but skips the Qt download. Leave `-DHELIX_SUPERBUILD=OFF` and the
+fetch settings out of the command above, and give `CMAKE_PREFIX_PATH` the
+dependency prefix of that build (`build-super/deps`).
+
+If the bison of the toolchain crashes on the host (`toolchain/bison/shim/bison
+--version` ends with a segmentation fault), add `-DDAS_FLEX_BISON_DISABLED=ON`
+to the configure command. daslang then builds from the parsers committed in
+`extern/daslang/src/parser`, the ones the version check of
+[The parser tools](#the-parser-tools) is there to keep up to date.
+
+The tests that draw with Metal skip themselves, with the message "No Metal
+device available", where the process cannot reach a GPU, as in a sandbox.
+
+### The Swift check of the facade
+
+`src/HelixCore/HelixCore.h` is the header a native Swift application imports
+(`src/HelixCore/module.modulemap`, with C++ interoperability). The small tool in
+`apple/HelixCoreSmoke` proves it: it starts the engine, creates a cube, cooks it
+and prints the number of points.
+
+```sh
+cmake --build build-core --target helixCore helixOps
+apple/HelixCoreSmoke/build.sh
+```
+
+### The native application
+
+`apple/Helix` is a standard Xcode project: a SwiftUI document app (`.kut` scenes) with a Metal
+viewport over the `HelixCore` facade. It needs the `build-core` of the section above, and
+macOS 15, Xcode 26 or newer and the Metal toolchain.
+
+```sh
+cmake --build build-core --target tests helixCore helixOps   # once, and after engine changes
+xcodebuild -project apple/Helix/Helix.xcodeproj -scheme Helix -configuration Debug build
+```
+
+The project builds the engine again before it compiles (a build phase that runs `cmake --build
+build-core --target helixCore helixOps`, a no-op when nothing changed; set `HELIX_BUILD_CORE` to
+use another folder), links the static libraries, and a second phase makes the bundle stand on
+its own:
+
+```
+Helix.app/Contents/
+├── MacOS/Helix
+├── Frameworks/    libhelixEngine, libhelixOps (the nodes), tbb and boost, with run paths
+│                  rewritten to sit next to each other
+└── Resources/     nodes/, daslib/, helix.metallib (the engine's shaders), default.metallib
+                   (the one shader that puts a frame on screen), the icon and the strings
+```
+
+The signature is ad hoc ("Sign to Run Locally"), with no team.
+
+The engine holds one scene, so the app opens one document at a time and refuses a second with
+an alert. The scene file type is `com.kyyzen.helix.scene` (`.kut`, JSON text).
+
+The viewport draws the edges of the mesh over its shading according to the **View > Wireframe**
+setting (Auto, On, Off; Shift+W cycles them). Auto leaves the wireframe out above 50 000
+triangles and fades it out as the edges come within a few points of each other on screen, since a
+wireframe on a dense mesh covers the shading entirely. The lights follow the camera.
+
+`Helix --render-snapshot <in.kut | --new-scene> <out.png> [width height]` opens a scene, frames
+its geometry, draws it off screen and writes a PNG, with no window. It is the check of the whole
+chain without a screen. `apple/Helix/Samples` holds two scenes to try it on, written by
+`apple/Helix/Samples/make-samples.sh`.
+
+## Importing 3D files
+
+`helix::geometryImport` is the one node that reads other tools' files, and picks its reader by
+extension:
+
+| Extensions | Reader | Notes |
+| --- | --- | --- |
+| `.glb` `.gltf` | Assimp 6.0.6 | `KHR_draco_mesh_compression` through the Draco that Assimp carries. |
+| `.fbx` `.stl` `.ply` `.dae` `.3ds` `.3mf` `.dxf` `.x3d` `.x` | Assimp | STL, 3MF and DXF are Z up by the convention of the format. |
+| `.obj` | the engine's own reader | Points, faces and texture coordinates (`uv`). Normals are computed, as they always were. |
+| `.usd` `.usda` `.usdc` `.usdz` | Model I/O | Quads come through as triangles. |
+| `.blend` | Blender, in the background | Converted to GLB (modifiers applied, no animation, skin or pictures), and kept under `~/Library/Caches/<bundle id>/blend` (the app) or `HelixBlendCache` in the temporary folder, keyed by path, size, date and the version of Blender. The Blender is the one in the node's `Blender` setting, `/Applications/Blender.app`, or one Spotlight finds. |
+
+Assimp is a static library built by the superbuild into `build-super/deps` with only those
+importers and no exporters (`superbuild/deps/assimp.cmake`), and linked into `libhelixEngine`, so
+the app bundle holds no extra library. The tests read the small files in `tests/data/import`,
+which `tests/data/import/make-test-files.sh` writes again (Python 3, and Blender for the Draco,
+FBX and BLEND files).
+
+`Helix --render-snapshot <file.glb> out.png` imports a 3D file into a new scene and prints how
+long that took and the peak memory of the process.
 
 ## The parser tools
 

@@ -18,8 +18,34 @@ parameters:
   - name: filePath
     label: File Path
     type: string
+    tooltip: >-
+      The file to read. glTF, GLB, FBX, OBJ, STL, PLY, Collada, 3DS, 3MF, DXF, X3D and X are
+      read directly, USD, USDA, USDC and USDZ through Model I/O, and BLEND through an installed
+      Blender.
 
   - name: size
     label: Size
     type: float
     default: 1
+
+  - name: upAxis
+    label: Up Axis
+    type: dropdown
+    default: auto
+    tooltip: The axis the file calls up. Auto reads it from the file, or from the format.
+    options:
+      - {value: auto, label: Auto}
+      - {value: "y", label: Y}
+      - {value: "z", label: Z}
+
+  - name: mergeMeshes
+    label: Merge Meshes
+    type: bool
+    default: true
+    tooltip: Joins the meshes of the file into one.
+
+  - name: blenderPath
+    label: Blender
+    type: string
+    tooltip: >-
+      The Blender used to open .blend files. Empty finds the installed one.

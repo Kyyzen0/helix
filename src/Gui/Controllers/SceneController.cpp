@@ -3,8 +3,11 @@
 #include "Engine/Network/NetworkManager.h"
 #include "Engine/Serializer/Serializer.h"
 
+#include <QDebug>
 #include <QFileInfo>
 #include <QSettings>
+
+#include <exception>
 
 namespace {
 
@@ -58,7 +61,17 @@ void helix::ui::SceneController::saveAs(const QUrl& fileUrl)
 
 void helix::ui::SceneController::writeTo(const QString& filePath)
 {
-    helix::nt::Serializer().save(helix::nt::nm(), filePath.toStdString());
+    // The serializer throws when the file can't be written. An exception must not leave a slot
+    // called from QML, so a failed save is reported and the current file stays as it was.
+    try
+    {
+        helix::nt::Serializer().save(helix::nt::nm(), filePath.toStdString());
+    }
+    catch (const std::exception& error)
+    {
+        qWarning() << "Couldn't save the scene:" << error.what();
+        return;
+    }
     currentFilePath_ = filePath;
     Q_EMIT currentFileChanged();
     rememberRecent(filePath);

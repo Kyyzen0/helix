@@ -1,0 +1,53 @@
+{
+    "networkModel": {
+        "nodes": [
+            {
+                "typeName": "helix::geometryImport",
+                "path": "/geometryImport1",
+                "posX": 0.0,
+                "posY": 0.0,
+                "parameters": [
+                    {
+                        "name": "filePath",
+                        "floatValues": [],
+                        "intValues": [],
+                        "stringValues": [
+                            "legacy-square.obj"
+                        ],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "size",
+                        "floatValues": [
+                            2.0
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    }
+                ]
+            }
+        ],
+        "nodeLinks": [],
+        "timeline": {
+            "startFrame": 1,
+            "endFrame": 240,
+            "fps": 24.0,
+            "frame": 1.0
+        },
+        "displayNodeIndex": 0
+    },
+    "sim::KeyframeStore::instance()": {
+        "records_": []
+    }
+}
