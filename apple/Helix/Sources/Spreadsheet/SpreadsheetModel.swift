@@ -124,8 +124,8 @@ final class SpreadsheetModel: ObservableObject {
             if column.mixed { return "mixed" }
             if column.partial { return "–" }
             let (pageNumber, inPage) = cache.locate(row: row)
-            if cache.page(attribute: attribute, page: pageNumber) == nil { loadPage(attribute: attribute, page: pageNumber) }
-            guard let page = cache.page(attribute: attribute, page: pageNumber) else { return "" }
+            if cache.page(owner: owner, attribute: attribute, page: pageNumber) == nil { loadPage(attribute: attribute, page: pageNumber) }
+            guard let page = cache.page(owner: owner, attribute: attribute, page: pageNumber) else { return "" }
             return page.text(row: inPage, component: component) ?? ""
         }
     }
@@ -137,7 +137,7 @@ final class SpreadsheetModel: ObservableObject {
             node: node, owner: owner, attribute: attribute, start: number * size, count: size
         ) else { return }
         pagesRead += 1
-        if !cache.store(page, attribute: attribute, number: number) {
+        if !cache.store(page, owner: owner, attribute: attribute, number: number) {
             // The read cooked the node again, so the cells already drawn are from the cook before.
             // The report is read again and the table redraws, instead of mixing the two.
             DispatchQueue.main.async { [weak self] in self?.refresh(); self?.revision += 1 }

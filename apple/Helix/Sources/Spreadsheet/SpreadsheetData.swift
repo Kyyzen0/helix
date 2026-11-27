@@ -254,7 +254,10 @@ struct SpreadsheetPage: Equatable, Sendable {
 /// A page is only good for the cook it came from: when the node cooks again its numbers may all
 /// have changed, so a page that arrives with another generation than the cache holds empties it.
 struct PageCache: Equatable {
+    /// A page is the values of one attribute of one owner: a point attribute and a face attribute
+    /// can share a name and hold different values, so the owner is part of what names a page.
     struct Key: Hashable, Sendable {
+        var owner: SpreadsheetOwner
         var attribute: String
         var page: Int
     }
@@ -275,8 +278,8 @@ struct PageCache: Equatable {
 
     var count: Int { pages.count }
 
-    func page(attribute: String, page: Int) -> SpreadsheetPage? {
-        pages[Key(attribute: attribute, page: page)]
+    func page(owner: SpreadsheetOwner, attribute: String, page: Int) -> SpreadsheetPage? {
+        pages[Key(owner: owner, attribute: attribute, page: page)]
     }
 
     /// Forgets every page and takes the cook they now have to come from.
@@ -289,10 +292,10 @@ struct PageCache: Equatable {
     /// Keeps a page that was read. Returns false when the page came from another cook than the
     /// ones before it: the cache was emptied, and the page is the first of the new cook.
     @discardableResult
-    mutating func store(_ page: SpreadsheetPage, attribute: String, number: Int) -> Bool {
+    mutating func store(_ page: SpreadsheetPage, owner: SpreadsheetOwner, attribute: String, number: Int) -> Bool {
         let fresh = page.generation == generation
         if !fresh { reset(generation: page.generation) }
-        let key = Key(attribute: attribute, page: number)
+        let key = Key(owner: owner, attribute: attribute, page: number)
         if pages[key] == nil {
             order.append(key)
             if order.count > capacity {

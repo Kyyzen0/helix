@@ -121,29 +121,43 @@ final class PageCacheTests: XCTestCase {
     func testAPageStoredIsFoundAgain() {
         var cache = PageCache(pageSize: 4)
         cache.reset(generation: 3)
-        XCTAssertNil(cache.page(attribute: "a", page: 0))
-        XCTAssertTrue(cache.store(page(generation: 3), attribute: "a", number: 0))
-        XCTAssertNotNil(cache.page(attribute: "a", page: 0))
-        XCTAssertNil(cache.page(attribute: "b", page: 0))
-        XCTAssertNil(cache.page(attribute: "a", page: 1))
+        XCTAssertNil(cache.page(owner: .points, attribute: "a", page: 0))
+        XCTAssertTrue(cache.store(page(generation: 3), owner: .points, attribute: "a", number: 0))
+        XCTAssertNotNil(cache.page(owner: .points, attribute: "a", page: 0))
+        XCTAssertNil(cache.page(owner: .points, attribute: "b", page: 0))
+        XCTAssertNil(cache.page(owner: .points, attribute: "a", page: 1))
+    }
+
+    func testAttributesOfTheSameNameOnTwoOwnersKeepTheirOwnPages() {
+        var cache = PageCache(pageSize: 4)
+        cache.reset(generation: 3)
+        // Two Attribute Create nodes can write a point "weight" and a face "weight".
+        let points = SpreadsheetPage(generation: 3, totalCount: 4, componentCount: 1, type: .float, floats: [1, 1, 1, 1])
+        let faces = SpreadsheetPage(generation: 3, totalCount: 4, componentCount: 1, type: .float, floats: [9, 9, 9, 9])
+        cache.store(points, owner: .points, attribute: "weight", number: 0)
+        // Switching to the faces tab must not find the points' page.
+        XCTAssertNil(cache.page(owner: .faces, attribute: "weight", page: 0))
+        cache.store(faces, owner: .faces, attribute: "weight", number: 0)
+        XCTAssertEqual(cache.page(owner: .faces, attribute: "weight", page: 0)?.floats.first, 9)
+        XCTAssertEqual(cache.page(owner: .points, attribute: "weight", page: 0)?.floats.first, 1)
     }
 
     func testAPageFromAnotherCookEmptiesTheCache() {
         var cache = PageCache(pageSize: 4)
         cache.reset(generation: 3)
-        cache.store(page(generation: 3), attribute: "a", number: 0)
-        cache.store(page(generation: 3), attribute: "a", number: 1)
+        cache.store(page(generation: 3), owner: .points, attribute: "a", number: 0)
+        cache.store(page(generation: 3), owner: .points, attribute: "a", number: 1)
         XCTAssertEqual(cache.count, 2)
         // The node cooked again while a page was being read: everything before is out of date.
-        XCTAssertFalse(cache.store(page(generation: 4), attribute: "a", number: 5))
+        XCTAssertFalse(cache.store(page(generation: 4), owner: .points, attribute: "a", number: 5))
         XCTAssertEqual(cache.count, 1)
         XCTAssertEqual(cache.generation, 4)
-        XCTAssertNil(cache.page(attribute: "a", page: 0))
+        XCTAssertNil(cache.page(owner: .points, attribute: "a", page: 0))
     }
 
     func testResetForgetsEverything() {
         var cache = PageCache(pageSize: 4)
-        cache.store(page(generation: 0), attribute: "a", number: 0)
+        cache.store(page(generation: 0), owner: .points, attribute: "a", number: 0)
         cache.reset(generation: 9)
         XCTAssertEqual(cache.count, 0)
         XCTAssertEqual(cache.generation, 9)
@@ -151,10 +165,10 @@ final class PageCacheTests: XCTestCase {
 
     func testTheOldestPageGoesWhenTheCacheIsFull() {
         var cache = PageCache(pageSize: 4, capacity: 3)
-        for number in 0..<5 { cache.store(page(generation: 0), attribute: "a", number: number) }
+        for number in 0..<5 { cache.store(page(generation: 0), owner: .points, attribute: "a", number: number) }
         XCTAssertEqual(cache.count, 3)
-        XCTAssertNil(cache.page(attribute: "a", page: 0))
-        XCTAssertNotNil(cache.page(attribute: "a", page: 4))
+        XCTAssertNil(cache.page(owner: .points, attribute: "a", page: 0))
+        XCTAssertNotNil(cache.page(owner: .points, attribute: "a", page: 4))
     }
 
     func testTheRowIsLocatedInItsPage() {
