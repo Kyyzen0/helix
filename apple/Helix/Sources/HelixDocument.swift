@@ -227,6 +227,8 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
     func relinquish() {
         guard isActive else { return }
         isActive = false
+        // Nothing the viewport calls back into may point at the document once it is closed.
+        viewport.onFailure = nil
         EngineHost.shared.release(self)
     }
 

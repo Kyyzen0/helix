@@ -23,8 +23,10 @@ struct ViewportView: NSViewRepresentable {
             blue: Double(ViewportRenderer.background.blue),
             alpha: 1
         )
-        view.onWindowClose = { [document] in document.relinquish() }
-        document.viewport.onFailure = { [document] message in document.reportViewportFailure(message) }
+        // Weak, because the document owns the viewport that owns the failure handler: a strong
+        // capture would keep a closed document alive.
+        view.onWindowClose = { [weak document] in document?.relinquish() }
+        document.viewport.onFailure = { [weak document] message in document?.reportViewportFailure(message) }
 
         if let device = document.startViewport() {
             view.device = device

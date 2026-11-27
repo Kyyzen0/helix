@@ -328,6 +328,35 @@ TEST_CASE("The up axis turns the normals")
     REQUIRE(turned.meshes.front()->getPointPos(2).y() == Approx(1.f));
 }
 
+TEST_CASE("A merge of meshes with and without normals computes the missing ones from the faces")
+{
+    import::RawScene scene = triangleScene();
+    // A quad in the plane z = 5 with no normals, wound counter clockwise seen from +z.
+    import::RawMesh quad;
+    quad.name = "quad";
+    quad.positions = {0, 0, 5, 1, 0, 5, 1, 1, 5, 0, 1, 5};
+    quad.faceCounts = {4};
+    quad.indices = {0, 1, 2, 3};
+    scene.meshes.push_back(quad);
+    import::RawInstance instance;
+    instance.mesh = 1;
+    scene.instances.push_back(instance);
+
+    import::ImportOptions options;
+    options.mergeMeshes = true;
+    const import::ImportedFile merged = import::buildMeshes(std::move(scene), options, import::UpAxis::Y, "test");
+    REQUIRE(merged.meshes.size() == 1);
+    const std::vector<Vector3> normals = vertexVectors(*merged.meshes.front(), attr::names::normal);
+    REQUIRE(normals.size() == 7);
+    for (std::size_t corner = 0; corner < 3; ++corner)
+        REQUIRE(normals[corner].isApprox(Vector3(0.f, 1.f, 0.f)));
+    for (std::size_t corner = 3; corner < 7; ++corner)
+    {
+        REQUIRE(normals[corner].norm() == Approx(1.f));
+        REQUIRE(normals[corner].z() == Approx(1.f));
+    }
+}
+
 TEST_CASE("A node that mirrors reverses the corners of its faces")
 {
     import::RawScene scene = triangleScene();
@@ -690,4 +719,57 @@ TEST_CASE("The facade imports a file into a node, without touching the file")
         REQUIRE_FALSE(core::setCacheDirectory("").ok);
         import::setBlendCacheDirectory({});
     }
+}
+
+namespace {
+
+// The buffer of a triangle whose first corner is at (x, 0, 0).
+void writeTriangleBuffer(const fs::path& folder, float x)
+{
+    const float positions[9] = {x, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f, 0.f};
+    std::ofstream bin(folder / "tri.bin", std::ios::binary);
+    bin.write(reinterpret_cast<const char*>(positions), sizeof(positions));
+}
+
+// A gltf of one triangle whose buffer is the separate file tri.bin.
+void writeSplitGltf(const fs::path& folder)
+{
+    std::ofstream json(folder / "tri.gltf");
+    json << R"({"asset":{"version":"2.0"},"scene":0,"scenes":[{"nodes":[0]}],"nodes":[{"mesh":0}],)"
+            R"("meshes":[{"primitives":[{"attributes":{"POSITION":0}}]}],)"
+            R"("accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3",)"
+            R"("min":[-9,0,0],"max":[9,1,0]}],)"
+            R"("bufferViews":[{"buffer":0,"byteLength":36}],"buffers":[{"uri":"tri.bin","byteLength":36}]})";
+}
+
+} // namespace
+
+TEST_CASE("The import cache sees a gltf buffer that changed behind an unchanged gltf")
+{
+    TempFolder folder;
+    writeTriangleBuffer(folder.path, 0.f);
+    writeSplitGltf(folder.path);
+    const fs::path gltf = folder.path / "tri.gltf";
+    const fs::path bin = folder.path / "tri.bin";
+    import::clearImportCache();
+
+    bool fromCache = true;
+    const auto first = import::importFile(gltf, defaults(), &fromCache);
+    REQUIRE_FALSE(fromCache);
+    REQUIRE(first->meshes.front()->getPointPos(0).x() == Approx(0.f));
+
+    // Nothing changed: the second import is the first one, without a read.
+    const std::size_t reads = import::importReadCount();
+    import::importFile(gltf, defaults(), &fromCache);
+    REQUIRE(fromCache);
+    REQUIRE(import::importReadCount() == reads);
+
+    // Only the buffer is rewritten, and its date is moved on by hand so the clock does not matter.
+    const auto before = fs::last_write_time(bin);
+    writeTriangleBuffer(folder.path, 5.f);
+    fs::last_write_time(bin, before + std::chrono::seconds(10));
+    const auto second = import::importFile(gltf, defaults(), &fromCache);
+    REQUIRE_FALSE(fromCache);
+    REQUIRE(second->meshes.front()->getPointPos(0).x() == Approx(5.f));
+    REQUIRE(import::importReadCount() == reads + 1);
 }

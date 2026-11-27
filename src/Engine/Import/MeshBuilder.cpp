@@ -26,6 +26,8 @@ struct Gathered
     std::string name;
     std::vector<Vector3> positions;
     std::vector<Vector3> normals;
+    // True for a point whose mesh carried no normals; toMesh fills those in from the faces.
+    std::vector<bool> normalMissing;
     std::vector<Vector3> uvs;
     std::vector<Vector3> colors;
     std::vector<Offset> faceCounts;
@@ -68,6 +70,7 @@ void gather(Gathered& out, const RawMesh& mesh, const Matrix4& world)
         out.positions.push_back(linear * position + translation);
     }
     out.normals.resize(base + vertexCount, Vector3::Zero());
+    out.normalMissing.resize(base + vertexCount, !hasNormals);
     out.uvs.resize(base + vertexCount, Vector3::Zero());
     out.colors.resize(base + vertexCount, Vector3::Ones());
     for (std::size_t v = 0; v < vertexCount; ++v)
@@ -111,8 +114,47 @@ std::string sanitizeName(const std::string& name)
     return clean;
 }
 
+// Gives the points of a mixed merge that came without normals the normal of their faces, so they
+// are not published as zero vectors that the viewport would trust over a computation. The corners
+// are already in their final, mirror corrected order, so the sums point out of the surface.
+void fillMissingNormals(Gathered& data)
+{
+    if (!data.hasNormals) return;
+    const bool anyMissing =
+        std::find(data.normalMissing.begin(), data.normalMissing.end(), true) != data.normalMissing.end();
+    if (!anyMissing) return;
+
+    std::vector<Vector3> sums(data.positions.size(), Vector3::Zero());
+    std::size_t cursor = 0;
+    for (const Offset count : data.faceCounts)
+    {
+        // Newell's sum is the face normal scaled by twice the area, so larger faces weigh more.
+        Vector3 face = Vector3::Zero();
+        for (Offset corner = 0; corner < count; ++corner)
+        {
+            const Vector3& current = data.positions[data.indices[cursor + corner]];
+            const Vector3& next = data.positions[data.indices[cursor + (corner + 1) % count]];
+            face.x() += (current.y() - next.y()) * (current.z() + next.z());
+            face.y() += (current.z() - next.z()) * (current.x() + next.x());
+            face.z() += (current.x() - next.x()) * (current.y() + next.y());
+        }
+        for (Offset corner = 0; corner < count; ++corner)
+            sums[data.indices[cursor + corner]] += face;
+        cursor += count;
+    }
+
+    for (std::size_t point = 0; point < sums.size(); ++point)
+    {
+        if (!data.normalMissing[point]) continue;
+        const float length = sums[point].norm();
+        // A point no face uses, or whose faces cancel out, still gets a usable direction.
+        data.normals[point] = length > 1e-20f ? Vector3(sums[point] / length) : Vector3(0.f, 1.f, 0.f);
+    }
+}
+
 std::shared_ptr<geo::Mesh> toMesh(Gathered& data, const std::string& path)
 {
+    fillMissingNormals(data);
     auto mesh = std::make_shared<geo::Mesh>(path);
     mesh->addPoints(data.positions);
     mesh->addFaces(data.indices, data.faceCounts, true);

@@ -78,6 +78,9 @@ Known gaps found on the way, to fix as the work below touches them:
   camera, so a model seen from below is lit from below, as in a modelling tool.
 - The `bison` shipped by the toolchain script crashes on recent macOS; the
   build uses the parsers committed in daslang instead.
+- The import cache watches the files Assimp opens (a glTF's `.bin`, for example), not the files
+  a USD layer references or a `.blend` links. Changing one of those without touching the main
+  file serves the old geometry until the cache is cleared.
 
 ---
 

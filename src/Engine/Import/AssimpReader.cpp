@@ -1,5 +1,8 @@
 #include "Engine/Import/ImportFile.h"
 #include "Engine/Import/Readers.h"
+#include <assimp/DefaultIOSystem.h>
+#include <assimp/IOStream.hpp>
+#include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/GltfMaterial.h>
 #include <assimp/config.h>
@@ -62,13 +65,42 @@ RawMaterial readMaterial(const aiMaterial& source)
     return material;
 }
 
+// Assimp's own file access, with a note of every file it opens for reading. A glTF reads its
+// buffers and a format may read its textures through this, and the import cache needs to know
+// them to see that one of them changed while the main file did not.
+class RecordingIOSystem : public Assimp::IOSystem
+{
+  public:
+    explicit RecordingIOSystem(std::vector<std::filesystem::path>& opened) : opened_(opened) {}
+
+    bool Exists(const char* path) const override { return inner_.Exists(path); }
+    char getOsSeparator() const override { return inner_.getOsSeparator(); }
+    bool ComparePaths(const char* one, const char* two) const override { return inner_.ComparePaths(one, two); }
+
+    Assimp::IOStream* Open(const char* path, const char* mode = "rb") override
+    {
+        Assimp::IOStream* stream = inner_.Open(path, mode);
+        if (stream && mode && std::string(mode).find('r') != std::string::npos) opened_.emplace_back(path);
+        return stream;
+    }
+
+    void Close(Assimp::IOStream* stream) override { inner_.Close(stream); }
+
+  private:
+    Assimp::DefaultIOSystem inner_;
+    std::vector<std::filesystem::path>& opened_;
+};
+
 } // namespace
 
-RawScene readWithAssimp(const std::filesystem::path& file)
+RawScene readWithAssimp(const std::filesystem::path& file, std::vector<std::filesystem::path>* openedFiles)
 {
     const std::string extension = lower(file.extension().string());
 
+    std::vector<std::filesystem::path> opened;
     Assimp::Importer importer;
+    // The importer owns the file access it is given. It outlives every read below.
+    if (openedFiles) importer.SetIOHandler(new RecordingIOSystem(opened));
     // The animations of an fbx are not read at all, and no mesh is turned into a skeleton.
     importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ANIMATIONS, false);
     importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
@@ -91,6 +123,18 @@ RawScene readWithAssimp(const std::filesystem::path& file)
         std::string reason = importer.GetErrorString();
         if (reason.size() > 300) reason.resize(300);
         throw ImportError("The file could not be read" + (reason.empty() ? "." : ": " + reason));
+    }
+
+    // The file and everything it references have been read by now.
+    if (openedFiles)
+    {
+        std::error_code error;
+        for (const std::filesystem::path& path : opened)
+        {
+            if (std::filesystem::equivalent(path, file, error)) continue;
+            if (std::find(openedFiles->begin(), openedFiles->end(), path) == openedFiles->end())
+                openedFiles->push_back(path);
+        }
     }
 
     RawScene result;

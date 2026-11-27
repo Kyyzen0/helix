@@ -73,11 +73,30 @@ std::mutex cacheMutex;
 fs::path blendCacheFolder;
 std::atomic<std::size_t> readCount{0};
 
+// A file a read depended on besides the main one, as it was when it was read.
+struct Dependency
+{
+    fs::path path;
+    std::uintmax_t size = 0;
+    long long modified = 0;
+};
+
 struct CacheEntry
 {
     std::string key;
     std::shared_ptr<const ImportedFile> file;
+    std::vector<Dependency> dependencies;
 };
+
+// Whether a dependency is still the file that was read: present, with the same size and date.
+bool unchanged(const Dependency& dependency)
+{
+    std::error_code error;
+    const std::uintmax_t size = fs::file_size(dependency.path, error);
+    if (error || size != dependency.size) return false;
+    const auto modified = fs::last_write_time(dependency.path, error).time_since_epoch().count();
+    return !error && static_cast<long long>(modified) == dependency.modified;
+}
 // The last few files, the newest first. Large scenes are big, so only a couple are kept.
 std::deque<CacheEntry> cache;
 constexpr std::size_t kCacheCapacity = 2;
@@ -136,7 +155,13 @@ ImportedFile readObjFile(const fs::path& file, const ImportOptions& options)
     return result;
 }
 
-ImportedFile readFile(const fs::path& file, const Format& format, const ImportOptions& options)
+// @param[out] opened The other files the read used, which the cache watches.
+ImportedFile readFile(
+    const fs::path& file,
+    const Format& format,
+    const ImportOptions& options,
+    std::vector<fs::path>& opened
+)
 {
     ++readCount;
     switch (format.reader)
@@ -146,7 +171,7 @@ ImportedFile readFile(const fs::path& file, const Format& format, const ImportOp
     case Reader::ModelIO:
         return buildMeshes(readWithModelIO(file), options, format.conventionalUp, "Model I/O");
     case Reader::Assimp:
-        return buildMeshes(readWithAssimp(file), options, format.conventionalUp, "Assimp");
+        return buildMeshes(readWithAssimp(file, &opened), options, format.conventionalUp, "Assimp");
     case Reader::Blender:
     {
         const fs::path converted = convertBlendToGlb(file, options.blenderPath);
@@ -285,20 +310,25 @@ std::shared_ptr<const ImportedFile> importFile(
                             upAxisName(options.upAxis) + "|" + options.blenderPath;
     {
         const std::lock_guard<std::mutex> lock(cacheMutex);
-        for (const CacheEntry& entry : cache)
+        for (auto entry = cache.begin(); entry != cache.end(); ++entry)
         {
-            if (entry.key == key)
+            if (entry->key != key) continue;
+            // A file the main one points to (a glTF's .bin) can change with the main file as it was.
+            if (std::all_of(entry->dependencies.begin(), entry->dependencies.end(), unchanged))
             {
                 if (fromCache) *fromCache = true;
-                return entry.file;
+                return entry->file;
             }
+            cache.erase(entry);
+            break;
         }
     }
 
     std::shared_ptr<const ImportedFile> imported;
+    std::vector<fs::path> opened;
     try
     {
-        imported = std::make_shared<const ImportedFile>(readFile(file, *format, options));
+        imported = std::make_shared<const ImportedFile>(readFile(file, *format, options, opened));
     }
     catch (const ImportError&)
     {
@@ -319,7 +349,18 @@ std::shared_ptr<const ImportedFile> importFile(
 
     {
         const std::lock_guard<std::mutex> lock(cacheMutex);
-        cache.push_front({key, imported});
+        // What the other files were when the read finished, to compare with at the next hit.
+        std::vector<Dependency> dependencies;
+        for (const fs::path& path : opened)
+        {
+            std::error_code stampError;
+            Dependency dependency{path, fs::file_size(path, stampError), 0};
+            dependency.modified = static_cast<long long>(fs::last_write_time(path, stampError).time_since_epoch().count());
+            // A file already gone counts as changed, so it cannot be a hit.
+            if (stampError) dependency.size = static_cast<std::uintmax_t>(-1);
+            dependencies.push_back(std::move(dependency));
+        }
+        cache.push_front({key, imported, std::move(dependencies)});
         while (cache.size() > kCacheCapacity)
             cache.pop_back();
     }
