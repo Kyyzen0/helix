@@ -355,6 +355,35 @@ def main(binary):
         check(server.call("render_view", {"materials": "yes"})["isError"] is True, "a materials value that is not a boolean is an error")
         server.data("delete_node", {"node": textured["node"]["id"]})
 
+        # A rigged file: the import reads the skeleton and the clips, the skeleton is the second output
+        # of the import node, and geometry_summary names the clips a Skeleton Pose node can play.
+        rigged = server.data("import_file", {"path": os.path.join(fixtures, "skinned-arm.glb")})
+        check("Skeleton: 2 joints" in rigged["summary"] and "Bend 1.00 s" in rigged["summary"],
+              "import_file reports the joints and the clips of a rigged file")
+        posed = server.data("create_node", {"type": "helix::skeletonPose", "name": "armPose"})
+        server.data("connect_nodes", {"from": rigged["node"]["name"], "output": 1, "to": "armPose"})
+        skin = server.data("create_node", {"type": "helix::skinDeform", "name": "armSkin"})
+        server.data("connect_nodes", {"from": rigged["node"]["name"], "to": "armSkin", "input": 0})
+        server.data("connect_nodes", {"from": "armPose", "to": "armSkin", "input": 1})
+        skeleton = server.data("geometry_summary", {"node": "armPose"}).get("skeleton")
+        check(skeleton is not None and skeleton["joints"] == 2 and skeleton["roots"] == 1
+              and [c["name"] for c in skeleton["clips"]] == ["Bend", "Snap"] and skeleton["clips"][0]["duration"] == 1.0,
+              "geometry_summary of a skeleton lists its joints, roots and clips")
+        check("skeleton" not in server.data("geometry_summary", {"node": "box"}), "a node with no skeleton reports none")
+        server.data("set_parameter", {"node": "armPose", "parameter": "clip", "value": "Bend"})
+        server.data("set_parameter", {"node": "armPose", "parameter": "loop", "value": "hold"})
+        server.data("set_frame", {"frame": 25})
+        bent = server.data("geometry_summary", {"node": "armSkin"})
+        check(bent["point_count"] == 12 and abs(bent["bounds"]["min"][0] + 1.0) < 1e-3,
+              "skinDeform bends the arm at the end of the clip (the top row swings to x = -1)")
+        server.data("set_parameter", {"node": "armPose", "parameter": "clip", "value": "Dance"})
+        refused = server.call("geometry_summary", {"node": "armSkin"})
+        check(refused["isError"] is True and "no clip named" in refused["content"][0]["text"],
+              "an unknown clip name is an error that names the clips")
+        server.data("set_frame", {"frame": 1})
+        for name in (rigged["node"]["id"], posed["id"], skin["id"]):
+            server.data("delete_node", {"node": name})
+
         path = os.path.join(folder, "smoke.kut")
         before = sorted(n["name"] for n in server.data("scene_info")["nodes"])
         server.data("save_scene", {"path": path})

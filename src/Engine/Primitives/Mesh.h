@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Primitives/Material.h"
 #include "Engine/Primitives/Primitive.h"
+#include "Engine/Primitives/Skeleton.h"
 #include <algorithm>
 #include <atomic>
 #include <mutex>
@@ -147,6 +148,14 @@ class Mesh : public Primitive
      * @return For each entry of the other table, its index in this one.
      */
     std::vector<intT> appendMaterials(const std::vector<std::shared_ptr<const Material>>& other);
+
+    /**
+     * @brief What a skeleton mesh carries besides its points: joint names, clips and the base of
+     * each root. Null for a mesh that is not a skeleton. Shared by pointer, so copying a mesh copies
+     * a pointer, and never saved in a scene (the import node reads it again from the file).
+     */
+    const std::shared_ptr<const Skeleton>& skeleton() const { return skeleton_; }
+    void setSkeleton(std::shared_ptr<const Skeleton> skeleton) { skeleton_ = std::move(skeleton); }
 
     std::unordered_set<Offset>::const_iterator soloPointsBegin() const;
     std::unordered_set<Offset>::const_iterator soloPointsEnd() const;
@@ -368,6 +377,8 @@ class Mesh : public Primitive
 
     // What the material_index face attribute points into. Immutable materials, shared by pointer.
     std::vector<std::shared_ptr<const Material>> materials_;
+    // The names and clips of a skeleton, shared like the materials.
+    std::shared_ptr<const Skeleton> skeleton_;
 
     attr::attribVector vertexAttributes_;
     attr::attribVector faceAttributes_;

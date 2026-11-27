@@ -5,7 +5,9 @@ namespace: helix
 label: Geometry Import
 tags: [import, file, primitive]
 
-outputs: 1
+# Output 0 is the geometry, with a skin on every point when the file is rigged. Output 1 is the
+# skeleton of the file (a mesh whose points are the joints), empty when the file has none.
+outputs: 2
 
 implementation:
   kind: cpp

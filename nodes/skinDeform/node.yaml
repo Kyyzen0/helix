@@ -1,0 +1,27 @@
+version: 1
+
+name: skinDeform
+namespace: helix
+label: Skin Deform
+tags: [skeleton, skin, deform, animation, rig]
+
+inputs:
+  - label: Skinned Mesh
+  - label: Posed Skeleton
+outputs: 1
+
+implementation:
+  kind: cpp
+  library: helixOps
+  constructor: skinDeform
+
+icon: icon.svg
+
+parameters:
+  - name: normals
+    label: Deform Normals
+    type: bool
+    default: true
+    tooltip: >
+      Turns the Normal attribute of the points and vertices with the skin, so the shading follows
+      the pose. A point the skin does not move keeps its normal.

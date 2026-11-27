@@ -1,0 +1,222 @@
+{
+ "asset": {
+  "version": "2.0",
+  "generator": "helix test files"
+ },
+ "scene": 0,
+ "scenes": [
+  {
+   "nodes": [
+    0,
+    2
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "Root",
+   "children": [
+    1
+   ]
+  },
+  {
+   "name": "Child",
+   "translation": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "Arm",
+   "mesh": 0,
+   "skin": 0
+  }
+ ],
+ "meshes": [
+  {
+   "name": "Arm",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "JOINTS_0": 2,
+      "WEIGHTS_0": 3
+     },
+     "indices": 4,
+     "mode": 4
+    }
+   ]
+  }
+ ],
+ "skins": [
+  {
+   "inverseBindMatrices": 5,
+   "joints": [
+    0,
+    1
+   ],
+   "skeleton": 0
+  }
+ ],
+ "animations": [
+  {
+   "name": "Bend",
+   "samplers": [
+    {
+     "input": 6,
+     "output": 7,
+     "interpolation": "LINEAR"
+    }
+   ],
+   "channels": [
+    {
+     "sampler": 0,
+     "target": {
+      "node": 1,
+      "path": "rotation"
+     }
+    }
+   ]
+  },
+  {
+   "name": "Snap",
+   "samplers": [
+    {
+     "input": 6,
+     "output": 7,
+     "interpolation": "STEP"
+    }
+   ],
+   "channels": [
+    {
+     "sampler": 0,
+     "target": {
+      "node": 1,
+      "path": "rotation"
+     }
+    }
+   ]
+  }
+ ],
+ "accessors": [
+  {
+   "bufferView": 0,
+   "componentType": 5126,
+   "count": 12,
+   "type": "VEC3",
+   "min": [
+    -0.5,
+    0.0,
+    -0.5
+   ],
+   "max": [
+    0.5,
+    2.0,
+    0.5
+   ]
+  },
+  {
+   "bufferView": 1,
+   "componentType": 5126,
+   "count": 12,
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 2,
+   "componentType": 5121,
+   "count": 12,
+   "type": "VEC4"
+  },
+  {
+   "bufferView": 3,
+   "componentType": 5126,
+   "count": 12,
+   "type": "VEC4"
+  },
+  {
+   "bufferView": 4,
+   "componentType": 5123,
+   "count": 48,
+   "type": "SCALAR"
+  },
+  {
+   "bufferView": 5,
+   "componentType": 5126,
+   "count": 2,
+   "type": "MAT4"
+  },
+  {
+   "bufferView": 6,
+   "componentType": 5126,
+   "count": 2,
+   "type": "SCALAR",
+   "min": [
+    0.0
+   ],
+   "max": [
+    1.0
+   ]
+  },
+  {
+   "bufferView": 7,
+   "componentType": 5126,
+   "count": 2,
+   "type": "VEC4"
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 144,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 144,
+   "byteLength": 144,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 288,
+   "byteLength": 48,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 336,
+   "byteLength": 192,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 528,
+   "byteLength": 96,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 624,
+   "byteLength": 128
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 752,
+   "byteLength": 8
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 760,
+   "byteLength": 32
+  }
+ ],
+ "buffers": [
+  {
+   "byteLength": 792,
+   "uri": "skinned-arm.bin"
+  }
+ ]
+}

@@ -186,6 +186,254 @@ def quad_gltf(quads, materials, image=None, image_uri=None):
     return gltf, binary
 
 
+def skinned_arm_gltf(meshes, armature=None, armature_lift=None):
+    """A two joint arm with meshes skinned to it, and two clips that bend its elbow.
+
+    The joints are Root at the origin and Child one unit above it (a glTF node each), with the inverse
+    bind matrices of their rest pose. Every entry of `meshes` is a tube of four columns along y from 0
+    to 2 (three rows of four vertices), described by a (name, x offset, skinned, node translation)
+    tuple. A skinned tube is weighted to the joints: the row at y = 0 wholly to Root, the row at y = 1
+    half to each, and the row at y = 2 wholly to Child. The clips are "Bend" (Child turns from 0 to 90
+    degrees about z over one second, linear) and "Snap" (the same two keys, stepped, so it holds 0
+    degrees and jumps to 90 at t = 1).
+
+    With `armature` (a node dict, translation and rotation) the joints hang under a node of that
+    transform, as the armature object of a Blender export does, and the inverse bind matrices follow.
+    The tubes are then drawn in the world position of the bind pose, around the Root joint, which is
+    where the file's own x offsets already put them.
+
+    A mesh tuple may carry a fifth item, a lift: the tube is then authored that many units up and has a
+    skin of its own (the same two joints) whose inverse bind matrices take that into account, as the
+    ones of a mesh whose node was moved do. Skinned, it lands on the arm again, `lift` below where its
+    vertices are. With `armature_lift` (a vector) and an armature, a third clip "Lift" moves the
+    armature node itself from its translation to that translation plus the vector over one second.
+    """
+    import math
+
+    def mat_mul(a, b):
+        return [[sum(a[r][k] * b[k][c] for k in range(4)) for c in range(4)] for r in range(4)]
+
+    def translation(x, y, z):
+        return [[1, 0, 0, x], [0, 1, 0, y], [0, 0, 1, z], [0, 0, 0, 1]]
+
+    def rotation_y(degrees):
+        c, s = math.cos(math.radians(degrees)), math.sin(math.radians(degrees))
+        return [[c, 0, s, 0], [0, 1, 0, 0], [-s, 0, c, 0], [0, 0, 0, 1]]
+
+    def invert_rigid(m):
+        # The inverse of a rotation and a translation: the transposed rotation and the rotated minus translation.
+        r = [[m[c][r_] for c in range(3)] for r_ in range(3)]
+        t = [-sum(r[i][k] * m[k][3] for k in range(3)) for i in range(3)]
+        return [r[0] + [t[0]], r[1] + [t[1]], r[2] + [t[2]], [0, 0, 0, 1]]
+
+    def column_major(m):
+        return [m[r][c] for c in range(4) for r in range(4)]
+
+    nodes = []
+    scene_roots = []
+    above = [[1 if r == c else 0 for c in range(4)] for r in range(4)]
+    root_index = 0
+    if armature:
+        nodes.append(dict(name="Armature", **armature))
+        root_index = 1
+        # The armature is a translation and, optionally, a turn about y, whichever the file lists.
+        above = mat_mul(translation(*armature.get("translation", [0, 0, 0])),
+                        rotation_y(armature.get("rotation_y_degrees", 0)))
+        nodes[0].pop("rotation_y_degrees", None)
+        if "rotation_y_degrees" in armature:
+            half = math.radians(armature["rotation_y_degrees"]) / 2
+            nodes[0]["rotation"] = [0, math.sin(half), 0, math.cos(half)]
+        nodes[0]["children"] = [1]
+    nodes.append({"name": "Root", "children": [root_index + 1]})
+    nodes.append({"name": "Child", "translation": [0, 1, 0]})
+    scene_roots.append(0)
+    joint_nodes = [root_index, root_index + 1]
+    root_world = above
+    child_world = mat_mul(above, translation(0, 1, 0))
+    ibm = column_major(invert_rigid(root_world)) + column_major(invert_rigid(child_world))
+
+    def lifted_ibm(lift):
+        down = translation(0, -lift, 0)
+        return column_major(mat_mul(invert_rigid(root_world), down)) + column_major(mat_mul(invert_rigid(child_world), down))
+
+    lifts = sorted({m[4] if len(m) > 4 else 0 for m in meshes})
+
+    binary = b""
+    views, accessors, mesh_defs = [], [], []
+
+    def add(data, target, component, count, kind, extra=None):
+        nonlocal binary
+        view = {"buffer": 0, "byteOffset": len(binary), "byteLength": len(data)}
+        if target:
+            view["target"] = target
+        views.append(view)
+        accessors.append({"bufferView": len(views) - 1, "componentType": component, "count": count, "type": kind, **(extra or {})})
+        binary += pad4(data)
+        return len(accessors) - 1
+
+    # Rows of the tube and the weights each row gets.
+    rows = [(0.0, (1.0, 0.0)), (1.0, (0.5, 0.5)), (2.0, (0.0, 1.0))]
+    columns = [(-0.5, -0.5), (0.5, -0.5), (0.5, 0.5), (-0.5, 0.5)]
+    indices = []
+    for row in range(2):
+        for column in range(4):
+            a = row * 4 + column
+            b = row * 4 + (column + 1) % 4
+            indices += [a, b, b + 4, a, b + 4, a + 4]
+
+    for mesh_index, (name, x_offset, skinned, node_translation, *rest) in enumerate(meshes):
+        lift = rest[0] if rest else 0
+        positions, normals, joints, weights = [], [], [], []
+        for y, (w0, w1) in rows:
+            for x, z in columns:
+                positions.append((x + x_offset, y + lift, z))
+                length = math.hypot(x, z)
+                normals.append((x / length, 0.0, z / length))
+                joints.append((0, 1, 0, 0))
+                weights.append((w0, w1, 0.0, 0.0))
+        lo, hi = bounds(positions)
+        attributes = {
+            "POSITION": add(pack_floats(positions), 34962, 5126, len(positions), "VEC3", {"min": lo, "max": hi}),
+            "NORMAL": add(pack_floats(normals), 34962, 5126, len(normals), "VEC3"),
+        }
+        if skinned:
+            attributes["JOINTS_0"] = add(b"".join(struct.pack("<4B", *j) for j in joints), 34962, 5121, len(joints), "VEC4")
+            attributes["WEIGHTS_0"] = add(pack_floats(weights), 34962, 5126, len(weights), "VEC4")
+        index_accessor = add(struct.pack("<%dH" % len(indices), *indices), 34963, 5123, len(indices), "SCALAR")
+        mesh_defs.append({"name": name, "primitives": [{"attributes": attributes, "indices": index_accessor, "mode": 4}]})
+        node = {"name": name, "mesh": mesh_index}
+        if skinned:
+            node["skin"] = lifts.index(lift)
+        if node_translation:
+            node["translation"] = node_translation
+        scene_roots.append(len(nodes))
+        nodes.append(node)
+
+    ibm_accessor = add(pack_floats([ibm[:16], ibm[16:]]), None, 5126, 2, "MAT4")
+    times = add(pack_floats([(0.0,), (1.0,)]), None, 5126, 2, "SCALAR", {"min": [0.0], "max": [1.0]})
+    half = math.radians(90) / 2
+    rotations = add(pack_floats([(0.0, 0.0, 0.0, 1.0), (0.0, 0.0, math.sin(half), math.cos(half))]), None, 5126, 2, "VEC4")
+    child_node = joint_nodes[1]
+    skins = [
+        {"inverseBindMatrices": ibm_accessor, "joints": joint_nodes, "skeleton": root_index}
+    ]
+    if lifts != [0]:
+        skins = []
+        for lift in lifts:
+            matrices = ibm if lift == 0 else lifted_ibm(lift)
+            skins.append(
+                {
+                    "inverseBindMatrices": ibm_accessor if lift == 0 else add(pack_floats([matrices[:16], matrices[16:]]), None, 5126, 2, "MAT4"),
+                    "joints": joint_nodes,
+                    "skeleton": root_index,
+                }
+            )
+    lift_animation = []
+    if armature and armature_lift:
+        base = armature.get("translation", [0, 0, 0])
+        moved = [base[i] + armature_lift[i] for i in range(3)]
+        positions_accessor = add(pack_floats([tuple(base), tuple(moved)]), None, 5126, 2, "VEC3")
+        lift_animation = [
+            {
+                "name": "Lift",
+                "samplers": [{"input": times, "output": positions_accessor, "interpolation": "LINEAR"}],
+                "channels": [{"sampler": 0, "target": {"node": 0, "path": "translation"}}],
+            }
+        ]
+    gltf = {
+        "asset": {"version": "2.0", "generator": "helix test files"},
+        "scene": 0,
+        "scenes": [{"nodes": scene_roots}],
+        "nodes": nodes,
+        "meshes": mesh_defs,
+        "skins": skins,
+        "animations": [
+            {
+                "name": "Bend",
+                "samplers": [{"input": times, "output": rotations, "interpolation": "LINEAR"}],
+                "channels": [{"sampler": 0, "target": {"node": child_node, "path": "rotation"}}],
+            },
+            {
+                "name": "Snap",
+                "samplers": [{"input": times, "output": rotations, "interpolation": "STEP"}],
+                "channels": [{"sampler": 0, "target": {"node": child_node, "path": "rotation"}}],
+            },
+        ]
+        + lift_animation,
+        "accessors": accessors,
+        "bufferViews": views,
+        "buffers": [{"byteLength": len(binary)}],
+    }
+    return gltf, binary
+
+
+def six_influence_gltf():
+    """A triangle skinned to a chain of six joints, to see how weights are reduced to four.
+
+    The joints stand one above the other, joint k at y = k. The first vertex is pulled by all six
+    (0.35, 0.25, 0.15, 0.10, 0.09 and 0.06), the second by joint 3 alone with a weight of 0.5 that does
+    not sum to one, and the third has no weight at all.
+    """
+    nodes = [{"name": "Joint0", "children": [1]}]
+    for k in range(1, 6):
+        node = {"name": "Joint%d" % k, "translation": [0, 1, 0]}
+        if k < 5:
+            node["children"] = [k + 1]
+        nodes.append(node)
+    nodes.append({"name": "Triangle", "mesh": 0, "skin": 0})
+
+    positions = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
+    sets = [
+        ([0, 1, 2, 3], [0.35, 0.25, 0.15, 0.10]),
+        ([4, 5, 0, 0], [0.09, 0.06, 0.0, 0.0]),
+    ]
+    second_vertex = ([3, 0, 0, 0], [0.5, 0.0, 0.0, 0.0])
+    third_vertex = ([0, 0, 0, 0], [0.0, 0.0, 0.0, 0.0])
+    joints0 = [sets[0][0], second_vertex[0], third_vertex[0]]
+    weights0 = [sets[0][1], second_vertex[1], third_vertex[1]]
+    joints1 = [sets[1][0], [0, 0, 0, 0], [0, 0, 0, 0]]
+    weights1 = [sets[1][1], [0.0] * 4, [0.0] * 4]
+
+    binary = b""
+    views, accessors = [], []
+
+    def add(data, target, component, count, kind, extra=None):
+        nonlocal binary
+        view = {"buffer": 0, "byteOffset": len(binary), "byteLength": len(data)}
+        if target:
+            view["target"] = target
+        views.append(view)
+        accessors.append({"bufferView": len(views) - 1, "componentType": component, "count": count, "type": kind, **(extra or {})})
+        binary += pad4(data)
+        return len(accessors) - 1
+
+    lo, hi = bounds(positions)
+    attributes = {
+        "POSITION": add(pack_floats(positions), 34962, 5126, 3, "VEC3", {"min": lo, "max": hi}),
+        "JOINTS_0": add(b"".join(struct.pack("<4B", *j) for j in joints0), 34962, 5121, 3, "VEC4"),
+        "WEIGHTS_0": add(pack_floats(weights0), 34962, 5126, 3, "VEC4"),
+        "JOINTS_1": add(b"".join(struct.pack("<4B", *j) for j in joints1), 34962, 5121, 3, "VEC4"),
+        "WEIGHTS_1": add(pack_floats(weights1), 34962, 5126, 3, "VEC4"),
+    }
+    indices = add(struct.pack("<3H", 0, 1, 2), 34963, 5123, 3, "SCALAR")
+    ibm = []
+    for k in range(6):
+        ibm.append([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, -k, 0, 1])
+    ibm_accessor = add(pack_floats(ibm), None, 5126, 6, "MAT4")
+    gltf = {
+        "asset": {"version": "2.0", "generator": "helix test files"},
+        "scene": 0,
+        "scenes": [{"nodes": [0, 6]}],
+        "nodes": nodes,
+        "meshes": [{"name": "Triangle", "primitives": [{"attributes": attributes, "indices": indices, "mode": 4}]}],
+        "skins": [{"inverseBindMatrices": ibm_accessor, "joints": [0, 1, 2, 3, 4, 5], "skeleton": 0}],
+        "accessors": accessors,
+        "bufferViews": views,
+        "buffers": [{"byteLength": len(binary)}],
+    }
+    return gltf, binary
+
+
 def write(name, data):
     mode = "wb" if isinstance(data, bytes) else "w"
     with open(os.path.join(OUT, name), mode) as f:
@@ -263,6 +511,38 @@ def main():
     ]
     gltf, binary = quad_gltf([("First", 0, [0, 0, 0]), ("Second", 1, [3, 0, 0])], plain)
     write("two-materials.glb", glb(gltf, binary))
+
+    # A two joint arm with a tube skinned to it, as a glb and as a gltf with its buffer next to it. The
+    # same arm with its joints under an armature node that is moved and turned, two tubes sharing the
+    # one skin next to a tube that is not skinned (to see joint indices survive a merge).
+    gltf, binary = skinned_arm_gltf([("Arm", 0.0, True, None)])
+    write("skinned-arm.glb", glb(gltf, binary))
+    gltf["buffers"][0]["uri"] = "skinned-arm.bin"
+    write("skinned-arm.gltf", json.dumps(gltf, indent=1))
+    write("skinned-arm.bin", binary)
+    gltf, binary = skinned_arm_gltf(
+        [("Arm", 5.0, True, None)], armature={"translation": [5, 0, 0], "rotation_y_degrees": 90}
+    )
+    write("skinned-arm-armature.glb", glb(gltf, binary))
+    # The same armature with a clip that moves the armature node itself 3 up, which the joints under it follow.
+    gltf, binary = skinned_arm_gltf(
+        [("Arm", 5.0, True, None)], armature={"translation": [5, 0, 0], "rotation_y_degrees": 90}, armature_lift=[0, 3, 0]
+    )
+    write("skinned-arm-armature-lift.glb", glb(gltf, binary))
+    # Two tubes skinned to the same two joints by skins with different inverse bind matrices: the second
+    # tube is authored 2 up, and its matrices take it back down onto the arm.
+    gltf, binary = skinned_arm_gltf([("ArmA", 0.0, True, None), ("ArmB", 3.0, True, None, 2)])
+    write("skinned-two-skins.glb", glb(gltf, binary))
+    # Six influences on a vertex, and weights that do not sum to one.
+    gltf, binary = six_influence_gltf()
+    write("skinned-six-influences.glb", glb(gltf, binary))
+
+    # A skinned tube whose node is moved 5 up: glTF says the node of a skinned mesh does not place it, the
+    # skeleton does, so the tube stays where its vertices are.
+    gltf, binary = skinned_arm_gltf([("Arm", 0.0, True, [0, 5, 0])])
+    write("skinned-arm-moved-node.glb", glb(gltf, binary))
+    gltf, binary = skinned_arm_gltf([("ArmA", 0.0, True, None), ("ArmB", 3.0, True, None), ("Prop", 0.0, False, [0, 5, 0])])
+    write("skinned-two-meshes.glb", glb(gltf, binary))
 
     # A picture wider than the largest texture side (8192), which a solid colour keeps tiny.
     write("wide-9000x2.png", png(9000, 2, lambda x, y: (200, 100, 50, 255)))

@@ -834,6 +834,28 @@ struct MaterialInfo
     std::string missingTexture;
 };
 
+/// @brief One clip of a skeleton: an animation sampled as a function of time.
+struct ClipInfo
+{
+    std::string name;
+    /// @brief The length of the clip in seconds.
+    float duration = 0.f;
+    /// @brief How many tracks (translation, rotation or scale of a joint) hold keys.
+    std::uint64_t channelCount = 0;
+};
+
+/// @brief What a skeleton (a mesh whose points are the joints) carries, when a primitive of the
+/// geometry is one.
+struct SkeletonInfo
+{
+    /// @brief True when a primitive of the geometry is a skeleton.
+    bool present = false;
+    std::uint64_t jointCount = 0;
+    /// @brief The joints that have no parent.
+    std::uint64_t rootCount = 0;
+    std::vector<ClipInfo> clips;
+};
+
 /// @brief Where one primitive's elements sit among the elements of the whole node output, which
 /// are numbered one primitive after the other, as readAttribute reads them.
 struct PrimitiveRange
@@ -868,6 +890,8 @@ struct GeometryReport
     /// order they are first met. A face's `material_index` points into the table of its own mesh,
     /// not into this list.
     std::vector<MaterialInfo> materials;
+    /// @brief The first skeleton among the primitives, when there is one.
+    SkeletonInfo skeleton;
 };
 
 /// @brief The values of a run of elements of one attribute.

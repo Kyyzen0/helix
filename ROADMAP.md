@@ -57,11 +57,11 @@ Done in the tree:
   `material_index` per face that points into the mesh's table of materials. The facade
   (`GeometryReport::materials`) and the MCP `geometry_summary` report them. A texture that cannot
   be loaded keeps the material's factor and is named in the summary. **Left out for now**:
-  skeletons and animations (counted in the summary of the import, and next in track three), the
-  other texture maps (normal, roughness, metallic, emissive, occlusion), cameras and lights. The
+  the other texture maps (normal, roughness, metallic, emissive, occlusion), cameras and lights. The
   viewport draws the base colour factor and base colour texture of the materials (View > Materials,
-  `render_view.materials`). The geometry is the bind pose of a
-  skinned mesh, and the current pose of a `.blend`. Model I/O hands USD quads over as triangles.
+  `render_view.materials`). A skinned mesh comes in as its bind pose with its skin, and its
+  skeleton on the second output (see skeletal animation below); a `.blend` is exported with its
+  skin and actions. Model I/O hands USD quads over as triangles and reads no skin.
   See [build-macos.md](build-macos.md).
 
 - **M1.5, Helix MCP.** `Helix --mcp` runs a Model Context Protocol server on standard input and
@@ -118,6 +118,17 @@ Done in the tree:
   went from 9.3 ms a frame on average (17 ms at the end) to 0.34 ms at every frame, going back to
   a cooked frame from 3.8 ms to 0.04 ms, and a keyed transform on 100 000 points from 0.18 to
   0.04 ms a frame the second time through. See [build-macos.md](build-macos.md).
+
+- **Skeletal animation.** `helix::geometryImport` has a second output, the skeleton of a rigged
+  file as geometry: a point per joint, an open face per bone, and the attributes `joint_parent`,
+  `rest_local`, `inverse_bind` and `pose`; the mesh on the first output carries four influences per
+  point (`skin_joint0..3`, `skin_weight0..3`). `helix::skeletonPose` samples a glTF clip at the
+  current time (`clip`, `speed`, `offset`, `loop`) as a pure function of the frame, and
+  `helix::skinDeform` does linear blend skinning in parallel (about 0.8 ms for the 74 000 points of
+  a rigged dragon, 3.7 ms with the display buffers). `geometry_summary` and the facade report the
+  joints, roots and clips. **Gaps**: cubic spline tracks play as lines, no blend shapes, inverse
+  kinematics, retargeting or blending between clips, CPU skinning, the skeleton and clips are not
+  saved in a `.kut`, and USD skins are not read. See [build-macos.md](build-macos.md).
 
 Known gaps found on the way, to fix as the work below touches them:
 
@@ -237,16 +248,19 @@ The data model grows so that 3D, 2D, animation and simulation all live in the
 same graph.
 
 1. **Interchange**: ~~glTF import~~ and the other formats (meshes, normals, UVs, material
-   indices, materials with their base colour textures as data) are done. To do: skins and animation
-   clips, the other texture maps, then glTF and USD export. Helix is useful next to other tools before it replaces any of them.
+   indices, materials with their base colour textures as data) are done, and so are skins and
+   animation clips (item 3). To do: the other texture maps, then glTF and USD export. Helix is useful next to other tools before it replaces any of them.
 2. **UVs, textures and materials**: `uv` as a vertex attribute and the material model
    (a table of immutable materials on the mesh, `material_index` per face) are done, and so is
    the base colour in the viewport (factor and texture, one draw per material). To do: alpha and
    cut-out materials, the other maps, then a material node.
-3. **Skeletal animation**: skeletons as geometry (joints are points, bones are
+3. **Skeletal animation**: ~~skeletons as geometry (joints are points, bones are
    lines, transforms are attributes), four skin influences per point as
    attributes, a deform node, and glTF clips sampled at the current frame as
-   a pure function of time.
+   a pure function of time~~ is done as far as it goes (`geometryImport` second output,
+   `skeletonPose`, `skinDeform`). To do: cubic spline tracks (played as lines for now), blend shapes,
+   inverse kinematics, retargeting, blending between clips, the GPU skinning, saving the skeleton
+   in the `.kut`, and the skins of USD files (Model I/O).
 4. **Keyframes, second version**: ~~set, move, delete and interpolation from the
    interface and MCP~~ is done (M4). To do: bezier tangents, a curve editor and a
    dope sheet next to the timeline, keys on integers and toggles, and keyframed
@@ -314,7 +328,7 @@ The reference machine is a Mac mini M4. Everything above must run well on it.
 5. ~~M2, the node editor~~, ~~M3, the inspector~~ and ~~M4, the timeline and the spreadsheet~~
    done, and so is the frame cache of the cook cache; the scheduler work is next, so playback can
    leave the main thread
-6. Skeletal animation and keyframes, second version
+6. ~~Skeletal animation~~ done, and keyframes, second version
 7. M5, then the stability and rendering items that remain
 
 Each step ships with tests, and is checked on the reference machine before the

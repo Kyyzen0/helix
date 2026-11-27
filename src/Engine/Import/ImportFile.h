@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace helix::geo {
@@ -44,9 +45,19 @@ struct ImportSummary
     /// @brief The base colour of the first material, when there is one.
     bool hasBaseColor = false;
     std::array<float, 4> baseColor{1.f, 1.f, 1.f, 1.f};
+    /// @brief Animations the file holds (some formats are read without theirs: see jointCount).
     std::size_t animationCount = 0;
     std::size_t skinnedMeshCount = 0;
     std::size_t skippedPrimitiveCount = 0;
+    /// @brief The joints of the skeleton the import built, 0 when the file has none.
+    std::size_t jointCount = 0;
+    std::size_t rootJointCount = 0;
+    /// @brief The clips the import kept, with their length in seconds.
+    std::vector<std::pair<std::string, float>> clips;
+    /// @brief Vertices that more than four joints pull on, which keep their four strongest.
+    std::size_t overInfluencedVertices = 0;
+    /// @brief Tracks that are cubic splines in the file, played as straight lines between keys.
+    std::size_t cubicTracks = 0;
     /// @brief The reader that was used, such as "Assimp" or "Model I/O".
     std::string reader;
 
@@ -58,6 +69,9 @@ struct ImportSummary
 struct ImportedFile
 {
     std::vector<std::shared_ptr<const geo::Mesh>> meshes;
+    /// @brief The skeleton of the file (a mesh whose points are the joints), or null when no mesh
+    /// of the file is skinned. The skin attributes of the meshes index its points.
+    std::shared_ptr<const geo::Mesh> skeleton;
     ImportSummary summary;
 };
 

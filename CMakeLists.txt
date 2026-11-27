@@ -73,6 +73,7 @@ set(ENGINE_SOURCES
     src/Engine/Primitives/Primitive.cpp
     src/Engine/Primitives/Mesh.cpp
     src/Engine/Primitives/Camera.cpp
+    src/Engine/Primitives/Skeleton.cpp
     src/Engine/Selection/PrimPath.cpp
     src/Engine/Core/InstallPaths.cpp
     src/Engine/Core/Path.cpp
@@ -128,6 +129,7 @@ set(ENGINE_SOURCES
     src/Engine/GeometryAlgorithms/PlaneCut.cpp
     src/Engine/GeometryAlgorithms/ObjReader.cpp
     src/Engine/Import/AssimpReader.cpp
+    src/Engine/Import/AssimpSkeleton.cpp
     src/Engine/Import/BlenderConverter.cpp
     src/Engine/Import/ImageDecode.mm
     src/Engine/Import/ImportFile.cpp
@@ -736,6 +738,7 @@ if(HELIX_BUILD_TESTS)
         tests/GeometryImportTests.cpp
         tests/ImportFormatTests.cpp
         tests/ImportMaterialTests.cpp
+        tests/SkeletalAnimationTests.cpp
         tests/ModelRatNodeTests.cpp
         tests/TransformNodeTests.cpp
         tests/AttributeCreateNodeTests.cpp
