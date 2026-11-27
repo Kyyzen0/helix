@@ -184,6 +184,66 @@ its geometry, draws it off screen and writes a PNG, with no window. It is the ch
 chain without a screen. `apple/Helix/Samples` holds two scenes to try it on, written by
 `apple/Helix/Samples/make-samples.sh`.
 
+## Helix MCP
+
+`Helix --mcp` runs a [Model Context Protocol](https://modelcontextprotocol.io) server on standard
+input and output, so an AI agent can create, inspect and change a scene and check the result as
+data and as a picture. It is the app binary itself, with no window: newline delimited JSON-RPC
+2.0, one message per line, over the same `HelixCore` facade the interface uses
+(`apple/Helix/Sources/MCP*.swift`). Standard output carries the protocol only. The engine prints
+debug output, so the server points it at standard error before the engine starts.
+
+Register it with Claude Code, with the path of a built app:
+
+```sh
+claude mcp add helix -- /path/to/Helix.app/Contents/MacOS/Helix --mcp
+```
+
+or with any other MCP client, in its JSON configuration:
+
+```json
+{
+  "mcpServers": {
+    "helix": {
+      "command": "/path/to/Helix.app/Contents/MacOS/Helix",
+      "args": ["--mcp"]
+    }
+  }
+}
+```
+
+The tools:
+
+- `scene_info`: the nodes, links, display node, time and whether there are unsaved changes.
+- `new_scene`, `open_scene`, `save_scene`: scene files. The first two refuse while the scene has
+  unsaved changes, unless `discard_changes` is true.
+- `list_node_types`: the type names `create_node` accepts.
+- `create_node`, `delete_node`, `connect_nodes`, `disconnect_nodes`, `set_display_node`: the graph.
+- `list_parameters`, `set_parameter`: the parameters of a node, and one to write (a number, an
+  integer, a boolean, a string, or an array such as `[1, 2, 3]`), read back after the write.
+- `import_file`: imports a 3D file as a node (see Importing 3D files).
+- `set_frame`: moves the scene in time.
+- `geometry_summary`: counts, bounds and attributes of the output of any node.
+- `read_attribute`: the values of an attribute, up to 10 000 elements a call, with the total to page by.
+- `render_view`: a PNG of a node, framed like the viewport, optionally orbited (`azimuth`,
+  `elevation`), up to 2048 pixels a side.
+
+A node is named by its name (`cube1`), its path (`/cube1`) or its id. A call that fails (a node
+that does not exist, a value out of range) returns a result with `isError` and a message, so the
+agent can read it and retry; only a malformed message or an unknown tool is a protocol error.
+
+`apple/Helix/Scripts/mcp-smoke.py` checks the server end to end against a built app (Python 3,
+standard library only):
+
+```sh
+python3 -I apple/Helix/Scripts/mcp-smoke.py /path/to/Helix.app/Contents/MacOS/Helix
+```
+
+Limits for now: the server runs its own engine in its own process, so it works on its own scene,
+not on the one open in a window of the app; its changes are not grouped into undoable steps with
+an intent; and the scripts a node runs are not sandboxed. The three go with track two of the
+[roadmap](ROADMAP.md).
+
 ## Importing 3D files
 
 `helix::geometryImport` is the one node that reads other tools' files, and picks its reader by

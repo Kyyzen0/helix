@@ -426,6 +426,7 @@ endif()
 # the engine and the renderer, with no Qt and none of the engine's third party types in it.
 add_library(helixCore STATIC
     src/HelixCore/HelixCore.cpp
+    src/HelixCore/HelixCoreReport.cpp
     src/HelixCore/HelixCoreViewport.cpp
     src/HelixCore/ImageFile.cpp
 )

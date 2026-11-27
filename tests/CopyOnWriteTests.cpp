@@ -506,8 +506,6 @@ TEST_CASE("Other attributes of a copy detach when they grow", "[copyOnWrite]")
     geo::Mesh copy = source;
     copy.addPoint(Vector3(5, 5, 5));
     attr::AttributeHandleFloat copyHeights = copy.addAttribute<floatT>(attr::AttrOwner::POINT, "height");
-    // addPoint grows the positions only, so the attribute grows to the new point count here.
-    copyHeights.resize(copy.getNumPoints());
     copyHeights.setValue(4, 40.f);
     copyHeights.setValue(0, 99.f);
 
@@ -515,6 +513,64 @@ TEST_CASE("Other attributes of a copy detach when they grow", "[copyOnWrite]")
         attr::AttributeHandleRO<floatT>(source.getAttribByName(attr::AttrOwner::POINT, "height"));
     REQUIRE(sourceHeights.getSize() == 4);
     REQUIRE(sourceHeights.getValue(0) == 0.f);
+}
+
+TEST_CASE("addPoint keeps custom point attributes at the point count", "[copyOnWrite]")
+{
+    geo::Mesh mesh = makeGrid(1, 1);
+    attr::AttributeHandleFloat heights = mesh.addAttribute<floatT>(attr::AttrOwner::POINT, "height");
+    const Offset added = mesh.addPoint(Vector3(5, 5, 5));
+
+    REQUIRE(added == 4);
+    REQUIRE(mesh.getNumPoints() == 5);
+    attr::AttributeHandleFloat after = mesh.addAttribute<floatT>(attr::AttrOwner::POINT, "height");
+    REQUIRE(after.getSize() == mesh.getNumPoints());
+    REQUIRE(after.getValue(added) == 0.f);
+    after.setValue(added, 3.f);
+    REQUIRE(after.getValue(added) == 3.f);
+    (void)heights;
+}
+
+TEST_CASE("addPoint on a copy leaves the shared attribute of the source unchanged", "[copyOnWrite]")
+{
+    geo::Mesh source = makeGrid(1, 1);
+    attr::AttributeHandleFloat heights = source.addAttribute<floatT>(attr::AttrOwner::POINT, "height");
+    for (Offset point = 0; point < source.getNumPoints(); ++point)
+        heights.setValue(point, static_cast<floatT>(point + 1));
+
+    geo::Mesh copy = source;
+    const Offset added = copy.addPoint(Vector3(5, 5, 5));
+    attr::AttributeHandleFloat copyHeights = copy.addAttribute<floatT>(attr::AttrOwner::POINT, "height");
+    REQUIRE(copyHeights.getSize() == copy.getNumPoints());
+    copyHeights.setValue(added, 50.f);
+
+    const auto sourceHeights =
+        attr::AttributeHandleRO<floatT>(source.getAttribByName(attr::AttrOwner::POINT, "height"));
+    REQUIRE(sourceHeights.getSize() == 4);
+    for (Offset point = 0; point < 4; ++point)
+        REQUIRE(sourceHeights.getValue(point) == static_cast<floatT>(point + 1));
+    REQUIRE(source.getNumPoints() == 4);
+}
+
+TEST_CASE("addFace keeps custom vertex and face attributes at their counts", "[copyOnWrite]")
+{
+    geo::Mesh mesh = makeGrid(1, 1);
+    mesh.addAttribute<floatT>(attr::AttrOwner::VERTEX, "weight");
+    mesh.addAttribute<floatT>(attr::AttrOwner::FACE, "tag");
+    geo::Mesh copy = mesh;
+
+    const Offset face = copy.addFace({0, 1, 2}, true);
+
+    attr::AttributeHandleFloat weights = copy.addAttribute<floatT>(attr::AttrOwner::VERTEX, "weight");
+    attr::AttributeHandleFloat tags = copy.addAttribute<floatT>(attr::AttrOwner::FACE, "tag");
+    REQUIRE(weights.getSize() == copy.getNumVerts());
+    REQUIRE(tags.getSize() == copy.getNumFaces());
+    REQUIRE(tags.getValue(face) == 0.f);
+    weights.setValue(copy.getNumVerts() - 1, 9.f);
+
+    const auto sourceWeights =
+        attr::AttributeHandleRO<floatT>(mesh.getAttribByName(attr::AttrOwner::VERTEX, "weight"));
+    REQUIRE(sourceWeights.getSize() == mesh.getNumVerts());
 }
 
 TEST_CASE("Writing an intrinsic attribute through addAttribute follows the mesh handles", "[copyOnWrite]")

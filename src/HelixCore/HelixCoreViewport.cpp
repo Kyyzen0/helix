@@ -10,6 +10,7 @@
 #include "HelixCore/HelixCoreInternal.h"
 #include "HelixCore/ImageFile.h"
 #include <algorithm>
+#include <cmath>
 #include <glm/common.hpp>
 #include <glm/vec3.hpp>
 #include <limits>
@@ -168,6 +169,12 @@ void orbitViewport(float deltaX, float deltaY) { viewport().camera.orbit({deltaX
 void panViewport(float deltaX, float deltaY) { viewport().camera.pan({deltaX, deltaY}); }
 
 void dollyViewport(float amount) { viewport().camera.dolly(amount); }
+
+void orbitViewportTo(float azimuthDegrees, float elevationDegrees)
+{
+    if (!std::isfinite(azimuthDegrees) || !std::isfinite(elevationDegrees)) return;
+    viewport().camera.setAngles(glm::radians(azimuthDegrees), glm::radians(elevationDegrees));
+}
 
 void resetViewport() { viewport().camera.reset(); }
 

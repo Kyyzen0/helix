@@ -178,19 +178,30 @@ void ensureSynchronousCooking()
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
+// Cooks a node and returns what its first output produced.
+Status cookNode(NodeId node, std::shared_ptr<const NodePacket>& packet)
+{
+    if (Status status = requireInitialized(); !status.ok) return status;
+    if (Status status = requireNode(node); !status.ok) return status;
+    ensureSynchronousCooking();
+
+    nt::nm().cook(node);
+    packet = nt::nm().getNode(node).getOutputPacket(0);
+    if (!packet) return failure("The node produced no geometry.");
+    return success();
+}
+
 // Cooks the display node and returns what it produced.
 Status cookDisplay(std::shared_ptr<const NodePacket>& packet)
 {
     if (Status status = requireInitialized(); !status.ok) return status;
-    ensureSynchronousCooking();
 
     const std::optional<nt::NodeId> display = nt::nm().getDisplayNode();
     if (!display || !nt::nm().isValidNode(*display)) return failure("No node is displayed.");
-
-    nt::nm().cook(*display);
-    packet = nt::nm().getNode(*display).getOutputPacket(0);
-    if (!packet) return failure("The display node produced no geometry.");
-    return success();
+    Status status = cookNode(*display, packet);
+    if (!status.ok && status.error == "The node produced no geometry.")
+        return failure("The display node produced no geometry.");
+    return status;
 }
 
 void appendVectors(std::vector<float>& out, const std::vector<glm::vec3>& vectors)
@@ -239,6 +250,11 @@ Status writeAtomically(const std::filesystem::path& destination)
 namespace detail {
 
 Status cookDisplayPacket(std::shared_ptr<const NodePacket>& packet) { return cookDisplay(packet); }
+
+Status cookNodePacket(NodeId node, std::shared_ptr<const NodePacket>& packet)
+{
+    return cookNode(node, packet);
+}
 
 } // namespace detail
 
@@ -455,6 +471,16 @@ Status setDisplayNode(NodeId node)
         if (Status status = requireNode(node); !status.ok) return status;
         ensureSynchronousCooking();
         nt::nm().setDisplayNode(node);
+        return success();
+    });
+}
+
+Status clearDisplayNode()
+{
+    return guarded([&] {
+        if (Status status = requireInitialized(); !status.ok) return status;
+        ensureSynchronousCooking();
+        if (nt::nm().getDisplayNode()) nt::nm().clearDisplayFlag();
         return success();
     });
 }

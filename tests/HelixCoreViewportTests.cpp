@@ -6,6 +6,7 @@
 #include <CoreGraphics/CoreGraphics.h>
 #include <ImageIO/ImageIO.h>
 #include <catch2/catch_test_macros.hpp>
+#include <cmath>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -296,4 +297,38 @@ TEST_CASE_METHOD(
     core::stopViewport();
     REQUIRE_FALSE(core::isViewportRunning());
     REQUIRE_FALSE(core::encodeViewport(nullptr, redOptions(64, 64)).status.ok);
+}
+
+TEST_CASE_METHOD(
+    ViewportFixture,
+    "An absolute orbit gives the same picture whatever the camera did before"
+)
+{
+    skipWithoutMetal();
+    showCube();
+    REQUIRE(core::updateViewportGeometry().status.ok);
+
+    const auto render = [](const char* name, float azimuth, float elevation, bool jostle) {
+        core::resetViewport();
+        if (jostle) core::orbitViewport(233.f, -61.f);
+        core::orbitViewportTo(azimuth, elevation);
+        REQUIRE(core::frameViewport(4.f / 3.f));
+        const std::string path = helix::test::tempPath(name);
+        fs::remove(path);
+        REQUIRE(core::renderToImage(path, redOptions(96, 72), true).ok);
+        return decodePng(path);
+    };
+
+    const DecodedImage first = render("helix_orbit_a.png", 30.f, 35.f, false);
+    const DecodedImage again = render("helix_orbit_b.png", 30.f, 35.f, true);
+    const DecodedImage other = render("helix_orbit_c.png", 120.f, 10.f, false);
+    REQUIRE(first.rgba.size() == 96 * 72 * 4);
+    REQUIRE(first.rgba == again.rgba);
+    REQUIRE(first.rgba != other.rgba);
+    REQUIRE(countRed(other) > 96 * 72 / 20);
+
+    // An angle that is not a number leaves the camera where it was.
+    core::orbitViewportTo(30.f, 35.f);
+    core::orbitViewportTo(std::nanf(""), 0.f);
+    REQUIRE(core::frameViewport(4.f / 3.f));
 }

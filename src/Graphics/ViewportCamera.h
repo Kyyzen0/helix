@@ -16,6 +16,10 @@ class ViewportCamera
     /// @brief Slides the camera and its centre across the view by a pointer drag in pixels.
     void pan(glm::vec2 delta);
 
+    /// @brief Sets the angles the camera looks from, in radians, keeping the centre and the
+    /// distance. The pitch is held short of straight up and down, like @ref orbit does.
+    void setAngles(float yaw, float pitch);
+
     /// @brief Moves the camera toward the centre for a negative amount and away for a positive one.
     ///
     /// @note Close to the centre the camera keeps moving forward and carries the centre with it.
