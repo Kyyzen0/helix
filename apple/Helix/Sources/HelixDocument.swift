@@ -75,7 +75,7 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
     /// not touched until `activate`.
     nonisolated init() {
         fileContents = nil
-        importURL = ImportRequests.shared.pop()
+        importURL = nil
     }
 
     /// A scene stored in a file. Loads it at once, so that a file that cannot be read, or a
@@ -88,9 +88,10 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
             fileContents = data
             importURL = nil
         } else {
-            // A 3D file that reached the document itself (the document controller normally
-            // takes it before). A document is given the bytes and not the path, so they are
-            // copied to a folder of the caches, under the name of the file, to be imported from.
+            // A 3D file opened through the document group (Open, Dock, double click). A document
+            // is given the bytes and not the path (`ReadConfiguration` has no URL), so they are
+            // copied to a temporary folder, under the name of the file, to be imported from. A
+            // `.gltf` whose `.bin` or textures sit beside it loses them: they are not copied.
             fileContents = nil
             importURL = try Self.stage(data, named: configuration.file.preferredFilename ?? "model")
         }
@@ -135,10 +136,21 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         cookGeometry()
         prepareEditor()
         prepareTimeline()
+        Self.logLaunchDebug()
         if let message = openingError {
             presentedError = message
             openingError = nil
         }
+    }
+
+    /// With `HELIX_DEBUG_LAUNCH=1` in the environment, writes the nodes of the scene that was just
+    /// opened to standard error ("helix-launch: scene nodes=2 types=geometryImport,..."), which
+    /// `Scripts/launch-smoke.py` reads to check that a file opened as a scene.
+    private static func logLaunchDebug() {
+        guard ProcessInfo.processInfo.environment["HELIX_DEBUG_LAUNCH"] == "1" else { return }
+        let types = helix.core.listNodes().map { String(engine: $0.type) }
+        FileHandle.standardError.write(
+            Data("helix-launch: scene nodes=\(types.count) types=\(types.joined(separator: ","))\n".utf8))
     }
 
     /// Asks for a 3D file with an open panel, and imports it into this scene.

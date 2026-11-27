@@ -530,6 +530,15 @@ standard library only):
 python3 -I apple/Helix/Scripts/mcp-smoke.py /path/to/Helix.app/Contents/MacOS/Helix
 ```
 
+`apple/Helix/Scripts/launch-smoke.py` launches the built app four times (plain, with a `.kut`, with a
+3D file, in French), kills it each time, and fails if it dies within 6 seconds or if the opened file
+did not become a scene (it reads the line `HELIX_DEBUG_LAUNCH=1` makes the app write to standard
+error). It opens a window each time, so it cannot run in a sandbox:
+
+```sh
+python3 -I apple/Helix/Scripts/launch-smoke.py /path/to/Helix.app/Contents/MacOS/Helix
+```
+
 Limits for now: the server runs its own engine in its own process, so it works on its own scene,
 not on the one open in a window of the app; its changes are not grouped into undoable steps with
 an intent; and the scripts a node runs are not sandboxed. The three go with track two of the
