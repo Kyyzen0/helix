@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo/helix-logo-256.png" width="160" alt="Helix logo"></p>
+
 <div align="center">
 
 # Helix
