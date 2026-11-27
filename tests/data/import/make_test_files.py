@@ -186,7 +186,7 @@ def quad_gltf(quads, materials, image=None, image_uri=None):
     return gltf, binary
 
 
-def skinned_arm_gltf(meshes, armature=None):
+def skinned_arm_gltf(meshes, armature=None, armature_lift=None):
     """A two joint arm with meshes skinned to it, and two clips that bend its elbow.
 
     The joints are Root at the origin and Child one unit above it (a glTF node each), with the inverse
@@ -201,6 +201,12 @@ def skinned_arm_gltf(meshes, armature=None):
     transform, as the armature object of a Blender export does, and the inverse bind matrices follow.
     The tubes are then drawn in the world position of the bind pose, around the Root joint, which is
     where the file's own x offsets already put them.
+
+    A mesh tuple may carry a fifth item, a lift: the tube is then authored that many units up and has a
+    skin of its own (the same two joints) whose inverse bind matrices take that into account, as the
+    ones of a mesh whose node was moved do. Skinned, it lands on the arm again, `lift` below where its
+    vertices are. With `armature_lift` (a vector) and an armature, a third clip "Lift" moves the
+    armature node itself from its translation to that translation plus the vector over one second.
     """
     import math
 
@@ -246,6 +252,12 @@ def skinned_arm_gltf(meshes, armature=None):
     child_world = mat_mul(above, translation(0, 1, 0))
     ibm = column_major(invert_rigid(root_world)) + column_major(invert_rigid(child_world))
 
+    def lifted_ibm(lift):
+        down = translation(0, -lift, 0)
+        return column_major(mat_mul(invert_rigid(root_world), down)) + column_major(mat_mul(invert_rigid(child_world), down))
+
+    lifts = sorted({m[4] if len(m) > 4 else 0 for m in meshes})
+
     binary = b""
     views, accessors, mesh_defs = [], [], []
 
@@ -269,11 +281,12 @@ def skinned_arm_gltf(meshes, armature=None):
             b = row * 4 + (column + 1) % 4
             indices += [a, b, b + 4, a, b + 4, a + 4]
 
-    for mesh_index, (name, x_offset, skinned, node_translation) in enumerate(meshes):
+    for mesh_index, (name, x_offset, skinned, node_translation, *rest) in enumerate(meshes):
+        lift = rest[0] if rest else 0
         positions, normals, joints, weights = [], [], [], []
         for y, (w0, w1) in rows:
             for x, z in columns:
-                positions.append((x + x_offset, y, z))
+                positions.append((x + x_offset, y + lift, z))
                 length = math.hypot(x, z)
                 normals.append((x / length, 0.0, z / length))
                 joints.append((0, 1, 0, 0))
@@ -290,7 +303,7 @@ def skinned_arm_gltf(meshes, armature=None):
         mesh_defs.append({"name": name, "primitives": [{"attributes": attributes, "indices": index_accessor, "mode": 4}]})
         node = {"name": name, "mesh": mesh_index}
         if skinned:
-            node["skin"] = 0
+            node["skin"] = lifts.index(lift)
         if node_translation:
             node["translation"] = node_translation
         scene_roots.append(len(nodes))
@@ -301,13 +314,39 @@ def skinned_arm_gltf(meshes, armature=None):
     half = math.radians(90) / 2
     rotations = add(pack_floats([(0.0, 0.0, 0.0, 1.0), (0.0, 0.0, math.sin(half), math.cos(half))]), None, 5126, 2, "VEC4")
     child_node = joint_nodes[1]
+    skins = [
+        {"inverseBindMatrices": ibm_accessor, "joints": joint_nodes, "skeleton": root_index}
+    ]
+    if lifts != [0]:
+        skins = []
+        for lift in lifts:
+            matrices = ibm if lift == 0 else lifted_ibm(lift)
+            skins.append(
+                {
+                    "inverseBindMatrices": ibm_accessor if lift == 0 else add(pack_floats([matrices[:16], matrices[16:]]), None, 5126, 2, "MAT4"),
+                    "joints": joint_nodes,
+                    "skeleton": root_index,
+                }
+            )
+    lift_animation = []
+    if armature and armature_lift:
+        base = armature.get("translation", [0, 0, 0])
+        moved = [base[i] + armature_lift[i] for i in range(3)]
+        positions_accessor = add(pack_floats([tuple(base), tuple(moved)]), None, 5126, 2, "VEC3")
+        lift_animation = [
+            {
+                "name": "Lift",
+                "samplers": [{"input": times, "output": positions_accessor, "interpolation": "LINEAR"}],
+                "channels": [{"sampler": 0, "target": {"node": 0, "path": "translation"}}],
+            }
+        ]
     gltf = {
         "asset": {"version": "2.0", "generator": "helix test files"},
         "scene": 0,
         "scenes": [{"nodes": scene_roots}],
         "nodes": nodes,
         "meshes": mesh_defs,
-        "skins": [{"inverseBindMatrices": ibm_accessor, "joints": joint_nodes, "skeleton": root_index}],
+        "skins": skins,
         "animations": [
             {
                 "name": "Bend",
@@ -319,7 +358,8 @@ def skinned_arm_gltf(meshes, armature=None):
                 "samplers": [{"input": times, "output": rotations, "interpolation": "STEP"}],
                 "channels": [{"sampler": 0, "target": {"node": child_node, "path": "rotation"}}],
             },
-        ],
+        ]
+        + lift_animation,
         "accessors": accessors,
         "bufferViews": views,
         "buffers": [{"byteLength": len(binary)}],
@@ -484,6 +524,15 @@ def main():
         [("Arm", 5.0, True, None)], armature={"translation": [5, 0, 0], "rotation_y_degrees": 90}
     )
     write("skinned-arm-armature.glb", glb(gltf, binary))
+    # The same armature with a clip that moves the armature node itself 3 up, which the joints under it follow.
+    gltf, binary = skinned_arm_gltf(
+        [("Arm", 5.0, True, None)], armature={"translation": [5, 0, 0], "rotation_y_degrees": 90}, armature_lift=[0, 3, 0]
+    )
+    write("skinned-arm-armature-lift.glb", glb(gltf, binary))
+    # Two tubes skinned to the same two joints by skins with different inverse bind matrices: the second
+    # tube is authored 2 up, and its matrices take it back down onto the arm.
+    gltf, binary = skinned_arm_gltf([("ArmA", 0.0, True, None), ("ArmB", 3.0, True, None, 2)])
+    write("skinned-two-skins.glb", glb(gltf, binary))
     # Six influences on a vertex, and weights that do not sum to one.
     gltf, binary = six_influence_gltf()
     write("skinned-six-influences.glb", glb(gltf, binary))

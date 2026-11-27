@@ -115,22 +115,33 @@ template <typename Key> KeyReading<Key> readKeys(const Key* keys, unsigned count
 
 float seconds(double time, double ticksPerSecond) { return static_cast<float>(time / ticksPerSecond); }
 
+// Two inverse bind matrices are the same one when no entry differs by more than the float noise
+// of a file that writes them as text.
+bool sameMatrix(const Matrix4& a, const Matrix4& b) { return (a - b).cwiseAbs().maxCoeff() <= 1e-4f; }
+
 } // namespace
 
 SkeletonReader::SkeletonReader(const aiScene& scene) : scene_(scene)
 {
     if (!scene.mRootNode) return;
 
-    // Every bone of every mesh, by name, with the first offset matrix seen for it.
+    // Every bone of every mesh, by name, with each distinct offset matrix seen for it, the first
+    // one first. Two meshes that skin to the same node with different offsets (a mesh authored
+    // elsewhere in space than the other) each need their own inverse bind matrix.
     std::vector<std::string> boneNames;
-    std::unordered_map<std::string, aiMatrix4x4> offsetOf;
+    std::unordered_map<std::string, std::vector<Matrix4>> offsetsOf;
     for (unsigned m = 0; m < scene.mNumMeshes; ++m)
     {
         const aiMesh& mesh = *scene.mMeshes[m];
         for (unsigned b = 0; b < mesh.mNumBones; ++b)
         {
             const std::string name = mesh.mBones[b]->mName.C_Str();
-            if (offsetOf.emplace(name, mesh.mBones[b]->mOffsetMatrix).second) boneNames.push_back(name);
+            const Matrix4 offset = assimpMatrix(mesh.mBones[b]->mOffsetMatrix);
+            auto [entry, isNew] = offsetsOf.try_emplace(name);
+            if (isNew) boneNames.push_back(name);
+            auto& offsets = entry->second;
+            if (std::none_of(offsets.begin(), offsets.end(), [&](const Matrix4& seen) { return sameMatrix(seen, offset); }))
+                offsets.push_back(offset);
         }
     }
     if (boneNames.empty()) return;
@@ -164,6 +175,30 @@ SkeletonReader::SkeletonReader(const aiScene& scene) : scene_(scene)
         }
     }
 
+    // A node above the bones that a clip animates (the armature object of a Blender export, moved
+    // by the action) moves the whole rig, so it joins the hierarchy as a joint with no weight, and
+    // so does every node between it and the bones. Only what is above the topmost of them stays
+    // static (the base of the roots). A node above the bones that no clip animates is not a joint.
+    std::unordered_set<std::string> animatedNodes;
+    for (unsigned a = 0; a < scene.mNumAnimations; ++a)
+        for (unsigned c = 0; c < scene.mAnimations[a]->mNumChannels; ++c)
+            animatedNodes.insert(scene.mAnimations[a]->mChannels[c]->mNodeName.C_Str());
+    if (!animatedNodes.empty())
+    {
+        const std::unordered_set<const aiNode*> bones = jointNodes;
+        for (const aiNode* node : bones)
+        {
+            std::vector<const aiNode*> above;
+            std::size_t topmost = 0;
+            for (const aiNode* up = node->mParent; up; up = up->mParent)
+            {
+                above.push_back(up);
+                if (animatedNodes.count(up->mName.C_Str())) topmost = above.size();
+            }
+            jointNodes.insert(above.begin(), above.begin() + static_cast<std::ptrdiff_t>(topmost));
+        }
+    }
+
     // Depth first from the root, so a parent comes before its children and the order does not
     // depend on how the file lists its bones.
     struct Pending
@@ -186,11 +221,27 @@ SkeletonReader::SkeletonReader(const aiScene& scene) : scene_(scene)
             joint.restWorld = nodes.world.at(current.node);
             if (joint.parent < 0 && current.node->mParent)
                 joint.parentBase = nodes.world.at(current.node->mParent);
-            const auto offset = offsetOf.find(joint.name);
-            joint.inverseBind = offset != offsetOf.end() ? assimpMatrix(offset->second) : Matrix4(joint.restWorld.inverse());
+            const auto offsets = offsetsOf.find(joint.name);
+            joint.inverseBind = offsets != offsetsOf.end() ? offsets->second.front() : Matrix4(joint.restWorld.inverse());
             parentForChildren = static_cast<int>(skeleton_.joints.size());
-            jointOfName_.emplace(joint.name, skeleton_.joints.size());
+            auto& entries = jointsOfName_.try_emplace(joint.name).first->second;
+            entries.push_back({joint.inverseBind, skeleton_.joints.size()});
+            // The other offsets of the node: a copy of the joint (same parent, same rest) with its
+            // own inverse bind matrix. A copy has no child; the children hang from the first.
+            std::vector<RawJoint> copies;
+            if (offsets != offsetsOf.end())
+                for (std::size_t i = 1; i < offsets->second.size(); ++i)
+                {
+                    RawJoint copy = joint;
+                    copy.inverseBind = offsets->second[i];
+                    copies.push_back(std::move(copy));
+                }
             skeleton_.joints.push_back(std::move(joint));
+            for (RawJoint& copy : copies)
+            {
+                entries.push_back({copy.inverseBind, skeleton_.joints.size()});
+                skeleton_.joints.push_back(std::move(copy));
+            }
         }
         for (unsigned i = current.node->mNumChildren; i-- > 0;)
             pending.push_back({current.node->mChildren[i], parentForChildren});
@@ -199,15 +250,16 @@ SkeletonReader::SkeletonReader(const aiScene& scene) : scene_(scene)
     // A bone that names no node has nowhere in the hierarchy: it stands alone at the origin and
     // holds the mesh at its bind pose.
     for (const std::string& name : orphans)
-    {
-        RawJoint joint;
-        joint.name = name;
-        joint.inverseBind = assimpMatrix(offsetOf.at(name));
-        joint.restWorld = joint.inverseBind.inverse();
-        joint.restLocal = joint.restWorld;
-        jointOfName_.emplace(name, skeleton_.joints.size());
-        skeleton_.joints.push_back(std::move(joint));
-    }
+        for (const Matrix4& offset : offsetsOf.at(name))
+        {
+            RawJoint joint;
+            joint.name = name;
+            joint.inverseBind = offset;
+            joint.restWorld = joint.inverseBind.inverse();
+            joint.restLocal = joint.restWorld;
+            jointsOfName_[name].push_back({offset, skeleton_.joints.size()});
+            skeleton_.joints.push_back(std::move(joint));
+        }
 }
 
 void SkeletonReader::readSkin(const aiMesh& source, RawMesh& mesh)
@@ -218,8 +270,17 @@ void SkeletonReader::readSkin(const aiMesh& source, RawMesh& mesh)
     for (unsigned b = 0; b < source.mNumBones; ++b)
     {
         const aiBone& bone = *source.mBones[b];
-        const auto joint = jointOfName_.find(bone.mName.C_Str());
-        if (joint == jointOfName_.end()) continue;
+        const auto found = jointsOfName_.find(bone.mName.C_Str());
+        if (found == jointsOfName_.end()) continue;
+        // The joint of this node that carries this mesh's inverse bind matrix.
+        const Matrix4 offset = assimpMatrix(bone.mOffsetMatrix);
+        std::size_t joint = found->second.front().index;
+        for (const JointEntry& entry : found->second)
+            if (sameMatrix(entry.inverseBind, offset))
+            {
+                joint = entry.index;
+                break;
+            }
         for (unsigned w = 0; w < bone.mNumWeights; ++w)
         {
             const aiVertexWeight& influence = bone.mWeights[w];
@@ -227,7 +288,7 @@ void SkeletonReader::readSkin(const aiMesh& source, RawMesh& mesh)
             if (influence.mVertexId >= source.mNumVertices || !(influence.mWeight > 0.f) ||
                 !std::isfinite(influence.mWeight))
                 continue;
-            offer(vertices[influence.mVertexId], static_cast<std::uint32_t>(joint->second), influence.mWeight);
+            offer(vertices[influence.mVertexId], static_cast<std::uint32_t>(joint), influence.mWeight);
         }
     }
 
@@ -271,13 +332,13 @@ void SkeletonReader::readClips()
         for (unsigned c = 0; c < animation.mNumChannels; ++c)
         {
             const aiNodeAnim& channel = *animation.mChannels[c];
-            const auto joint = jointOfName_.find(channel.mNodeName.C_Str());
-            if (joint == jointOfName_.end())
+            const auto joint = jointsOfName_.find(channel.mNodeName.C_Str());
+            if (joint == jointsOfName_.end())
             {
                 ++skeleton_.unmatchedTracks;
                 continue;
             }
-            geo::JointTracks& tracks = clip->joints[joint->second];
+            geo::JointTracks& tracks = clip->joints[joint->second.front().index];
 
             const auto translation = readKeys(channel.mPositionKeys, channel.mNumPositionKeys);
             if (translation.cubic && !translation.valueKeys.empty()) ++skeleton_.cubicTracks;
@@ -313,6 +374,10 @@ void SkeletonReader::readClips()
                  {&tracks.translation.times, &tracks.rotation.times, &tracks.scale.times})
                 if (!times->empty()) duration = std::max(duration, times->back());
         }
+        // Every copy of a node (one per distinct inverse bind matrix) moves as the node does.
+        for (const auto& named : jointsOfName_)
+            for (std::size_t i = 1; i < named.second.size(); ++i)
+                clip->joints[named.second[i].index] = clip->joints[named.second.front().index];
         // A clip with no key at all still has the length the file gives it.
         if (duration <= 0.f) duration = static_cast<float>(animation.mDuration / ticksPerSecond);
         clip->duration = std::max(duration, 0.f);

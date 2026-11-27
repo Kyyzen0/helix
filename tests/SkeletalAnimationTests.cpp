@@ -698,6 +698,113 @@ TEST_CASE_METHOD(NMReset, "Joints under a moved and turned armature node pose th
     }
 }
 
+TEST_CASE_METHOD(NMReset, "Meshes skinned to the same nodes with different inverse binds each keep their own", "[skeleton]")
+{
+    // ArmA is skinned by the usual inverse binds. ArmB is authored 2 up and its skin's inverse binds
+    // carry that (a translation of -2 in y after the rest pose), so skinned it lands on the arm again.
+    import::ImportOptions options;
+    options.mergeMeshes = false;
+    const auto imported = read("skinned-two-skins.glb", options);
+    REQUIRE(imported->meshes.size() == 2);
+    REQUIRE(imported->skeleton != nullptr);
+
+    // The two nodes have a joint per distinct inverse bind matrix, all four under their own names.
+    const auto& names = imported->skeleton->skeleton()->jointNames;
+    REQUIRE((names == std::vector<std::string>{"Root", "Root", "Child", "Child"} ||
+             names == std::vector<std::string>{"Root", "Child", "Root", "Child"}));
+    const auto parents = pointAttribute<intT>(*imported->skeleton, attr::names::jointParent);
+    for (std::size_t joint = 0; joint < names.size(); ++joint)
+        if (names[joint] == "Child")
+        {
+            REQUIRE(parents[joint] >= 0);
+            REQUIRE(names[static_cast<std::size_t>(parents[joint])] == "Root");
+        }
+    REQUIRE(imported->meshes[0]->getNumPoints() == 12);
+    REQUIRE(imported->meshes[1]->getNumPoints() == 12);
+    const auto inputA = pointsOf(*imported->meshes[0]);
+    const auto inputB = pointsOf(*imported->meshes[1]);
+    REQUIRE(inputB[0].y() >= 2.f);
+
+    Rig rig("skinned-two-skins.glb", 1.f, "auto", false);
+    rig.setString(rig.pose, "clip", "Bend");
+    auto& nm = nt::nm();
+    const float quarterTurn = static_cast<float>(M_PI) / 2.f;
+    for (const float seconds : {0.f, 1.f})
+    {
+        CAPTURE(seconds);
+        nm.setFrame(frameAt(seconds));
+        nm.cook(rig.deform);
+        REQUIRE(rig.error(rig.deform).empty());
+        const auto packet = nm.getNode(rig.deform).getOutputPacket(0);
+        REQUIRE(packet->size() == 2);
+        const float angle = quarterTurn * seconds;
+        for (std::size_t m = 0; m < 2; ++m)
+        {
+            CAPTURE(m);
+            const auto output = pointsOf(*std::dynamic_pointer_cast<const geo::Mesh>(packet->getPrimitive(m)));
+            const auto& input = m == 0 ? inputA : inputB;
+            REQUIRE(output.size() == input.size());
+            for (std::size_t point = 0; point < input.size(); ++point)
+            {
+                CAPTURE(point);
+                // What the arm does to a point of the arm: ArmB's vertices are 2 above the arm.
+                const Vector3 onArm = input[point] - Vector3(0, m == 0 ? 0.f : 2.f, 0);
+                const float row = rowOf(onArm);
+                const Vector3 child = bentAbout(onArm, angle);
+                const Vector3 expected = row == 0.f ? onArm : row == 2.f ? child : Vector3((onArm + child) * 0.5f);
+                REQUIRE(near(output[point], expected));
+            }
+        }
+    }
+}
+
+TEST_CASE_METHOD(NMReset, "A clip that moves the armature node moves the whole rig", "[skeleton]")
+{
+    SECTION("an armature no clip animates stays a static base")
+    {
+        const auto imported = read("skinned-arm-armature.glb");
+        REQUIRE(imported->skeleton->skeleton()->jointNames == std::vector<std::string>{"Root", "Child"});
+        REQUIRE(imported->skeleton->skeleton()->clips.size() == 2);
+    }
+
+    SECTION("an animated armature is a joint with no weight, and its children follow")
+    {
+        const auto imported = read("skinned-arm-armature-lift.glb");
+        REQUIRE(imported->skeleton != nullptr);
+        const auto& table = *imported->skeleton->skeleton();
+        REQUIRE(table.jointNames == std::vector<std::string>{"Armature", "Root", "Child"});
+        // Only what is above the armature is static, and nothing is: the base of the root is the identity.
+        REQUIRE(near(table.rootBase[0], Matrix4::Identity()));
+        const auto parents = pointAttribute<intT>(*imported->skeleton, attr::names::jointParent);
+        REQUIRE(parents == std::vector<intT>{-1, 0, 1});
+        // Nothing is skinned to it.
+        const auto jointOfFirst = pointAttribute<intT>(*imported->meshes[0], attr::names::skinJoint[0]);
+        const auto weight = pointAttribute<floatT>(*imported->meshes[0], attr::names::skinWeight[0]);
+        for (std::size_t point = 0; point < jointOfFirst.size(); ++point)
+            if (weight[point] > 0.f) REQUIRE(jointOfFirst[point] != 0);
+
+        Rig rig("skinned-arm-armature-lift.glb");
+        rig.setString(rig.pose, "clip", "Lift");
+        const auto input = pointsOf(*imported->meshes[0]);
+        for (const float seconds : {0.f, 0.5f, 1.f})
+        {
+            CAPTURE(seconds);
+            const auto output = rig.skinned(seconds);
+            REQUIRE(output.size() == input.size());
+            for (std::size_t point = 0; point < input.size(); ++point)
+            {
+                CAPTURE(point);
+                REQUIRE(near(output[point], Vector3(input[point] + Vector3(0, 3.f * seconds, 0))));
+            }
+        }
+        // The elbow clip still bends it, under the same armature.
+        rig.setString(rig.pose, "clip", "Bend");
+        const auto rest = rig.skinned(0.f);
+        for (std::size_t point = 0; point < input.size(); ++point)
+            REQUIRE(near(rest[point], input[point], 1e-5f));
+    }
+}
+
 TEST_CASE_METHOD(NMReset, "More than four influences keep the four strongest, and weights are normalized", "[skeleton]")
 {
     const auto imported = read("skinned-six-influences.glb");
@@ -901,6 +1008,13 @@ TEST_CASE("The cost of posing and skinning a rig", "[.bench]")
     REQUIRE(core::connectNodes(import, 0, deform, 0).ok);
     REQUIRE(core::connectNodes(pose, 0, deform, 1).ok);
     nm.cook(import);
+    {
+        const auto skeleton = nm.getNode(import).getOutputPacket(1);
+        REQUIRE((skeleton != nullptr && skeleton->size() >= 1));
+        const auto joints = std::dynamic_pointer_cast<const geo::Mesh>(skeleton->getPrimitive(0));
+        REQUIRE(joints != nullptr);
+        WARN("joints: " << joints->getNumPoints());
+    }
     REQUIRE(core::setFrameRange(1, 1000).ok);
 
     const auto millis = [](auto&& work) {

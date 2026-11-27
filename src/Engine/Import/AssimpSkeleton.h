@@ -3,6 +3,7 @@
 #include <assimp/scene.h>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace helix::import {
 
@@ -20,6 +21,11 @@ inline Matrix4 assimpMatrix(const aiMatrix4x4& m)
  * Assimp gives every mesh its own list of bones, each naming a node of the hierarchy, so the
  * joints are collected once for the whole file, by node, and every mesh weights the same joint
  * list. The joints are put in depth first order, so a parent always comes before its children.
+ *
+ * Two meshes may skin to the same node with different inverse bind matrices. The node then has
+ * one joint per matrix, all with the same name, parent and rest pose, and each mesh weights the
+ * one that carries its matrix; a clip moves all of them alike. The nodes above the bones that a
+ * clip animates are joints too, with no weight, so the clip can move the rig through them.
  */
 class SkeletonReader
 {
@@ -42,7 +48,15 @@ class SkeletonReader
   private:
     const aiScene& scene_;
     RawSkeleton skeleton_;
-    std::unordered_map<std::string, std::size_t> jointOfName_;
+    // A joint of a node, with the inverse bind matrix it carries. A node has one joint per
+    // distinct inverse bind matrix the meshes give it, and every one of them bears the name of the
+    // node; the first is the one the children hang from and the clips are read for.
+    struct JointEntry
+    {
+        Matrix4 inverseBind;
+        std::size_t index;
+    };
+    std::unordered_map<std::string, std::vector<JointEntry>> jointsOfName_;
 };
 
 } // namespace helix::import

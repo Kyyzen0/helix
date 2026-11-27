@@ -551,7 +551,11 @@ The joints are collected once for the whole file, by node, and ordered depth fir
 always comes before its children and every mesh of a merge indexes the same list. A node that is not
 a bone but sits between two bones is kept as a joint, so the hierarchy is not cut; the nodes above
 the first bone (the armature object of a Blender export) are not joints, and their transform is kept
-as the base of the root. A file with several unrelated skins gives one skeleton with several roots.
+as the base of the root, unless a clip animates one of them: that node, and those between it and the
+bones, are then joints with no weight, so the clip moves the whole rig. Two meshes that skin to the
+same node with different inverse bind matrices get one joint of that node per matrix (same name,
+parent and rest pose, the clip tracks of the node on each), so each mesh is bound as its file says.
+A file with several unrelated skins gives one skeleton with several roots.
 The summary says the joints, the roots, the skinned meshes and every clip with its name and length.
 
 **Conventions.** `inverse_bind` is what the file gives (the inverse bind matrix of a glTF, the
