@@ -79,9 +79,9 @@ struct InspectorHeader: View {
                         .foregroundStyle(node.isDisplay ? theme.accent : Color.secondary)
                 }
                 .buttonStyle(.borderless)
-                .help(Text(node.isDisplay ? "This node is shown in the viewport" : "Show this node in the viewport"))
+                .help(node.isDisplay ? Text("This node is shown in the viewport") : Text("Show this node in the viewport"))
                 .accessibilityLabel(Text("Display node"))
-                .accessibilityValue(Text(node.isDisplay ? "On" : "Off"))
+                .accessibilityValue(node.isDisplay ? Text("On") : Text("Off"))
             }
             if let error = node.error { DiagnosticBanner(text: error, isError: true) }
             ForEach(node.warnings, id: \.self) { DiagnosticBanner(text: $0, isError: false) }
@@ -113,7 +113,7 @@ struct DiagnosticBanner: View {
         .background(RoundedRectangle(cornerRadius: 7).fill(tint.opacity(0.14)))
         .overlay(RoundedRectangle(cornerRadius: 7).stroke(tint.opacity(0.45)))
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text(isError ? "Error: \(text)" : "Warning: \(text)"))
+        .accessibilityLabel(isError ? Text("Error: \(text)") : Text("Warning: \(text)"))
     }
 }
 

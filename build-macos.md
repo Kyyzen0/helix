@@ -551,7 +551,36 @@ What follows the theme: the appearance of the whole app (`NSApplication.appearan
 
 What follows the system, not the theme: the semantic reds and yellows of errors and warnings, the red, green and blue of the X, Y and Z fields, and AppKit's own drawing: the fill of text fields, the selection highlight of the spreadsheet table (the system accent colour) and menus. System, Light and Dark keep the semantic colours of macOS everywhere, so they look as before; the viewport is the same dark slate in all three, as it always was.
 
-Every `--render-*` command takes `--theme <system|light|dark|helix|ember>` and `--appearance <light|dark>` (for the system theme), and `--render-settings <out.png>` draws the Appearance tab.
+Every `--render-*` command takes `--theme <system|light|dark|helix|ember>` and `--appearance <light|dark>` (for the system theme), and `--render-settings <out.png> [--tab <appearance|general>]` draws a tab of the Settings window.
+
+## Languages
+
+The app is in English (the development language) and French, and follows the language of macOS: Foundation picks `en` or `fr` from the preferred languages of the system, and the bundle carries both (`en.lproj`, `fr.lproj`, with `fr` in the `knownRegions` of the project). Another system language gets English.
+
+**The setting.** The Settings window has a General tab with **Language: System / English / Français**. The choice is the `AppleLanguages` override in the user defaults of the app, which is what Foundation reads as the app starts, so it applies at the next launch; the tab says so (« La langue sera appliquée au prochain lancement de Helix. ») and offers **Relaunch Now**, which opens a second instance and quits the first. *System* removes the override. The code is in `Sources/Localization/LanguageSetting.swift` (`AppLanguage`), checked by `Tests/LocalizationTests.swift`.
+
+**`--language <en|fr>`.** Every command of the app takes it, the `--render-*` pictures and `--mcp` included, to run in a language for that run only, whatever the system and the Settings say. The program starts again with `-AppleLanguages (xx)` in front of its arguments (Foundation reads the language once), so nothing is written to the user defaults. `Helix --render-inspector Waves.kut wave1 out.png --language fr` draws the inspector in French; `--render-settings out.png --tab general` draws the language tab (with `--choice <system|en|fr>` to preview a choice that is not applied yet) and `--render-palette <query> out.png` draws the node palette with a query typed in it.
+
+**Where the texts are.** Three string catalogs in `apple/Helix/Resources`, each with `en` and `fr`:
+
+| Catalog | Holds | Maintained |
+| --- | --- | --- |
+| `Localizable.xcstrings` | The interface: menus, buttons, tooltips, alerts, panels, the names of edits in the Edit menu, errors the Swift side raises. The key is the English text (`%@` and `%lld` are the arguments). Counts use plural variations (« 1 nœud sélectionné » / « 3 nœuds sélectionnés »). | By hand |
+| `Nodes.xcstrings` | What the engine gives a node in English, from its `node.yaml`: `node.<type>.label`, `node.<type>.input.<n>`, `param.<type>.<name>.label` (a parameter, group or divider), `.tooltip` and `.caption`, `option.<type>.<parameter>.<value>` and `tag.<tag>`. | `Scripts/extract-node-strings.py` writes the English; French is added in the catalog |
+| `InfoPlist.xcstrings` | The texts of `Info.plist` a person sees: the names of the document types and of the imported formats, the copyright line. The key is the English text, or `NSHumanReadableCopyright`. | By hand |
+
+The Swift side looks a node text up with `NodeText` (`String(localized: key, table: "Nodes")` underneath) and **falls back to the engine's English** when the key is missing, so a node that is added, or defined by a script, shows in English until it is translated. The palette searches both the translated and the English label and tags, and ignores accents (`camera` finds *Caméra*). Names a person gives (`cube1`) and the internal names of parameters are never translated.
+
+**Adding or changing a translation.**
+
+1. A new interface text: write it in Swift as `Text("…")`, `Button("…")`, `.help("…")` or `String(localized: "…")`, and add its key to `Localizable.xcstrings` with the French. A text that is chosen by a condition must be a `LocalizedStringKey("…")` on each side, since `Text(flag ? "a" : "b")` is a `String` and is never looked up.
+2. A new node or parameter: run `python3 -I apple/Helix/Scripts/extract-node-strings.py` (standard library only; `--check` changes nothing and fails when the catalog is out of date or a key has no French), then write the French for the keys it lists. A key whose English changed keeps its French and is marked `needs_review`.
+3. Run `python3 -I apple/Helix/Scripts/audit-strings.py`. It reads every Swift file and lists literals that would reach a person without a lookup (`missing-key`, `not-looked-up`, `ternary-string`, `suspicious`); `// l10n-ok` on the line accepts one that is meant to stay as written (« Français » in the language menu). It skips the MCP server and the `--render-*` commands. With `--stringsdata <DerivedData>` it compares the catalog with the keys the compiler extracted (build once with `SWIFT_EMIT_LOC_STRINGS=YES`).
+4. `xcodebuild test -scheme HelixNodeEditorTests` runs `LocalizationTests`: every key of the three catalogs has a French value, with the same arguments as the English (same count, same order, or positional), French punctuation is preceded by a non-breaking space, `Info.plist` has an entry for every text it shows, and `Nodes.xcstrings` matches the node files.
+
+**Conventions of the French.** The words are those of the Mac and of the 3D tools: *nœud*, *attribut*, *image clé*, *chronologie*, *tableur*, *inspecteur*, *vue 3D* (never « viewport »), *éditeur de nœuds*, *fil de fer*, *cadence d’images*. A non-breaking space (U+00A0) goes before `:`, `;`, `?`, `!` and inside « », the apostrophe is ’ and the ellipsis is …. Numbers the user types keep the dot (`0.5`), as expressions and the engine read them; counts in sentences use the locale (« 3 600 points »).
+
+**What stays English.** The messages of the engine (the errors a node reports when it cooks, the warnings, the messages of a refused edit that the facade writes) are English: they also go to agents and to the logs, and they appear in the inspector's red banner and the card tooltips, framed by a translated « Erreur : … ». The MCP server (tool descriptions, results, errors) stays English, since it speaks to agents. The command line usage and the output of the `--render-*` commands are English. The `documentation` field of a parameter, which the interface does not show, is not translated.
 
 ## Importing 3D files
 

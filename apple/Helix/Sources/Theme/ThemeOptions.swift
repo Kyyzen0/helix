@@ -6,7 +6,7 @@ import Foundation
 struct ThemeOptions: Equatable {
     static let themeFlag = "--theme"
     static let appearanceFlag = "--appearance"
-    static let usage = "[\(themeFlag) <\(Theme.allCases.map(\.rawValue).joined(separator: "|"))>] [\(appearanceFlag) <light|dark>]"
+    static let usage = "[\(themeFlag) <\(Theme.allCases.map(\.rawValue).joined(separator: "|"))>] [\(appearanceFlag) <light|dark>] \(LanguageLaunch.usage)" // l10n-ok: command line usage
 
     var theme = Theme.system
     /// The appearance the system theme has, when asked for one.

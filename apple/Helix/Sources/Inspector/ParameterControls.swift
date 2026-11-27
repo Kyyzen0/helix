@@ -23,7 +23,7 @@ struct ToggleControl: View {
                     .buttonStyle(.plain)
                     .help(Text(parameter.tooltip.isEmpty ? parameter.label : parameter.tooltip))
                     .accessibilityLabel(Text(parameter.label))
-                    .accessibilityValue(Text(isOn ? "On" : "Off"))
+                    .accessibilityValue(isOn ? Text("On") : Text("Off"))
                 case .boolSwitch:
                     Toggle(parameter.label, isOn: binding)
                         .labelsHidden()

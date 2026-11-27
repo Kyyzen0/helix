@@ -18,8 +18,10 @@ enum TimelineLoader {
         let tracks = Array(helix.core.listKeyframes(node))
         guard !tracks.isEmpty else { return [] }
         var labels: [String: (label: String, count: Int)] = [:]
+        let type = helix.core.listNodes().first { $0.id == node }.map { String(engine: $0.type) } ?? ""
         for info in helix.core.listParameters(node) {
-            labels[String(engine: info.name)] = (String(engine: info.label), Int(info.componentCount))
+            let name = String(engine: info.name)
+            labels[name] = (NodeText.label(type, parameter: name, fallback: String(engine: info.label)), Int(info.componentCount))
         }
         var keys: [TimelineKey] = []
         for track in tracks {

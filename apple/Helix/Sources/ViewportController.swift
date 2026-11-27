@@ -22,9 +22,9 @@ enum WireframeSetting: String, CaseIterable, Identifiable {
 
     var title: LocalizedStringKey {
         switch self {
-        case .auto: "Wireframe: Auto"
-        case .on: "Wireframe: On"
-        case .off: "Wireframe: Off"
+        case .auto: LocalizedStringKey("Wireframe: Auto")
+        case .on: LocalizedStringKey("Wireframe: On")
+        case .off: LocalizedStringKey("Wireframe: Off")
         }
     }
 

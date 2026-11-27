@@ -36,7 +36,7 @@ struct TimelineKey: Equatable, Hashable, Sendable {
 
     /// "Translate X", or "Radius" for a parameter of one value.
     var title: String {
-        componentName.isEmpty ? label : label + " " + componentName
+        componentName.isEmpty ? label : String(localized: "\(label) \(componentName)")
     }
 
     /// The track the key belongs to, which two keys of the same frame cannot share.
@@ -59,7 +59,7 @@ struct TimelineDiamond: Equatable, Identifiable, Sendable {
     /// leaves the key.
     var tooltip: String {
         let lines = keys.map { key in
-            "\(key.title): \(NumberText.format(key.value)) (\(key.interpolation.title.lowercased()))"
+            String(localized: "\(key.title): \(NumberText.format(key.value)) (\(key.interpolation.title.lowercased()))")
         }
         let head = String(localized: "Frame \(NumberText.format(frame))")
         return ([head] + lines).joined(separator: "\n")

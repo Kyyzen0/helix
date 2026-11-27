@@ -17,10 +17,10 @@ struct RampEditor: View {
                 .frame(height: 60)
             ForEach(Array(points.enumerated()), id: \.offset) { index, point in
                 HStack(spacing: 4) {
-                    NumberField(text: NumberText.format(point.position), accessibilityName: "Position") { typed in
+                    NumberField(text: NumberText.format(point.position), accessibilityName: String(localized: "Position")) { typed in
                         edit(index, typed) { $0.position = $1 }
                     }
-                    NumberField(text: NumberText.format(point.value), accessibilityName: "Value") { typed in
+                    NumberField(text: NumberText.format(point.value), accessibilityName: String(localized: "Value")) { typed in
                         edit(index, typed) { $0.value = $1 }
                     }
                     Picker("Interpolation", selection: Binding(

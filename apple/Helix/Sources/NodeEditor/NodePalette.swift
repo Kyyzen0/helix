@@ -11,8 +11,15 @@ struct NodePalette: View {
     let request: PaletteRequest
     let area: CGSize
 
-    @State private var query = ""
+    @State private var query: String
     @State private var chosen = 0
+
+    init(model: NodeEditorModel, request: PaletteRequest, area: CGSize, query: String = "") {
+        self.model = model
+        self.request = request
+        self.area = area
+        _query = State(initialValue: query)
+    }
 
     private static let width: CGFloat = 340
     private static let rowHeight: CGFloat = 36

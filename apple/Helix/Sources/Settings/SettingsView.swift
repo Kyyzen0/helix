@@ -1,14 +1,61 @@
 import SwiftUI
 
-/// The Settings window (⌘,). One tab for now; the others (General, and so on) join it here.
+/// The Settings window (⌘,): the language, and the theme.
 struct SettingsView: View {
     var body: some View {
         TabView {
+            GeneralSettings()
+                .tabItem { Label("General", systemImage: "gearshape") }
             AppearanceSettings()
                 .tabItem { Label("Appearance", systemImage: "paintpalette") }
         }
         .frame(width: 540)
         .scenePadding()
+    }
+}
+
+/// The General tab as the Settings window shows it: the choice is kept in the defaults of the app
+/// as it is made, and applies the next time the app starts.
+struct GeneralSettings: View {
+    @State private var choice = AppLanguage.stored()
+
+    var body: some View {
+        LanguagePane(
+            selection: Binding(get: { choice }, set: { choice = $0; $0.store() }),
+            needsRelaunch: AppLanguage.needsRelaunch(choice: choice),
+            relaunch: AppRelaunch.now
+        )
+    }
+}
+
+/// The language picker, the note that it applies at the next launch, and a button to launch now.
+struct LanguagePane: View {
+    @Binding var selection: AppLanguage
+    var needsRelaunch: Bool
+    var relaunch: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Language").font(.headline)
+            Picker("Language", selection: $selection) {
+                ForEach(AppLanguage.allCases) { language in
+                    Text(language.title).tag(language)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .fixedSize()
+            Text("The language will be applied the next time Helix launches.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            if needsRelaunch {
+                Button("Relaunch Now", action: relaunch)
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 

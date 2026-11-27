@@ -11,8 +11,8 @@ enum InspectorLoader {
         let warnings = info.warnings.map { String(engine: $0) }
         let error = String(engine: info.error)
 
-        let parameters = Array(helix.core.listParameters(id)).map { convert($0, of: id) }
-        let layout = Array(helix.core.listParameterLayout(id)).map(convert)
+        let parameters = Array(helix.core.listParameters(id)).map { convert($0, of: id, type: typeName) }
+        let layout = Array(helix.core.listParameterLayout(id)).map { convert($0, type: typeName) }
         return InspectorNode(
             id: id,
             name: String(engine: info.name),
@@ -26,7 +26,7 @@ enum InspectorLoader {
         )
     }
 
-    private static func convert(_ item: helix.core.ParameterLayoutItem) -> InspectorLayoutItem {
+    private static func convert(_ item: helix.core.ParameterLayoutItem, type: String) -> InspectorLayoutItem {
         let kind: InspectorLayoutItem.Kind
         switch item.kind {
         case .Parameter: kind = .parameter
@@ -36,7 +36,8 @@ enum InspectorLoader {
         @unknown default: kind = .parameter
         }
         return InspectorLayoutItem(
-            kind: kind, name: String(engine: item.name), label: String(engine: item.label),
+            kind: kind, name: String(engine: item.name),
+            label: NodeText.label(type, parameter: String(engine: item.name), fallback: String(engine: item.label)),
             icon: String(engine: item.icon), horizontal: item.horizontal, labelInline: item.labelInline,
             hidden: item.hidden, enabled: item.enabled
         )
@@ -55,15 +56,17 @@ enum InspectorLoader {
         }
     }
 
-    private static func convert(_ info: helix.core.ParameterInfo, of node: UInt64) -> InspectorParameter {
+    private static func convert(_ info: helix.core.ParameterInfo, of node: UInt64, type: String) -> InspectorParameter {
         let name = String(engine: info.name)
-        var parameter = InspectorParameter(name: name, label: String(engine: info.label))
-        parameter.tooltip = String(engine: info.tooltip)
+        var parameter = InspectorParameter(name: name, label: NodeText.label(type, parameter: name, fallback: String(engine: info.label)))
+        parameter.tooltip = NodeText.tooltip(type, parameter: name, fallback: String(engine: info.tooltip))
         parameter.documentation = String(engine: info.documentation)
         parameter.kind = kind(of: info.type)
         parameter.style = InspectorStyle(name: String(engine: info.style))
         for option in info.styleOptions {
-            parameter.styleOptions[String(engine: option.name)] = String(engine: option.value)
+            let key = String(engine: option.name)
+            let value = String(engine: option.value)
+            parameter.styleOptions[key] = key == "caption" ? NodeText.caption(type, parameter: name, fallback: value) : value
         }
         parameter.componentCount = Int(info.componentCount)
         if info.hasRange {
@@ -73,7 +76,10 @@ enum InspectorLoader {
             )
         }
         parameter.options = info.options.map {
-            InspectorOption(value: String(engine: $0.value), label: String(engine: $0.label))
+            let value = String(engine: $0.value)
+            return InspectorOption(
+                value: value, label: NodeText.option(type, parameter: name, value: value, fallback: String(engine: $0.label))
+            )
         }
         parameter.labelHidden = info.labelHidden
         parameter.hidden = info.hidden
@@ -107,7 +113,8 @@ enum InspectorLoader {
                 InspectorRampPoint(position: Double($0.position), value: Double($0.value), interpolation: String(engine: $0.interpolation))
             }
             parameter.rampInterpolations = ramp.interpolations.map {
-                InspectorOption(value: String(engine: $0.value), label: String(engine: $0.label))
+                let value = String(engine: $0.value)
+                return InspectorOption(value: value, label: RampText.interpolation(value, fallback: String(engine: $0.label)))
             }
         }
         return parameter

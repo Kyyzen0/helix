@@ -90,8 +90,14 @@ struct ParameterMenu: View {
             Button("Clear Expression") { model.clearExpression(parameter.name, component: component) }
         } else if component == nil, parameter.hasAnyExpression {
             ForEach(Array(parameter.expressions.enumerated()).filter { !$0.element.isEmpty }, id: \.offset) { entry in
-                Button(parameter.componentCount > 1 ? "Clear Expression \(Self.axisName(entry.offset))" : "Clear Expression") {
+                Button {
                     model.clearExpression(parameter.name, component: entry.offset)
+                } label: {
+                    if parameter.componentCount > 1 {
+                        Text("Clear Expression \(Self.axisName(entry.offset))")
+                    } else {
+                        Text("Clear Expression")
+                    }
                 }
             }
         }
@@ -279,7 +285,7 @@ struct VectorControl: View {
                         }
                         NumberField(
                             text: text(component),
-                            accessibilityName: parameter.label + " " + ParameterMenu.axisName(component)
+                            accessibilityName: String(localized: "\(parameter.label) \(ParameterMenu.axisName(component))")
                         ) { typed in commit(typed, component: component) }
                     }
                 }
