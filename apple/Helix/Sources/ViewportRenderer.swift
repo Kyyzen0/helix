@@ -68,6 +68,7 @@ final class ViewportRenderer: NSObject, MTKViewDelegate {
         options.backgroundRed = Self.background.red
         options.backgroundGreen = Self.background.green
         options.backgroundBlue = Self.background.blue
+        options.wireframe = WireframeSetting.current.facadeMode
 
         // The facade borrows the command buffer for the call and keeps nothing of it.
         let frame = helix.core.encodeViewport(Unmanaged.passUnretained(commandBuffer as AnyObject).toOpaque(), options)

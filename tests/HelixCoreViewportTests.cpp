@@ -51,7 +51,7 @@ core::ViewportFrameOptions redOptions(std::uint32_t width, std::uint32_t height)
     options.geometryRed = 1.f;
     options.geometryGreen = 0.f;
     options.geometryBlue = 0.f;
-    options.wireframeVisible = false;
+    options.wireframe = core::WireframeMode::Off;
     return options;
 }
 

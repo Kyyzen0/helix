@@ -47,7 +47,11 @@ enum SnapshotCommand {
             options.backgroundRed = ViewportRenderer.background.red
             options.backgroundGreen = ViewportRenderer.background.green
             options.backgroundBlue = ViewportRenderer.background.blue
+            options.wireframe = WireframeSetting.current.facadeMode
+            let drawStarted = DispatchTime.now()
             try HelixError.check(helix.core.renderToImage(std.string(arguments[1]), options, true))
+            let drawSeconds = Double(DispatchTime.now().uptimeNanoseconds - drawStarted.uptimeNanoseconds) / 1e9
+            print("rendered in \(String(format: "%.0f", drawSeconds * 1000)) ms")
             print("wrote \(arguments[1]) (\(width) x \(height))")
             return 0
         } catch {

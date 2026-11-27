@@ -266,6 +266,61 @@
           }
         }
       }
+    },
+    "Wireframe": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wireframe"
+          }
+        }
+      }
+    },
+    "Wireframe: Auto": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wireframe: Auto"
+          }
+        }
+      }
+    },
+    "Wireframe: On": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wireframe: On"
+          }
+        }
+      }
+    },
+    "Wireframe: Off": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wireframe: Off"
+          }
+        }
+      }
+    },
+    "Cycle Wireframe": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cycle Wireframe"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

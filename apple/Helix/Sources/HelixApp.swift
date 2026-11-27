@@ -16,6 +16,7 @@ struct HelixApp: App {
 /// The menu items the document group does not give: the viewport, and the About panel.
 struct HelixCommands: Commands {
     @FocusedObject private var document: HelixDocument?
+    @AppStorage(WireframeSetting.defaultsKey) private var wireframe = WireframeSetting.auto
 
     var body: some Commands {
         CommandGroup(replacing: .appInfo) {
@@ -30,7 +31,27 @@ struct HelixCommands: Commands {
             Button("Frame Geometry") { document?.requestFrame() }
                 .keyboardShortcut("f", modifiers: [])
                 .disabled(document == nil)
+            Picker("Wireframe", selection: wireframeBinding) {
+                ForEach(WireframeSetting.allCases) { setting in
+                    Text(setting.title).tag(setting)
+                }
+            }
+            Button("Cycle Wireframe") { wireframeBinding.wrappedValue = wireframe.next }
+                .keyboardShortcut("w", modifiers: .shift)
         }
+    }
+}
+
+extension HelixCommands {
+    /// Sets the wireframe mode and asks the viewport of the window in front to draw again.
+    private var wireframeBinding: Binding<WireframeSetting> {
+        Binding(
+            get: { wireframe },
+            set: { setting in
+                wireframe = setting
+                document?.viewport.redraw()
+            }
+        )
     }
 }
 

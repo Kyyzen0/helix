@@ -32,12 +32,16 @@ struct FrameConstants
     HELIX_SHADER_MAT4 viewProjection;
     HELIX_SHADER_VEC4 cameraPosition;
     HELIX_SHADER_VEC4 geometryColor;
+    /// The unit vectors of the camera in world space, which the lights of the mesh follow.
+    HELIX_SHADER_VEC4 cameraRight;
+    HELIX_SHADER_VEC4 cameraUp;
     HELIX_SHADER_VEC2 viewportPixelSize;
     float pixelRatio;
-    float padding;
+    /// How opaque the wireframe is, from 0 to 1.
+    float wireframeOpacity;
 };
 
 #ifndef __METAL_VERSION__
-static_assert(sizeof(FrameConstants) == 112, "FrameConstants must match the layout the shaders read");
+static_assert(sizeof(FrameConstants) == 144, "FrameConstants must match the layout the shaders read");
 } // namespace helix::gfx
 #endif

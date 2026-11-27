@@ -738,6 +738,7 @@ if(HELIX_BUILD_TESTS)
         tests/SimulationTests.cpp
         tests/HelixCoreTests.cpp
         tests/ExceptionBoundaryTests.cpp
+        tests/ViewportLightingTests.cpp
         tests/HelixCoreViewportTests.cpp
     )
     # The one test of the engine that goes through a Qt type, the item QML holds for a parameter.

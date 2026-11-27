@@ -3,6 +3,7 @@
 #include "Graphics/Shaders/ShaderTypes.h"
 
 #include <algorithm>
+#include <glm/geometric.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/matrix.hpp>
 #include <glm/vec4.hpp>
@@ -30,9 +31,41 @@ FrameConstants getFrameConstants(const FrameState& frame)
     const float aspect = float(frame.pixelSize.x) / float(std::max(frame.pixelSize.y, 1u));
     const glm::mat4 viewProjection = frame.camera.getProjectionMatrix(aspect) * view;
     const glm::vec2 viewportPixelSize{frame.pixelSize};
+
+    // The rows of the rotation of the view matrix are the axes of the camera in world space.
+    const glm::vec4 cameraRight{view[0][0], view[1][0], view[2][0], 0.f};
+    const glm::vec4 cameraUp{view[0][1], view[1][1], view[2][1], 0.f};
     return FrameConstants{
-        viewProjection, cameraPosition, frame.geometryColor, viewportPixelSize, frame.pixelRatio, 0.f
+        viewProjection,
+        cameraPosition,
+        frame.geometryColor,
+        cameraRight,
+        cameraUp,
+        viewportPixelSize,
+        frame.pixelRatio,
+        1.f
     };
+}
+
+// Returns how opaque the wireframe is for this frame, and 0 when it is left out.
+//
+// A wireframe that is not adaptive is opaque. An adaptive one is left out above the triangle
+// limit, and below it fades with the mean length of the edges on screen, so it disappears as the
+// lines come to touch (a dense mesh, or a view from far away) and comes back when they part.
+float getWireframeOpacity(const FrameState& frame, const MeshPass& mesh, const FrameConstants& constants)
+{
+    if (!frame.wireframeVisible) return 0.f;
+    if (!frame.wireframeAdaptive) return 1.f;
+    if (mesh.triangleCount() > kWireframeAutoTriangleLimit) return 0.f;
+
+    // The size of an edge at the distance of the middle of the mesh, in device pixels: the
+    // vertical field of view spans the height of the frame.
+    const float distance = std::max(glm::length(glm::vec3(constants.cameraPosition) - mesh.center()), 1e-4f);
+    const float aspect = float(frame.pixelSize.x) / float(std::max(frame.pixelSize.y, 1u));
+    const float cotHalfFov = frame.camera.getProjectionMatrix(aspect)[1][1];
+    const float pixelsPerUnit = 0.5f * float(frame.pixelSize.y) * cotHalfFov / distance;
+    const float edgePoints = mesh.meanEdgeLength() * pixelsPerUnit / std::max(frame.pixelRatio, 1e-3f);
+    return adaptiveWireframeOpacity(edgePoints);
 }
 
 std::string describeError(const NS::Error* error)
@@ -164,7 +197,8 @@ RenderedImage ViewportRenderer::encode(const FrameState& frame, MTL::CommandBuff
     // The work that can fail runs before an encoder is opened, so a failure never leaves one open.
     const RenderedImage image = prepareTarget(frame.pixelSize);
     uploadGeometry(frame);
-    const FrameConstants frameConstants = getFrameConstants(frame);
+    FrameConstants frameConstants = getFrameConstants(frame);
+    frameConstants.wireframeOpacity = getWireframeOpacity(frame, meshPass_, frameConstants);
 
     MTL::RenderPassDescriptor* pass = MTL::RenderPassDescriptor::renderPassDescriptor();
 
@@ -204,7 +238,7 @@ RenderedImage ViewportRenderer::encode(const FrameState& frame, MTL::CommandBuff
     encoder->setFragmentBytes(&frameConstants, sizeof(frameConstants), HELIX_FRAME_CONSTANTS_SLOT);
 
     gridPass_.draw(encoder);
-    meshPass_.draw(encoder, frame.wireframeVisible);
+    meshPass_.draw(encoder, frameConstants.wireframeOpacity > 0.f);
     pointPass_.draw(encoder, frame.pointsVisible);
     cameraPrimPass_.draw(encoder, frame.viewCameraIndex);
     encoder->endEncoding();

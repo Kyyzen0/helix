@@ -72,6 +72,10 @@ Known gaps found on the way, to fix as the work below touches them:
   every daslang target, and `tests/ExceptionBoundaryTests.cpp` fails if an image defines such a
   copy again. Getting the size back means building only the daslang files that never touch an
   exception without RTTI, which needs the daslang build files to say which.
+- The viewport frames the projected bounding box, not the shape: a diagonal model (the dragon)
+  still leaves empty corners of its box unused. Framing the cooked points would fit it tighter.
+- The viewport shows one flat colour: no materials or textures yet. The mesh lights follow the
+  camera, so a model seen from below is lit from below, as in a modelling tool.
 - The `bison` shipped by the toolchain script crashes on recent macOS; the
   build uses the parsers committed in daslang instead.
 

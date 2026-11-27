@@ -1,5 +1,8 @@
 #include "Graphics/Passes/MeshPass.h"
+#include <algorithm>
+#include <glm/geometric.hpp>
 #include <glm/vec3.hpp>
+#include <limits>
 
 namespace helix::gfx {
 
@@ -12,7 +15,8 @@ Pipeline createMeshPipeline(
     const char* name,
     const char* fragmentFunction,
     MTL::PrimitiveTopologyClass topology,
-    bool pushedBack
+    bool pushedBack,
+    bool blended = false
 )
 {
     PipelineSettings settings;
@@ -22,6 +26,7 @@ Pipeline createMeshPipeline(
     settings.topology = topology;
     settings.vertexLayout = layout;
     settings.depthCompare = MTL::CompareFunctionLessEqual;
+    settings.blendOver = blended;
     if (pushedBack)
     {
         // Pushes the faces back so the wireframe draws on top.
@@ -32,6 +37,14 @@ Pipeline createMeshPipeline(
 }
 
 } // namespace
+
+float adaptiveWireframeOpacity(float edgePoints)
+{
+    const float t = std::clamp(
+        (edgePoints - kWireframeGoneEdgePoints) / (kWireframeFullEdgePoints - kWireframeGoneEdgePoints), 0.f, 1.f
+    );
+    return t * t * (3.f - 2.f * t);
+}
 
 MeshPass::MeshPass(GraphicsDevice& device, NS::UInteger sampleCount)
 {
@@ -57,7 +70,7 @@ MeshPass::MeshPass(GraphicsDevice& device, NS::UInteger sampleCount)
         device, layout, sampleCount, "Mesh open faces", "meshShadedFragment", MTL::PrimitiveTopologyClassLine, false
     );
     wireframePipeline_ = createMeshPipeline(
-        device, layout, sampleCount, "Mesh wireframe", "meshWireframeFragment", MTL::PrimitiveTopologyClassLine, false
+        device, layout, sampleCount, "Mesh wireframe", "meshWireframeFragment", MTL::PrimitiveTopologyClassLine, false, true
     );
 }
 
@@ -70,6 +83,33 @@ void MeshPass::upload(MTL::Device* device, const DisplayGeometry& geometry, Reti
     replaceGpuArray(triangleIndices_, device, "Mesh triangles", topology.triangleIndices, retired);
     replaceGpuArray(edgeIndices_, device, "Mesh edges", topology.edgeIndices, retired);
     replaceGpuArray(lineIndices_, device, "Mesh open faces", topology.lineIndices, retired);
+
+    // What the adaptive wireframe judges the density of the mesh by. A denser mesh is not drawn
+    // with a wireframe, so it is not measured.
+    triangleCount_ = topology.triangleIndices.size() / 3;
+    meanEdgeLength_ = 0.f;
+    center_ = glm::vec3(0.f);
+    if (triangleCount_ == 0 || triangleCount_ > kWireframeAutoTriangleLimit) return;
+
+    glm::vec3 minimum(std::numeric_limits<float>::max());
+    glm::vec3 maximum(std::numeric_limits<float>::lowest());
+    for (const glm::vec3& point : geometry.positions)
+    {
+        minimum = glm::min(minimum, point);
+        maximum = glm::max(maximum, point);
+    }
+    if (!geometry.positions.empty()) center_ = (minimum + maximum) * 0.5f;
+
+    double total = 0.0;
+    std::size_t edges = 0;
+    const std::vector<std::uint32_t>& indices = topology.edgeIndices;
+    for (std::size_t i = 0; i + 1 < indices.size(); i += 2)
+    {
+        if (indices[i] >= geometry.positions.size() || indices[i + 1] >= geometry.positions.size()) continue;
+        total += glm::distance(geometry.positions[indices[i]], geometry.positions[indices[i + 1]]);
+        ++edges;
+    }
+    if (edges > 0) meanEdgeLength_ = static_cast<float>(total / double(edges));
 }
 
 void MeshPass::draw(MTL::RenderCommandEncoder* encoder, bool wireframeVisible)

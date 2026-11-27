@@ -1,6 +1,12 @@
-// Draws the display mesh lit by a key light and a fill light, and its wireframe over it.
+// Draws the display mesh lit so that its volume reads, and its wireframe over it.
 //
-// The colour of the mesh is the one the host asks for, so the lighting only shapes it.
+// The lights follow the camera, as in the viewport of a modelling tool: the main light comes
+// from above and to the left of the viewer, a fill light from the right and below, and a rim
+// light from behind lifts the silhouette off the background. A hemisphere term (sky above,
+// ground below, in world space) keeps the faces that turn away from every light readable.
+//
+// The colour the host asks for is a display (sRGB) colour. The lighting is computed in linear
+// light and the result is encoded back, so the shading is neither washed out nor crushed.
 
 #include "ShaderTypes.h"
 
@@ -15,16 +21,33 @@ struct MeshVertexInput
 struct MeshVertexOutput
 {
     float4 clipPosition [[position]];
+    float3 worldPosition;
     float3 normal;
 };
 
-// The colour the faces are lit with, before the colour of the mesh is mixed in.
-constant float3 keyLightColor = float3(1.0, 0.97, 0.92);
-constant float3 fillLightColor = float3(0.55, 0.62, 0.75);
-constant float3 ambientColor = float3(0.22, 0.23, 0.28);
+// The lights, in the space of the camera: x to the right, y up, z toward the viewer.
+constant float3 keyLightDirection = float3(-0.60, 0.60, 0.52);
+constant float3 fillLightDirection = float3(0.70, -0.20, 0.45);
+constant float3 keyLightColor = float3(1.0, 0.96, 0.90);
+constant float3 fillLightColor = float3(0.50, 0.55, 0.64);
+constant float3 rimLightColor = float3(0.62, 0.74, 1.0);
+
+// The light of the sky and of the ground, in linear light.
+constant float3 skyColor = float3(0.14, 0.16, 0.20);
+constant float3 groundColor = float3(0.05, 0.045, 0.04);
 
 // The wireframe is a darker shade of the mesh, so that it reads on any background.
 constant float wireframeShade = 0.35;
+
+float3 srgbToLinear(float3 color)
+{
+    return select(pow((color + 0.055) / 1.055, 2.4), color / 12.92, color <= 0.04045);
+}
+
+float3 linearToSrgb(float3 color)
+{
+    return select(1.055 * pow(color, 1.0 / 2.4) - 0.055, color * 12.92, color <= 0.0031308);
+}
 
 vertex MeshVertexOutput meshVertex(
     MeshVertexInput input [[stage_in]],
@@ -33,38 +56,60 @@ vertex MeshVertexOutput meshVertex(
 {
     MeshVertexOutput output;
     output.clipPosition = frame.viewProjection * float4(input.position, 1.0);
+    output.worldPosition = input.position;
     output.normal = input.normal;
     return output;
 }
 
-// Lights the face with the key light, the fill light and the light of the sky.
+// Lights the face with the key, fill, rim and hemisphere lights.
 fragment float4 meshShadedFragment(
     MeshVertexOutput input [[stage_in]],
     constant FrameConstants& frame [[buffer(HELIX_FRAME_CONSTANTS_SLOT)]]
 )
 {
-    // The key light comes from above and to the side, the fill light from the other side.
-    const float3 keyLightDirection = normalize(float3(0.6, 0.8, 0.4));
-    const float3 fillLightDirection = normalize(float3(-0.5, 0.2, -0.7));
-
     float3 normal = normalize(input.normal);
     if (all(normal == float3(0.0))) normal = float3(0.0, 1.0, 0.0);
 
-    // The key light falls off towards the faces that are turned away from it.
-    float key = saturate(dot(normal, keyLightDirection));
-    float fill = saturate(dot(normal, fillLightDirection));
+    // The camera looks along -forward; its basis carries the lights with it.
+    const float3 right = frame.cameraRight.xyz;
+    const float3 up = frame.cameraUp.xyz;
+    const float3 toViewer = cross(right, up);
+    const float3 view = normalize(frame.cameraPosition.xyz - input.worldPosition);
 
-    // The light of the sky reaches the faces that look up, so that a shape stays readable
-    // from below as well.
-    float sky = normal.y * 0.5 + 0.5;
+    // A face seen from behind (an open surface, a flipped normal) is lit as the side facing
+    // the viewer, rather than left black.
+    if (dot(normal, view) < 0.0) normal = -normal;
 
-    float3 light = ambientColor + keyLightColor * key + fillLightColor * fill * 0.35 +
-                   ambientColor * sky * 0.6;
+    const float3 keyDirection = normalize(
+        right * keyLightDirection.x + up * keyLightDirection.y + toViewer * keyLightDirection.z
+    );
+    const float3 fillDirection = normalize(
+        right * fillLightDirection.x + up * fillLightDirection.y + toViewer * fillLightDirection.z
+    );
 
-    // The colour of the mesh is mixed into the light, so that the mesh keeps the colour
-    // the host asks for.
-    float3 color = frame.geometryColor.rgb * light;
-    return float4(saturate(color), 1.0);
+    // The key light is wrapped a little, so the shadow side falls off softly instead of
+    // cutting to black at the terminator.
+    const float key = saturate((dot(normal, keyDirection) + 0.15) / 1.15);
+    const float fill = saturate(dot(normal, fillDirection));
+
+    // Sky above and ground below, from the world up axis.
+    const float3 hemisphere = mix(groundColor, skyColor, normal.y * 0.5 + 0.5);
+
+    // The edge of the shape facing away from the viewer picks up the rim light, more on the
+    // side the key light does not reach, so it separates the silhouette from the background.
+    const float facing = 1.0 - saturate(dot(normal, view));
+    const float rim = pow(facing, 3.0) * (0.55 + 0.45 * saturate(1.0 - key));
+
+    const float3 albedo = srgbToLinear(frame.geometryColor.rgb);
+    // Every light is tinted by the colour of the mesh, so the mesh keeps the colour the host
+    // asked for: a pure red mesh stays pure red, and only its brightness changes.
+    const float3 halfVector = normalize(keyDirection + view);
+    const float highlight = pow(saturate(dot(normal, halfVector)), 40.0) * 0.10;
+    float3 light = hemisphere + keyLightColor * key * 1.05 + fillLightColor * fill * 0.30 +
+                   rimLightColor * rim * 0.8 + keyLightColor * highlight;
+    float3 color = albedo * light;
+
+    return float4(saturate(linearToSrgb(saturate(color))), 1.0);
 }
 
 fragment float4 meshWireframeFragment(
@@ -72,5 +117,5 @@ fragment float4 meshWireframeFragment(
     constant FrameConstants& frame [[buffer(HELIX_FRAME_CONSTANTS_SLOT)]]
 )
 {
-    return float4(frame.geometryColor.rgb * wireframeShade, 1.0);
+    return float4(frame.geometryColor.rgb * wireframeShade, frame.wireframeOpacity);
 }

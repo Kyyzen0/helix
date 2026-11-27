@@ -27,8 +27,11 @@ class ViewportCamera
 
     /// @brief Moves the centre and the distance so a box fills the view, keeping the angles.
     ///
-    /// The box is fitted by its bounding sphere, so it stays whole at any angle the camera is
-    /// orbited to. A box with no extent (a single point) is framed like a unit sphere.
+    /// The box is fitted by its projection at the current angles, not by its bounding sphere,
+    /// which a long thin shape (a dragon with a tail) makes far larger than the shape: the
+    /// corners of the box are projected, centred in the view, and the camera backs off until
+    /// they fill 80% of the narrower side of the view. Orbiting afterwards can turn a corner
+    /// outside the view. A box with no extent (a single point) is framed like a unit sphere.
     ///
     /// @param minimum the corner of the box with the smallest coordinates.
     /// @param maximum the corner of the box with the largest coordinates.

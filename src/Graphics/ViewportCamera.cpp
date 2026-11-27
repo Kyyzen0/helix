@@ -3,6 +3,7 @@
 #include <cmath>
 #include <glm/geometric.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <limits>
 
 namespace helix::gfx {
 
@@ -29,8 +30,8 @@ constexpr float minDistance = 1.f;
 // clipped by the far plane.
 constexpr float maxFramedDistance = 0.45f * 1000.f;
 
-// Room left around a framed box, as a factor on the distance.
-constexpr float frameMargin = 1.15f;
+// The share of the narrower side of the view a framed box fills.
+constexpr float frameFill = 0.8f;
 
 const float fieldOfView = glm::radians(45.f);
 constexpr float nearPlane = 0.1f;
@@ -77,18 +78,75 @@ void ViewportCamera::reset() { *this = ViewportCamera(); }
 
 void ViewportCamera::frameBounds(glm::vec3 minimum, glm::vec3 maximum, float aspect)
 {
-    center_ = (minimum + maximum) * 0.5f;
+    const glm::vec3 boxCenter = (minimum + maximum) * 0.5f;
+    glm::vec3 half = (maximum - minimum) * 0.5f;
+    // A box with no extent is framed like a unit sphere.
+    if (!(glm::length(half) > 1e-4f)) half = glm::vec3(1.f);
 
-    float radius = 0.5f * glm::length(maximum - minimum);
-    if (!(radius > 1e-4f)) radius = 1.f;
+    const glm::vec3 forward = getForward();
+    const glm::vec3 right = glm::normalize(glm::cross(forward, worldUp));
+    const glm::vec3 up = glm::cross(right, forward);
 
-    // The sphere has to fit the narrower of the two half angles of the view.
-    const float halfVertical = fieldOfView * 0.5f;
-    const float halfHorizontal = std::atan(std::tan(halfVertical) * std::max(aspect, 1e-3f));
-    const float halfAngle = std::min(halfVertical, halfHorizontal);
+    const float tanY = std::tan(fieldOfView * 0.5f);
+    const float tanX = tanY * std::max(aspect, 1e-3f);
 
-    distance_ =
-        std::clamp(radius / std::sin(halfAngle) * frameMargin, minDistance, maxFramedDistance);
+    // The corners of the box as seen from the camera: across (x), up (y) and along the view (z).
+    glm::vec3 corners[8];
+    for (int corner = 0; corner < 8; ++corner)
+    {
+        const glm::vec3 offset(
+            (corner & 1) ? half.x : -half.x, (corner & 2) ? half.y : -half.y, (corner & 4) ? half.z : -half.z
+        );
+        corners[corner] = glm::vec3(glm::dot(offset, right), glm::dot(offset, up), glm::dot(offset, forward));
+    }
+
+    // The distance at which the box, slid across the view by `slide`, fills frameFill of the
+    // narrower side, held between the closest distance and a share of the far plane.
+    auto fitDistance = [&](glm::vec2 slide)
+    {
+        float distance = 0.f;
+        float deepest = 0.f;
+        for (const glm::vec3& corner : corners)
+        {
+            const glm::vec3 c = corner - glm::vec3(slide, 0.f);
+            distance = std::max(distance, std::abs(c.x) / (frameFill * tanX) - c.z);
+            distance = std::max(distance, std::abs(c.y) / (frameFill * tanY) - c.z);
+            deepest = std::max(deepest, std::abs(c.z));
+        }
+        // Keeps every corner well in front of the camera.
+        return std::clamp(std::max(distance, deepest + 0.1f * glm::length(half)), minDistance, maxFramedDistance);
+    };
+
+    // Slides the box across the view until its projection is centred. The slide and the distance
+    // depend a little on each other (a corner nearer the camera is larger), so a few rounds
+    // settle them.
+    glm::vec2 slide(0.f);
+    for (int round = 0; round < 4; ++round)
+    {
+        const float distance = fitDistance(slide);
+        // A box too large to fit even from the farthest distance is framed around its middle: it
+        // fills the view whatever the slide.
+        if (distance >= maxFramedDistance)
+        {
+            slide = glm::vec2(0.f);
+            break;
+        }
+        glm::vec2 low(std::numeric_limits<float>::max());
+        glm::vec2 high(std::numeric_limits<float>::lowest());
+        for (const glm::vec3& corner : corners)
+        {
+            const glm::vec3 c = corner - glm::vec3(slide, 0.f);
+            const glm::vec2 projected(c.x / ((distance + c.z) * tanX), c.y / ((distance + c.z) * tanY));
+            low = glm::min(low, projected);
+            high = glm::max(high, projected);
+        }
+        const glm::vec2 middle = (low + high) * 0.5f;
+        slide += glm::vec2(middle.x * distance * tanX, middle.y * distance * tanY);
+    }
+    const float distance = fitDistance(slide);
+
+    center_ = boxCenter + right * slide.x + up * slide.y;
+    distance_ = distance;
 }
 
 void ViewportCamera::placeAt(const glm::mat4& transform)

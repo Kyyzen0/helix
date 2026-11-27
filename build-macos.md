@@ -174,6 +174,11 @@ The signature is ad hoc ("Sign to Run Locally"), with no team.
 The engine holds one scene, so the app opens one document at a time and refuses a second with
 an alert. The scene file type is `com.kyyzen.helix.scene` (`.kut`, JSON text).
 
+The viewport draws the edges of the mesh over its shading according to the **View > Wireframe**
+setting (Auto, On, Off; Shift+W cycles them). Auto leaves the wireframe out above 50 000
+triangles and fades it out as the edges come within a few points of each other on screen, since a
+wireframe on a dense mesh covers the shading entirely. The lights follow the camera.
+
 `Helix --render-snapshot <in.kut | --new-scene> <out.png> [width height]` opens a scene, frames
 its geometry, draws it off screen and writes a PNG, with no window. It is the check of the whole
 chain without a screen. `apple/Helix/Samples` holds two scenes to try it on, written by

@@ -18,6 +18,10 @@ struct FrameState
     glm::vec4 backgroundColor{0.f, 0.f, 0.f, 1.f};
     glm::vec4 geometryColor{1.f, 1.f, 1.f, 1.f};
     bool wireframeVisible = true;
+    /// @brief Whether the wireframe adapts to the density of the mesh: it is left out above
+    /// kWireframeAutoTriangleLimit triangles and fades as the edges come close on screen. When
+    /// false, a visible wireframe is drawn as it is.
+    bool wireframeAdaptive = false;
     /// @brief Whether every mesh point is drawn, rather than only the points that belong to no face.
     bool pointsVisible = false;
     ViewportCamera camera;

@@ -430,6 +430,18 @@ struct ViewportGeometryInfo
     Bounds bounds;
 };
 
+/// @brief Whether the viewport draws the edges of the mesh over its shading.
+enum class WireframeMode
+{
+    /// @brief The wireframe is drawn while the mesh is light enough to read through it: it is
+    /// left out above 50 000 triangles and fades out as the edges come close on screen.
+    Auto,
+    /// @brief Every edge is drawn, whatever the density of the mesh.
+    On,
+    /// @brief No edge is drawn.
+    Off,
+};
+
 /// @brief What one viewport frame is drawn with.
 struct ViewportFrameOptions
 {
@@ -447,7 +459,7 @@ struct ViewportFrameOptions
     float geometryRed = 0.62f;
     float geometryGreen = 0.64f;
     float geometryBlue = 0.68f;
-    bool wireframeVisible = true;
+    WireframeMode wireframe = WireframeMode::Auto;
     bool pointsVisible = false;
 };
 
