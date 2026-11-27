@@ -4,12 +4,23 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct HelixApp: App {
+    init() {
+        // The appearance of the theme chosen last time, before the first window opens.
+        ThemeAppearance.applyStored()
+    }
+
     var body: some Scene {
         DocumentGroup(newDocument: { HelixDocument() }) { file in
             DocumentView(document: file.document)
                 .focusedSceneObject(file.document)
+                .themed()
         }
         .commands { HelixCommands() }
+        // ⌘, opens it.
+        Settings {
+            SettingsView()
+                .themed()
+        }
     }
 }
 

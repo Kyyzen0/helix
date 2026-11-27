@@ -212,7 +212,7 @@ interface keeps working until the last one removes it.
 | ~~M2, the node editor~~ | Done: the window shows the viewport over a node editor. Show, select, move, connect, disconnect and delete nodes, set the display node, and create nodes from a search palette; every edit is one undoable step. See [build-macos.md](build-macos.md). |
 | ~~M3, the inspector~~ | Done: every parameter type in a column beside the viewport, with undo through the macOS `UndoManager`, and per-node cook errors. See [build-macos.md](build-macos.md). |
 | ~~M4, timeline and spreadsheet~~ | Done: playback, keyframes from the interface and from MCP, and the attribute spreadsheet as a native table. Playback is synchronous on the main thread for now. See [build-macos.md](build-macos.md). |
-| **M5, finish** | Settings, icon, document types, packaging, signing and notarization, then the Qt interface is removed. |
+| **M5, finish** | Settings (started: a Settings window with an Appearance tab and five themes, done), icon, document types, packaging, signing and notarization, then the Qt interface is removed. |
 
 What the native application gets from the platform rather than reimplementing:
 documents with autosave and versions, menus and standard shortcuts, the

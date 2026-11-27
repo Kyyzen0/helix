@@ -39,6 +39,7 @@ FrameConstants getFrameConstants(const FrameState& frame)
         viewProjection,
         cameraPosition,
         frame.geometryColor,
+        frame.gridColor,
         cameraRight,
         cameraUp,
         viewportPixelSize,

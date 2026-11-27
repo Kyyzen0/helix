@@ -761,9 +761,9 @@ enum MCPHandlers {
         var options = helix.core.ViewportFrameOptions()
         options.pixelWidth = pixelWidth
         options.pixelHeight = pixelHeight
-        options.backgroundRed = ViewportRenderer.background.red
-        options.backgroundGreen = ViewportRenderer.background.green
-        options.backgroundBlue = ViewportRenderer.background.blue
+        // No window here, so no appearance to ask: the system theme draws as its dark side, the
+        // viewport's colours in every appearance.
+        Theme.stored().palette(systemIsDark: true).apply(to: &options)
         options.wireframe = wireframe
         options.materialsVisible = materialsVisible
 

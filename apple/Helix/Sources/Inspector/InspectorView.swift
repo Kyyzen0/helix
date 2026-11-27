@@ -62,6 +62,7 @@ struct InspectorNodeView: View {
 
 /// The name of the node, its type, the display flag and what went wrong when it cooked.
 struct InspectorHeader: View {
+    @Environment(\.theme) private var theme
     let node: InspectorNode
     @ObservedObject var model: InspectorModel
 
@@ -75,7 +76,7 @@ struct InspectorHeader: View {
                 Spacer()
                 Button { model.setDisplay() } label: {
                     Image(systemName: node.isDisplay ? "flag.fill" : "flag")
-                        .foregroundStyle(node.isDisplay ? Color.accentColor : Color.secondary)
+                        .foregroundStyle(node.isDisplay ? theme.accent : Color.secondary)
                 }
                 .buttonStyle(.borderless)
                 .help(Text(node.isDisplay ? "This node is shown in the viewport" : "Show this node in the viewport"))

@@ -14,10 +14,11 @@ enum SnapshotCommand {
     static let flag = "--render-snapshot"
     static let newSceneArgument = "--new-scene"
 
-    static let usage = "usage: Helix \(flag) <in.kut | 3D file | \(newSceneArgument)> <out.png> [width height]"
+    static let usage = "usage: Helix \(flag) <in.kut | 3D file | \(newSceneArgument)> <out.png> [width height] \(ThemeOptions.usage)"
 
     /// Runs the command on its arguments, the ones after the flag, and returns the exit code.
-    static func run(_ arguments: [String]) -> Int32 {
+    static func run(_ all: [String]) -> Int32 {
+        guard let (theme, arguments) = ThemeOptions.extract(from: all) else { return fail(usage) }
         guard arguments.count == 2 || arguments.count == 4 else { return fail(usage) }
         let width = arguments.count == 4 ? UInt32(arguments[2]) : 1024
         let height = arguments.count == 4 ? UInt32(arguments[3]) : 768
@@ -44,9 +45,7 @@ enum SnapshotCommand {
             var options = helix.core.ViewportFrameOptions()
             options.pixelWidth = width
             options.pixelHeight = height
-            options.backgroundRed = ViewportRenderer.background.red
-            options.backgroundGreen = ViewportRenderer.background.green
-            options.backgroundBlue = ViewportRenderer.background.blue
+            theme.palette().apply(to: &options)
             options.wireframe = WireframeSetting.current.facadeMode
             options.materialsVisible = MaterialsSetting.isVisible
             let drawStarted = DispatchTime.now()

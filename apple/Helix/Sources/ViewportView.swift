@@ -17,12 +17,8 @@ struct ViewportView: NSViewRepresentable {
         view.isPaused = true
         view.colorPixelFormat = .bgra8Unorm
         view.colorspace = CGColorSpace(name: CGColorSpace.sRGB)
-        view.clearColor = MTLClearColor(
-            red: Double(ViewportRenderer.background.red),
-            green: Double(ViewportRenderer.background.green),
-            blue: Double(ViewportRenderer.background.blue),
-            alpha: 1
-        )
+        view.clearColor = ViewportRenderer.palette().viewportClearColor
+        context.coordinator.watchTheme(of: view)
         // Weak, because the document owns the viewport that owns the failure handler: a strong
         // capture would keep a closed document alive.
         view.onWindowClose = { [weak document] in document?.relinquish() }
@@ -44,7 +40,29 @@ struct ViewportView: NSViewRepresentable {
     func updateNSView(_ view: HelixMetalView, context: Context) {}
 
     /// Keeps the renderer alive, since the view only holds its delegate weakly.
+    @MainActor
     final class Coordinator {
         var renderer: ViewportRenderer?
+        nonisolated(unsafe) private var observer: NSObjectProtocol?
+
+        /// Redraws the view with the colours of a new theme as soon as one is chosen in the
+        /// Settings window. The renderer reads the theme at each frame; the clear colour of the
+        /// view, which shows before the first frame, is set here. A theme that follows the
+        /// system appearance is redrawn by the view itself (`HelixMetalView`).
+        func watchTheme(of view: HelixMetalView) {
+            observer = NotificationCenter.default.addObserver(
+                forName: UserDefaults.didChangeNotification, object: nil, queue: .main
+            ) { [weak view] _ in
+                MainActor.assumeIsolated {
+                    guard let view else { return }
+                    view.clearColor = ViewportRenderer.palette(for: view.effectiveAppearance).viewportClearColor
+                    view.needsDisplay = true
+                }
+            }
+        }
+
+        deinit {
+            if let observer { NotificationCenter.default.removeObserver(observer) }
+        }
     }
 }

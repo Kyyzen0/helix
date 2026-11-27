@@ -15,7 +15,6 @@ struct GridVertexOutput
     float3 worldPosition;
 };
 
-constant float3 lineColor = float3(0.227, 0.227, 0.275);
 constant float centerOpacity = 0.5;
 constant float fadeDistance = 40.0;
 
@@ -30,8 +29,11 @@ vertex GridVertexOutput gridVertex(
     return output;
 }
 
-fragment float4 gridFragment(GridVertexOutput input [[stage_in]])
+fragment float4 gridFragment(
+    GridVertexOutput input [[stage_in]],
+    constant FrameConstants& frame [[buffer(HELIX_FRAME_CONSTANTS_SLOT)]]
+)
 {
     float fade = saturate(1.0 - length(input.worldPosition) / fadeDistance);
-    return float4(lineColor, centerOpacity * fade);
+    return float4(frame.gridColor.rgb, centerOpacity * fade);
 }

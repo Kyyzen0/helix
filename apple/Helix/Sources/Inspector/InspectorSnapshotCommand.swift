@@ -16,7 +16,7 @@ import UniformTypeIdentifiers
 enum InspectorSnapshotCommand {
     static let flag = "--render-inspector"
 
-    static let usage = "usage: Helix \(flag) <in.kut | \(SnapshotCommand.newSceneArgument)> <node name or path> <out.png> [width [height]] [--dark]"
+    static let usage = "usage: Helix \(flag) <in.kut | \(SnapshotCommand.newSceneArgument)> <node name or path> <out.png> [width [height]] [--dark] \(ThemeOptions.usage)"
 
     /// What an inspector with no document behind it does: it reads the engine and edits nothing.
     @MainActor
@@ -30,7 +30,8 @@ enum InspectorSnapshotCommand {
         func setDisplay(_ node: UInt64) -> EditOutcome { .done }
     }
 
-    static func run(_ arguments: [String]) -> Int32 {
+    static func run(_ all: [String]) -> Int32 {
+        guard let (themeOptions, arguments) = ThemeOptions.extract(from: all) else { return fail(usage) }
         var positional: [String] = []
         var dark = false
         for argument in arguments {
@@ -74,10 +75,12 @@ enum InspectorSnapshotCommand {
             // The controls of the panel are AppKit's (fields, sliders, menus), which ImageRenderer
             // draws as a placeholder, so the panel is laid out in a window that is never shown
             // and its pixels are read back.
+            let palette = themeOptions.palette(dark: dark)
             let content = InspectorView(model: model, scrolls: false)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .background(Color(nsColor: .windowBackgroundColor))
-            guard let image = draw(content, width: width, height: height, dark: dark) else {
+                .background(ThemeColors(palette).window)
+                .themeEnvironment(palette)
+            guard let image = draw(content, width: width, height: height, dark: palette.isDark) else {
                 return fail("the inspector could not be drawn")
             }
             try write(image, to: positional[2])

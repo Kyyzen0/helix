@@ -12,9 +12,10 @@ import SwiftUI
 enum SpreadsheetSnapshotCommand {
     static let flag = "--render-spreadsheet"
 
-    static let usage = "usage: Helix \(flag) <in.kut> <node> <out.png> [width height] [--owner points|vertices|faces|primitives] [--dark]"
+    static let usage = "usage: Helix \(flag) <in.kut> <node> <out.png> [width height] [--owner points|vertices|faces|primitives] [--dark] \(ThemeOptions.usage)"
 
-    static func run(_ arguments: [String]) -> Int32 {
+    static func run(_ all: [String]) -> Int32 {
+        guard let (themeOptions, arguments) = ThemeOptions.extract(from: all) else { return OffscreenRender.fail(usage) }
         var positional: [String] = []
         var owner = SpreadsheetOwner.points
         var dark = false
@@ -60,8 +61,11 @@ enum SpreadsheetSnapshotCommand {
             print("\(model.nodeName ?? "?"): \(owner.title) \(model.rowCount) rows, columns \(model.columns.map(\.title).joined(separator: " "))")
             if case .failed(let message) = model.state { print("error: \(message)") }
 
-            let content = SpreadsheetView(model: model).background(Color(nsColor: .windowBackgroundColor))
-            guard let image = OffscreenRender.image(of: content, width: width, height: height, dark: dark) else {
+            let palette = themeOptions.palette(dark: dark)
+            let content = SpreadsheetView(model: model)
+                .background(ThemeColors(palette).window)
+                .themeEnvironment(palette)
+            guard let image = OffscreenRender.image(of: content, width: width, height: height, dark: palette.isDark) else {
                 return OffscreenRender.fail("the spreadsheet could not be drawn")
             }
             try OffscreenRender.write(image, to: positional[2])

@@ -13,9 +13,10 @@ import SwiftUI
 enum TimelineSnapshotCommand {
     static let flag = "--render-timeline"
 
-    static let usage = "usage: Helix \(flag) <in.kut> <out.png> [width] [--select <node>] [--frame <n>] [--dark]"
+    static let usage = "usage: Helix \(flag) <in.kut> <out.png> [width] [--select <node>] [--frame <n>] [--dark] \(ThemeOptions.usage)"
 
-    static func run(_ arguments: [String]) -> Int32 {
+    static func run(_ all: [String]) -> Int32 {
+        guard let (themeOptions, arguments) = ThemeOptions.extract(from: all) else { return OffscreenRender.fail(usage) }
         var positional: [String] = []
         var selected: String?
         var frame: Float?
@@ -65,8 +66,11 @@ enum TimelineSnapshotCommand {
             print("frame \(NumberText.format(time.frame)) of \(time.start) to \(time.end) at \(NumberText.format(time.fps)) fps, \(model.diamonds.count) diamonds")
             for diamond in model.diamonds { print("  " + diamond.tooltip.replacingOccurrences(of: "\n", with: "; ")) }
 
-            let content = TimelineBar(model: model).background(Color(nsColor: .windowBackgroundColor))
-            guard let image = OffscreenRender.image(of: content, width: width, height: nil, dark: dark) else {
+            let palette = themeOptions.palette(dark: dark)
+            let content = TimelineBar(model: model)
+                .background(ThemeColors(palette).window)
+                .themeEnvironment(palette)
+            guard let image = OffscreenRender.image(of: content, width: width, height: nil, dark: palette.isDark) else {
                 return OffscreenRender.fail("the timeline could not be drawn")
             }
             try OffscreenRender.write(image, to: positional[1])

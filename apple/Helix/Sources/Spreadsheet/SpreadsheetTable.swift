@@ -7,6 +7,7 @@ import SwiftUI
 /// cells are in.
 struct SpreadsheetTable: NSViewRepresentable {
     @ObservedObject var model: SpreadsheetModel
+    @Environment(\.theme) private var theme
 
     func makeCoordinator() -> Coordinator { Coordinator(model: model) }
 
@@ -34,12 +35,14 @@ struct SpreadsheetTable: NSViewRepresentable {
         scroll.hasHorizontalScroller = true
         scroll.autohidesScrollers = true
         scroll.drawsBackground = false
+        context.coordinator.apply(theme.palette)
         context.coordinator.sync()
         return scroll
     }
 
     func updateNSView(_ scroll: NSScrollView, context: Context) {
         context.coordinator.model = model
+        context.coordinator.apply(theme.palette)
         context.coordinator.sync()
     }
 
@@ -50,7 +53,28 @@ struct SpreadsheetTable: NSViewRepresentable {
         private var shownColumns: [String] = []
         private var shownRevision = -1
 
+        private var palette: ThemePalette?
         init(model: SpreadsheetModel) { self.model = model }
+
+        /// Gives the table the colours of the theme. The cells and the header are the system's
+        /// text colours, which follow the appearance the theme sets. A theme that follows the
+        /// system keeps the alternating rows of AppKit, which a custom theme draws itself
+        /// (`StripedRowView`) in a tint of its own background.
+        func apply(_ palette: ThemePalette) {
+            guard let table, self.palette != palette else { return }
+            self.palette = palette
+            table.usesAlternatingRowBackgroundColors = palette.followsSystemColors
+            table.backgroundColor = palette.followsSystemColors ? .controlBackgroundColor : NSColor(palette.surface)
+            table.stripe = palette.followsSystemColors ? nil : NSColor(palette.window.mixed(with: palette.text, by: 0.05))
+            table.reloadData()
+        }
+
+        func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
+            guard let table = tableView as? SpreadsheetTableView, let stripe = table.stripe else { return nil }
+            let view = StripedRowView()
+            view.stripe = row % 2 == 1 ? stripe : nil
+            return view
+        }
 
         /// Brings the table in line with the model: the columns when they changed, and the cells
         /// when anything they say may have.
@@ -133,11 +157,24 @@ struct SpreadsheetTable: NSViewRepresentable {
 /// The table, with the command C of the Edit menu wired to the selected rows.
 final class SpreadsheetTableView: NSTableView {
     var onCopy: (() -> Void)?
+    /// The colour of the odd rows when the theme draws its own stripes.
+    var stripe: NSColor?
 
     @objc func copy(_ sender: Any?) { onCopy?() }
 
     override func validateUserInterfaceItem(_ item: any NSValidatedUserInterfaceItem) -> Bool {
         if item.action == #selector(copy(_:)) { return !selectedRowIndexes.isEmpty }
         return super.validateUserInterfaceItem(item)
+    }
+}
+
+/// A row that paints a stripe under its cells, for the themes that draw their own.
+final class StripedRowView: NSTableRowView {
+    var stripe: NSColor?
+
+    override func drawBackground(in dirtyRect: NSRect) {
+        guard let stripe else { return super.drawBackground(in: dirtyRect) }
+        stripe.setFill()
+        dirtyRect.fill()
     }
 }

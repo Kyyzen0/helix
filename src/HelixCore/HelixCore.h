@@ -1054,6 +1054,10 @@ struct ViewportFrameOptions
     float geometryRed = 0.62f;
     float geometryGreen = 0.64f;
     float geometryBlue = 0.68f;
+    /// @brief The colour of the ground grid lines, each channel from 0 to 1.
+    float gridRed = 0.227f;
+    float gridGreen = 0.227f;
+    float gridBlue = 0.275f;
     WireframeMode wireframe = WireframeMode::Auto;
     bool pointsVisible = false;
     /// @brief Whether the faces are drawn with the base colour and texture of their material.

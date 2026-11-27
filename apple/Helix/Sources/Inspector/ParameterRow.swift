@@ -352,6 +352,7 @@ struct RangeCircleControl: View {
 
 /// An arc on a circle, from one angle to another, measured in degrees from the top, clockwise.
 struct ArcDial: View {
+    @Environment(\.theme) private var theme
     let start: Double
     let end: Double
 
@@ -366,7 +367,7 @@ struct ArcDial: View {
                 center: centre, radius: rect.width / 2,
                 startAngle: .degrees(start - 90), endAngle: .degrees(end - 90), clockwise: false
             )
-            context.stroke(arc, with: .color(.accentColor), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+            context.stroke(arc, with: .color(theme.accent), style: StrokeStyle(lineWidth: 3, lineCap: .round))
         }
     }
 }

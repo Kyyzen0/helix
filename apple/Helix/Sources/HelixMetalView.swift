@@ -29,6 +29,13 @@ final class HelixMetalView: MTKView {
         }
     }
 
+    // The system theme changed between light and dark: the colours of the viewport may have.
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        clearColor = ViewportRenderer.palette(for: effectiveAppearance).viewportClearColor
+        needsDisplay = true
+    }
+
     // The window moved to a screen with another scale, so the drawable has another size.
     override func viewDidChangeBackingProperties() {
         super.viewDidChangeBackingProperties()

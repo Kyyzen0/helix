@@ -8,11 +8,11 @@ import SwiftUI
 /// over it.
 struct NodeEditorCanvas: View {
     @ObservedObject var model: NodeEditorModel
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.theme) private var theme
 
     var body: some View {
         Canvas(rendersAsynchronously: false) { context, size in
-            NodeEditorPainter(model: model, colorScheme: colorScheme, size: size).paint(&context)
+            NodeEditorPainter(model: model, colors: theme, size: size).paint(&context)
         }
         .accessibilityLabel(Text("Node editor"))
     }
@@ -22,24 +22,20 @@ struct NodeEditorCanvas: View {
 @MainActor
 struct NodeEditorPainter {
     let model: NodeEditorModel
-    let colorScheme: ColorScheme
+    let colors: ThemeColors
     let size: CGSize
 
     private var graph: EditorGraph { model.graph }
     private var transform: ViewTransform { model.transform }
     private var zoom: CGFloat { transform.zoom }
 
-    private var background: Color { Color(nsColor: .windowBackgroundColor) }
-    private var cardFill: Color {
-        colorScheme == .dark
-            ? Color(nsColor: .windowBackgroundColor).mix(with: .white, by: 0.1)
-            : Color(nsColor: .controlBackgroundColor)
-    }
-    private var cardStroke: Color { Color.primary.opacity(0.28) }
-    private var linkColor: Color { Color.primary.opacity(0.5) }
+    private var background: Color { colors.nodeBackground }
+    private var cardFill: Color { colors.surface }
+    private var cardStroke: Color { colors.nodeCardStroke }
+    private var linkColor: Color { colors.nodeLink }
     // Opaque, so a link that ends in a port does not show through it.
-    private var portFill: Color { colorScheme == .dark ? Color(white: 0.7) : Color(white: 0.45) }
-    private var accent: Color { Color.accentColor }
+    private var portFill: Color { colors.nodePort }
+    private var accent: Color { colors.accent }
 
     func paint(_ context: inout GraphicsContext) {
         context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(background))
@@ -71,7 +67,7 @@ struct NodeEditorPainter {
             }
             x += spacing
         }
-        context.fill(dots, with: .color(Color.primary.opacity(0.14)))
+        context.fill(dots, with: .color(colors.nodeGrid))
     }
 
     // MARK: Links
@@ -153,7 +149,7 @@ struct NodeEditorPainter {
             clipped.clip(to: shape)
             clipped.fill(
                 Path(CGRect(x: card.minX, y: card.minY, width: max(4 * zoom, 2), height: card.height)),
-                with: .color(accent)
+                with: .color(colors.displayFlag)
             )
         }
         // A card whose node failed is outlined in red, selected or not: the selection shows in its
@@ -171,21 +167,21 @@ struct NodeEditorPainter {
         let textWidth = card.width - (left - card.minX) - 8 * zoom - flagSpace
         let name = fitted(node.name, font: .system(size: 12 * zoom, weight: .semibold), width: textWidth, in: context)
         context.draw(
-            context.resolve(Text(name).font(.system(size: 12 * zoom, weight: .semibold)).foregroundColor(.primary)),
+            context.resolve(Text(name).font(.system(size: 12 * zoom, weight: .semibold)).foregroundColor(colors.text)),
             at: CGPoint(x: left, y: card.minY + card.height * (zoom >= 0.5 ? 0.38 : 0.5)),
             anchor: .leading
         )
         if zoom >= 0.5 {
             let label = fitted(type.label, font: .system(size: 10 * zoom), width: textWidth, in: context)
             context.draw(
-                context.resolve(Text(label).font(.system(size: 10 * zoom)).foregroundColor(.secondary)),
+                context.resolve(Text(label).font(.system(size: 10 * zoom)).foregroundColor(colors.textSecondary)),
                 at: CGPoint(x: left, y: card.minY + card.height * 0.7),
                 anchor: .leading
             )
         }
         if isDisplay {
             var flag = context.resolve(Image(systemName: "flag.fill"))
-            flag.shading = .color(accent)
+            flag.shading = .color(colors.displayFlag)
             let side = 11 * zoom
             context.draw(
                 flag,
@@ -278,7 +274,7 @@ struct NodeEditorPainter {
             lineWidth: 2
         )
         guard !target.label.isEmpty else { return }
-        let text = context.resolve(Text(target.label).font(.system(size: 11, weight: .medium)).foregroundColor(.white))
+        let text = context.resolve(Text(target.label).font(.system(size: 11, weight: .medium)).foregroundColor(colors.onAccent))
         let measured = text.measure(in: CGSize(width: 400, height: 40))
         let chip = CGRect(x: centre.x - measured.width / 2 - 6, y: centre.y - radius - measured.height - 10, width: measured.width + 12, height: measured.height + 4)
         context.fill(Path(roundedRect: chip, cornerRadius: chip.height / 2), with: .color(accent))
@@ -287,7 +283,7 @@ struct NodeEditorPainter {
 
     private func paintEmptyHint(_ context: inout GraphicsContext) {
         let hint = context.resolve(
-            Text("Press Tab to add a node").font(.system(size: 14)).foregroundColor(.secondary)
+            Text("Press Tab to add a node").font(.system(size: 14)).foregroundColor(colors.textSecondary)
         )
         context.draw(hint, at: CGPoint(x: size.width / 2, y: size.height / 2))
     }

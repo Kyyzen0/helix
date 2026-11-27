@@ -70,6 +70,7 @@ struct RampEditor: View {
 /// engine reads them, and a b spline segment as a smooth curve through the same points, which
 /// is a drawing aid and not the sampled curve itself.
 struct RampCurve: View {
+    @Environment(\.theme) private var theme
     let points: [InspectorRampPoint]
 
     var body: some View {
@@ -106,10 +107,10 @@ struct RampCurve: View {
                     curve.addLine(to: here)
                 }
             }
-            context.stroke(curve, with: .color(.accentColor), lineWidth: 2)
+            context.stroke(curve, with: .color(theme.accent), lineWidth: 2)
             for point in sorted {
                 let centre = place(point)
-                context.fill(Path(ellipseIn: CGRect(x: centre.x - 3, y: centre.y - 3, width: 6, height: 6)), with: .color(.accentColor))
+                context.fill(Path(ellipseIn: CGRect(x: centre.x - 3, y: centre.y - 3, width: 6, height: 6)), with: .color(theme.accent))
             }
         }
         .accessibilityLabel(Text("Ramp curve"))

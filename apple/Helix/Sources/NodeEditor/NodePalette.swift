@@ -6,6 +6,7 @@ import SwiftUI
 /// Up and down choose, Return makes the node, Escape closes. The field is an AppKit one, since
 /// that is where a text field's own commands, the arrows and Return, can be told apart reliably.
 struct NodePalette: View {
+    @Environment(\.theme) private var theme
     @ObservedObject var model: NodeEditorModel
     let request: PaletteRequest
     let area: CGSize
@@ -89,7 +90,7 @@ struct NodePalette: View {
         }
         .padding(.horizontal, 10)
         .frame(height: Self.rowHeight)
-        .background(isChosen ? Color.accentColor.opacity(0.3) : Color.clear)
+        .background(isChosen ? theme.accent.opacity(0.3) : Color.clear)
         .contentShape(Rectangle())
     }
 }

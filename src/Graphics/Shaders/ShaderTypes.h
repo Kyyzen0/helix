@@ -41,6 +41,8 @@ struct FrameConstants
     HELIX_SHADER_MAT4 viewProjection;
     HELIX_SHADER_VEC4 cameraPosition;
     HELIX_SHADER_VEC4 geometryColor;
+    /// The colour of the ground grid lines, in the colour space of the shader constants of `lineColor`.
+    HELIX_SHADER_VEC4 gridColor;
     /// The unit vectors of the camera in world space, which the lights of the mesh follow.
     HELIX_SHADER_VEC4 cameraRight;
     HELIX_SHADER_VEC4 cameraUp;
@@ -64,7 +66,7 @@ struct MaterialConstants
 };
 
 #ifndef __METAL_VERSION__
-static_assert(sizeof(FrameConstants) == 144, "FrameConstants must match the layout the shaders read");
+static_assert(sizeof(FrameConstants) == 160, "FrameConstants must match the layout the shaders read");
 static_assert(sizeof(MaterialConstants) == 32, "MaterialConstants must match the layout the shaders read");
 } // namespace helix::gfx
 #endif

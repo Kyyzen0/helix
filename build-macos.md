@@ -533,6 +533,26 @@ not on the one open in a window of the app; its changes are not grouped into und
 an intent; and the scripts a node runs are not sandboxed. The three go with track two of the
 [roadmap](ROADMAP.md).
 
+## Themes
+
+The app has five themes, chosen in the Settings window (Helix > Settings, or the command key and comma), in the Appearance tab. A click on a tile applies at once, in every open window, and the choice is kept in the user defaults under `theme`.
+
+| Theme | Appearance | Accent |
+| --- | --- | --- |
+| System (default) | Follows macOS, light or dark | The system accent colour |
+| Light | Forced light | The system accent colour |
+| Dark | Forced dark | The system accent colour |
+| Helix | Dark, deep indigo from the logo | Between violet and magenta (`#C063E0`) |
+| Ember | Dark, warm charcoal | Ember orange (`#FF7A1A`) |
+
+The palettes are in `apple/Helix/Sources/Theme/Theme.swift` (`ThemePalette`, a pure value with no HelixCore import, checked by `Tests/ThemeTests.swift` for WCAG contrast). `ThemeColors.swift` turns a palette into SwiftUI colours and puts it in the environment (`@Environment(\.theme)`).
+
+What follows the theme: the appearance of the whole app (`NSApplication.appearance`, so title bars and AppKit controls too), the colour behind the windows, the tint of the controls, the viewport (background, geometry colour and the ground grid, through `ViewportFrameOptions`, redrawn when the theme changes), the node editor (canvas, dots, cards, ports, links, selection, display flag), the timeline (bar, ruler, range, playhead, cached frames, keys), the inspector accents and the spreadsheet background and stripes.
+
+What follows the system, not the theme: the semantic reds and yellows of errors and warnings, the red, green and blue of the X, Y and Z fields, and AppKit's own drawing: the fill of text fields, the selection highlight of the spreadsheet table (the system accent colour) and menus. System, Light and Dark keep the semantic colours of macOS everywhere, so they look as before; the viewport is the same dark slate in all three, as it always was.
+
+Every `--render-*` command takes `--theme <system|light|dark|helix|ember>` and `--appearance <light|dark>` (for the system theme), and `--render-settings <out.png>` draws the Appearance tab.
+
 ## Importing 3D files
 
 `helix::geometryImport` is the one node that reads other tools' files, and picks its reader by

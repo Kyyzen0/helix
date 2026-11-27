@@ -17,6 +17,8 @@ struct FrameState
     float pixelRatio = 1.f;
     glm::vec4 backgroundColor{0.f, 0.f, 0.f, 1.f};
     glm::vec4 geometryColor{1.f, 1.f, 1.f, 1.f};
+    /// @brief The colour of the ground grid. Its opacity is the grid's own and fades with distance.
+    glm::vec4 gridColor{0.227f, 0.227f, 0.275f, 1.f};
     bool wireframeVisible = true;
     /// @brief Whether the wireframe adapts to the density of the mesh: it is left out above
     /// kWireframeAutoTriangleLimit triangles and fades as the edges come close on screen. When

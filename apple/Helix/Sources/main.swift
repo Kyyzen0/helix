@@ -24,6 +24,11 @@ if let flag = arguments.firstIndex(of: SpreadsheetSnapshotCommand.flag) {
     exit(SpreadsheetSnapshotCommand.run(Array(arguments[(flag + 1)...])))
 }
 
+// And the Appearance tab of the Settings window.
+if let flag = arguments.firstIndex(of: SettingsSnapshotCommand.flag) {
+    exit(SettingsSnapshotCommand.run(Array(arguments[(flag + 1)...])))
+}
+
 // An AI agent starts the app with this flag and talks to it over standard input and output.
 if arguments.contains(MCPServer.flag) {
     exit(MCPServer.run())

@@ -115,6 +115,7 @@ gfx::FrameState makeFrame(const ViewportFrameOptions& options, const gfx::Viewpo
         options.backgroundAlpha
     };
     frame.geometryColor = {options.geometryRed, options.geometryGreen, options.geometryBlue, 1.f};
+    frame.gridColor = {options.gridRed, options.gridGreen, options.gridBlue, 1.f};
     frame.wireframeVisible = options.wireframe != WireframeMode::Off;
     frame.wireframeAdaptive = options.wireframe == WireframeMode::Auto;
     frame.pointsVisible = options.pointsVisible;

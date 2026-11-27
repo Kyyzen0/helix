@@ -1,4 +1,5 @@
 import HelixCore
+import AppKit
 import MetalKit
 
 /// Presents the frames the engine draws: asks the facade to record a frame into a command buffer
@@ -13,8 +14,12 @@ final class ViewportRenderer: NSObject, MTKViewDelegate {
     private let controller: ViewportController
     private var reportedFailure = false
 
-    /// The background of the viewport, shared with the clear colour of the view.
-    static let background = (red: Float(0.13), green: Float(0.14), blue: Float(0.16))
+    /// The palette the viewport draws with: the theme chosen in the Settings window, in the
+    /// appearance of the view when the theme follows the system. Read at each frame, so a change
+    /// of theme only needs a redraw.
+    static func palette(for appearance: NSAppearance? = nil) -> ThemePalette {
+        Theme.stored().palette(systemIsDark: (appearance ?? NSApplication.shared.effectiveAppearance).isDark)
+    }
 
     init?(device: MTLDevice, view: MTKView, controller: ViewportController) {
         guard let queue = device.makeCommandQueue(),
@@ -65,9 +70,7 @@ final class ViewportRenderer: NSObject, MTKViewDelegate {
         options.pixelWidth = UInt32(view.drawableSize.width)
         options.pixelHeight = UInt32(view.drawableSize.height)
         options.pixelRatio = Float(view.window?.backingScaleFactor ?? 1)
-        options.backgroundRed = Self.background.red
-        options.backgroundGreen = Self.background.green
-        options.backgroundBlue = Self.background.blue
+        Self.palette(for: view.effectiveAppearance).apply(to: &options)
         options.wireframe = WireframeSetting.current.facadeMode
         options.materialsVisible = MaterialsSetting.isVisible
 
@@ -95,5 +98,26 @@ final class ViewportRenderer: NSObject, MTKViewDelegate {
         guard !reportedFailure else { return }
         reportedFailure = true
         controller.onFailure?(message)
+    }
+}
+
+extension ThemePalette {
+    /// Writes the colours of the viewport into the options of a frame: the background and the
+    /// colour of the geometry, and the grid lines.
+    func apply(to options: inout helix.core.ViewportFrameOptions) {
+        options.backgroundRed = Float(viewportBackground.red)
+        options.backgroundGreen = Float(viewportBackground.green)
+        options.backgroundBlue = Float(viewportBackground.blue)
+        options.geometryRed = Float(viewportGeometry.red)
+        options.geometryGreen = Float(viewportGeometry.green)
+        options.geometryBlue = Float(viewportGeometry.blue)
+        options.gridRed = Float(viewportGrid.red)
+        options.gridGreen = Float(viewportGrid.green)
+        options.gridBlue = Float(viewportGrid.blue)
+    }
+
+    /// The colour the Metal view is cleared to.
+    var viewportClearColor: MTLClearColor {
+        MTLClearColor(red: viewportBackground.red, green: viewportBackground.green, blue: viewportBackground.blue, alpha: 1)
     }
 }

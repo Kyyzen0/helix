@@ -15,9 +15,10 @@ import UniformTypeIdentifiers
 enum NodeEditorSnapshotCommand {
     static let flag = "--render-node-editor"
 
-    static let usage = "usage: Helix \(flag) <in.kut | \(SnapshotCommand.newSceneArgument)> <out.png> [width height] [--select <name>]... [--dark]"
+    static let usage = "usage: Helix \(flag) <in.kut | \(SnapshotCommand.newSceneArgument)> <out.png> [width height] [--select <name>]... [--dark] \(ThemeOptions.usage)"
 
-    static func run(_ arguments: [String]) -> Int32 {
+    static func run(_ all: [String]) -> Int32 {
+        guard let (themeOptions, arguments) = ThemeOptions.extract(from: all) else { return fail(usage) }
         var positional: [String] = []
         var selected: [String] = []
         var dark = false
@@ -61,9 +62,11 @@ enum NodeEditorSnapshotCommand {
 
             // The app has not started, but AppKit needs to exist to draw colours and symbols.
             _ = NSApplication.shared
+            let palette = themeOptions.palette(dark: dark)
             let view = NodeEditorCanvas(model: model)
                 .frame(width: width, height: height)
-                .environment(\.colorScheme, dark ? .dark : .light)
+                .themeEnvironment(palette)
+                .environment(\.colorScheme, palette.isDark ? .dark : .light)
             let renderer = ImageRenderer(content: view)
             renderer.scale = 2
             guard let image = renderer.cgImage else { return fail("the editor could not be drawn") }
