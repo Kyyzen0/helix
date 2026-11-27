@@ -22,7 +22,7 @@ extension UTType {
 /// a file is opened. So `init()` only notes that this is a new scene, and the engine is touched
 /// by `activate()`, on the main thread, when the document is actually shown.
 @MainActor
-final class HelixDocument: @preconcurrency ReferenceFileDocument {
+final class HelixDocument: ReferenceFileDocument {
     /// Scenes, and the 3D files Helix imports. The file of a 3D model is never written back: a
     /// scene that imports it saves as a `.kut`.
     nonisolated static var readableContentTypes: [UTType] { [.helixScene] + ImportFormats.contentTypes }
@@ -63,6 +63,11 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
     /// The undo manager of the window, which the view hands over once it has one. Weak, since
     /// the window owns it and it holds no reference to the document.
     weak var undoManager: UndoManager?
+
+    /// The scene as a file holds it, for a save that is asked for off the main thread (see
+    /// `HelixDocument+Saving`).
+    nonisolated let savedScene = SceneSnapshotCache(currentRevision: { helix.core.sceneRevision() })
+    var snapshotKeeper: SceneSnapshotKeeper?
 
     /// The file the scene is read from, or nil for a new scene. Set once, before the document is
     /// shared, so it can be read from any thread.
@@ -138,6 +143,7 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
                 // A new scene is empty: the welcome screen offers what to start from.
                 try EngineHost.shared.makeEmptyScene()
                 Self.logUntitledScene()
+                scheduleDebugImportAfterLaunch()
             }
         } catch {
             EngineHost.shared.release(self)
@@ -147,6 +153,7 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         cookGeometry()
         prepareEditor()
         prepareTimeline()
+        startKeepingSavedScene()
         if !pendingOpenedImport { Self.logLaunchDebug() }
     }
 
@@ -346,22 +353,9 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         // A playback that goes on would cook a scene the window no longer holds.
         timeline.pause()
         isActive = false
+        stopKeepingSavedScene()
         // Nothing the viewport calls back into may point at the document once it is closed.
         viewport.onFailure = nil
         EngineHost.shared.release(self)
-    }
-
-    // MARK: Saving
-
-    func snapshot(contentType: UTType) throws -> Data {
-        guard isActive else { throw HelixError.sceneClosed }
-        let url = FileManager.default.temporaryDirectory.appending(path: "helix-save-\(UUID().uuidString).kut")
-        defer { try? FileManager.default.removeItem(at: url) }
-        try HelixError.check(helix.core.saveScene(std.string(url.path)))
-        return try Data(contentsOf: url)
-    }
-
-    nonisolated func fileWrapper(snapshot: Data, configuration: WriteConfiguration) throws -> FileWrapper {
-        FileWrapper(regularFileWithContents: snapshot)
     }
 }

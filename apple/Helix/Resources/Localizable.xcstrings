@@ -1191,6 +1191,23 @@
         }
       }
     },
+    "Helix could not save the latest changes. Try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helix could not save the latest changes. Try again."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helix n’a pas pu enregistrer les dernières modifications. Réessayez."
+          }
+        }
+      }
+    },
     "Helix is a continuation of enzo by ParkerBritt, whose engine, node system and attribute model remain its foundation. Both are released under the MIT licence.\n\n3D files are read with Assimp (BSD 3-Clause, with Draco, Apache 2.0) and Model I/O.": {
       "extractionState": "manual",
       "localizations": {

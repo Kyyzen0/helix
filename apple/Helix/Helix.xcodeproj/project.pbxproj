@@ -8,11 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		34C235F25B2010954D97674C /* WindowPlacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73EEBBB1395BA354B4F4D120 /* WindowPlacement.swift */; };
+		C5219815311138267CDA895F /* SceneSnapshotCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD5E70F708C30BA11147D625 /* SceneSnapshotCacheTests.swift */; };
+		E90688861FEE65D9853E578A /* SceneSnapshotCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD5E70F708C30BA11147D625 /* SceneSnapshotCacheTests.swift */; };
+		3ABA01C345594E34C81A9DE7 /* HelixDocument+Saving.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FBED3BC5E12B674B13387F1 /* HelixDocument+Saving.swift */; };
+		7A0A9DE4BC3175A4A272ED7B /* HelixDocument+Saving.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FBED3BC5E12B674B13387F1 /* HelixDocument+Saving.swift */; };
+		27BAAA5C3F25E2FAEB08DD81 /* SceneSnapshotKeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60E13A3B685510AED3FC2D2 /* SceneSnapshotKeeper.swift */; };
+		FF5782EDAFEB01057698C423 /* SceneSnapshotKeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60E13A3B685510AED3FC2D2 /* SceneSnapshotKeeper.swift */; };
+		5455E99840304A5B1F7ABE23 /* SceneSnapshotCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D019B4EA66F6B71892D7287B /* SceneSnapshotCache.swift */; };
+		3BDC5F0A53A616BA554A0FFC /* SceneSnapshotCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D019B4EA66F6B71892D7287B /* SceneSnapshotCache.swift */; };
 		99706AD9425C8FEA1208B0A4 /* WindowUXTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4591E300901EF8E054A1693A /* WindowUXTests.swift */; };
 		45DAE69EC82C375897F6EBF8 /* RenderWindowSnapshotCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2EF429DE5069241014E7A05 /* RenderWindowSnapshotCommand.swift */; };
 		3C8E2ED171AE2A0073D578E5 /* WindowPlacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73EEBBB1395BA354B4F4D120 /* WindowPlacement.swift */; };
 		CAB02E5CB7171DCCBFAE6D5C /* ViewportStill.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEA30C93753716E30110E2A7 /* ViewportStill.swift */; };
 		938C4EA7A3984F7524F7242C /* HelixDocument+Welcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CF56C357EEF362D48B2B95 /* HelixDocument+Welcome.swift */; };
+		9EB410C5A831181C9481D3A7 /* HelixDocument+DebugImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7ED59A2212CA75E5A595D89 /* HelixDocument+DebugImport.swift */; };
 		7BCB6008343B5DCDA085A482 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 159E81A0C0D06F78A12BCD3F /* WelcomeView.swift */; };
 		65C4999A4A1D5893CBD2E923 /* StarterExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A772210E4206BA7E2CD270 /* StarterExample.swift */; };
 		75D0A3C48C17B2692CF3B846 /* AddNodeMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9F770E253497C500EC78D24 /* AddNodeMenu.swift */; };
@@ -125,8 +134,13 @@
 		9A1C4E7B2D5F8031A6B94C20 /* ImportFormats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ImportFormats.swift; path = Sources/ImportFormats.swift; sourceTree = "<group>"; };
 		BA89128C69AD540AF5DB2885 /* DocumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DocumentView.swift; path = Sources/DocumentView.swift; sourceTree = "<group>"; };
 		73EEBBB1395BA354B4F4D120 /* WindowPlacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WindowPlacement.swift; path = Sources/WindowPlacement.swift; sourceTree = "<group>"; };
+		AD5E70F708C30BA11147D625 /* SceneSnapshotCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SceneSnapshotCacheTests.swift"; path = "Tests/SceneSnapshotCacheTests.swift"; sourceTree = "<group>"; };
+		5FBED3BC5E12B674B13387F1 /* HelixDocument+Saving.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Saving.swift"; path = "Sources/HelixDocument+Saving.swift"; sourceTree = "<group>"; };
+		F60E13A3B685510AED3FC2D2 /* SceneSnapshotKeeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SceneSnapshotKeeper.swift"; path = "Sources/SceneSnapshotKeeper.swift"; sourceTree = "<group>"; };
+		D019B4EA66F6B71892D7287B /* SceneSnapshotCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "SceneSnapshotCache.swift"; path = "Sources/SceneSnapshotCache.swift"; sourceTree = "<group>"; };
 		BEA30C93753716E30110E2A7 /* ViewportStill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewportStill.swift; path = Sources/ViewportStill.swift; sourceTree = "<group>"; };
 		B6CF56C357EEF362D48B2B95 /* HelixDocument+Welcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Welcome.swift"; path = "Sources/HelixDocument+Welcome.swift"; sourceTree = "<group>"; };
+		A7ED59A2212CA75E5A595D89 /* HelixDocument+DebugImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+DebugImport.swift"; path = "Sources/HelixDocument+DebugImport.swift"; sourceTree = "<group>"; };
 		D3267E492841E7AB897616F8 /* EngineHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EngineHost.swift; path = Sources/EngineHost.swift; sourceTree = "<group>"; };
 		38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelixApp.swift; path = Sources/HelixApp.swift; sourceTree = "<group>"; };
 		22137D970CE01AF6540E6B07 /* HelixDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelixDocument.swift; path = Sources/HelixDocument.swift; sourceTree = "<group>"; };
@@ -315,8 +329,13 @@
 				DF2882B61690998E4E7E4F6D /* HelixDocument+Inspector.swift */,
 				BA89128C69AD540AF5DB2885 /* DocumentView.swift */,
 				73EEBBB1395BA354B4F4D120 /* WindowPlacement.swift */,
+				AD5E70F708C30BA11147D625 /* SceneSnapshotCacheTests.swift */,
+				5FBED3BC5E12B674B13387F1 /* HelixDocument+Saving.swift */,
+				F60E13A3B685510AED3FC2D2 /* SceneSnapshotKeeper.swift */,
+				D019B4EA66F6B71892D7287B /* SceneSnapshotCache.swift */,
 				BEA30C93753716E30110E2A7 /* ViewportStill.swift */,
 				B6CF56C357EEF362D48B2B95 /* HelixDocument+Welcome.swift */,
+				A7ED59A2212CA75E5A595D89 /* HelixDocument+DebugImport.swift */,
 				D3267E492841E7AB897616F8 /* EngineHost.swift */,
 				38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */,
 				22137D970CE01AF6540E6B07 /* HelixDocument.swift */,
@@ -625,9 +644,13 @@
 				65C4999A4A1D5893CBD2E923 /* StarterExample.swift in Sources */,
 				7BCB6008343B5DCDA085A482 /* WelcomeView.swift in Sources */,
 				938C4EA7A3984F7524F7242C /* HelixDocument+Welcome.swift in Sources */,
+				9EB410C5A831181C9481D3A7 /* HelixDocument+DebugImport.swift in Sources */,
 				CAB02E5CB7171DCCBFAE6D5C /* ViewportStill.swift in Sources */,
 				3C8E2ED171AE2A0073D578E5 /* WindowPlacement.swift in Sources */,
 				45DAE69EC82C375897F6EBF8 /* RenderWindowSnapshotCommand.swift in Sources */,
+				3BDC5F0A53A616BA554A0FFC /* SceneSnapshotCache.swift in Sources */,
+				FF5782EDAFEB01057698C423 /* SceneSnapshotKeeper.swift in Sources */,
+				7A0A9DE4BC3175A4A272ED7B /* HelixDocument+Saving.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -664,6 +687,8 @@
 				7D9242CBC86131AE70E667CF /* NodeCategories.swift in Sources */,
 				99706AD9425C8FEA1208B0A4 /* WindowUXTests.swift in Sources */,
 				34C235F25B2010954D97674C /* WindowPlacement.swift in Sources */,
+				5455E99840304A5B1F7ABE23 /* SceneSnapshotCache.swift in Sources */,
+				C5219815311138267CDA895F /* SceneSnapshotCacheTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

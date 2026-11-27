@@ -6,8 +6,11 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <map>
 #include <sstream>
+#include <utility>
+#include <vector>
 #include <string>
 #include <unistd.h>
 
@@ -867,4 +870,82 @@ TEST_CASE_METHOD(CoreFixture, "A scene that cannot be restored is reported, and 
     const core::NodeId cube = core::createNode("helix::cube", "", 0.f, 0.f).id;
     REQUIRE(core::moveNode(cube, 3.f, 4.f).ok);
     REQUIRE_FALSE(helix::nt::nm().undoStack().canUndo());
+}
+
+// A save off the main thread trusts sceneRevision to tell whether the text it holds is still the
+// scene, so every call that changes what captureScene writes has to change it.
+TEST_CASE_METHOD(CoreFixture, "Every call that changes the scene changes its revision", "[core][revision]")
+{
+    const core::NodeId torus = core::createNode("helix::torus", "", 0.f, 0.f).id;
+    const core::NodeId cube = core::createNode("helix::cube", "", 200.f, 0.f).id;
+    const core::NodeId sweep = core::createNode("helix::sweep", "", 400.f, 0.f).id;
+    const core::NodeId box = core::createNode("helix::cube", "", 600.f, 0.f).id;
+    REQUIRE(box != 0);
+    REQUIRE(torus != 0);
+    REQUIRE(cube != 0);
+    REQUIRE(sweep != 0);
+    REQUIRE(core::setKeyframe(torus, "radius", 0, 1.f, 2.f, core::Interpolation::Linear).ok);
+    REQUIRE(core::setKeyframe(torus, "radius", 0, 20.f, 4.f, core::Interpolation::Linear).ok);
+    REQUIRE(core::setDisplayNode(torus).ok);
+    const std::string capture = core::captureScene().data;
+    TempFolder folder;
+    const std::string saved = folder.file("revision.kut").string();
+    REQUIRE(core::saveScene(saved).ok);
+    const std::string model = (fs::path(__FILE__).parent_path() / "data/import/textured-quad.glb").string();
+    const core::NodeId imported = core::importFile(model).id;
+    REQUIRE(imported != 0);
+
+    const std::vector<std::pair<std::string, std::function<bool()>>> changes = {
+        {"createNode", [&] { return core::createNode("helix::grid", "", 0.f, 300.f).status.ok; }},
+        {"deleteNode", [&] { return core::deleteNode(cube).ok; }},
+        {"connectNodes", [&] { return core::connectNodes(torus, 0, sweep, 0).ok; }},
+        {"disconnectNodes", [&] { return core::disconnectNodes(torus, 0, sweep, 0).ok; }},
+        {"moveNode", [&] { return core::moveNode(torus, 5.f, 6.f).ok; }},
+        {"setDisplayNode", [&] { return core::setDisplayNode(sweep).ok; }},
+        {"clearDisplayNode", [&] { return core::clearDisplayNode().ok; }},
+        {"importFile", [&] { return core::importFile(model).status.ok; }},
+        {"setFloat", [&] { return core::setFloat(torus, "radius", 1, 3.f).ok; }},
+        {"setInt", [&] { return core::setInt(torus, "columns", 0, 11).ok; }},
+        {"setString", [&] { return core::setString(imported, "filePath", 0, model + ".other").ok; }},
+        {"setVector3", [&] { return core::setVector3(box, "size", 4.f, 4.f, 4.f).ok; }},
+        {"setExpression", [&] { return core::setExpression(torus, "uniformScale", 0, "2 + 3").ok; }},
+        {"clearExpression", [&] { return core::clearExpression(torus, "uniformScale", 0).ok; }},
+        {"resetParameter", [&] { return core::resetParameter(torus, "columns").ok; }},
+        {"setRamp", [&] {
+             return core::setRamp(sweep, "scaleRamp", {{0.f, 1.f, "linear"}, {0.5f, 2.f, "bspline"}, {1.f, 1.f, "linear"}}).ok;
+         }},
+        {"setKeyframe", [&] { return core::setKeyframe(torus, "radius", 0, 8.f, 9.f, core::Interpolation::Linear).ok; }},
+        {"setKeyframeAtCurrentValue", [&] { return core::setKeyframeAtCurrentValue(torus, "radius", 0, 12.f).ok; }},
+        {"moveKeyframe", [&] { return core::moveKeyframe(torus, "radius", 0, 8.f, 9.f).ok; }},
+        {"setKeyframeInterpolation", [&] {
+             return core::setKeyframeInterpolation(torus, "radius", 0, 9.f, core::Interpolation::Step).ok;
+         }},
+        {"removeKeyframe", [&] { return core::removeKeyframe(torus, "radius", 0, 9.f).ok; }},
+        {"clearKeyframes", [&] { return core::clearKeyframes(torus, "radius", 0).ok; }},
+        {"setFrameRange", [&] { return core::setFrameRange(1, 77).ok; }},
+        {"setFps", [&] { return core::setFps(30.f).ok; }},
+        {"setFrame", [&] { core::setFrame(7.f); return true; }},
+        {"restoreScene", [&] { return core::restoreScene(capture).ok; }},
+        {"openScene", [&] { return core::openScene(saved).ok; }},
+        {"newScene", [&] { return core::newScene().ok; }},
+    };
+
+    for (const auto& [name, change] : changes)
+    {
+        const std::uint64_t before = core::sceneRevision();
+        INFO(name);
+        REQUIRE(change());
+        REQUIRE(core::sceneRevision() > before);
+    }
+}
+
+TEST_CASE_METHOD(CoreFixture, "The revision does not move for a call that changes nothing", "[core][revision]")
+{
+    const core::NodeId cube = core::createNode("helix::cube", "", 0.f, 0.f).id;
+    const std::uint64_t before = core::sceneRevision();
+    REQUIRE_FALSE(core::setFloat(cube, "size", 9, 1.f).ok);
+    REQUIRE_FALSE(core::deleteNode(99999).ok);
+    (void)core::captureScene();
+    (void)core::listNodes();
+    REQUIRE(core::sceneRevision() == before);
 }

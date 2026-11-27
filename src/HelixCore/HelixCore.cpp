@@ -42,6 +42,8 @@ namespace {
 // Everything here runs on the one thread the header names, so plain variables do.
 bool initialized = false;
 bool sceneModified = false;
+// Read from any thread (see sceneRevision), so not a plain variable.
+std::atomic<std::uint64_t> revision{0};
 std::string importSummary;
 
 Status requireInitialized()
@@ -166,7 +168,20 @@ Status checkPorts(
     return success();
 }
 
-void markModified() { sceneModified = true; }
+void bumpRevision() { revision.fetch_add(1, std::memory_order_acq_rel); }
+
+void markModified()
+{
+    sceneModified = true;
+    bumpRevision();
+}
+
+// Bumps the revision when the scope ends, however it ends: a load or a clear fires its signals
+// while it runs, and the scene is only what it is going to be once it is done.
+struct RevisionBumpAtExit
+{
+    ~RevisionBumpAtExit() { bumpRevision(); }
+};
 
 // The facade cooks on the calling thread. Background cooking is off unless something turned it
 // on, and when it was on, a cook still running has to finish before the thread cooks too, since
@@ -377,6 +392,7 @@ std::string version() { return HELIX_VERSION; }
 Status newScene()
 {
     return guarded([] {
+        RevisionBumpAtExit bump;
         if (Status status = requireInitialized(); !status.ok) return status;
         ensureSynchronousCooking();
         nt::nm().clear();
@@ -388,6 +404,7 @@ Status newScene()
 Status openScene(const std::string& path)
 {
     return guarded([&] {
+        RevisionBumpAtExit bump;
         if (Status status = requireInitialized(); !status.ok) return status;
 
         std::error_code ignored;
@@ -426,6 +443,8 @@ Status saveScene(const std::string& path)
 
 bool isSceneModified() { return initialized && sceneModified; }
 
+std::uint64_t sceneRevision() { return revision.load(std::memory_order_acquire); }
+
 SceneSnapshot captureScene()
 {
     SceneSnapshot result;
@@ -442,6 +461,7 @@ SceneSnapshot captureScene()
 Status restoreScene(const std::string& data)
 {
     return guarded([&] {
+        RevisionBumpAtExit bump;
         if (Status status = requireInitialized(); !status.ok) return status;
 
         // Loading fires the signals that mark the scene as changed, and a restore is not a
@@ -623,6 +643,7 @@ Status setDisplayNode(NodeId node)
         if (Status status = requireNode(node); !status.ok) return status;
         ensureSynchronousCooking();
         nt::nm().setDisplayNode(node);
+        bumpRevision();
         return success();
     });
 }
@@ -633,6 +654,7 @@ Status clearDisplayNode()
         if (Status status = requireInitialized(); !status.ok) return status;
         ensureSynchronousCooking();
         if (nt::nm().getDisplayNode()) nt::nm().clearDisplayFlag();
+        bumpRevision();
         return success();
     });
 }
@@ -695,6 +717,7 @@ CreateNodeResult importFile(const std::string& path)
             return failure("The import node has no file path parameter.");
         }
         filePath->setString(file.string());
+        bumpRevision();
         dropEngineUndo();
         importSummary = summary.text();
         return success();
@@ -847,6 +870,7 @@ void setFrame(float frame)
 {
     if (!initialized) return;
     nt::nm().setFrame(frame);
+    bumpRevision();
 }
 
 GeometrySummary cookDisplaySummary()

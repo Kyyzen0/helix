@@ -15,6 +15,9 @@ enum HelixError: LocalizedError {
     case engine(String)
     case busy
     case sceneClosed
+    /// A save was asked for off the main thread while the scene had changed, and the main thread
+    /// did not bring the saved text up to date in time. Nothing stale is written instead.
+    case saveBehind
 
     var errorDescription: String? {
         switch self {
@@ -24,6 +27,8 @@ enum HelixError: LocalizedError {
             return String(localized: "Helix opens one scene at a time for now.")
         case .sceneClosed:
             return String(localized: "This scene is closed.")
+        case .saveBehind:
+            return String(localized: "Helix could not save the latest changes. Try again.")
         }
     }
 
