@@ -8,6 +8,7 @@ import SwiftUI
 struct SpreadsheetTable: NSViewRepresentable {
     @ObservedObject var model: SpreadsheetModel
     @Environment(\.theme) private var theme
+    @Environment(\.interfaceSize) private var size
 
     func makeCoordinator() -> Coordinator { Coordinator(model: model) }
 
@@ -18,7 +19,7 @@ struct SpreadsheetTable: NSViewRepresentable {
         table.allowsMultipleSelection = true
         table.allowsColumnReordering = false
         table.allowsColumnResizing = true
-        table.rowHeight = 18
+        table.rowHeight = size.spreadsheetRowHeight
         table.intercellSpacing = NSSize(width: 6, height: 0)
         table.gridStyleMask = [.solidVerticalGridLineMask]
         table.gridColor = NSColor.separatorColor.withAlphaComponent(0.4)
@@ -36,6 +37,7 @@ struct SpreadsheetTable: NSViewRepresentable {
         scroll.autohidesScrollers = true
         scroll.drawsBackground = false
         context.coordinator.apply(theme.palette)
+        context.coordinator.apply(size: size)
         context.coordinator.sync()
         return scroll
     }
@@ -43,6 +45,7 @@ struct SpreadsheetTable: NSViewRepresentable {
     func updateNSView(_ scroll: NSScrollView, context: Context) {
         context.coordinator.model = model
         context.coordinator.apply(theme.palette)
+        context.coordinator.apply(size: size)
         context.coordinator.sync()
     }
 
@@ -54,6 +57,7 @@ struct SpreadsheetTable: NSViewRepresentable {
         private var shownRevision = -1
 
         private var palette: ThemePalette?
+        private var size = InterfaceSize.medium
         init(model: SpreadsheetModel) { self.model = model }
 
         /// Gives the table the colours of the theme. The cells and the header are the system's
@@ -66,6 +70,15 @@ struct SpreadsheetTable: NSViewRepresentable {
             table.usesAlternatingRowBackgroundColors = palette.followsSystemColors
             table.backgroundColor = palette.followsSystemColors ? .controlBackgroundColor : NSColor(palette.surface)
             table.stripe = palette.followsSystemColors ? nil : NSColor(palette.window.mixed(with: palette.text, by: 0.05))
+            table.reloadData()
+        }
+
+        /// The row height and the text size of the interface size of Settings.
+        func apply(size: InterfaceSize) {
+            guard let table, self.size != size || table.rowHeight != size.spreadsheetRowHeight else { return }
+            self.size = size
+            table.rowHeight = size.spreadsheetRowHeight
+            shownColumns = []
             table.reloadData()
         }
 
@@ -98,6 +111,7 @@ struct SpreadsheetTable: NSViewRepresentable {
             tableColumn.title = column.title
             tableColumn.headerToolTip = column.tooltip
             tableColumn.headerCell.alignment = .right
+            tableColumn.headerCell.font = NSFont.systemFont(ofSize: size.points(12), weight: .medium)
             tableColumn.isEditable = false
             switch column.kind {
             case .index:
@@ -108,7 +122,8 @@ struct SpreadsheetTable: NSViewRepresentable {
                 tableColumn.width = column.type.isWhole ? 72 : 92
             }
             // A long name (material_index) gets the room its header needs.
-            tableColumn.width = max(tableColumn.width, CGFloat(column.title.count) * 7 + 28)
+            tableColumn.width = size.points(tableColumn.width)
+            tableColumn.width = max(tableColumn.width, CGFloat(column.title.count) * size.points(8) + 28)
             tableColumn.minWidth = 32
             return tableColumn
         }
@@ -127,11 +142,11 @@ struct SpreadsheetTable: NSViewRepresentable {
             } else {
                 field = NSTextField(labelWithString: "")
                 field.identifier = identifier
-                field.font = NSFont.monospacedDigitSystemFont(ofSize: 11, weight: .regular)
                 field.alignment = .right
                 field.lineBreakMode = .byTruncatingTail
                 field.cell?.usesSingleLineMode = true
             }
+            field.font = NSFont.monospacedDigitSystemFont(ofSize: size.points(13), weight: .regular)
             field.stringValue = model.cellText(row: row, column: column)
             let muted = column.kind == .index || column.kind == .primitive || column.partial || column.mixed
             field.textColor = muted ? .secondaryLabelColor : .labelColor

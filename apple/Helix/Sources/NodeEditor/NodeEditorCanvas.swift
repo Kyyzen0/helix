@@ -43,7 +43,6 @@ struct NodeEditorPainter {
         paintLinks(&context)
         paintNodes(&context)
         paintGesture(&context)
-        if graph.nodes.isEmpty { paintEmptyHint(&context) }
     }
 
     // MARK: Grid
@@ -165,16 +164,16 @@ struct NodeEditorPainter {
         let left = card.minX + (isDisplay ? 12 : 9) * zoom
         let flagSpace: CGFloat = isDisplay ? 18 * zoom : 0
         let textWidth = card.width - (left - card.minX) - 8 * zoom - flagSpace
-        let name = fitted(node.name, font: .system(size: 12 * zoom, weight: .semibold), width: textWidth, in: context)
+        let name = fitted(node.name, font: .system(size: 13 * zoom, weight: .semibold), width: textWidth, in: context)
         context.draw(
-            context.resolve(Text(name).font(.system(size: 12 * zoom, weight: .semibold)).foregroundColor(colors.text)),
+            context.resolve(Text(name).font(.system(size: 13 * zoom, weight: .semibold)).foregroundColor(colors.text)),
             at: CGPoint(x: left, y: card.minY + card.height * (zoom >= 0.5 ? 0.38 : 0.5)),
             anchor: .leading
         )
         if zoom >= 0.5 {
-            let label = fitted(type.label, font: .system(size: 10 * zoom), width: textWidth, in: context)
+            let label = fitted(type.label, font: .system(size: 11 * zoom), width: textWidth, in: context)
             context.draw(
-                context.resolve(Text(label).font(.system(size: 10 * zoom)).foregroundColor(colors.textSecondary)),
+                context.resolve(Text(label).font(.system(size: 11 * zoom)).foregroundColor(colors.textSecondary)),
                 at: CGPoint(x: left, y: card.minY + card.height * 0.7),
                 anchor: .leading
             )
@@ -274,17 +273,10 @@ struct NodeEditorPainter {
             lineWidth: 2
         )
         guard !target.label.isEmpty else { return }
-        let text = context.resolve(Text(target.label).font(.system(size: 11, weight: .medium)).foregroundColor(colors.onAccent))
+        let text = context.resolve(Text(target.label).font(.system(size: 12, weight: .medium)).foregroundColor(colors.onAccent))
         let measured = text.measure(in: CGSize(width: 400, height: 40))
         let chip = CGRect(x: centre.x - measured.width / 2 - 6, y: centre.y - radius - measured.height - 10, width: measured.width + 12, height: measured.height + 4)
         context.fill(Path(roundedRect: chip, cornerRadius: chip.height / 2), with: .color(accent))
         context.draw(text, at: CGPoint(x: chip.midX, y: chip.midY))
-    }
-
-    private func paintEmptyHint(_ context: inout GraphicsContext) {
-        let hint = context.resolve(
-            Text("Press Tab to add a node").font(.system(size: 14)).foregroundColor(colors.textSecondary)
-        )
-        context.draw(hint, at: CGPoint(x: size.width / 2, y: size.height / 2))
     }
 }

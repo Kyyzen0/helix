@@ -47,6 +47,11 @@ if let flag = arguments.firstIndex(of: SettingsSnapshotCommand.flag) {
     exit(SettingsSnapshotCommand.run(Array(arguments[(flag + 1)...])))
 }
 
+// And the whole document window, toolbar included.
+if let flag = arguments.firstIndex(of: RenderWindowSnapshotCommand.flag) {
+    exit(RenderWindowSnapshotCommand.run(Array(arguments[(flag + 1)...])))
+}
+
 // And the node palette, with a query typed in it.
 if let flag = arguments.firstIndex(of: PaletteSnapshotCommand.flag) {
     exit(PaletteSnapshotCommand.run(Array(arguments[(flag + 1)...])))

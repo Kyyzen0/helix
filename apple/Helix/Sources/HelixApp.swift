@@ -5,6 +5,11 @@ import UniformTypeIdentifiers
 
 struct HelixApp: App {
     init() {
+        // A launch with nothing to open makes a new scene, as most document apps do, and not the
+        // Open panel AppKit shows by default.
+        UserDefaults.standard.register(defaults: [
+            "NSShowAppCentricOpenPanelInsteadOfUntitledFile": false,
+        ])
         // The appearance of the theme chosen last time, before the first window opens. Not here
         // and now: reading NSApplication.shared this early makes the application object before
         // SwiftUI does, and SwiftUI then crashes setting up its document classes at launch. The
@@ -21,12 +26,17 @@ struct HelixApp: App {
             DocumentView(document: file.document, fileURL: file.fileURL)
                 .focusedSceneObject(file.document)
                 .themed()
+                .sized()
+        }
+        .defaultWindowPlacement { _, context in
+            WindowPlacement.helixDefault(in: context.defaultDisplay.visibleRect)
         }
         .commands { HelixCommands() }
         // ⌘, opens it.
         Settings {
             SettingsView()
                 .themed()
+                .sized()
         }
     }
 }
@@ -45,11 +55,6 @@ struct HelixCommands: Commands {
     var body: some Commands {
         CommandGroup(replacing: .appInfo) {
             Button("About Helix") { AboutPanel.show() }
-        }
-        CommandGroup(after: .newItem) {
-            Button("Import…") { document?.chooseFileToImport() }
-                .keyboardShortcut("i", modifiers: .command)
-                .disabled(document == nil || document?.isActive != true)
         }
         // The keys F, shift W and shift M belong to the viewport, which handles them itself
         // while it has the keys. A menu shortcut without the command key would also fire while a
@@ -98,10 +103,19 @@ struct HelixCommands: Commands {
             Button("Clear Cook Cache") { document?.clearCookCache() }
                 .disabled(document == nil || document?.isActive != true)
         }
-        CommandMenu("Node") {
-            Button("Add Node…") { document?.editor.openPalette() }
+        CommandMenu("Add") {
+            Button("Add Node…") { document?.showNodePalette() }
                 .keyboardShortcut("k", modifiers: .command)
                 .disabled(document == nil || document?.isActive != true)
+            Divider()
+            if let document, document.isActive {
+                AddNodeSubmenus(types: document.editor.paletteTypes) { document.editor.addNode($0) }
+            }
+            Divider()
+            Button("Import a 3D Model…") { document?.chooseFileToImport() }
+                .keyboardShortcut("i", modifiers: .command)
+                .disabled(document == nil || document?.isActive != true)
+            Divider()
             Button("Frame Nodes") { document?.editor.frameSelection() }
                 .disabled(document == nil || document?.isActive != true)
         }

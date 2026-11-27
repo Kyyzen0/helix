@@ -19,12 +19,48 @@ struct SettingsView: View {
 struct GeneralSettings: View {
     @State private var choice = AppLanguage.stored()
 
+    @AppStorage(InterfaceSize.defaultsKey) private var size = InterfaceSize.default.rawValue
+
     var body: some View {
-        LanguagePane(
-            selection: Binding(get: { choice }, set: { choice = $0; $0.store() }),
-            needsRelaunch: AppLanguage.needsRelaunch(choice: choice),
-            relaunch: AppRelaunch.now
-        )
+        VStack(alignment: .leading, spacing: 0) {
+            LanguagePane(
+                selection: Binding(get: { choice }, set: { choice = $0; $0.store() }),
+                needsRelaunch: AppLanguage.needsRelaunch(choice: choice),
+                relaunch: AppRelaunch.now
+            )
+            Divider().padding(.horizontal, 20)
+            InterfaceSizePane(selection: Binding(
+                get: { InterfaceSize(rawValue: size) ?? .default },
+                set: { size = $0.rawValue }
+            ))
+        }
+    }
+}
+
+/// The interface size: how large the node editor, the timeline, the spreadsheet and the
+/// inspector are drawn. It applies at once, in every window.
+struct InterfaceSizePane: View {
+    @Binding var selection: InterfaceSize
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Interface Size").font(.headline)
+            Picker("Interface Size", selection: $selection) {
+                ForEach(InterfaceSize.allCases) { size in
+                    Text(size.title).tag(size)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.segmented)
+            .fixedSize()
+            Text("The size of the node editor, the timeline, the spreadsheet and the inspector. It applies at once.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 

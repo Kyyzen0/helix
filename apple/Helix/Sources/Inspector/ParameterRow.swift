@@ -14,7 +14,7 @@ struct ParameterRow: View {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 if !inline, !parameter.labelHidden { ParameterLabel(parameter: parameter) }
                 if inline, !parameter.labelHidden, parameter.kind != .toggle {
-                    Text(parameter.label).font(.caption).foregroundStyle(.secondary)
+                    Text(parameter.label).uiFont(.caption).foregroundStyle(.secondary)
                 }
                 ParameterControl(parameter: parameter, model: model, availability: availability)
             }
@@ -31,7 +31,7 @@ struct ParameterRow: View {
 struct ParameterLabel: View {
     let parameter: InspectorParameter
 
-    static let width: CGFloat = 104
+    static let width: CGFloat = 116
 
     var body: some View {
         HStack(spacing: 3) {
@@ -64,7 +64,7 @@ struct ParameterMessages: View {
     var body: some View {
         ForEach(lines, id: \.self) { line in
             Text(line)
-                .font(.caption)
+                .uiFont(.caption)
                 .foregroundStyle(.red)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.leading, 0)
@@ -235,7 +235,6 @@ struct ScalarControl: View {
         ) { editing in
             if editing { model.beginGesture(parameter.name) } else { model.endGesture() }
         }
-        .controlSize(.small)
         .accessibilityLabel(Text(parameter.label))
     }
 
@@ -350,7 +349,7 @@ struct RangeCircleControl: View {
                 .accessibilityLabel(Text("\(parameter.label): \(NumberText.format(start)) to \(NumberText.format(end)) degrees"))
             VectorControl(parameter: parameter, model: model, availability: availability)
             if let caption = parameter.styleOptions["caption"], !caption.isEmpty {
-                Text(caption).font(.caption).foregroundStyle(.secondary)
+                Text(caption).uiFont(.caption).foregroundStyle(.secondary)
             }
         }
     }

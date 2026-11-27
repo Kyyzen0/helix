@@ -7,6 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		34C235F25B2010954D97674C /* WindowPlacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73EEBBB1395BA354B4F4D120 /* WindowPlacement.swift */; };
+		99706AD9425C8FEA1208B0A4 /* WindowUXTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4591E300901EF8E054A1693A /* WindowUXTests.swift */; };
+		45DAE69EC82C375897F6EBF8 /* RenderWindowSnapshotCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2EF429DE5069241014E7A05 /* RenderWindowSnapshotCommand.swift */; };
+		3C8E2ED171AE2A0073D578E5 /* WindowPlacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73EEBBB1395BA354B4F4D120 /* WindowPlacement.swift */; };
+		CAB02E5CB7171DCCBFAE6D5C /* ViewportStill.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEA30C93753716E30110E2A7 /* ViewportStill.swift */; };
+		938C4EA7A3984F7524F7242C /* HelixDocument+Welcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CF56C357EEF362D48B2B95 /* HelixDocument+Welcome.swift */; };
+		7BCB6008343B5DCDA085A482 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 159E81A0C0D06F78A12BCD3F /* WelcomeView.swift */; };
+		65C4999A4A1D5893CBD2E923 /* StarterExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A772210E4206BA7E2CD270 /* StarterExample.swift */; };
+		75D0A3C48C17B2692CF3B846 /* AddNodeMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9F770E253497C500EC78D24 /* AddNodeMenu.swift */; };
+		7D9242CBC86131AE70E667CF /* NodeCategories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62DF5D2F8EEE6254981E3D2C /* NodeCategories.swift */; };
+		61DC0C790FC97350AE166986 /* NodeCategories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62DF5D2F8EEE6254981E3D2C /* NodeCategories.swift */; };
+		BAD8B929F68F19F5F74C3DE0 /* InterfaceSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873F9D99C61B8715757B1AB9 /* InterfaceSize.swift */; };
+		11F87BFB76DC4FFA0AC04AF5 /* InterfaceSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873F9D99C61B8715757B1AB9 /* InterfaceSize.swift */; };
 		54138808B32DE3EFC888A110 /* MCPHandlers.swift */ = {isa = PBXBuildFile; fileRef = 331ECFCBA0A158F0DB4C98B2 /* MCPHandlers.swift */; };
 		368C30DFA56067FD2B43F2FF /* MCPTools.swift */ = {isa = PBXBuildFile; fileRef = 398FE0956997104A8A94C077 /* MCPTools.swift */; };
 		EC4C2A2B61E414CA353E7542 /* MCPServer.swift */ = {isa = PBXBuildFile; fileRef = 44A86D134CE0E6260BCBFFA4 /* MCPServer.swift */; };
@@ -111,6 +124,9 @@
 		F5BF48AA40CAD7891EB709FC /* Helix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Helix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A1C4E7B2D5F8031A6B94C20 /* ImportFormats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ImportFormats.swift; path = Sources/ImportFormats.swift; sourceTree = "<group>"; };
 		BA89128C69AD540AF5DB2885 /* DocumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DocumentView.swift; path = Sources/DocumentView.swift; sourceTree = "<group>"; };
+		73EEBBB1395BA354B4F4D120 /* WindowPlacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WindowPlacement.swift; path = Sources/WindowPlacement.swift; sourceTree = "<group>"; };
+		BEA30C93753716E30110E2A7 /* ViewportStill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewportStill.swift; path = Sources/ViewportStill.swift; sourceTree = "<group>"; };
+		B6CF56C357EEF362D48B2B95 /* HelixDocument+Welcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Welcome.swift"; path = "Sources/HelixDocument+Welcome.swift"; sourceTree = "<group>"; };
 		D3267E492841E7AB897616F8 /* EngineHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EngineHost.swift; path = Sources/EngineHost.swift; sourceTree = "<group>"; };
 		38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelixApp.swift; path = Sources/HelixApp.swift; sourceTree = "<group>"; };
 		22137D970CE01AF6540E6B07 /* HelixDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelixDocument.swift; path = Sources/HelixDocument.swift; sourceTree = "<group>"; };
@@ -118,6 +134,7 @@
 		8949648E5078146AEA910130 /* NavigationSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NavigationSettings.swift; path = Sources/NavigationSettings.swift; sourceTree = "<group>"; };
 		FEFB88B45D0D09B01B758F7D /* Present.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; name = Present.metal; path = Sources/Present.metal; sourceTree = "<group>"; };
 		B8C2943CF65CE26DE83D3576 /* SnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SnapshotCommand.swift; path = Sources/SnapshotCommand.swift; sourceTree = "<group>"; };
+		B2EF429DE5069241014E7A05 /* RenderWindowSnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RenderWindowSnapshotCommand.swift; path = Sources/RenderWindowSnapshotCommand.swift; sourceTree = "<group>"; };
 		B066A6C7E5D201772BE45D04 /* ViewportController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewportController.swift; path = Sources/ViewportController.swift; sourceTree = "<group>"; };
 		E27EC0CCDEB296D5F887B697 /* ViewportRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewportRenderer.swift; path = Sources/ViewportRenderer.swift; sourceTree = "<group>"; };
 		A60E5D3D69B45D8B43B4079E /* ViewportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewportView.swift; path = Sources/ViewportView.swift; sourceTree = "<group>"; };
@@ -129,9 +146,11 @@
 		43258E627B8EA2747E3196C6 /* embed-engine.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = embed-engine.sh; path = Scripts/embed-engine.sh; sourceTree = "<group>"; };
 		336FB461269DA3BA527AA869 /* make-icon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = make-icon.swift; path = Scripts/make-icon.swift; sourceTree = "<group>"; };
 		5206C4173AFD546F4947E7EC /* EditorGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EditorGraph.swift; path = Sources/NodeEditor/EditorGraph.swift; sourceTree = "<group>"; };
+		62DF5D2F8EEE6254981E3D2C /* NodeCategories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeCategories.swift; path = Sources/NodeEditor/NodeCategories.swift; sourceTree = "<group>"; };
 		6DCC00B62C0A9AF1E5E66342 /* ViewTransform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewTransform.swift; path = Sources/NodeEditor/ViewTransform.swift; sourceTree = "<group>"; };
 		463D252985639658705EB25C /* EditorLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EditorLayout.swift; path = Sources/NodeEditor/EditorLayout.swift; sourceTree = "<group>"; };
 		1532547BA1E2B1813C3B8A48 /* NodeSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeSearch.swift; path = Sources/NodeEditor/NodeSearch.swift; sourceTree = "<group>"; };
+		D9F770E253497C500EC78D24 /* AddNodeMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddNodeMenu.swift; path = Sources/NodeEditor/AddNodeMenu.swift; sourceTree = "<group>"; };
 		36001A4884A5E17DBF28165C /* NodePlacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodePlacement.swift; path = Sources/NodeEditor/NodePlacement.swift; sourceTree = "<group>"; };
 		CA43F87F4F7E713C9A7AF226 /* NodeEditorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorModel.swift; path = Sources/NodeEditor/NodeEditorModel.swift; sourceTree = "<group>"; };
 		BC085FED8BAEBD4136D90989 /* NodeEditorCanvas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorCanvas.swift; path = Sources/NodeEditor/NodeEditorCanvas.swift; sourceTree = "<group>"; };
@@ -166,6 +185,8 @@
 		FE86066298BFFADE6B0143D2 /* SpreadsheetModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetModel.swift; path = Sources/Spreadsheet/SpreadsheetModel.swift; sourceTree = "<group>"; };
 		F2C7205F01E219A98F743652 /* SpreadsheetTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetTable.swift; path = Sources/Spreadsheet/SpreadsheetTable.swift; sourceTree = "<group>"; };
 		77061C17B125BBCFE178E352 /* SpreadsheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetView.swift; path = Sources/Spreadsheet/SpreadsheetView.swift; sourceTree = "<group>"; };
+		159E81A0C0D06F78A12BCD3F /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WelcomeView.swift; path = Sources/Welcome/WelcomeView.swift; sourceTree = "<group>"; };
+		D6A772210E4206BA7E2CD270 /* StarterExample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StarterExample.swift; path = Sources/Welcome/StarterExample.swift; sourceTree = "<group>"; };
 		5B5498A2917551D1F978EDCE /* SpreadsheetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetBridge.swift; path = Sources/Spreadsheet/SpreadsheetBridge.swift; sourceTree = "<group>"; };
 		564AE8AD9240154969677DCF /* SpreadsheetSnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetSnapshotCommand.swift; path = Sources/Spreadsheet/SpreadsheetSnapshotCommand.swift; sourceTree = "<group>"; };
 		18FF823E6FF8F5FB40A89AE3 /* HelixDocument+Timeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Timeline.swift"; path = "Sources/HelixDocument+Timeline.swift"; sourceTree = "<group>"; };
@@ -176,9 +197,11 @@
 		F065729E8AA2A9E085532245 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Theme.swift; path = Sources/Theme/Theme.swift; sourceTree = "<group>"; };
 		EF107546B2D1378355329CF6 /* ThemeColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ThemeColors.swift; path = Sources/Theme/ThemeColors.swift; sourceTree = "<group>"; };
 		0351E00010918100580DE4AD /* ThemeOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ThemeOptions.swift; path = Sources/Theme/ThemeOptions.swift; sourceTree = "<group>"; };
+		873F9D99C61B8715757B1AB9 /* InterfaceSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InterfaceSize.swift; path = Sources/InterfaceSize.swift; sourceTree = "<group>"; };
 		8470AFA9E195FBC15283EF56 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsView.swift; path = Sources/Settings/SettingsView.swift; sourceTree = "<group>"; };
 		691C494210FE0CE24FC100EF /* SettingsSnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsSnapshotCommand.swift; path = Sources/Settings/SettingsSnapshotCommand.swift; sourceTree = "<group>"; };
 		7551655AA18560B454477678 /* ThemeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ThemeTests.swift; path = Tests/ThemeTests.swift; sourceTree = "<group>"; };
+		4591E300901EF8E054A1693A /* WindowUXTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WindowUXTests.swift; path = Tests/WindowUXTests.swift; sourceTree = "<group>"; };
 		189459C7825E1561F401E8F1 /* NodeText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeText.swift; path = Sources/Localization/NodeText.swift; sourceTree = "<group>"; };
 		1F75C848D4E793834A2F5220 /* LanguageSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LanguageSetting.swift; path = Sources/Localization/LanguageSetting.swift; sourceTree = "<group>"; };
 		1978AE8702A3FF95D7833A19 /* PaletteSnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PaletteSnapshotCommand.swift; path = Sources/NodeEditor/PaletteSnapshotCommand.swift; sourceTree = "<group>"; };
@@ -232,6 +255,7 @@
 			children = (
 				4296C9AEB8D4A12CA3A7B577 /* TimelineTests.swift */,
 				7551655AA18560B454477678 /* ThemeTests.swift */,
+				4591E300901EF8E054A1693A /* WindowUXTests.swift */,
 				440766BF689E8B73A699BD63 /* SpreadsheetTests.swift */,
 				D3F54926D9EBC58B30CE4961 /* NodeEditorTests.swift */,
 				DFDAF0510D8421E7D0F36AC8 /* InspectorTests.swift */,
@@ -245,9 +269,11 @@
 			isa = PBXGroup;
 			children = (
 				5206C4173AFD546F4947E7EC /* EditorGraph.swift */,
+				62DF5D2F8EEE6254981E3D2C /* NodeCategories.swift */,
 				6DCC00B62C0A9AF1E5E66342 /* ViewTransform.swift */,
 				463D252985639658705EB25C /* EditorLayout.swift */,
 				1532547BA1E2B1813C3B8A48 /* NodeSearch.swift */,
+				D9F770E253497C500EC78D24 /* AddNodeMenu.swift */,
 				36001A4884A5E17DBF28165C /* NodePlacement.swift */,
 				CA43F87F4F7E713C9A7AF226 /* NodeEditorModel.swift */,
 				BC085FED8BAEBD4136D90989 /* NodeEditorCanvas.swift */,
@@ -288,6 +314,9 @@
 				03011B942D714D79F3FBB0DB /* Inspector */,
 				DF2882B61690998E4E7E4F6D /* HelixDocument+Inspector.swift */,
 				BA89128C69AD540AF5DB2885 /* DocumentView.swift */,
+				73EEBBB1395BA354B4F4D120 /* WindowPlacement.swift */,
+				BEA30C93753716E30110E2A7 /* ViewportStill.swift */,
+				B6CF56C357EEF362D48B2B95 /* HelixDocument+Welcome.swift */,
 				D3267E492841E7AB897616F8 /* EngineHost.swift */,
 				38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */,
 				22137D970CE01AF6540E6B07 /* HelixDocument.swift */,
@@ -301,6 +330,7 @@
 				398FE0956997104A8A94C077 /* MCPTools.swift */,
 				331ECFCBA0A158F0DB4C98B2 /* MCPHandlers.swift */,
 				B8C2943CF65CE26DE83D3576 /* SnapshotCommand.swift */,
+				B2EF429DE5069241014E7A05 /* RenderWindowSnapshotCommand.swift */,
 				B066A6C7E5D201772BE45D04 /* ViewportController.swift */,
 				E27EC0CCDEB296D5F887B697 /* ViewportRenderer.swift */,
 				A60E5D3D69B45D8B43B4079E /* ViewportView.swift */,
@@ -359,6 +389,8 @@
 				FE86066298BFFADE6B0143D2 /* SpreadsheetModel.swift */,
 				F2C7205F01E219A98F743652 /* SpreadsheetTable.swift */,
 				77061C17B125BBCFE178E352 /* SpreadsheetView.swift */,
+				159E81A0C0D06F78A12BCD3F /* WelcomeView.swift */,
+				D6A772210E4206BA7E2CD270 /* StarterExample.swift */,
 				5B5498A2917551D1F978EDCE /* SpreadsheetBridge.swift */,
 				564AE8AD9240154969677DCF /* SpreadsheetSnapshotCommand.swift */,
 			);
@@ -371,6 +403,7 @@
 				F065729E8AA2A9E085532245 /* Theme.swift */,
 				EF107546B2D1378355329CF6 /* ThemeColors.swift */,
 				0351E00010918100580DE4AD /* ThemeOptions.swift */,
+				873F9D99C61B8715757B1AB9 /* InterfaceSize.swift */,
 			);
 			name = Theme;
 			sourceTree = "<group>";
@@ -586,6 +619,15 @@
 				C213E1CE61AFC2D6C1AB70AA /* ViewportRenderer.swift */,
 				85D58ED727147DA0DC51A478 /* ViewportView.swift */,
 				7D2E8F1A615A1C75D07154BA /* main.swift */,
+				11F87BFB76DC4FFA0AC04AF5 /* InterfaceSize.swift in Sources */,
+				61DC0C790FC97350AE166986 /* NodeCategories.swift in Sources */,
+				75D0A3C48C17B2692CF3B846 /* AddNodeMenu.swift in Sources */,
+				65C4999A4A1D5893CBD2E923 /* StarterExample.swift in Sources */,
+				7BCB6008343B5DCDA085A482 /* WelcomeView.swift in Sources */,
+				938C4EA7A3984F7524F7242C /* HelixDocument+Welcome.swift in Sources */,
+				CAB02E5CB7171DCCBFAE6D5C /* ViewportStill.swift in Sources */,
+				3C8E2ED171AE2A0073D578E5 /* WindowPlacement.swift in Sources */,
+				45DAE69EC82C375897F6EBF8 /* RenderWindowSnapshotCommand.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -618,6 +660,10 @@
 				A8D0BBAEF61B15BEC4C4C8F1 /* NodeSearch.swift in Sources */,
 				F84D6267025A7FF720EBBA5F /* NodePlacement.swift in Sources */,
 				63B2105D86411904207E519E /* NodeEditorModel.swift in Sources */,
+				BAD8B929F68F19F5F74C3DE0 /* InterfaceSize.swift in Sources */,
+				7D9242CBC86131AE70E667CF /* NodeCategories.swift in Sources */,
+				99706AD9425C8FEA1208B0A4 /* WindowUXTests.swift in Sources */,
+				34C235F25B2010954D97674C /* WindowPlacement.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

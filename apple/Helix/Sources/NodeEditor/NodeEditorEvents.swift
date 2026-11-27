@@ -227,6 +227,19 @@ final class NodeEditorEventView: NSView, NSViewToolTipOwner {
         case .canvas:
             let anchor = point(of: event)
             menu.addItem(item(String(localized: "Add Node…")) { model.openPalette(at: anchor) })
+            menu.addItem(.separator())
+            for group in NodeCategory.groups(of: model.paletteTypes) {
+                let submenu = NSMenu()
+                for type in group.types {
+                    let entry = item(type.label) { model.addNode(type, at: anchor) }
+                    entry.image = NSImage(systemSymbolName: NodeCategory.symbol(of: type), accessibilityDescription: nil)
+                    submenu.addItem(entry)
+                }
+                let parent = NSMenuItem(title: group.category.title, action: nil, keyEquivalent: "")
+                parent.image = NSImage(systemSymbolName: group.category.symbol, accessibilityDescription: nil)
+                parent.submenu = submenu
+                menu.addItem(parent)
+            }
         }
         return menu
     }
