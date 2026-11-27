@@ -199,7 +199,7 @@ struct NodeEditorPainter {
         let circle = Path(ellipseIn: CGRect(x: centre.x - radius, y: centre.y - radius, width: radius * 2, height: radius * 2))
         context.fill(circle, with: .color(failed ? .red : .yellow))
         let mark = context.resolve(
-            Text("!").font(.system(size: max(radius * 1.35, 7), weight: .heavy)).foregroundColor(failed ? .white : .black)
+            Text(verbatim: "!").font(.system(size: max(radius * 1.35, 7), weight: .heavy)).foregroundColor(failed ? .white : .black)
         )
         context.draw(mark, at: centre)
     }
