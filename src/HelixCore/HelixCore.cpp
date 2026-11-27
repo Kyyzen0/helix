@@ -2,6 +2,7 @@
 #include "HelixCore/HelixCoreInternal.h"
 #include "Engine/Core/Path.h"
 #include "Engine/Daslang/Runtime.h"
+#include "Engine/Import/ImportFile.h"
 #include "Engine/Network/NetworkManager.h"
 #include "Engine/Network/Node.h"
 #include "Engine/Network/NodeLoader.h"
@@ -12,6 +13,7 @@
 #include "Graphics/DisplayGeometry.h"
 #include <algorithm>
 #include <atomic>
+#include <cctype>
 #include <chrono>
 #include <exception>
 #include <filesystem>
@@ -38,6 +40,7 @@ namespace {
 // Everything here runs on the one thread the header names, so plain variables do.
 bool initialized = false;
 bool sceneModified = false;
+std::string importSummary;
 
 Status requireInitialized()
 {
@@ -462,6 +465,76 @@ NodeId displayNode()
     const std::optional<nt::NodeId> display = nt::nm().getDisplayNode();
     return display && nt::nm().isValidNode(*display) ? *display : 0;
 }
+
+std::vector<std::string> supportedImportExtensions() { return import::supportedExtensions(); }
+
+Status setCacheDirectory(const std::string& directory)
+{
+    return guarded([&] {
+        if (directory.empty()) return failure("No folder was given.");
+        std::error_code error;
+        std::filesystem::create_directories(directory, error);
+        if (error || !std::filesystem::is_directory(directory, error))
+            return failure("Couldn't use " + directory + " as the cache folder.");
+        import::setBlendCacheDirectory(directory);
+        return success();
+    });
+}
+
+CreateNodeResult importFile(const std::string& path)
+{
+    CreateNodeResult result;
+    result.status = guarded([&] {
+        if (Status status = requireInitialized(); !status.ok) return status;
+        if (path.empty()) return failure("No file was given.");
+
+        const std::filesystem::path file =
+            std::filesystem::absolute(std::filesystem::path(path)).lexically_normal();
+
+        // The default settings the new node has, so the cook of the node finds the result of
+        // this read in the cache.
+        import::ImportSummary summary;
+        try
+        {
+            summary = import::importFile(file, import::ImportOptions{})->summary;
+        }
+        catch (const import::ImportError& error)
+        {
+            return failure(error.what());
+        }
+        catch (...)
+        {
+            return failure(import::describeCurrentException());
+        }
+
+        // The node is named after the file when that name is free and valid. Otherwise the
+        // engine picks a free one.
+        std::string name = file.stem().string();
+        for (char& c : name)
+            if (!(std::isalnum(static_cast<unsigned char>(c)) || c == '_')) c = '_';
+        if (name.empty() || std::isdigit(static_cast<unsigned char>(name.front())) ||
+            !Path::isValidName(name) || nt::nm().getNodeAtPath(Path("/" + name)))
+            name.clear();
+
+        const float y = 140.f * static_cast<float>(listNodes().size());
+        result.id = nt::nm().createNode("helix::geometryImport", Path("/"), name, Vector2(0.f, y));
+
+        const std::shared_ptr<prm::NodeParameter> filePath =
+            nt::nm().getNode(result.id).getParameter("filePath").lock();
+        if (!filePath)
+        {
+            nt::nm().deleteNode(result.id);
+            result.id = 0;
+            return failure("The import node has no file path parameter.");
+        }
+        filePath->setString(file.string());
+        importSummary = summary.text();
+        return success();
+    });
+    return result;
+}
+
+std::string lastImportSummary() { return importSummary; }
 
 std::vector<ParameterInfo> listParameters(NodeId node)
 {

@@ -195,6 +195,41 @@ NodeId displayNode();
 
 /** @} */
 
+/** @name Import
+ * @{
+ *
+ * Helix reads other tools' files through one node, `helix::geometryImport`, which picks its
+ * reader by extension: Assimp for glTF, GLB (Draco compression included), FBX, STL, PLY,
+ * Collada, 3DS, 3MF, DXF, X3D and X, the engine's own reader for OBJ, Model I/O for USD, USDA,
+ * USDC and USDZ, and Blender running in the background for BLEND. Only the geometry is imported:
+ * points, faces, normals, UVs (`uv`), vertex colours (`Cd`) and a `material_index` per face.
+ * Skeletons, animations, textures and materials are left out.
+ */
+
+/// @brief The extensions the import reads, lower case and with the dot (".glb", ".usdz").
+std::vector<std::string> supportedImportExtensions();
+
+/// @brief Names the folder where the conversions of .blend files are kept between runs, which is
+/// created when it does not exist. Without one they go to a folder in the temporary directory.
+Status setCacheDirectory(const std::string& directory);
+
+/// @brief Reads a file to check it, then creates an import node that points at it.
+///
+/// The node sits at the root of the scene with the default settings, and is not made the display
+/// node. The file is read once here and kept in memory, so the node's first cook does not read it
+/// again. A file that cannot be imported creates no node: the status says why, in words for a
+/// person, such as the list of formats for an extension Helix does not read, or that Blender is
+/// needed for a .blend file.
+/// @note It never writes to the file.
+CreateNodeResult importFile(const std::string& path);
+
+/// @brief A sentence on what the last successful importFile found: the counts, what the file
+/// carries (normals, UVs, colours), the first base colour, and what was left out (animations,
+/// skins). Empty before any import.
+std::string lastImportSummary();
+
+/** @} */
+
 /** @name Parameters
  * @{
  */

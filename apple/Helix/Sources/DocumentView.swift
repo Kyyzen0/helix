@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// The window of a document: the viewport, with a toolbar over it.
 struct DocumentView: View {
@@ -23,6 +24,18 @@ struct DocumentView: View {
         }
         .frame(minWidth: 480, minHeight: 320)
         .task { activate() }
+        // A 3D file dropped on the window is imported into the scene.
+        .onDrop(of: [.fileURL], isTargeted: nil) { providers in
+            guard document.isActive else { return false }
+            guard let provider = providers.first(where: { $0.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) }) else {
+                return false
+            }
+            _ = provider.loadObject(ofClass: URL.self) { url, _ in
+                guard let url else { return }
+                Task { @MainActor in document.importDroppedFile(url) }
+            }
+            return true
+        }
         .toolbar {
             ToolbarItem(placement: .navigation) {
                 Label(document.displayNodeName ?? String(localized: "No display node"), systemImage: "cube")

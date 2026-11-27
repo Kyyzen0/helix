@@ -15,6 +15,7 @@ macOS host needs on top of the ordinary build instructions in the
 | Git | Fetched by CMake, not by the superbuild. |
 | Metal compiler | Part of Xcode. Xcode 26 and later install it apart, with `xcodebuild -downloadComponent MetalToolchain`. The configure step stops with that command when it is missing. |
 | Network access | For the dependency archives, the Qt download and the `metal-cpp` archive from developer.apple.com. |
+| Blender (optional) | Only to open `.blend` files, and only at run time. Not needed to build or to run the tests, whose `.blend` test is skipped without it. |
 
 Homebrew is not needed and is deliberately not used. Every tool the build
 requires is downloaded into `toolchain/` by
@@ -87,11 +88,15 @@ The engine (`helixEngine`), the nodes (`helixOps`), the Metal renderer
 (`helixGraphics`), the `helixCore` facade and the `tests` target need no Qt.
 `-DHELIX_BUILD_GUI=OFF` leaves the Qt interface out: no Qt is searched for or
 linked, the `helix` application, `helixGuiTests` and the one engine test that
-goes through a Qt type (`ParameterItemTests.cpp`) are not built, and Objective-C++
-is not enabled. The default is `ON`, which is the build described above.
+goes through a Qt type (`ParameterItemTests.cpp`) are not built. Objective-C++ is enabled in
+both configurations, since the USD reader of the engine uses Model I/O. The default is `ON`,
+which is the build described above.
 
 With the dependencies of an earlier superbuild already in `build-super/deps`,
-nothing needs to be built again but Helix itself. This configures a build folder
+nothing needs to be built again but Helix itself. A prefix built before Assimp joined the
+superbuild lacks it: build that one dependency into the prefix, from the source the superbuild
+holds (or let `cmake --build build-super --target assimp` fetch it), with the options of
+`superbuild/deps/assimp.cmake`. This configures a build folder
 `build-core` straight against them, with the sources of the fetched libraries
 that the superbuild already holds (no network is needed):
 
@@ -173,6 +178,28 @@ an alert. The scene file type is `com.kyyzen.helix.scene` (`.kut`, JSON text).
 its geometry, draws it off screen and writes a PNG, with no window. It is the check of the whole
 chain without a screen. `apple/Helix/Samples` holds two scenes to try it on, written by
 `apple/Helix/Samples/make-samples.sh`.
+
+## Importing 3D files
+
+`helix::geometryImport` is the one node that reads other tools' files, and picks its reader by
+extension:
+
+| Extensions | Reader | Notes |
+| --- | --- | --- |
+| `.glb` `.gltf` | Assimp 6.0.6 | `KHR_draco_mesh_compression` through the Draco that Assimp carries. |
+| `.fbx` `.stl` `.ply` `.dae` `.3ds` `.3mf` `.dxf` `.x3d` `.x` | Assimp | STL, 3MF and DXF are Z up by the convention of the format. |
+| `.obj` | the engine's own reader | Points, faces and texture coordinates (`uv`). Normals are computed, as they always were. |
+| `.usd` `.usda` `.usdc` `.usdz` | Model I/O | Quads come through as triangles. |
+| `.blend` | Blender, in the background | Converted to GLB (modifiers applied, no animation, skin or pictures), and kept under `~/Library/Caches/<bundle id>/blend` (the app) or `HelixBlendCache` in the temporary folder, keyed by path, size, date and the version of Blender. The Blender is the one in the node's `Blender` setting, `/Applications/Blender.app`, or one Spotlight finds. |
+
+Assimp is a static library built by the superbuild into `build-super/deps` with only those
+importers and no exporters (`superbuild/deps/assimp.cmake`), and linked into `libhelixEngine`, so
+the app bundle holds no extra library. The tests read the small files in `tests/data/import`,
+which `tests/data/import/make-test-files.sh` writes again (Python 3, and Blender for the Draco,
+FBX and BLEND files).
+
+`Helix --render-snapshot <file.glb> out.png` imports a 3D file into a new scene and prints how
+long that took and the peak memory of the process.
 
 ## The parser tools
 

@@ -1,4 +1,5 @@
 #include "Engine/GeometryAlgorithms/ObjReader.h"
+#include "Engine/Attribute/AttributeNames.h"
 #include "Engine/Core/Types.h"
 #include "Engine/Primitives/Mesh.h"
 #include <algorithm>
@@ -63,10 +64,48 @@ bool getPointOffset(const std::string& field, Offset pointCount, Offset& pointOf
     return false;
 }
 
+// Resolves the texture coordinate of one vertex reference ("12/4/7" names the fourth one), or
+// returns false when the reference names none.
+bool getTexcoordOffset(const std::string& field, size_t texcoordCount, size_t& texcoordOffset)
+{
+    const size_t firstSlash = field.find('/');
+    if (firstSlash == std::string::npos) return false;
+    const size_t secondSlash = field.find('/', firstSlash + 1);
+    const std::string indexText = field.substr(firstSlash + 1, secondSlash - firstSlash - 1);
+    if (indexText.empty()) return false;
+
+    int objIndex = 0;
+    try
+    {
+        objIndex = std::stoi(indexText);
+    }
+    catch (const std::exception&)
+    {
+        return false;
+    }
+    if (objIndex > 0 && static_cast<size_t>(objIndex) <= texcoordCount)
+    {
+        texcoordOffset = objIndex - 1;
+        return true;
+    }
+    if (objIndex < 0 && static_cast<size_t>(-objIndex) <= texcoordCount)
+    {
+        texcoordOffset = texcoordCount - static_cast<size_t>(-objIndex);
+        return true;
+    }
+    return false;
+}
+
 } // namespace
 
-void readObjInto(std::istream& file, geo::Mesh& mesh)
+void readObjInto(std::istream& file, geo::Mesh& mesh, bool readTexcoords)
 {
+    std::vector<Vector3> texcoords;
+    // One texture coordinate per corner of the faces added, in the order the mesh numbers its
+    // vertices, and whether any corner named one.
+    std::vector<Vector3> cornerTexcoords;
+    bool anyTexcoord = false;
+
     std::string line;
     while (std::getline(file, line))
     {
@@ -79,21 +118,47 @@ void readObjInto(std::istream& file, geo::Mesh& mesh)
         {
             mesh.addPoint(Vector3(std::stof(fields[1]), std::stof(fields[2]), std::stof(fields[3])));
         }
+        else if (readTexcoords && record == "vt" && fields.size() >= 3)
+        {
+            texcoords.emplace_back(std::stof(fields[1]), std::stof(fields[2]), 0.f);
+        }
         else if (record == "f" || record == "l")
         {
             std::vector<Offset> pointOffsets;
             pointOffsets.reserve(fields.size() - 1);
+            std::vector<Vector3> faceTexcoords;
 
             const Offset pointCount = mesh.getNumPoints();
             for (size_t field = 1; field < fields.size(); ++field)
             {
                 Offset pointOffset = 0;
                 if (getPointOffset(fields[field], pointCount, pointOffset))
+                {
                     pointOffsets.push_back(pointOffset);
+                    if (readTexcoords)
+                    {
+                        size_t texcoordOffset = 0;
+                        const bool named =
+                            getTexcoordOffset(fields[field], texcoords.size(), texcoordOffset);
+                        anyTexcoord = anyTexcoord || named;
+                        faceTexcoords.push_back(named ? texcoords[texcoordOffset] : Vector3::Zero());
+                    }
+                }
             }
 
-            if (pointOffsets.size() >= 2) mesh.addFace(pointOffsets, record == "f");
+            if (pointOffsets.size() >= 2)
+            {
+                mesh.addFace(pointOffsets, record == "f");
+                cornerTexcoords.insert(cornerTexcoords.end(), faceTexcoords.begin(), faceTexcoords.end());
+            }
         }
+    }
+
+    if (readTexcoords && anyTexcoord)
+    {
+        auto uvs = mesh.addAttribute<Vector3>(attr::AttributeOwner::VERTEX, attr::names::uv);
+        for (size_t corner = 0; corner < cornerTexcoords.size(); ++corner)
+            uvs.setValue(corner, cornerTexcoords[corner]);
     }
 }
 

@@ -1,12 +1,11 @@
 #include "Engine/Attribute/Transform.h"
 #include "Engine/Core/Types.h"
-#include "Engine/GeometryAlgorithms/ObjReader.h"
+#include "Engine/Import/ImportFile.h"
 #include "Engine/Network/NodeImpl.h"
 #include "Engine/Network/NodeRegistry.h"
 #include "Engine/Primitives/Mesh.h"
 #include <boost/algorithm/string.hpp>
 #include <filesystem>
-#include <fstream>
 
 namespace {
 
@@ -18,12 +17,19 @@ class GeometryImport : public helix::nt::NodeImpl
     void cook() override;
 
   private:
-    // Fills the mesh from the file the parameters name, leaving it empty and
+    // Adds the meshes of the file the parameters name to the packet, leaving it empty and
     // reporting an error when there is nothing readable to fill it from.
-    void readFileInto(helix::geo::Mesh& mesh);
+    void readFileInto(helix::NodePacket& packet);
 };
 
-void GeometryImport::readFileInto(helix::geo::Mesh& mesh)
+helix::import::UpAxis upAxisFrom(const std::string& value)
+{
+    if (value == "y") return helix::import::UpAxis::Y;
+    if (value == "z") return helix::import::UpAxis::Z;
+    return helix::import::UpAxis::Auto;
+}
+
+void GeometryImport::readFileInto(helix::NodePacket& packet)
 {
     using namespace helix;
 
@@ -34,23 +40,40 @@ void GeometryImport::readFileInto(helix::geo::Mesh& mesh)
     // and hands out empty geometry until the user points it somewhere.
     if (filePath.empty()) return;
 
-    const std::filesystem::path file(filePath);
-    if (file.extension() != ".obj")
+    import::ImportOptions options;
+    options.upAxis = upAxisFrom(evalParmString("upAxis"));
+    options.mergeMeshes = evalParmBool("mergeMeshes");
+    options.blenderPath = evalParmString("blenderPath");
+    boost::trim(options.blenderPath);
+
+    // The file is read once and kept: a cook that follows with the same file and settings
+    // reuses it, and only the size below is applied again.
+    std::shared_ptr<const import::ImportedFile> imported;
+    try
     {
-        throwError("Only obj files can be imported, not " + file.extension().string());
+        imported = import::importFile(std::filesystem::path(filePath), options);
+    }
+    catch (const import::ImportError& error)
+    {
+        throwError(error.what());
+        return;
+    }
+    catch (...)
+    {
+        // Not catch (const std::exception&), which does not match across the libraries of this
+        // build (see describeCurrentException).
+        throwError(import::describeCurrentException());
         return;
     }
 
-    std::ifstream stream(file);
-    if (!stream.is_open())
+    const Transform scale = Transform().scale(evalParmFloat("size"));
+    for (const std::shared_ptr<const geo::Mesh>& source : imported->meshes)
     {
-        throwError("Couldn't open " + filePath);
-        return;
+        // A copy shares its storage with the kept mesh until the scale writes the points.
+        auto mesh = std::make_shared<geo::Mesh>(*source);
+        mesh->applyTransform(scale, TransformClass::POINT);
+        packet.addPrimitive(std::move(mesh));
     }
-
-    utils::readObjInto(stream, mesh);
-
-    mesh.applyTransform(Transform().scale(evalParmFloat("size")), TransformClass::POINT);
 }
 
 void GeometryImport::cook()
@@ -59,11 +82,11 @@ void GeometryImport::cook()
 
     if (!outputRequested(0)) return;
 
-    auto mesh = std::make_shared<geo::Mesh>();
-    readFileInto(*mesh);
-
     NodePacket packet;
-    packet.addPrimitive(std::move(mesh));
+    readFileInto(packet);
+    // Nothing read, because the path is unset or the file failed: the output is an empty mesh,
+    // so whatever sits downstream still has geometry of the right kind to work on.
+    if (packet.size() == 0) packet.addPrimitive(std::make_shared<geo::Mesh>());
     setOutputPacket(0, packet);
 }
 

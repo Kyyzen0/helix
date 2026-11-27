@@ -137,6 +137,7 @@ include(deps/eigen.cmake)
 include(deps/glm.cmake)
 include(deps/argparse.cmake)
 include(deps/fastnoise2.cmake)
+include(deps/assimp.cmake)
 
 # The settings of helix itself that a caller may give to the superbuild, which are handed
 # on to the build of helix when they are set.

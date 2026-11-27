@@ -41,6 +41,21 @@ Done in the tree:
   and can render the display node to a PNG (`renderToImage`), which is how the app and an AI
   check what was drawn without a window. See [build-macos.md](build-macos.md).
 
+- **Import of the principal 3D formats.** `helix::geometryImport` reads a file by its
+  extension: glTF and GLB (with `KHR_draco_mesh_compression`), FBX, STL, PLY, Collada (`.dae`),
+  3DS, 3MF, DXF, X3D and X through Assimp; OBJ through the engine's own reader; USD, USDA,
+  USDC and USDZ through Apple's Model I/O; and `.blend` through an installed Blender run in the
+  background (converted to GLB with the modifiers applied, and kept in the caches of the user).
+  The node applies the transforms of the hierarchy, merges the meshes (or not), corrects a
+  Z up file, and keeps the result in memory until the file or a setting changes. The app opens a
+  3D file as a new untitled scene (File > Open, double click, the Dock) and imports one into the
+  open scene (File > Import…, drag and drop). What comes through: points, faces, normals, `uv`,
+  vertex colours (`Cd`) and a `material_index` per face. **Left out for now**: skeletons and
+  animations (counted in the summary of the import, and next in track three), materials and
+  textures (the viewport shows none yet), cameras and lights. The geometry is the bind pose of a
+  skinned mesh, and the current pose of a `.blend`. Model I/O hands USD quads over as triangles.
+  See [build-macos.md](build-macos.md).
+
 Known gaps found on the way, to fix as the work below touches them:
 
 - **The engine is a singleton: one scene at a time.** The native app refuses a second
@@ -101,9 +116,9 @@ interface can, and can check what it did.
 The data model grows so that 3D, 2D, animation and simulation all live in the
 same graph.
 
-1. **Interchange**: glTF import first (meshes, normals, UVs, materials, then
-   skins and animation clips), then glTF and USD export, then USD import.
-   Helix is useful next to other tools before it replaces any of them.
+1. **Interchange**: ~~glTF import~~ and the other formats (meshes, normals, UVs, material
+   indices) are done. To do: skins and animation clips, materials with their textures, then
+   glTF and USD export. Helix is useful next to other tools before it replaces any of them.
 2. **UVs, textures and materials**: `uv` as a vertex attribute, a material
    model on top of the attribute system, and textured shading in the viewport.
 3. **Skeletal animation**: skeletons as geometry (joints are points, bones are
@@ -157,7 +172,7 @@ The reference machine is a Mac mini M4. Everything above must run well on it.
 1. ~~M0, the engine without Qt and the facade~~ done
 2. ~~M1, the walking skeleton of the native app~~ done
 3. M1.5, Helix MCP, so the AI track is exercised from the start
-4. glTF import with UVs and textured viewport shading
+4. ~~glTF import with UVs~~ done; textured viewport shading next
 5. M2 to M4, the native interface, with cook caching and the scheduler work
    alongside
 6. Skeletal animation and keyframes, second version

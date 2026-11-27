@@ -30,6 +30,16 @@ license:
 
   daslang (daScript)   https://github.com/GaijinEntertainment/daScript
   metal-cpp            https://developer.apple.com/metal/cpp/ (Apache License 2.0)
+  Assimp               https://github.com/assimp/assimp (BSD 3-Clause), which reads the glTF,
+                       FBX, STL, PLY, Collada, 3DS, 3MF, DXF, X3D and X formats. It is built
+                       into the engine with the libraries it carries:
+                         Draco       https://github.com/google/draco (Apache License 2.0)
+                         pugixml     (MIT), RapidJSON (MIT), utf8cpp (Boost Software License),
+                         poly2tri    (BSD 3-Clause), Clipper (Boost Software License),
+                         minizip     (zlib license)
+  Model I/O            Apple's framework of macOS, which reads USD files. Not redistributed.
+  Blender              https://www.blender.org (GPL), run as a separate program, when the person
+                       has it installed, to open .blend files. Not bundled.
   Qt                   https://www.qt.io
   TBB, Boost, Eigen, GLM, Manifold, argparse, yaml-cpp, Catch2, cereal,
   icecream-cpp, FastNoise2

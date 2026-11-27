@@ -166,17 +166,6 @@
         }
       }
     },
-    "Helix is a continuation of enzo by ParkerBritt, whose engine, node system and attribute model remain its foundation. Both are released under the MIT licence.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Helix is a continuation of enzo by ParkerBritt, whose engine, node system and attribute model remain its foundation. Both are released under the MIT licence."
-          }
-        }
-      }
-    },
     "%lld points": {
       "extractionState": "manual",
       "localizations": {
@@ -219,6 +208,61 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Import…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import…"
+          }
+        }
+      }
+    },
+    "Import": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import"
+          }
+        }
+      }
+    },
+    "Choose a 3D file to add to the scene. The file is not changed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a 3D file to add to the scene. The file is not changed."
+          }
+        }
+      }
+    },
+    "Helix cannot import this kind of file.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helix cannot import this kind of file."
+          }
+        }
+      }
+    },
+    "Helix is a continuation of enzo by ParkerBritt, whose engine, node system and attribute model remain its foundation. Both are released under the MIT licence.\n\n3D files are read with Assimp (BSD 3-Clause, with Draco, Apache 2.0) and Model I/O.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helix is a continuation of enzo by ParkerBritt, whose engine, node system and attribute model remain its foundation. Both are released under the MIT licence.\n\n3D files are read with Assimp (BSD 3-Clause, with Draco, Apache 2.0) and Model I/O."
           }
         }
       }

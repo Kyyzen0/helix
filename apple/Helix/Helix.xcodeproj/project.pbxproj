@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5E2B8D4A1C7F9063B8D1A4E7 /* ImportFormats.swift */ = {isa = PBXBuildFile; fileRef = 9A1C4E7B2D5F8031A6B94C20 /* ImportFormats.swift */; };
 		18485CD047FA97EB2E642D0A /* DocumentView.swift */ = {isa = PBXBuildFile; fileRef = BA89128C69AD540AF5DB2885 /* DocumentView.swift */; };
 		778229516B283DD35DA34D13 /* EngineHost.swift */ = {isa = PBXBuildFile; fileRef = D3267E492841E7AB897616F8 /* EngineHost.swift */; };
 		C78E938AA9B588158567FA3E /* HelixApp.swift */ = {isa = PBXBuildFile; fileRef = 38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */; };
@@ -25,6 +26,7 @@
 
 /* Begin PBXFileReference section */
 		F5BF48AA40CAD7891EB709FC /* Helix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Helix.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A1C4E7B2D5F8031A6B94C20 /* ImportFormats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ImportFormats.swift; path = Sources/ImportFormats.swift; sourceTree = "<group>"; };
 		BA89128C69AD540AF5DB2885 /* DocumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DocumentView.swift; path = Sources/DocumentView.swift; sourceTree = "<group>"; };
 		D3267E492841E7AB897616F8 /* EngineHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EngineHost.swift; path = Sources/EngineHost.swift; sourceTree = "<group>"; };
 		38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelixApp.swift; path = Sources/HelixApp.swift; sourceTree = "<group>"; };
@@ -73,6 +75,7 @@
 				D3267E492841E7AB897616F8 /* EngineHost.swift */,
 				38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */,
 				22137D970CE01AF6540E6B07 /* HelixDocument.swift */,
+				9A1C4E7B2D5F8031A6B94C20 /* ImportFormats.swift */,
 				C487B92355DA31AAC19BB695 /* HelixMetalView.swift */,
 				8949648E5078146AEA910130 /* NavigationSettings.swift */,
 				FEFB88B45D0D09B01B758F7D /* Present.metal */,
@@ -221,6 +224,7 @@
 				778229516B283DD35DA34D13 /* EngineHost.swift */,
 				C78E938AA9B588158567FA3E /* HelixApp.swift */,
 				876DE517FD07C5B8353EF30F /* HelixDocument.swift */,
+				5E2B8D4A1C7F9063B8D1A4E7 /* ImportFormats.swift */,
 				0EBBB41BFE29A7683A9F84AE /* HelixMetalView.swift */,
 				366B6A1E32AD956F46E94013 /* NavigationSettings.swift */,
 				201044A22A24DDDAC52A68AE /* Present.metal */,

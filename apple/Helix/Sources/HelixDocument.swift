@@ -1,4 +1,5 @@
 import CxxStdlib
+import AppKit
 import Foundation
 import HelixCore
 import SwiftUI
@@ -21,7 +22,10 @@ extension UTType {
 /// by `activate()`, on the main thread, when the document is actually shown.
 @MainActor
 final class HelixDocument: @preconcurrency ReferenceFileDocument {
-    nonisolated static var readableContentTypes: [UTType] { [.helixScene] }
+    /// Scenes, and the 3D files Helix imports. The file of a 3D model is never written back: a
+    /// scene that imports it saves as a `.kut`.
+    nonisolated static var readableContentTypes: [UTType] { [.helixScene] + ImportFormats.contentTypes }
+    nonisolated static var writableContentTypes: [UTType] { [.helixScene] }
 
     /// The name of the node the viewport shows, or nil when there is none.
     @Published private(set) var displayNodeName: String?
@@ -40,9 +44,14 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
     /// shared, so it can be read from any thread.
     private nonisolated let fileContents: Data?
 
-    /// A new scene, with a cube to look at. The engine is not touched until `activate`.
+    /// The 3D file the scene imports, or nil. Set once, like `fileContents`.
+    private nonisolated let importURL: URL?
+
+    /// A new scene, with a cube to look at, or with the 3D file that was opened. The engine is
+    /// not touched until `activate`.
     nonisolated init() {
         fileContents = nil
+        importURL = ImportRequests.shared.pop()
     }
 
     /// A scene stored in a file. Loads it at once, so that a file that cannot be read, or a
@@ -51,8 +60,25 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         guard let data = configuration.file.regularFileContents else {
             throw HelixError.engine(String(localized: "The file could not be read."))
         }
-        fileContents = data
+        if configuration.contentType == .helixScene {
+            fileContents = data
+            importURL = nil
+        } else {
+            // A 3D file that reached the document itself (the document controller normally
+            // takes it before). A document is given the bytes and not the path, so they are
+            // copied to a folder of the caches, under the name of the file, to be imported from.
+            fileContents = nil
+            importURL = try Self.stage(data, named: configuration.file.preferredFilename ?? "model")
+        }
         try Self.onMainThread { try self.activate() }
+    }
+
+    private nonisolated static func stage(_ data: Data, named name: String) throws -> URL {
+        let folder = FileManager.default.temporaryDirectory.appending(path: "helix-opened-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let url = folder.appending(path: name)
+        try data.write(to: url)
+        return url
     }
 
     /// Runs on the main thread, which is where the engine lives, and waits for it.
@@ -71,6 +97,9 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         do {
             if let fileContents {
                 try loadScene(from: fileContents)
+            } else if let importURL {
+                try EngineHost.shared.makeEmptyScene()
+                openingError = importFile(importURL)
             } else {
                 try EngineHost.shared.makeDefaultScene()
             }
@@ -80,6 +109,59 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         }
         isActive = true
         cookGeometry()
+        if let message = openingError {
+            presentedError = message
+            openingError = nil
+        }
+    }
+
+    /// Asks for a 3D file with an open panel, and imports it into this scene.
+    func chooseFileToImport() {
+        let panel = NSOpenPanel()
+        panel.title = String(localized: "Import")
+        panel.prompt = String(localized: "Import")
+        panel.message = String(localized: "Choose a 3D file to add to the scene. The file is not changed.")
+        panel.allowedContentTypes = ImportFormats.contentTypes
+        panel.allowsOtherFileTypes = false
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        importFile(url)
+    }
+
+    /// Imports a file that was dropped on the window, when it is a 3D file Helix reads.
+    func importDroppedFile(_ url: URL) {
+        guard ImportFormats.canImport(url) else {
+            presentedError = String(localized: "Helix cannot import this kind of file.")
+            return
+        }
+        importFile(url)
+    }
+
+    /// Why the 3D file this scene was opened for could not be imported, until it is shown.
+    private var openingError: String?
+
+    /// Imports a 3D file into the scene, makes it the node the viewport shows and frames it.
+    /// Returns why it could not be imported, or nil. The file is only read.
+    @discardableResult
+    func importFile(_ url: URL) -> String? {
+        let result = helix.core.importFile(std.string(url.path))
+        guard result.status.ok else {
+            let message = String(engine: result.status.error)
+            if isActive { presentedError = message }
+            return message
+        }
+        let display = helix.core.setDisplayNode(result.id)
+        guard display.ok else {
+            let message = String(engine: display.error)
+            if isActive { presentedError = message }
+            return message
+        }
+        if isActive {
+            cookGeometry()
+            viewport.requestFrame()
+        }
+        return nil
     }
 
     private func loadScene(from data: Data) throws {

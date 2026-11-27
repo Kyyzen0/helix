@@ -72,6 +72,9 @@ final class EngineHost {
         }
         try HelixError.check(helix.core.initialize(options))
         started = true
+        // A cache that cannot be made is not a reason to stop: conversions go to the temporary
+        // folder then.
+        try? useCacheFolder()
     }
 
     /// Gives the engine to a document, or refuses when another document holds it.
@@ -85,6 +88,20 @@ final class EngineHost {
         guard owner === document else { return }
         helix.core.stopViewport()
         owner = nil
+    }
+
+    /// Replaces the scene with a new, empty one.
+    func makeEmptyScene() throws {
+        try HelixError.check(helix.core.newScene())
+    }
+
+    /// Where a conversion of a .blend file is kept between runs, in the caches of the user.
+    func useCacheFolder() throws {
+        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+        let identifier = Bundle.main.bundleIdentifier ?? "Helix"
+        let folder = caches.appending(path: identifier).appending(path: "blend")
+        try HelixError.check(helix.core.setCacheDirectory(std.string(folder.path)))
     }
 
     /// Replaces the scene with a new one that shows a cube, so there is something to see.

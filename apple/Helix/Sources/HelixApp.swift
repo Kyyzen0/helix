@@ -1,6 +1,7 @@
 import AppKit
 import HelixCore
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct HelixApp: App {
     var body: some Scene {
@@ -20,6 +21,11 @@ struct HelixCommands: Commands {
         CommandGroup(replacing: .appInfo) {
             Button("About Helix") { AboutPanel.show() }
         }
+        CommandGroup(after: .newItem) {
+            Button("Import…") { document?.chooseFileToImport() }
+                .keyboardShortcut("i", modifiers: .command)
+                .disabled(document == nil || document?.isActive != true)
+        }
         CommandGroup(before: .toolbar) {
             Button("Frame Geometry") { document?.requestFrame() }
                 .keyboardShortcut("f", modifiers: [])
@@ -35,6 +41,8 @@ enum AboutPanel {
         let credits = String(localized: """
         Helix is a continuation of enzo by ParkerBritt, whose engine, node system and attribute \
         model remain its foundation. Both are released under the MIT licence.
+
+        3D files are read with Assimp (BSD 3-Clause, with Draco, Apache 2.0) and Model I/O.
         """)
         NSApplication.shared.orderFrontStandardAboutPanel(options: [
             .applicationVersion: String(engine: helix.core.version()),
