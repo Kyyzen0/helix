@@ -310,8 +310,17 @@ Offset geo::Mesh::addFace(const std::vector<Offset>& pointOffsets, bool closed)
         faceAttribute->resize(faceNum + 1);
     }
 
-    // resize face and vertex groups so they stay aligned with element counts
+    // resize custom vertex attributes so they stay aligned with the vertex count
     const Offset newVertCount = pointOffsetVertexHandle_.getSize();
+    for (auto& vertexAttribute : vertexAttributes_)
+    {
+        if (vertexAttribute && !vertexAttribute->isIntrinsic())
+        {
+            vertexAttribute->resize(newVertCount);
+        }
+    }
+
+    // resize face and vertex groups so they stay aligned with element counts
     for (auto& faceGroup : faceGroups_)
     {
         if (faceGroup) faceGroup->resize(faceNum + 1);
@@ -589,14 +598,9 @@ void geo::Mesh::defragment()
 
 Offset geo::Mesh::addPoint(const Vector3& pos)
 {
-    ensureWritable_();
-    const Offset pointOffset = posPointHandle_.getSize();
-
-    posPointHandle_.addValue(pos);
-    validPointHandle_.addValue(true);
-    soloPointsDirty_ = true;
-
-    return pointOffset;
+    // Go through addPoints so every custom point attribute and group grows with the
+    // positions (copy-on-write detach included), instead of staying one element short.
+    return addPoints(std::span<const Vector3>(&pos, 1)).front();
 }
 
 std::vector<Offset> geo::Mesh::addPoints(std::span<const Vector3> positions)
