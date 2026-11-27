@@ -1,4 +1,5 @@
 #include "Engine/Simulation/KeyframeStore.h"
+#include "Engine/Network/CookKey.h"
 #include "Engine/Network/NetworkManager.h"
 #include "Engine/Network/Node.h"
 #include "Engine/NetworkGraph/NetworkGraph.h"
@@ -196,6 +197,27 @@ std::vector<KeyframeTarget> KeyframeStore::getTargets(nt::NodeId nodeId) const
     for (const auto& [target, track] : tracks_)
         if (target.nodeId == nodeId) targets.push_back(target);
     return targets;
+}
+
+std::uint64_t KeyframeStore::keyOf(nt::NodeId nodeId) const
+{
+    nt::KeyHasher hasher;
+    const KeyframeTarget first{nodeId, std::string(), 0};
+    for (auto track = tracks_.lower_bound(first); track != tracks_.end() && track->first.nodeId == nodeId;
+         ++track)
+    {
+        hasher.add(track->first.parameter);
+        hasher.add(track->first.component);
+        hasher.add(track->second.getBaseValue());
+        for (const Keyframe& key : track->second.getKeyframes())
+        {
+            hasher.add(key.frame);
+            hasher.add(key.value);
+            hasher.add(static_cast<int>(key.interpolation));
+        }
+        hasher.add(static_cast<std::uint64_t>(track->second.size()));
+    }
+    return hasher.value();
 }
 
 std::optional<floatT> KeyframeStore::getBaseValue(const KeyframeTarget& target) const

@@ -8,7 +8,10 @@
 #include "Engine/Simulation/ParticleSolver.h"
 #include "Engine/Simulation/SpringSolver.h"
 #include <algorithm>
+#include <cstdint>
 #include <memory>
+#include <optional>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -44,6 +47,12 @@ class Simulation : public helix::nt::NodeImpl
 
     /// @brief The settings of the spring sheet at a frame.
     helix::sim::SpringSettings springSettingsAt_(floatT frame) const;
+
+    /// @brief Where the particle system resumes from and what it leaves behind.
+    helix::sim::SolverCheckpoints<helix::sim::ParticleState> particleCheckpoints_() const;
+
+    /// @brief Where the spring sheet resumes from and what it leaves behind.
+    helix::sim::SolverCheckpoints<helix::sim::SpringState> springCheckpoints_() const;
 };
 
 floatT Simulation::valueAt_(const char* parameter, unsigned int component, floatT frame) const
@@ -99,6 +108,59 @@ helix::sim::SpringSettings Simulation::springSettingsAt_(floatT frame) const
     return settings;
 }
 
+helix::sim::SolverCheckpoints<helix::sim::ParticleState> Simulation::particleCheckpoints_() const
+{
+    using namespace helix;
+
+    // The states live in the cook cache, under everything this cook depends on except the frame,
+    // so a state is only reused by a cook that would have reached it by itself.
+    sim::SolverCheckpoints<sim::ParticleState> checkpoints;
+    checkpoints.find = [this](std::int64_t maxIndex)
+        -> std::optional<std::pair<std::int64_t, std::shared_ptr<const sim::ParticleState>>> {
+        const std::optional<nt::CachedState> found = findSolverState(0, maxIndex);
+        if (!found) return std::nullopt;
+        return std::make_pair(
+            found->index,
+            std::static_pointer_cast<const sim::ParticleState>(found->state)
+        );
+    };
+    checkpoints.save = [this](std::int64_t index, const sim::ParticleState& state) {
+        saveSolverState(
+            0,
+            index,
+            std::make_shared<const sim::ParticleState>(state),
+            state.size() * sizeof(sim::Particle) + sizeof(sim::ParticleState)
+        );
+    };
+    return checkpoints;
+}
+
+helix::sim::SolverCheckpoints<helix::sim::SpringState> Simulation::springCheckpoints_() const
+{
+    using namespace helix;
+
+    sim::SolverCheckpoints<sim::SpringState> checkpoints;
+    checkpoints.find = [this](std::int64_t maxIndex)
+        -> std::optional<std::pair<std::int64_t, std::shared_ptr<const sim::SpringState>>> {
+        const std::optional<nt::CachedState> found = findSolverState(1, maxIndex);
+        if (!found) return std::nullopt;
+        return std::make_pair(
+            found->index,
+            std::static_pointer_cast<const sim::SpringState>(found->state)
+        );
+    };
+    checkpoints.save = [this](std::int64_t index, const sim::SpringState& state) {
+        saveSolverState(
+            1,
+            index,
+            std::make_shared<const sim::SpringState>(state),
+            (state.positions.size() + state.previousPositions.size()) * sizeof(Vector3) +
+                sizeof(sim::SpringState)
+        );
+    };
+    return checkpoints;
+}
+
 void Simulation::cook()
 {
     using namespace helix;
@@ -121,13 +183,15 @@ void Simulation::cook()
             return particleSettingsAt_(atFrame);
         };
 
+        const sim::SolverCheckpoints<sim::ParticleState> checkpoints = particleCheckpoints_();
         const std::vector<sim::Particle> particles = sim::simulateParticles(
             particleSettingsAt_(firstFrame),
             settingsAtFrame,
             firstFrame,
             frame,
             fps,
-            subSteps
+            subSteps,
+            &checkpoints
         );
 
         std::vector<Vector3> positions;
@@ -149,13 +213,15 @@ void Simulation::cook()
             return springSettingsAt_(atFrame);
         };
 
+        const sim::SolverCheckpoints<sim::SpringState> checkpoints = springCheckpoints_();
         const std::vector<Vector3> positions = sim::simulateSprings(
             springSettingsAt_(firstFrame),
             settingsAtFrame,
             firstFrame,
             frame,
             fps,
-            subSteps
+            subSteps,
+            &checkpoints
         );
 
         const std::vector<Offset> offsets = mesh->addPoints(positions);

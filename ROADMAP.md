@@ -105,13 +105,27 @@ Done in the tree:
   dirties the simulations, and a key is worth its own value on its own frame after a step (both were
   bugs). See [build-macos.md](build-macos.md).
 
+- **The cook cache (track four, item 2).** A node that moves with the scene time keeps what it
+  produced at every frame it cooked, so going back to a frame costs a lookup instead of a cook, and
+  scrubbing, looping and replaying are cheap. The simulation node resumes from a state it saved
+  every eight frames instead of replaying from its start frame, so playing it costs about the same
+  at every frame. One budget (1 GiB, `setCookCacheBudget`) bounds all of it, and the entry used
+  longest ago goes first. The ruler shows the cached frames of the display node as a blue line
+  (Timeline > Clear Cook Cache empties it), the facade has `cookCacheInfo`, `cachedFrames` and
+  `clearCookCache`, and MCP has `clear_cook_cache` and the `cook_cache` of `scene_info`. A cached
+  frame is the same, bit for bit, as a cook from nothing (tests compare them). Measured on the Mac
+  mini (Release build, the cook alone): playing a simulation with 20 000 particles from frame 1 to 500
+  went from 9.3 ms a frame on average (17 ms at the end) to 0.34 ms at every frame, going back to
+  a cooked frame from 3.8 ms to 0.04 ms, and a keyed transform on 100 000 points from 0.18 to
+  0.04 ms a frame the second time through. See [build-macos.md](build-macos.md).
+
 Known gaps found on the way, to fix as the work below touches them:
 
 - **Playback gaps.** Playback cooks synchronously on the main thread, since the engine's background
   cooking is not safe to drive from the interface yet (the simulation nodes read the live network
   while they cook, and the keyframe store is not locked): a cook slower than a frame stalls the
-  window for that long. A simulation replays from its start frame at every cook, so its cost grows
-  with the frame until the cook cache of track four. Keys are floats only. There is no dope sheet
+  window for that long. A frame that was not cooked yet still costs a cook (a simulation resumes from
+  the nearest state it saved, at most seven frames before). Keys are floats only. There is no dope sheet
   and no curve editor: the ruler shows the keys of one node as diamonds, and tangents are not
   editable (step, linear and smooth only). An edit stops the playback.
 - **Spreadsheet gaps.** Read only: no editing of a value, no sorting or filtering, no selection of
@@ -261,6 +275,20 @@ The reference machine is a Mac mini M4. Everything above must run well on it.
 2. **Cook caching and dirty propagation**: hash the inputs of a node, skip the
    subtree when nothing changed, and keep the last result visible while a new
    one computes. This makes heavy scenes interactive and scrubbing cheap.
+   *Done for time*: the frame cache, the incremental simulation, its budget and the
+   timeline bar (see the status above). Still to do:
+   - **Keep the last result visible while a new one computes** needs cooking off the main
+     thread: the background cook exists (`requestCook`, `CookScheduler`) and shows the last
+     published result while it runs, but the interface does not use it yet, since the simulation
+     nodes and the keyframe store read the live network from a worker, and a cook on a worker
+     reads a snapshot that the cache does not use. Both go with the scheduler of item 3.
+   - **Only a node that moves with the time is cached.** An edit of a static graph still recooks
+     the node and what is downstream of it (the node keeps its own last output, which is what skips
+     the subtree that did not change). Keeping the versions a slider went through, so that a
+     toggle back is free, was left out on purpose: it would push out the frames.
+   - **The budget is an estimate** from the size of the attributes, which counts a store that two
+     frames share (copy on write) once for each. A texture of a material is not counted.
+   - **No disk cache** (item 5), so the cache is gone when the document closes.
 3. **One scheduler, the right cores**: one worker pool instead of the cook
    threads, TBB and manifold competing, sized on the performance cores, with
    quality of service set for interactive and background work.
@@ -284,7 +312,8 @@ The reference machine is a Mac mini M4. Everything above must run well on it.
 3. ~~M1.5, Helix MCP, so the AI track is exercised from the start~~ done
 4. ~~glTF import with UVs~~ and ~~textured viewport shading~~ done (base colour only)
 5. ~~M2, the node editor~~, ~~M3, the inspector~~ and ~~M4, the timeline and the spreadsheet~~
-   done; cook caching and the scheduler work next, so playback can leave the main thread
+   done, and so is the frame cache of the cook cache; the scheduler work is next, so playback can
+   leave the main thread
 6. Skeletal animation and keyframes, second version
 7. M5, then the stability and rendering items that remain
 

@@ -610,6 +610,60 @@ Status setFps(float fps);
 
 /** @} */
 
+/** @name Cook cache
+ * @{
+ *
+ * A node that moves with the scene time (it reads the frame, a keyframe or an expression drives
+ * one of its parameters, or something wired into it does) keeps what it produced at every frame it
+ * has cooked, so going back to a frame costs a lookup instead of a cook. The solvers of the
+ * simulation node also save their state every few frames, so a frame not visited yet is reached
+ * from the nearest saved state rather than from the first frame. What is kept is the same, bit for
+ * bit, as what a cook makes: any change to a parameter, a link or a keyframe of a node (or of
+ * anything upstream of it) drops what it held. One budget bounds all of it, and the entry used
+ * longest ago goes first.
+ */
+
+/// @brief What the cook cache holds and how it has been used.
+struct CookCacheInfo
+{
+    /// @brief The estimated size of everything the cache holds, in bytes.
+    std::uint64_t bytesUsed = 0;
+    /// @brief The most the cache may hold, in bytes. Zero means the cache is off.
+    std::uint64_t budget = 0;
+    /// @brief How many things the cache holds, cooks and solver states together.
+    std::uint64_t entries = 0;
+    /// @brief How many of them are what a node produced at one frame.
+    std::uint64_t frameEntries = 0;
+    /// @brief How many of them are the saved state of a solver.
+    std::uint64_t stateEntries = 0;
+    /// @brief How many cooks were answered from the cache since the process started.
+    std::uint64_t hits = 0;
+    /// @brief How many times the cache was asked and held nothing.
+    std::uint64_t misses = 0;
+    /// @brief How many times a simulation resumed from a saved state instead of its first frame.
+    std::uint64_t stateHits = 0;
+};
+
+/// @brief Returns what the cook cache holds and how it has been used.
+CookCacheInfo cookCacheInfo();
+
+/// @brief Sets the most the cook cache may hold, in bytes (1 GiB at the start). What no longer
+/// fits is dropped, the entry used longest ago first. Zero turns the cache off and empties it.
+/// @note The size is an estimate from the size of the attributes, which errs on the high side:
+/// two frames that share an attribute are counted as if they held it twice.
+void setCookCacheBudget(std::uint64_t bytes);
+
+/// @brief Drops everything the cook cache holds. The next visit to a frame cooks it again.
+void clearCookCache();
+
+/// @brief The whole frames a node has a cached cook for, in increasing order. Empty for a node
+/// that does not exist, one that does not move with the time (nothing is kept for it), and one
+/// that has not been cooked at any frame yet.
+/// @note Reading it never cooks. The timeline shows it for the display node.
+std::vector<std::int32_t> cachedFrames(NodeId node);
+
+/** @} */
+
 /** @name Keyframes
  * @{
  *

@@ -101,14 +101,17 @@ std::vector<Particle> simulateParticles(
     floatT startFrame,
     floatT endFrame,
     floatT fps,
-    intT subSteps
+    intT subSteps,
+    const SolverCheckpoints<ParticleState>* checkpoints
 )
 {
     ParticleSolver solver;
-    solver.reset(startSettings);
 
-    if (endFrame <= startFrame) return solver.getParticles();
-    if (fps <= 0.f) return solver.getParticles();
+    if (endFrame <= startFrame || fps <= 0.f)
+    {
+        solver.reset(startSettings);
+        return solver.getParticles();
+    }
 
     const intT steps = std::max<intT>(1, subSteps);
     const floatT frameDelta = 1.f / fps;
@@ -119,7 +122,20 @@ std::vector<Particle> simulateParticles(
     const floatT frameCount = endFrame - startFrame;
     const intT wholeFrames = static_cast<intT>(std::floor(frameCount + 1e-4f));
 
-    for (intT frameIndex = 0; frameIndex < wholeFrames; ++frameIndex)
+    // Start from the latest state a run left behind, when there is one at or before the end.
+    intT firstIndex = 0;
+    if (checkpoints && checkpoints->find)
+    {
+        const auto found = checkpoints->find(wholeFrames);
+        if (found && found->second && found->first > 0 && found->first <= wholeFrames)
+        {
+            solver.restore(*found->second);
+            firstIndex = static_cast<intT>(found->first);
+        }
+    }
+    if (firstIndex == 0) solver.reset(startSettings);
+
+    for (intT frameIndex = firstIndex; frameIndex < wholeFrames; ++frameIndex)
     {
         const floatT frame = startFrame + static_cast<floatT>(frameIndex);
         const ParticleSettings settings =
@@ -127,6 +143,12 @@ std::vector<Particle> simulateParticles(
 
         for (intT stepIndex = 0; stepIndex < steps; ++stepIndex)
             solver.step(settings, stepTime);
+
+        // Leave the state behind every few frames, for a run that goes further.
+        const intT framesDone = frameIndex + 1;
+        if (checkpoints && checkpoints->save && checkpoints->interval > 0 &&
+            framesDone % checkpoints->interval == 0)
+            checkpoints->save(framesDone, solver.getParticles());
     }
 
     // The frame the scene sits on may sit between two whole frames, so the run

@@ -176,7 +176,8 @@ std::vector<Vector3> simulateSprings(
     floatT startFrame,
     floatT endFrame,
     floatT fps,
-    intT subSteps
+    intT subSteps,
+    const SolverCheckpoints<SpringState>* checkpoints
 )
 {
     SpringSolver solver;
@@ -194,13 +195,37 @@ std::vector<Vector3> simulateSprings(
     const floatT frameCount = endFrame - startFrame;
     const intT wholeFrames = static_cast<intT>(std::floor(frameCount + 1e-4f));
 
-    for (intT frameIndex = 0; frameIndex < wholeFrames; ++frameIndex)
+    // Start from the latest state a run left behind, when there is one at or before the end. The
+    // lattice itself (the springs and their rest lengths) was just built from the settings.
+    intT firstIndex = 0;
+    if (checkpoints && checkpoints->find)
+    {
+        const auto found = checkpoints->find(wholeFrames);
+        if (found && found->second && found->first > 0 && found->first <= wholeFrames &&
+            found->second->positions.size() == solver.size() &&
+            found->second->previousPositions.size() == solver.size())
+        {
+            solver.restore(found->second->positions, found->second->previousPositions);
+            firstIndex = static_cast<intT>(found->first);
+        }
+    }
+
+    for (intT frameIndex = firstIndex; frameIndex < wholeFrames; ++frameIndex)
     {
         const floatT frame = startFrame + static_cast<floatT>(frameIndex);
         const SpringSettings settings = settingsAtFrame ? settingsAtFrame(frame) : startSettings;
 
         for (intT stepIndex = 0; stepIndex < steps; ++stepIndex)
             solver.step(settings, stepTime);
+
+        // Leave the state behind every few frames, for a run that goes further.
+        const intT framesDone = frameIndex + 1;
+        if (checkpoints && checkpoints->save && checkpoints->interval > 0 &&
+            framesDone % checkpoints->interval == 0)
+            checkpoints->save(
+                framesDone,
+                SpringState{solver.getPositions(), solver.getPreviousPositions()}
+            );
     }
 
     // The frame the scene sits on may sit between two whole frames, so the run

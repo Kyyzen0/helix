@@ -110,6 +110,9 @@ struct TimelineRulerView: View {
     /// The height of the row the numbers are in, above the row of diamonds.
     private static let numberRow: CGFloat = 13
 
+    /// The height of the bar of cached frames, along the bottom of the ruler.
+    private static let cacheBar: CGFloat = 3
+
     var body: some View {
         GeometryReader { proxy in
             let ruler = TimelineRuler.fitting(start: model.time.start, end: model.time.end, width: proxy.size.width)
@@ -182,6 +185,15 @@ struct TimelineRulerView: View {
         context.stroke(Path { $0.move(to: CGPoint(x: endX, y: 0)); $0.addLine(to: CGPoint(x: endX, y: size.height)) }, with: .color(line), lineWidth: 1)
         let startX = ruler.x(of: Double(model.time.start))
         context.stroke(Path { $0.move(to: CGPoint(x: startX, y: 0)); $0.addLine(to: CGPoint(x: startX, y: size.height)) }, with: .color(line), lineWidth: 1)
+
+        // The frames that are cached, as a thin bar under the ticks and the diamonds.
+        for run in model.cachedRuns {
+            guard let span = ruler.span(of: run), span.width > 0 else { continue }
+            context.fill(
+                Path(CGRect(x: span.x, y: size.height - Self.cacheBar, width: span.width, height: Self.cacheBar)),
+                with: .color(.blue.opacity(0.85))
+            )
+        }
 
         // The playhead.
         let x = ruler.x(of: model.time.frame)

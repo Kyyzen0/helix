@@ -100,4 +100,23 @@ prm::Ramp NodeImpl::evalParmRamp(std::string_view parmName) const
     return context_.evalParmRamp(parmName);
 }
 
+std::optional<CachedState> NodeImpl::findSolverState(unsigned int slot, std::int64_t maxIndex) const
+{
+    const std::uint64_t key = node_.getCookStateKey();
+    if (key == 0) return std::nullopt;
+    return cookCache().findState(context_.getNodeId(), slot + 1, key, maxIndex);
+}
+
+void NodeImpl::saveSolverState(
+    unsigned int slot,
+    std::int64_t index,
+    std::shared_ptr<const void> state,
+    std::size_t bytes
+) const
+{
+    const std::uint64_t key = node_.getCookStateKey();
+    if (key == 0 || context_.isCancelled()) return;
+    cookCache().storeState(context_.getNodeId(), slot + 1, key, index, std::move(state), bytes);
+}
+
 } // namespace helix::nt

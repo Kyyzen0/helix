@@ -22,6 +22,7 @@ EXPECTED_TOOLS = {
     "delete_node", "connect_nodes", "disconnect_nodes", "set_display_node", "list_parameters",
     "set_parameter", "reset_parameter", "import_file", "set_frame", "geometry_summary", "read_attribute", "render_view",
     "set_time_range", "set_keyframe", "remove_keyframe", "clear_keyframes", "list_keyframes",
+    "clear_cook_cache",
 }
 
 failures = []
@@ -261,6 +262,18 @@ def main(binary):
     server.data("set_frame", {"frame": 24})
     _, revisited = render(server, width=240, height=160, wireframe="off")
     check(revisited == at_end, "a frame gives the same picture however it was reached")
+
+    # The cook cache kept the frames of the keyed node, and forgets them on request.
+    cache = server.data("scene_info")["cook_cache"]
+    check(cache["frame_entries"] > 0 and cache["hits"] > 0 and cache["bytes_used"] > 0 and cache["budget"] > 0,
+          "scene_info reports the cook cache: %r" % (cache,))
+    emptied = server.data("clear_cook_cache")["cook_cache"]
+    check(emptied["entries"] == 0 and emptied["bytes_used"] == 0 and server.data("scene_info")["cook_cache"]["entries"] == 0,
+          "clear_cook_cache empties it: %r" % (emptied,))
+    server.data("set_frame", {"frame": 3})
+    server.data("set_frame", {"frame": 24})
+    _, after_clear = render(server, width=240, height=160, wireframe="off")
+    check(after_clear == at_end, "a frame cooked again after the cache was cleared gives the same picture")
     server.data("set_frame", {"frame": 12})
     spun = server.data("geometry_summary", {"node": "spin"})["bounds"]["min"]
     server.data("set_frame", {"frame": 1})

@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/Core/Types.h"
+#include "Engine/Simulation/SolverCheckpoints.h"
 #include <functional>
 #include <vector>
 
@@ -63,12 +64,18 @@ class ParticleSolver
     /// @brief The particles as they stand now.
     const std::vector<Particle>& getParticles() const { return particles_; }
 
+    /// @brief Puts the particles back to a state read from getParticles earlier.
+    void restore(const std::vector<Particle>& particles) { particles_ = particles; }
+
     /// @brief How many particles the solver holds.
     std::size_t size() const { return particles_.size(); }
 
   private:
     std::vector<Particle> particles_;
 };
+
+/// @brief What a particle system keeps between two steps, which is all of it.
+using ParticleState = std::vector<Particle>;
 
 /**
  * @brief Runs a particle system from one frame to another.
@@ -84,6 +91,8 @@ class ParticleSolver
  * @param endFrame The frame the system ends on.
  * @param fps How many frames make up a second.
  * @param subSteps How many steps each frame is broken into.
+ * @param checkpoints Where to start from and where to leave states, or null to run from the
+ * first frame and leave nothing. The particles are the same either way.
  * @return The particles as they stand at the end frame.
  */
 std::vector<Particle> simulateParticles(
@@ -92,7 +101,8 @@ std::vector<Particle> simulateParticles(
     floatT startFrame,
     floatT endFrame,
     floatT fps,
-    intT subSteps = 1
+    intT subSteps = 1,
+    const SolverCheckpoints<ParticleState>* checkpoints = nullptr
 );
 
 } // namespace helix::sim

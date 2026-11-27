@@ -293,12 +293,13 @@ adapts to the width: 1, 2, 5, 10, 20...), shades the range, and carries the play
 drag on the ruler moves the playhead and stops the playback. The diamonds on the ruler are the keys of
 the node in front, one diamond for every frame that has a key, however many parameters it holds (see
 Keyframes). The node in front is the one selected in the node editor, or the display node when there
-is no selection or several.
+is no selection or several. A thin blue line along the bottom of the ruler marks the frames the cook
+cache holds for the display node, which show without a cook (see Cook cache).
 
 **Keys.** `Space` plays or pauses, `←` and `→` step one frame, `⌥←` and `⌥→` go to the start and the end.
 They act only while the viewport, the node editor or the ruler has the keys, never while a text field
-does, for the reason the viewport keys do. The Timeline menu has the same commands without keys, and
-the two settings: Loop, and Play Every Frame.
+does, for the reason the viewport keys do. The Timeline menu has the same commands without keys, the
+two settings (Loop, and Play Every Frame), and Clear Cook Cache.
 
 **Playback.** The frames follow the clock: a timer ticks at 120 Hz, and each tick moves the playhead
 by the time that went by times the frame rate, keeping the part of a frame that did not make a whole
@@ -315,13 +316,15 @@ the live network while they cook, and the keyframe store is not locked), so a co
 than a frame stalls the interface for as long as it takes. The viewport keeps the camera where the
 person put it (a frame of playback never reframes the geometry), and the node editor is read again
 when the playback stops, not at every frame. A simulation node replays from its start frame at every
-cook, which makes a frame as pure a function of the frame number as any other, and also makes the
-cook cost grow with the frame; until the cook cache of track four, a heavy simulation plays slower
-the further it goes. Measured on the Mac mini (Release build, the cook and the buffers of the viewport
-without the GPU): about 0.4 ms a frame for `Waves.kut`, 0.05 ms for a keyed transform on the textured
-quad, and for a `helix::simulation` node 0.2, 1.8 and 8 ms at frames 10, 100 and 500 with its default
-particles (1.0, 4 and 18 ms with 20 000 of them). `build-core/helix.app/Contents/bin/tests "[.bench]"`
-measures it again.
+cook, which makes a frame as pure a function of the frame number as any other. Started from nothing
+that cost grows with the frame, so the cook cache (below) saves the state of the simulation every
+eight frames and resumes from the nearest one. Measured on the Mac mini (Release build, the cook and
+the buffers of the viewport without the GPU), for a frame that was not cooked before: about 0.3 ms a
+frame for `Waves.kut`, 0.05 ms for a keyed transform on the textured quad, and for a
+`helix::simulation` node 0.2, 1.7 and 8.3 ms at frames 10, 100 and 500 when the cache holds nothing
+(1.1, 4.3 and 19 ms with 20 000 particles), and 0.1 ms (0.3 ms with 20 000) at every frame when the
+playhead goes forward one frame at a time. `build-core/helix.app/Contents/bin/tests "[.bench]"`
+measures it again, with and without the cache.
 
 **An edit stops the playback.** Any edit (the node editor, the inspector, a key, the range) pauses
 it first, so that what the person changes lands on the frame they were looking at.
@@ -364,6 +367,65 @@ server alike (`setKeyframe`, `setKeyframeAtCurrentValue`, `removeKeyframe`, `mov
 
 Not yet: bezier tangents, a curve editor and a dope sheet, keys on integers, toggles and strings, and
 keys moved or copied across several nodes at once (the ruler shows one node's keys).
+
+### Cook cache
+
+A node that moves with the scene time keeps what it produced at every frame it has cooked. Going back
+to a frame (scrubbing, looping, stepping back, replaying) then costs a lookup instead of a cook, and
+the packets are the very ones the first visit made, so nothing is copied. The facade is `cookCacheInfo`
+(bytes used, the budget, the number of entries, hits and misses), `cachedFrames(node)` (the whole
+frames a node has a cook for), `setCookCacheBudget(bytes)` and `clearCookCache()`. MCP has
+`clear_cook_cache`, and `scene_info` carries a `cook_cache` object.
+
+**What is cached.** A node *moves with the time* when its cook reads the frame or the time (the
+simulation), when one of its parameters does (a keyframe, or an expression with `frame()`), or when
+something wired into it does. Only those nodes are filed; what does not move with the time is already
+kept by the node itself, and filing every version of it while a slider is dragged would push out the
+frames that matter. A node whose `node.yaml` says `cache: false` is never filed, and nor is what is
+wired after it while it moves with the time. Nothing is kept of a cook that failed, and a cook on a
+worker thread of the background cook, which reads a snapshot of the network, does not use the cache.
+
+**The key.** A cook is filed under a 64 bit hash of everything it reads: the type of the node; the
+identity of the packet that arrives at each input (every packet a node publishes gets a number from
+one counter, and a cook answered from the cache publishes the packet it published the first time, so a
+node downstream of a cached node is a hit at the same frames); the value of every parameter as the
+cook reads it, an expression evaluated (a ramp as its control points); the keyframes of the node, since
+a simulation reads a keyed setting at the frames before the current one; the frame rate; and the frame
+and the time. A cached frame is the same, bit for bit, as a cook from nothing, because the cook is a
+pure function of what the key holds (`tests/CookCacheTests.cpp` compares the two for a keyed transform,
+an expression of `frame()`, a simulation and what is wired after it, going forward, back and jumping).
+
+**What drops it.** Anything that dirties a node for a reason other than the frame moving: an edit of a
+parameter, a link made or removed, a keyframe edited, the node deleted, and the same for anything
+upstream of it, since the dependents of a dirtied node are dirtied too (a key written by the playhead
+reaching a frame is not an edit). A change of the frame rate, a new scene and a restore empty the whole
+cache. The key is the guard behind that: an edit that nothing dirties (a key moved far from the
+playhead, which leaves the value at the playhead where it was) still cannot be answered with an old
+cook, since the keys and the inputs are in the key.
+
+**The budget.** One budget for the whole process, 1 GiB by default (`setCookCacheBudget`), counts the
+size of the attributes of what is held, and the entry used longest ago goes first, whatever node it is
+of. A store that two frames share (a grid that a transform moves) is counted once for each of them, so
+the estimate errs on the high side; a texture is not counted. Zero turns the cache off, which is also
+how a cook from nothing is made for a comparison.
+
+**The simulation.** A solver is worked out from its first frame, which cost the frame. It now saves
+its state (the particles, or the points of the sheet and where they were) every eight frames in the
+same cache, under the key of the node without the frame, and a cook starts from the latest state at or
+before its frame and steps the frames after it (at most seven, plus the part of a frame). The state is
+all the next step reads and the steps are the same, so the result is the same bit for bit; a change of
+a setting, a key or an input loses the states. A keyed setting is read through its keys, so its value
+at the frame is left out of the key of the states and a simulation with a keyed setting resumes too.
+
+**The ruler.** The blue line under the ticks marks the whole frames the cache holds for the display
+node. It is read when the playhead is moved by hand, every twelve frames of playback and when the
+playback stops, and after an edit. Timeline > Clear Cook Cache empties the cache (the scene is not
+changed, so it is not a step of undo).
+
+**Limits.** The background cook does not use it, and the interface does not use the background cook
+yet, so a frame that was not cooked still stalls the interface for its cook. There is no disk cache,
+so it is empty when the document is closed, and the budget is a count of attributes, not a measure of
+the memory the process uses.
 
 ### Spreadsheet
 
@@ -437,7 +499,9 @@ or with any other MCP client, in its JSON configuration:
 
 The tools:
 
-- `scene_info`: the nodes, links, display node, time and whether there are unsaved changes.
+- `scene_info`: the nodes, links, display node, time, the cook cache and whether there are unsaved
+  changes.
+- `clear_cook_cache`: forgets what the cook cache holds (the scene is not changed).
 - `new_scene`, `open_scene`, `save_scene`: scene files. The first two refuse while the scene has
   unsaved changes, unless `discard_changes` is true.
 - `list_node_types`: the type names `create_node` accepts.

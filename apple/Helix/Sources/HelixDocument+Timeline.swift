@@ -15,6 +15,15 @@ extension HelixDocument: TimelineEditing {
 
     func loadKeys(node: UInt64?) -> [TimelineKey] { TimelineLoader.loadKeys(node: node) }
 
+    func loadCachedFrames() -> [Int] { TimelineLoader.loadCachedFrames() }
+
+    /// Drops everything the cook cache holds, so the next visit to a frame cooks it again. Not an
+    /// edit of the scene: the scene is the same, only what it remembers is gone.
+    func clearCookCache() {
+        helix.core.clearCookCache()
+        timeline.refreshCache()
+    }
+
     /// Makes the models of the bottom of the window ready, once the scene is loaded.
     func prepareTimeline() {
         timeline.editing = self

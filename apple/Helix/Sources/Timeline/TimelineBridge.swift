@@ -36,6 +36,13 @@ enum TimelineLoader {
         return keys
     }
 
+    /// The whole frames the cook cache holds a cook of the displayed node for.
+    static func loadCachedFrames() -> [Int] {
+        let node = helix.core.displayNode()
+        guard node != 0 else { return [] }
+        return helix.core.cachedFrames(node).map { Int($0) }
+    }
+
     static func interpolation(_ value: helix.core.Interpolation) -> KeyInterpolation {
         switch value {
         case .Step: .step
@@ -60,6 +67,7 @@ enum TimelineLoader {
 final class ReadOnlyTimelineSource: TimelineEditing {
     func readTime() -> TimelineTime { TimelineLoader.readTime() }
     func loadKeys(node: UInt64?) -> [TimelineKey] { TimelineLoader.loadKeys(node: node) }
+    func loadCachedFrames() -> [Int] { TimelineLoader.loadCachedFrames() }
     func moveToFrame(_ frame: Double) {}
     func setRange(start: Int, end: Int) -> EditOutcome { .done }
     func setFps(_ fps: Double) -> EditOutcome { .done }

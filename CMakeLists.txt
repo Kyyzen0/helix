@@ -103,6 +103,8 @@ set(ENGINE_SOURCES
     src/Engine/Parameter/Default.cpp
     src/Engine/Parameter/Range.cpp
     src/Engine/Parameter/PrmName.cpp
+    src/Engine/Network/CookCache.cpp
+    src/Engine/Network/CookCacheAttempt.cpp
     src/Engine/Network/NetworkManager.cpp
     src/Engine/Network/UpdateLock.cpp
     src/Engine/Async/CookPlan.cpp
@@ -432,6 +434,7 @@ endif()
 # the engine and the renderer, with no Qt and none of the engine's third party types in it.
 add_library(helixCore STATIC
     src/HelixCore/HelixCore.cpp
+    src/HelixCore/HelixCoreCache.cpp
     src/HelixCore/HelixCoreParameters.cpp
     src/HelixCore/HelixCoreReport.cpp
     src/HelixCore/HelixCoreTime.cpp
@@ -755,6 +758,7 @@ if(HELIX_BUILD_TESTS)
         tests/CookPlanTests.cpp
         tests/CopyOnWriteTests.cpp
         tests/SimulationTests.cpp
+        tests/CookCacheTests.cpp
         tests/HelixCoreTests.cpp
         tests/NodeErrorTests.cpp
         tests/InspectorFacadeTests.cpp

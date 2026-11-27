@@ -5,6 +5,7 @@
 #include "Engine/Async/CookTypes.h"
 #include "Engine/Core/Types.h"
 #include "Engine/Network/NetworkManager.h"
+#include "Engine/Network/Node.h"
 #include "Engine/Parameter/NodeParameter.h"
 #include "Engine/Parameter/Ramp.h"
 #include <memory>
@@ -108,6 +109,8 @@ void nt::CookContext::recordTimeDependency_() const
     // The graph belongs to the thread that owns the network, so a cook on a
     // worker thread leaves the note with the result and the network picks it
     // up when the cook is published.
+    if (node_) node_->noteReadsTime();
+
     if (snapshot_)
     {
         result_->markTimeDependent(nodeId_);
@@ -115,6 +118,15 @@ void nt::CookContext::recordTimeDependency_() const
     }
 
     networkManager_.graph().setTimeDependent(nt::Unit{nodeId_}, true);
+}
+
+nt::Node* nt::CookContext::inputSourceNode(unsigned int inputIndex)
+{
+    if (snapshot_) return nullptr;
+
+    auto inputNodeLink = networkManager_.graph().getInputNodeLink(nodeId_, inputIndex);
+    if (!inputNodeLink) return nullptr;
+    return &networkManager_.getNode(inputNodeLink->sourceNode);
 }
 
 floatT nt::CookContext::getFrame() const

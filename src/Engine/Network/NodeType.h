@@ -53,6 +53,16 @@ struct NodeType
 
     unsigned int maxOutputs = 1;
 
+    /**
+     * @brief Whether the cook cache may keep what this node produces.
+     *
+     * A node turns it off with `cache: false` in its node.yaml when a cook depends on something the
+     * cache cannot see (a file that changes on disk, a clock, the state of the machine): a cook
+     * answered from the cache would then differ from a fresh one. What is wired after such a node
+     * is left out of the cache too, while the node moves with the time.
+     */
+    bool cacheable = true;
+
     /// @brief The words the tab menu searches on, such as "curve" or "primitive".
     std::vector<std::string> tags;
 

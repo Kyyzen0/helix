@@ -76,6 +76,9 @@ struct HelixCommands: Commands {
             Divider()
             Toggle("Loop", isOn: $loop)
             Toggle("Play Every Frame", isOn: $everyFrame)
+            Divider()
+            Button("Clear Cook Cache") { document?.clearCookCache() }
+                .disabled(document == nil || document?.isActive != true)
         }
         CommandMenu("Node") {
             Button("Add Node…") { document?.editor.openPalette() }

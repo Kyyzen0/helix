@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Core/Path.h"
 #include "Engine/Core/Types.h"
+#include "Engine/Network/CookCache.h"
 #include "Engine/Network/CookContext.h"
 #include "Engine/Network/NodePacket.h"
 #include "Engine/Network/NodeType.h"
@@ -163,6 +164,37 @@ class Node
     /// scene is restored cannot be mistaken for the one it replaces.
     std::uint64_t getCookGeneration() const { return cookGeneration_.load(std::memory_order_relaxed); }
 
+    /// @brief What the cook cache knows about the node after its last cook.
+    struct CacheState
+    {
+        /// @brief Whether the node moves with the scene time: it reads the time, one of its
+        /// parameters does, or something wired into it does.
+        bool varying = false;
+
+        /// @brief Whether what the node produces can be filed in the cache: its type allows it
+        /// and so does everything that feeds it while that moves with the time.
+        bool cacheable = true;
+    };
+
+    /// @brief Returns what the cook cache knows about the node after its last cook.
+    CacheState getCacheState() const
+    {
+        return CacheState{
+            cacheVarying_.load(std::memory_order_relaxed),
+            cacheCacheable_.load(std::memory_order_relaxed)};
+    }
+
+    /// @brief Returns whether the last cook of the node read the scene time.
+    bool readsTime() const { return readsTime_.load(std::memory_order_relaxed); }
+
+    /// @brief Notes that the cook read the scene time. Called by the cook context.
+    void noteReadsTime() { readsTime_.store(true, std::memory_order_relaxed); }
+
+    /// @brief Returns the key of everything this cook depends on except the frame, or zero when
+    /// the cook is not using the cook cache.
+    /// @note Only meaningful while the node cooks. A solver files its saved states under it.
+    std::uint64_t getCookStateKey() const { return cookStateKey_.load(std::memory_order_relaxed); }
+
     /// @brief Returns whether the node takes any input at all.
     bool takesInput() const;
 
@@ -182,7 +214,28 @@ class Node
     boost::signals2::signal<void(const std::string& parmName)> parameterChanged;
 
   private:
+    friend class CookCacheAttempt;
+
     void initParameters();
+
+    /// @brief Gives the node the outputs and the warnings of a cook the cache kept.
+    void restoreCachedCook(const CachedCook& cook);
+
+    /// @brief Returns what every output holds.
+    std::vector<std::shared_ptr<const helix::NodePacket>> getOutputPackets() const
+    {
+        return outputPackets_;
+    }
+
+    /// @brief Marks the node cooked: it is clean, and it has a new cook generation.
+    void finishCook();
+
+    /// @brief Records what the cook cache knows about the node.
+    void setCacheState(CacheState state)
+    {
+        cacheVarying_.store(state.varying, std::memory_order_relaxed);
+        cacheCacheable_.store(state.cacheable, std::memory_order_relaxed);
+    }
 
     /// @brief Forgets the error and the warnings, which describe a cook that is over.
     void clearDiagnostics();
@@ -204,6 +257,11 @@ class Node
     mutable std::mutex diagnosticsMutex_;
     // The mark of the last cook, see getCookGeneration. Atomic since a worker thread cooks.
     std::atomic<std::uint64_t> cookGeneration_{0};
+    // Whether the last cook read the scene time, and what the cook cache knows from it.
+    std::atomic<bool> readsTime_{false};
+    std::atomic<bool> cacheVarying_{false};
+    std::atomic<bool> cacheCacheable_{true};
+    std::atomic<std::uint64_t> cookStateKey_{0};
     std::string error_;
     std::vector<std::string> warnings_;
     helix::nt::NodeId nodeId_;

@@ -47,6 +47,9 @@ protocol TimelineEditing: AnyObject {
     func readTime() -> TimelineTime
     /// The keys of a node, or of nothing when the node is nil.
     func loadKeys(node: UInt64?) -> [TimelineKey]
+    /// The whole frames the cook cache holds a cook of the displayed node for, which the bar under
+    /// the ruler shows. Reading it never cooks.
+    func loadCachedFrames() -> [Int]
     /// Moves the playhead. The viewport, the inspector and the spreadsheet follow it.
     func moveToFrame(_ frame: Double)
     func setRange(start: Int, end: Int) -> EditOutcome
@@ -67,6 +70,9 @@ final class TimelineModel: ObservableObject {
     @Published private(set) var time = TimelineTime()
     @Published private(set) var isPlaying = false
     @Published private(set) var diamonds: [TimelineDiamond] = []
+    /// The frames the cook cache holds a cook of the displayed node for, as runs of frames. They
+    /// are the thin bar under the ticks: a frame in it is shown without a cook.
+    @Published private(set) var cachedRuns: [ClosedRange<Int>] = []
     /// How playback is going, such as "24 fps · 18 shown". Nil when it is not playing.
     @Published private(set) var meterText: String?
     /// A refusal of the engine, to show beside the fields until the next edit.
@@ -88,6 +94,11 @@ final class TimelineModel: ObservableObject {
     private var meter = PlaybackMeter()
     private var timer: Timer?
     private var lastMeterUpdate = 0.0
+    // The frames shown since the bar of cached frames was read, which playback reads again every
+    // few of.
+    private var framesSinceCacheRead = 0
+    /// How many frames playback shows between two readings of the cached frames.
+    static let cacheReadInterval = 12
 
     nonisolated init() {}
 
@@ -98,12 +109,22 @@ final class TimelineModel: ObservableObject {
         guard let editing else { return }
         time = editing.readTime()
         diamonds = TimelineKeys.merge(editing.loadKeys(node: keyNode))
+        refreshCache()
     }
 
     func setKeyNode(_ node: UInt64?) {
         keyNode = node
         guard let editing else { return }
         diamonds = TimelineKeys.merge(editing.loadKeys(node: node))
+        refreshCache()
+    }
+
+    /// Reads the cached frames again, which a cook, an edit or a new display node changes.
+    func refreshCache() {
+        guard let editing else { return }
+        framesSinceCacheRead = 0
+        let runs = TimelineCache.runs(of: editing.loadCachedFrames())
+        if runs != cachedRuns { cachedRuns = runs }
     }
 
     /// Reads only the time, which is all a frame of playback changes.
@@ -119,6 +140,7 @@ final class TimelineModel: ObservableObject {
     func scrub(to frame: Int) {
         pause()
         goTo(Double(frame))
+        refreshCache()
     }
 
     private func goTo(_ frame: Double) {
@@ -174,6 +196,7 @@ final class TimelineModel: ObservableObject {
         meterText = nil
         meter.reset()
         editing?.playbackChanged(isPlaying: false)
+        refreshCache()
     }
 
     private func configureClock() {
@@ -203,6 +226,10 @@ final class TimelineModel: ObservableObject {
         if step.advanced > 0 {
             goTo(Double(step.frame))
             meter.recordShown(at: now())
+            // Reading the frames at every one would be a lookup at every frame of a cook, so the
+            // bar catches up every few frames, and when playback stops.
+            framesSinceCacheRead += step.advanced
+            if framesSinceCacheRead >= Self.cacheReadInterval { refreshCache() }
         }
         if step.stopped {
             pause()

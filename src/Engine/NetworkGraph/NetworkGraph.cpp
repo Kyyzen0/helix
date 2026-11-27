@@ -122,9 +122,23 @@ void NetworkGraph::eraseUnit_(CapturedMap& map, const Unit& key, const Unit& val
 void NetworkGraph::setTimeDependent(const Unit& dependent, bool dependsOnTime)
 {
     if (dependsOnTime)
-        timeDependents_.insert(dependent);
-    else
-        timeDependents_.erase(dependent);
+    {
+        if (timeDependents_.insert(dependent).second && dependent.isParameter())
+            ++timeParameterCounts_[dependent.nodeId];
+        return;
+    }
+
+    if (timeDependents_.erase(dependent) > 0 && dependent.isParameter())
+    {
+        auto count = timeParameterCounts_.find(dependent.nodeId);
+        if (count != timeParameterCounts_.end() && --count->second == 0)
+            timeParameterCounts_.erase(count);
+    }
+}
+
+bool NetworkGraph::hasTimeDependentParameter(NodeId nodeId) const
+{
+    return timeParameterCounts_.count(nodeId) > 0;
 }
 
 std::vector<Unit> NetworkGraph::getTimeDependents() const
@@ -146,6 +160,7 @@ void NetworkGraph::removeNode(NodeId nodeId)
     eraseCapturedTouching_(capturedDependents_, nodeId);
     eraseCapturedTouching_(capturedDependencies_, nodeId);
     std::erase_if(timeDependents_, [nodeId](const Unit& unit) { return unit.nodeId == nodeId; });
+    timeParameterCounts_.erase(nodeId);
 }
 
 void NetworkGraph::eraseNodeLinksTouching_(NodeLinkMap& side, NodeId nodeId)
@@ -212,6 +227,7 @@ void NetworkGraph::clear()
     capturedDependents_.clear();
     capturedDependencies_.clear();
     timeDependents_.clear();
+    timeParameterCounts_.clear();
 }
 
 std::vector<NodeId> NetworkGraph::getCookOrder(NodeId target) const

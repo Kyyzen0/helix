@@ -9,6 +9,7 @@
 #include "Engine/Network/UpdateLock.h"
 #include "Engine/NetworkGraph/NetworkGraph.h"
 #include "Engine/UndoRedo/UndoStack.h"
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -512,6 +513,11 @@ class NetworkManager
     floatT fps_ = 24;
 
     UndoStack undoStack_;
+
+    // Set while the scene moves to another frame. A node that is dirtied then follows the frame
+    // (a keyframe writes its value into a parameter, say), which is not an edit, so what the cook
+    // cache holds for it stays valid.
+    std::atomic<bool> timeChangeInProgress_{false};
 
     // The pool the background cooks run on, built the first time it is needed.
     std::unique_ptr<async::CookScheduler> cookSchedulerPtr_;
