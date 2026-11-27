@@ -62,7 +62,7 @@ struct WelcomeView: View {
         }
         .buttonStyle(.borderedProminent)
         Button {
-            document.editor.openPalette()
+            document.showNodePalette()
         } label: {
             WelcomeButtonLabel(title: LocalizedStringKey("Add a Node…"), symbol: "plus.square", shortcut: "⌘K")
         }

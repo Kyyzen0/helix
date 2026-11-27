@@ -104,7 +104,7 @@ struct HelixCommands: Commands {
                 .disabled(document == nil || document?.isActive != true)
         }
         CommandMenu("Add") {
-            Button("Add Node…") { document?.editor.openPalette() }
+            Button("Add Node…") { document?.showNodePalette() }
                 .keyboardShortcut("k", modifiers: .command)
                 .disabled(document == nil || document?.isActive != true)
             Divider()

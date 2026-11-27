@@ -314,11 +314,22 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         viewport.requestFrame()
     }
 
-    /// Whether this is a new scene nothing was done to: no file behind it and no node. Another
+    /// Whether this is a new scene nothing was done to: no file behind it, no node, and no change
+    /// at all — an edit that adds no node (the frame range, the frame rate) counts, so it is
+    /// checked through the engine's modified flag rather than the node count alone. Another
     /// scene that is opened takes the engine from it (see `EngineHost.claim`), and its window
     /// closes, as the empty untitled window of any document app does when a file is opened.
     var isPristineUntitled: Bool {
         isActive && fileContents == nil && importURL == nil && editor.graph.nodes.isEmpty
+            && !helix.core.isSceneModified()
+    }
+
+    /// Opens the node palette. Only the node editor presents it, so the lower pane switches to
+    /// the network first: from the spreadsheet, the welcome screen or the Add menu would
+    /// otherwise open a palette nobody sees.
+    func showNodePalette() {
+        UserDefaults.standard.set(TimelineSetting.LowerPane.network.rawValue, forKey: TimelineSetting.lowerPaneKey)
+        editor.openPalette()
     }
 
     /// Set when a scene that was opened took the engine from this empty one.

@@ -193,7 +193,7 @@ struct AddMenu: View {
             Button { document.chooseFileToImport() } label: {
                 Label("Import a 3D Model…", systemImage: "square.and.arrow.down")
             }
-            Button { document.editor.openPalette() } label: {
+            Button { document.showNodePalette() } label: {
                 Label("Add Node…", systemImage: "magnifyingglass")
             }
         } label: {
