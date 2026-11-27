@@ -72,7 +72,6 @@ void nt::Node::initParameters()
         parameter->valueChanged.connect([this, name = templateEntry.getName()]() {
             onParameterChanged(name);
         });
-        IC(parameter);
         parameters_.push_back(parameter);
     };
 
@@ -83,6 +82,9 @@ void nt::Node::initParameters()
 void nt::Node::dirtyNode(bool dirtyDescendents)
 {
     dirty_ = true;
+    // What the node said about its last cook is out of date once it is dirty. Leaving it would
+    // show an error for a value that has since been corrected, on a node nothing cooks again.
+    clearDiagnostics();
     nodeDirtied(nodeId_, dirtyDescendents);
 }
 
@@ -98,11 +100,68 @@ void nt::Node::cook(nt::CookContext& context)
 {
     if (!dirty_) return;
 
-    // The implementation lives only as long as the cook, so nothing it holds
-    // can survive into the next one.
-    const std::unique_ptr<nt::NodeImpl> implementation(nodeType_.ctorFunc(*this, context));
-    implementation->cook();
+    clearDiagnostics();
+    // An output the implementation does not set stays an empty packet (see NodeImpl::cook), so
+    // it must not keep what an older cook put there.
+    resetOutputPackets();
+
+    try
+    {
+        // The implementation lives only as long as the cook, so nothing it holds
+        // can survive into the next one.
+        const std::unique_ptr<nt::NodeImpl> implementation(nodeType_.ctorFunc(*this, context));
+        implementation->cook();
+    }
+    catch (const std::exception& error)
+    {
+        // A node that fails is reported on that node, and the rest of the scene keeps working.
+        const std::string message = error.what();
+        recordError(message.empty() ? "The node failed without a message." : message);
+        resetOutputPackets();
+    }
+    catch (...)
+    {
+        recordError("The node failed without a message.");
+        resetOutputPackets();
+    }
     dirty_ = false;
+}
+
+std::string nt::Node::getError() const
+{
+    const std::lock_guard<std::mutex> lock(diagnosticsMutex_);
+    return error_;
+}
+
+std::vector<std::string> nt::Node::getWarnings() const
+{
+    const std::lock_guard<std::mutex> lock(diagnosticsMutex_);
+    return warnings_;
+}
+
+void nt::Node::recordError(std::string error)
+{
+    const std::lock_guard<std::mutex> lock(diagnosticsMutex_);
+    if (error_.empty()) error_ = std::move(error);
+}
+
+void nt::Node::recordWarning(std::string warning)
+{
+    const std::lock_guard<std::mutex> lock(diagnosticsMutex_);
+    warnings_.push_back(std::move(warning));
+}
+
+void nt::Node::clearDiagnostics()
+{
+    const std::lock_guard<std::mutex> lock(diagnosticsMutex_);
+    error_.clear();
+    warnings_.clear();
+}
+
+void nt::Node::resetOutputPackets()
+{
+    for (auto& packet : outputPackets_)
+        packet = std::make_shared<const NodePacket>();
 }
 
 std::shared_ptr<const NodePacket> nt::Node::getOutputPacket(unsigned outputIndex) const
@@ -179,6 +238,16 @@ bool nt::Node::isParameterHidden(std::string_view parmName)
 
     // Hidden only while its hide comparison is true.
     return isComparisonTrue(parameter.lock()->getTemplate().getHideCondition());
+}
+
+bool nt::Node::isTemplateHidden(const prm::Template& templateEntry)
+{
+    return isComparisonTrue(templateEntry.getHideCondition());
+}
+
+bool nt::Node::isTemplateEnabled(const prm::Template& templateEntry)
+{
+    return !isComparisonTrue(templateEntry.getDisableCondition());
 }
 
 std::optional<std::string> nt::Node::getReferencedValue(const std::string& text)

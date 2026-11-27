@@ -18,6 +18,7 @@ struct HelixCommands: Commands {
     @FocusedObject private var document: HelixDocument?
     @AppStorage(WireframeSetting.defaultsKey) private var wireframe = WireframeSetting.auto
     @AppStorage(MaterialsSetting.defaultsKey) private var materialsVisible = true
+    @AppStorage(InspectorSetting.defaultsKey) private var inspectorShown = true
 
     var body: some Commands {
         CommandGroup(replacing: .appInfo) {
@@ -41,6 +42,11 @@ struct HelixCommands: Commands {
             }
             Button("Cycle Wireframe") { wireframeBinding.wrappedValue = wireframe.next }
             Toggle("Materials", isOn: materialsBinding)
+            // Command and option keep the shortcut out of the way of text fields, which take
+            // the plain keys.
+            Button(inspectorShown ? "Hide Inspector" : "Show Inspector") { inspectorShown.toggle() }
+                .keyboardShortcut("i", modifiers: [.command, .option])
+                .disabled(document == nil)
         }
         CommandMenu("Node") {
             Button("Add Node…") { document?.editor.openPalette() }

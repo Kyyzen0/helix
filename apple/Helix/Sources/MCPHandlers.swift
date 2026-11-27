@@ -97,6 +97,16 @@ enum MCPHandlers {
         let nodeEntries: [JSONValue] = nodes.map { info in
             var entry = identity(info)
             entry = .object((entry.object ?? [:]).merging(["x": .init(info.x), "y": .init(info.y)]) { $1 })
+            // A node says why its last cook failed, and what it warned about, when it has
+            // something to say. A node nothing has cooked yet has no verdict.
+            if !info.error.empty(), var fields = entry.object {
+                fields["error"] = .string(String(engine: info.error))
+                entry = .object(fields)
+            }
+            if !info.warnings.empty(), var fields = entry.object {
+                fields["warnings"] = .array(info.warnings.map { .string(String(engine: $0)) })
+                entry = .object(fields)
+            }
             return entry
         }
         let linkEntries: [JSONValue] = Array(helix.core.listLinks()).map { link in
@@ -280,32 +290,160 @@ enum MCPHandlers {
         return values.count == 1 ? values[0] : .array(values)
     }
 
-    static func listParameters(_ arguments: Arguments) throws -> MCPToolOutput {
-        let node = try resolve(arguments.values["node"])
-        let entries: [JSONValue] = Array(helix.core.listParameters(node.id)).map { info in
-            [
-                "name": .string(String(engine: info.name)),
-                "label": .string(String(engine: info.label)),
-                "type": .string(typeName(info.type)),
-                "components": .int(Int64(info.componentCount)),
-                "value": readParameter(node.id, info),
-            ]
-        }
-        return .data(["node": identity(node), "parameters": .array(entries)])
+    /// A per component list as one JSON value: the element for one component, or an array.
+    private static func perComponent(_ values: [JSONValue]) -> JSONValue {
+        values.count == 1 ? values[0] : .array(values)
     }
 
-    static func setParameter(_ arguments: Arguments) throws -> MCPToolOutput {
-        let node = try resolve(arguments.values["node"])
-        let name = try arguments.requiredString("parameter")
-        guard let value = arguments.value("value") else { throw MCPToolError("The argument 'value' is required.") }
-        let component = try arguments.integer("component")
+    private static func describeParameter(_ node: helix.core.NodeId, _ info: helix.core.ParameterInfo) -> JSONValue {
+        var entry: [String: JSONValue] = [
+            "name": .string(String(engine: info.name)),
+            "label": .string(String(engine: info.label)),
+            "type": .string(typeName(info.type)),
+            "components": .int(Int64(info.componentCount)),
+            "value": readParameter(node, info),
+            "hidden": .bool(info.hidden),
+            "enabled": .bool(info.enabled),
+        ]
+        if !info.tooltip.empty() { entry["tooltip"] = .string(String(engine: info.tooltip)) }
+        if !info.style.empty() { entry["style"] = .string(String(engine: info.style)) }
+        if !info.group.empty() { entry["group"] = .string(String(engine: info.group)) }
+        if info.hasRange {
+            entry["range"] = [
+                "min": .init(info.rangeMin), "max": .init(info.rangeMax),
+                "min_locked": .bool(info.minLocked), "max_locked": .bool(info.maxLocked),
+            ]
+        }
+        if !info.options.empty() {
+            entry["options"] = .array(info.options.map {
+                ["value": .string(String(engine: $0.value)), "label": .string(String(engine: $0.label))]
+            })
+        }
+        switch info.type {
+        case .Float: entry["default"] = perComponent(info.defaultFloats.map { .init($0) })
+        case .Int: entry["default"] = perComponent(info.defaultInts.map { .int($0) })
+        case .Toggle: entry["default"] = perComponent(info.defaultInts.map { .bool($0 != 0) })
+        case .String, .Dropdown: entry["default"] = perComponent(info.defaultStrings.map { .string(String(engine: $0)) })
+        default: break
+        }
+        // An expression is the text that drives a component, null where there is none. Its error
+        // says why it reads as zero.
+        let expressions = info.expressions.map { String(engine: $0) }
+        if expressions.contains(where: { !$0.isEmpty }) {
+            entry["expression"] = perComponent(expressions.map { $0.isEmpty ? .null : .string($0) })
+            let errors = info.expressionErrors.map { String(engine: $0) }
+            if errors.contains(where: { !$0.isEmpty }) {
+                entry["expression_error"] = perComponent(errors.map { $0.isEmpty ? .null : .string($0) })
+            }
+        }
+        if !info.animatedComponents.empty() {
+            entry["animated"] = .array(info.animatedComponents.map { .int(Int64($0)) })
+        }
+        if info.type == .Ramp {
+            let ramp = helix.core.getRamp(node, info.name)
+            entry["points"] = .array(ramp.points.map {
+                [
+                    "position": .init($0.position), "value": .init($0.value),
+                    "interpolation": .string(String(engine: $0.interpolation)),
+                ]
+            })
+            entry["interpolations"] = .array(ramp.interpolations.map { .string(String(engine: $0.value)) })
+        }
+        return .object(entry)
+    }
 
+    static func listParameters(_ arguments: Arguments) throws -> MCPToolOutput {
+        let node = try resolve(arguments.values["node"])
+        let entries = Array(helix.core.listParameters(node.id)).map { describeParameter(node.id, $0) }
+        // The order the parameters are shown in, with the groups and headings between them.
+        let layout: [JSONValue] = Array(helix.core.listParameterLayout(node.id)).map { item in
+            var fields: [String: JSONValue] = ["name": .string(String(engine: item.name))]
+            switch item.kind {
+            case .Parameter: fields["kind"] = "parameter"
+            case .GroupBegin: fields["kind"] = "group_begin"
+            case .GroupEnd: fields["kind"] = "group_end"
+            case .Divider: fields["kind"] = "divider"
+            @unknown default: fields["kind"] = "parameter"
+            }
+            if !item.label.empty() { fields["label"] = .string(String(engine: item.label)) }
+            fields["hidden"] = .bool(item.hidden)
+            return .object(fields)
+        }
+        return .data(["node": identity(node), "parameters": .array(entries), "layout": .array(layout)])
+    }
+
+    private static func findParameterInfo(_ node: helix.core.NodeInfo, _ name: String) throws -> helix.core.ParameterInfo {
         let parameters = Array(helix.core.listParameters(node.id))
         guard let info = parameters.first(where: { String(engine: $0.name) == name }) else {
             let known = parameters.map { String(engine: $0.name) }.joined(separator: ", ")
             throw MCPToolError("The node '\(String(engine: node.name))' has no parameter '\(name)'. Its parameters: \(known).")
         }
+        return info
+    }
+
+    /// What a parameter reads back after it was written: its value, and its expression if it has one.
+    private static func parameterResult(_ node: helix.core.NodeInfo, _ name: String) throws -> MCPToolOutput {
+        let info = try findParameterInfo(node, name)
+        var result = describeParameter(node.id, info).object ?? [:]
+        // The identity and the name are given the way every parameter result gives them.
+        for key in ["label", "components", "hidden", "enabled", "tooltip", "style", "group", "range", "options", "default"] {
+            result[key] = nil
+        }
+        result["node"] = identity(node)
+        result["parameter"] = .string(name)
+        result["name"] = nil
+        return .data(.object(result))
+    }
+
+    private static func ramp(from value: JSONValue, parameter name: String) throws -> [helix.core.RampPoint] {
+        guard let list = value.array, list.allSatisfy({ $0.object != nil }) else {
+            throw MCPToolError(
+                "The ramp '\(name)' takes an array of points, each {position, value, interpolation}, with the interpolation constant, linear or bspline."
+            )
+        }
+        return try list.map { item in
+            guard let fields = item.object, let position = fields["position"]?.number, let number = fields["value"]?.number else {
+                throw MCPToolError("Every point of the ramp '\(name)' needs a numeric position and value.")
+            }
+            var point = helix.core.RampPoint()
+            point.position = Float(position)
+            point.value = Float(number)
+            if let interpolation = fields["interpolation"] {
+                guard let text = interpolation.string else { throw MCPToolError("The interpolation of a ramp point is a string.") }
+                point.interpolation = std.string(text)
+            }
+            return point
+        }
+    }
+
+    static func setParameter(_ arguments: Arguments) throws -> MCPToolOutput {
+        let node = try resolve(arguments.values["node"])
+        let name = try arguments.requiredString("parameter")
+        let component = try arguments.integer("component")
+        let info = try findParameterInfo(node, name)
         let count = Int(info.componentCount)
+
+        if let expression = try arguments.string("expression") {
+            guard !arguments.has("value") else { throw MCPToolError("Give either a value or an expression, not both.") }
+            let index = component ?? (count == 1 ? 0 : nil)
+            guard let index else {
+                throw MCPToolError("The parameter '\(name)' holds \(count) values: give the component the expression drives.")
+            }
+            guard index >= 0, index < Int64(count) else {
+                throw MCPToolError("Component \(index) is out of range, the parameter holds \(count).")
+            }
+            try check(helix.core.setExpression(node.id, std.string(name), UInt32(index), std.string(expression)))
+            return try parameterResult(node, name)
+        }
+
+        guard let value = arguments.value("value") else { throw MCPToolError("Give a 'value' or an 'expression'.") }
+
+        if info.type == .Ramp {
+            var points = helix.core.RampPointList()
+            for point in try ramp(from: value, parameter: name) { points.push_back(point) }
+            try check(helix.core.setRamp(node.id, std.string(name), points))
+            return try parameterResult(node, name)
+        }
 
         // One value per component, in order: an array gives them all, a single value gives one.
         var assignments: [(component: Int, value: JSONValue)] = []
@@ -362,11 +500,15 @@ enum MCPHandlers {
             throw MCPToolError("The parameter '\(name)' is a \(typeName(info.type)), which cannot be set from here.")
         }
 
-        return .data([
-            "node": identity(node),
-            "parameter": .string(name),
-            "value": readParameter(node.id, info),
-        ])
+        return try parameterResult(node, name)
+    }
+
+    static func resetParameter(_ arguments: Arguments) throws -> MCPToolOutput {
+        let node = try resolve(arguments.values["node"])
+        let name = try arguments.requiredString("parameter")
+        _ = try findParameterInfo(node, name)
+        try check(helix.core.resetParameter(node.id, std.string(name)))
+        return try parameterResult(node, name)
     }
 
     // MARK: Import and time

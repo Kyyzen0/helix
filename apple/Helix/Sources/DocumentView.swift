@@ -7,6 +7,8 @@ struct DocumentView: View {
     @ObservedObject var document: HelixDocument
     @Environment(\.dismiss) private var dismiss
     @Environment(\.undoManager) private var undoManager
+    /// Whether the inspector column is shown. Kept across launches, and shared with the menu.
+    @AppStorage(InspectorSetting.defaultsKey) private var inspectorShown = true
 
     var body: some View {
         VSplitView {
@@ -29,6 +31,10 @@ struct DocumentView: View {
                 .frame(minHeight: 120, idealHeight: 260)
         }
         .frame(minWidth: 480, minHeight: 440)
+        .inspector(isPresented: $inspectorShown) {
+            InspectorView(model: document.inspector)
+                .inspectorColumnWidth(min: 280, ideal: 320, max: 460)
+        }
         // The window's undo manager takes the steps of the node editor, and marks the document
         // as edited when it gets one.
         .onAppear { document.undoManager = undoManager }
@@ -68,6 +74,14 @@ struct DocumentView: View {
                 }
                 .disabled(!document.isActive)
                 .help("Add a node (Tab in the node editor, ⌘K)")
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    inspectorShown.toggle()
+                } label: {
+                    Label("Inspector", systemImage: "sidebar.trailing")
+                }
+                .help("Show or hide the inspector (⌥⌘I)")
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {

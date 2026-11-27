@@ -47,12 +47,13 @@ class BOOST_SYMBOL_EXPORT NodeImpl
     virtual void cook() = 0;
 
   protected:
-    /// @brief Stops the cook and displays an error.
-    /// @todo Add visual error to GUI
+    /// @brief Records an error on the node, for a person or an agent to read (nt::Node::getError).
+    /// @note It does not stop the cook: it returns, and the node has to return after it, so the
+    /// outputs it did not set stay empty packets. Only the first error of a cook is kept.
+    /// Throwing an exception does the same, and the engine records its message.
     void throwError(std::string error);
 
-    /// @brief Displays a warning on the node without interrupting the cook.
-    /// @todo Add visual warning to GUI
+    /// @brief Records a warning on the node without interrupting the cook.
     void throwWarning(std::string warning);
 
     /// @brief Returns the id of the node being cooked.

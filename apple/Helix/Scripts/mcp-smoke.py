@@ -20,7 +20,7 @@ import threading
 EXPECTED_TOOLS = {
     "scene_info", "new_scene", "open_scene", "save_scene", "list_node_types", "create_node",
     "delete_node", "connect_nodes", "disconnect_nodes", "set_display_node", "list_parameters",
-    "set_parameter", "import_file", "set_frame", "geometry_summary", "read_attribute", "render_view",
+    "set_parameter", "reset_parameter", "import_file", "set_frame", "geometry_summary", "read_attribute", "render_view",
 }
 
 failures = []
@@ -143,6 +143,35 @@ def main(binary):
     check(value == [2.0, 4.0, 6.0], "set_parameter reads the vector back: %r" % (value,))
     value = server.data("set_parameter", {"node": cube["id"], "parameter": "size", "value": 8, "component": 0})["value"]
     check(value[0] == 8.0 and value[1] == 4.0, "set_parameter sets one component, by id")
+
+    # The inspector's view of a parameter: range, default, style, layout.
+    size = {p["name"]: p for p in server.data("list_parameters", {"node": "box"})["parameters"]}["size"]
+    check(size["default"] is not None and "range" in size and size["hidden"] is False and size["enabled"] is True,
+          "list_parameters gives default, range, hidden and enabled: %r" % (sorted(size),))
+    check(any(item["kind"] == "parameter" for item in server.data("list_parameters", {"node": "box"})["layout"]),
+          "list_parameters gives the layout")
+    result = server.data("set_parameter", {"node": "box", "parameter": "size", "component": 1, "expression": "2 + 3"})
+    check(result["expression"] == [None, "2 + 3", None] and result["value"][1] == 5.0, "set_parameter takes an expression: %r" % (result,))
+    result = server.data("set_parameter", {"node": "box", "parameter": "size", "component": 2, "expression": "2 +"})
+    check(result["expression_error"][2], "a broken expression is kept and says why")
+    check(server.call("set_parameter", {"node": "box", "parameter": "size", "value": 1, "expression": "1"})["isError"] is True,
+          "a value and an expression together are refused")
+    result = server.data("reset_parameter", {"node": "box", "parameter": "size"})
+    check("expression" not in result and "expression_error" not in result,
+          "reset_parameter takes the expressions off: %r" % (result,))
+    # A node that fails says so, and the failure names it.
+    server.data("create_node", {"type": "helix::attributeNoise", "name": "bad"})
+    server.data("connect_nodes", {"from": "box", "to": "bad"})
+    server.data("set_parameter", {"node": "bad", "parameter": "name", "value": ""})
+    failed = server.call("geometry_summary", {"node": "bad"})
+    check(failed["isError"] is True and "/bad: The attribute needs a name." in failed["content"][0]["text"],
+          "geometry_summary of a failed node is isError with the root cause")
+    bad = [n for n in server.data("scene_info")["nodes"] if n["name"] == "bad"][0]
+    check(bad.get("error") == "The attribute needs a name.", "scene_info carries the error of a node: %r" % (bad,))
+    server.data("delete_node", {"node": "bad"})
+    server.data("set_parameter", {"node": "box", "parameter": "size", "value": [2, 4, 6]})
+    server.data("set_parameter", {"node": "/box", "parameter": "size", "value": [2, 4, 6]})
+    server.data("set_parameter", {"node": cube["id"], "parameter": "size", "value": 8, "component": 0})
 
     check(server.call("geometry_summary")["isError"] is True, "geometry_summary with no display node is an error")
     server.data("set_display_node", {"node": "box"})

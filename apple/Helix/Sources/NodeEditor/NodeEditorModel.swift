@@ -116,6 +116,17 @@ final class NodeEditorModel: ObservableObject {
 
     nonisolated init() {}
 
+    // MARK: Diagnostics
+
+    /// The cards that carry an error or a warning, where they are in the view, with what to say
+    /// when the pointer rests on one.
+    func diagnosticAreas() -> [(rect: CGRect, text: String)] {
+        graph.nodes.compactMap { node in
+            guard let text = node.diagnosticText else { return nil }
+            return (transform.viewRect(EditorLayout.cardRect(at: displayPosition(of: node))), text)
+        }
+    }
+
     // MARK: Graph
 
     /// Takes the graph the engine holds now. The selection keeps what is still there. A graph

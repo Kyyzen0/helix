@@ -5,11 +5,17 @@
 
 namespace helix::nt {
 
-void NodeImpl::throwError(std::string error) { std::cerr << "NODE EXCEPTION: " << error << "\n"; }
+void NodeImpl::throwError(std::string error)
+{
+    // The line on standard error stays for whoever runs the engine from a terminal.
+    std::cerr << "NODE EXCEPTION: " << error << "\n";
+    node_.recordError(std::move(error));
+}
 
 void NodeImpl::throwWarning(std::string warning)
 {
     std::cerr << "NODE WARNING: " << warning << "\n";
+    node_.recordWarning(std::move(warning));
 }
 
 NodeId NodeImpl::getNodeId() const { return context_.getNodeId(); }

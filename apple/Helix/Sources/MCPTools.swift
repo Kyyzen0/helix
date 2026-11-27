@@ -46,7 +46,7 @@ enum MCPTools {
         [
             // The scene.
             tool("scene_info",
-                 "Lists the nodes, the links, the display node, the time and whether the scene has unsaved changes.",
+                 "Lists the nodes, the links, the display node, the time and whether the scene has unsaved changes. A node whose last cook failed carries 'error', and one that was warned carries 'warnings'; a node nothing has cooked has neither, so call geometry_summary on it to find out. geometry_summary and render_view fail with the message of the node that is the root cause.",
                  [:], readOnly: true, MCPHandlers.sceneInfo),
             tool("new_scene",
                  "Replaces the scene with an empty one. Refuses when there are unsaved changes unless discard_changes is true.",
@@ -101,16 +101,22 @@ enum MCPTools {
 
             // The parameters.
             tool("list_parameters",
-                 "Lists the parameters of a node with their type, number of components and current values.",
+                 "Lists the parameters of a node. Each has its label, type (float, int, string, toggle, dropdown, ramp, other for a heading), number of components, current value, the default, the range ({min, max, min_locked, max_locked}: a locked end is a limit, an unlocked end is only where a slider stops), the options of a dropdown ({value, label}), a tooltip, a style (xyz, rangeCircle, boolIcon, boolSwitch, attribute, code), the group it sits in, whether it is hidden or disabled now by the value of another parameter (hidden, enabled), the expression driving each component and why it fails (expression, expression_error), the components that hold keyframes (animated), and for a ramp its points. layout gives the order the parameters are shown in, with the groups and headings between them.",
                  ["node": nodeReference()],
                  required: ["node"], readOnly: true, MCPHandlers.listParameters),
             tool("set_parameter",
-                 "Sets a parameter of a node and returns the value read back, which the engine may have clamped. Give a number, an integer, a boolean or a string for one component, or an array for all of them, such as [1, 2, 3] for a vector.",
+                 "Sets a parameter of a node and returns what it reads back: the value, and the expression and its error if it has one. Give a number, an integer, a boolean or a string for one component, or an array for all of them, such as [1, 2, 3] for a vector. A value at a locked end of the range is held to it. A ramp takes an array of points {position, value, interpolation}. Give 'expression' (a daslang expression such as \"sin($F * 0.1)\") instead of 'value' to drive a component by it: the text is kept even when it does not compile, expression_error says why, and a broken expression reads as zero. Writing a value takes the expression off the component.",
                  ["node": nodeReference(),
                   "parameter": string("The name of the parameter, as list_parameters gives it."),
-                  "value": ["description": "A number, integer, boolean, string, or an array of them, one per component."],
-                  "component": integer("Which component a single value sets, 0 by default. Not used with an array.")],
-                 required: ["node", "parameter", "value"], idempotent: true, MCPHandlers.setParameter),
+                  "value": ["description": "A number, integer, boolean, string, or an array of them, one per component. For a ramp, an array of points."],
+                  "expression": string("An expression to drive the component, instead of a value."),
+                  "component": integer("Which component a single value or an expression sets, 0 by default. Not used with an array.")],
+                 required: ["node", "parameter"], idempotent: true, MCPHandlers.setParameter),
+            tool("reset_parameter",
+                 "Puts every component of a parameter back to its default, takes its expressions off, and returns what it reads back. A ramp goes back to its default points. Refused for a parameter that holds keyframes.",
+                 ["node": nodeReference(),
+                  "parameter": string("The name of the parameter, as list_parameters gives it.")],
+                 required: ["node", "parameter"], idempotent: true, MCPHandlers.resetParameter),
 
             // Import and time.
             tool("import_file",

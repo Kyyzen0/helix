@@ -1,0 +1,105 @@
+import CxxStdlib
+import Foundation
+import HelixCore
+
+/// The edits of the inspector, each one a step of undo, or part of one while a drag goes on.
+extension HelixDocument: InspectorEditing {
+    func loadInspector(node: UInt64) -> InspectorNode? {
+        guard isActive else { return nil }
+        return InspectorLoader.load(node: node)
+    }
+
+    func attributeSuggestions(node: UInt64, parameter: String) -> [String] {
+        guard isActive else { return [] }
+        let result = helix.core.listAttributeSuggestions(node, std.string(parameter))
+        // A node with nothing wired in, or whose input failed, has nothing to suggest, which
+        // is not worth an alert: the field takes any name.
+        guard result.status.ok else { return [] }
+        return result.names.map { String(engine: $0) }
+    }
+
+    func apply(_ edit: InspectorEdit, to node: UInt64, named name: String) -> EditOutcome {
+        performEdit(named: name) { write(edit, to: node) }
+    }
+
+    func applyLive(_ edit: InspectorEdit, to node: UInt64) -> EditOutcome {
+        guard isActive else { return .failed(String(localized: "This scene is closed.")) }
+        let outcome = write(edit, to: node)
+        if outcome.error == nil { cookGeometry() }
+        return outcome
+    }
+
+    // setDisplay(_:) is the node editor's, which the inspector shares.
+
+    // MARK: A drag as one step
+
+    func beginContinuousEdit(named name: String) {
+        guard isActive else { return }
+        let before = helix.core.captureScene()
+        // An edit that cannot be undone is not made, so a drag whose start cannot be kept does
+        // not start either: the live edits that follow are refused.
+        guard before.status.ok else { return }
+        continuousEdit.begin(named: name, before: String(engineBytes: before.data))
+    }
+
+    func endContinuousEdit() {
+        guard continuousEdit.isActive else { return }
+        let after = helix.core.captureScene()
+        let afterText = after.status.ok ? String(engineBytes: after.data) : nil
+        if let registration = continuousEdit.end(after: afterText), let afterText {
+            registerUndo(named: registration.name, restoring: registration.before, otherwise: afterText)
+        }
+        cookGeometry()
+        refreshEditor()
+    }
+
+    /// Puts the scene back as it was when the drag began, and registers nothing.
+    func cancelContinuousEdit() {
+        guard let before = continuousEdit.cancel() else { return }
+        let paths = selectedPathsBeforeRestore()
+        let status = helix.core.restoreScene(std.string(before))
+        if !status.ok { presentedError = String(engine: status.error) }
+        cookGeometry()
+        reselectAfterRestore(paths: paths)
+    }
+
+    // MARK: Writing
+
+    private func write(_ edit: InspectorEdit, to node: UInt64) -> EditOutcome {
+        func outcome(_ status: helix.core.Status) -> EditOutcome {
+            status.ok ? .done : .failed(String(engine: status.error))
+        }
+        switch edit {
+        case .floats(let parameter, let values):
+            for (component, value) in values.sorted(by: { $0.key < $1.key }) {
+                let status = helix.core.setFloat(node, std.string(parameter), UInt32(component), Float(value))
+                if !status.ok { return outcome(status) }
+            }
+            return .done
+        case .ints(let parameter, let values):
+            for (component, value) in values.sorted(by: { $0.key < $1.key }) {
+                let status = helix.core.setInt(node, std.string(parameter), UInt32(component), Int64(value))
+                if !status.ok { return outcome(status) }
+            }
+            return .done
+        case .string(let parameter, let component, let value):
+            return outcome(helix.core.setString(node, std.string(parameter), UInt32(component), std.string(value)))
+        case .ramp(let parameter, let points):
+            var list = helix.core.RampPointList()
+            for point in points {
+                var entry = helix.core.RampPoint()
+                entry.position = Float(point.position)
+                entry.value = Float(point.value)
+                entry.interpolation = std.string(point.interpolation)
+                list.push_back(entry)
+            }
+            return outcome(helix.core.setRamp(node, std.string(parameter), list))
+        case .setExpression(let parameter, let component, let text):
+            return outcome(helix.core.setExpression(node, std.string(parameter), UInt32(component), std.string(text)))
+        case .clearExpression(let parameter, let component):
+            return outcome(helix.core.clearExpression(node, std.string(parameter), UInt32(component)))
+        case .reset(let parameter):
+            return outcome(helix.core.resetParameter(node, std.string(parameter)))
+        }
+    }
+}

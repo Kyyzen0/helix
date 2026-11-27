@@ -1,5 +1,6 @@
 import CxxStdlib
 import AppKit
+import Combine
 import Foundation
 import HelixCore
 import SwiftUI
@@ -42,6 +43,15 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
 
     /// What the node editor of the window shows and does.
     let editor = NodeEditorModel()
+
+    /// What the inspector of the window shows and does: the parameters of the selected node.
+    let inspector = InspectorModel()
+
+    /// The drag in progress that is to become one step of undo, if there is one.
+    var continuousEdit = ContinuousEdit()
+
+    /// Keeps the inspector following the selection of the node editor.
+    var inspectorSubscription: AnyCancellable?
 
     /// The undo manager of the window, which the view hands over once it has one. Weak, since
     /// the window owns it and it holds no reference to the document.

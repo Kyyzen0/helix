@@ -156,7 +156,12 @@ struct NodeEditorPainter {
                 with: .color(accent)
             )
         }
-        context.stroke(shape, with: .color(selected ? accent : cardStroke), lineWidth: selected ? 2.5 : 1)
+        // A card whose node failed is outlined in red, selected or not: the selection shows in its
+        // fill and in the badge, since a failure must not be hidden by being picked.
+        let failed = node.error != nil
+        let outline: Color = failed ? .red : (selected ? accent : cardStroke)
+        context.stroke(shape, with: .color(outline), lineWidth: (selected || failed) ? 2.5 : 1)
+        paintBadge(of: node, in: card, &context)
 
         paintPorts(of: node, type: type, &context)
         guard zoom >= 0.3 else { return }
@@ -187,6 +192,21 @@ struct NodeEditorPainter {
                 in: CGRect(x: card.maxX - 8 * zoom - side, y: card.minY + 6 * zoom, width: side, height: side)
             )
         }
+    }
+
+    /// A red dot with a mark for a node that failed, a yellow one for a warning, at the bottom
+    /// right of the card where the display flag is not.
+    private func paintBadge(of node: EditorNode, in card: CGRect, _ context: inout GraphicsContext) {
+        guard zoom >= 0.3, node.error != nil || !node.warnings.isEmpty else { return }
+        let failed = node.error != nil
+        let radius = max(6.5 * zoom, 4)
+        let centre = CGPoint(x: card.maxX - radius - 4 * zoom, y: card.maxY - radius - 3 * zoom)
+        let circle = Path(ellipseIn: CGRect(x: centre.x - radius, y: centre.y - radius, width: radius * 2, height: radius * 2))
+        context.fill(circle, with: .color(failed ? .red : .yellow))
+        let mark = context.resolve(
+            Text("!").font(.system(size: max(radius * 1.35, 7), weight: .heavy)).foregroundColor(failed ? .white : .black)
+        )
+        context.draw(mark, at: centre)
     }
 
     /// The text cut short with an ellipsis when it does not fit.

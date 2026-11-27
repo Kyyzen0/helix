@@ -153,6 +153,12 @@ struct NodeInfo
     /// @brief Where the node sits in the network editor.
     float x = 0.f;
     float y = 0.f;
+    /// @brief Why the last cook of the node failed, in a sentence for a person. Empty when it
+    /// cooked cleanly, and also when it has not cooked since it last changed (a node nothing
+    /// displayed or asked for is not cooked, so it has no verdict yet).
+    std::string error;
+    /// @brief What the last cook of the node warned about. The cook went on in spite of it.
+    std::vector<std::string> warnings;
 };
 
 /// @brief One link, from the output of a node into the input of another.
@@ -318,7 +324,22 @@ enum class ParameterType : std::int32_t
     Other
 };
 
-/// @brief One parameter of a node.
+/// @brief One entry of a dropdown: the value the node stores, and the text a person reads.
+struct ParameterOption
+{
+    std::string value;
+    std::string label;
+};
+
+/// @brief One option of a parameter style, such as the icon of a boolIcon or the owners of an
+/// attribute.
+struct ParameterStyleOption
+{
+    std::string name;
+    std::string value;
+};
+
+/// @brief One parameter of a node, with everything a panel needs to edit it.
 struct ParameterInfo
 {
     /// @brief The name scripts and expressions use, such as "size".
@@ -328,6 +349,90 @@ struct ParameterInfo
     ParameterType type = ParameterType::Other;
     /// @brief How many values the parameter holds, three for a vector.
     std::uint32_t componentCount = 1;
+
+    /// @brief A sentence on what the parameter does. Empty when the node says nothing.
+    std::string tooltip;
+    /// @brief Longer documentation, empty when there is none.
+    std::string documentation;
+    /// @brief How the node asks for the parameter to be drawn: "" (the plain widget), "xyz",
+    /// "rangeCircle", "boolIcon", "boolSwitch", "attribute" or "code".
+    std::string style;
+    /// @brief The options the style carries, such as `icon` for boolIcon, `caption` and
+    /// `ordered` for rangeCircle, `owners` and `attributeTypes` for attribute.
+    std::vector<ParameterStyleOption> styleOptions;
+
+    /// @brief Whether a numeric parameter has a range, which every float and integer does (a
+    /// node that says nothing gets 0 to 10, with neither end locked).
+    bool hasRange = false;
+    /// @brief The range every component shares (a node.yaml gives one range to a parameter).
+    /// An unlocked end is where a slider stops, and a person may type past it. A locked end is a
+    /// limit: the engine pulls a value back to it.
+    float rangeMin = 0.f;
+    float rangeMax = 10.f;
+    bool minLocked = false;
+    bool maxLocked = false;
+
+    /// @brief What a dropdown offers, in order. Empty for any other parameter.
+    std::vector<ParameterOption> options;
+
+    /// @brief The defaults, one per component, in the list the type reads: floats for a float,
+    /// integers for an integer or a toggle, strings for a string or a dropdown (the stored value
+    /// of the option). The others are empty.
+    std::vector<float> defaultFloats;
+    std::vector<std::int64_t> defaultInts;
+    std::vector<std::string> defaultStrings;
+
+    /// @brief Whether the parameter, or a group around it, is hidden by its hide condition now.
+    bool hidden = false;
+    /// @brief Whether the parameter, and every group around it, is enabled by its disable
+    /// condition now. A disabled parameter is shown and cannot be edited.
+    bool enabled = true;
+    /// @brief Whether the label is left out because the widget carries its own.
+    bool labelHidden = false;
+    /// @brief The labels of the groups around the parameter, outermost first, joined with " / ".
+    /// Empty at the top level.
+    std::string group;
+
+    /// @brief The expression driving each component, one entry per component and an empty
+    /// string where there is none.
+    std::vector<std::string> expressions;
+    /// @brief What is wrong with each component's expression, an empty string where it is fine
+    /// or there is none. A broken expression reads as zero.
+    std::vector<std::string> expressionErrors;
+    /// @brief The components that hold keyframes, by index. Their value follows the timeline.
+    std::vector<std::uint32_t> animatedComponents;
+};
+
+/// @brief What an entry of the layout of a node's parameters is.
+enum class ParameterLayoutKind : std::int32_t
+{
+    /// @brief A parameter, named by `name`.
+    Parameter,
+    /// @brief The start of a group. Every entry up to its GroupEnd belongs to it.
+    GroupBegin,
+    GroupEnd,
+    /// @brief A heading between parameters.
+    Divider
+};
+
+/// @brief One entry of the order a node's parameters are shown in.
+struct ParameterLayoutItem
+{
+    ParameterLayoutKind kind = ParameterLayoutKind::Parameter;
+    /// @brief The parameter name, or the name of the group or divider.
+    std::string name;
+    /// @brief The text of a group or a divider, and the label of a parameter.
+    std::string label;
+    /// @brief The icon of a divider (a Lucide name such as "tag"), empty when there is none.
+    std::string icon;
+    /// @brief Whether a group lays its members out side by side (true) or one under the other.
+    bool horizontal = false;
+    /// @brief Whether a group shows its label beside its row instead of above it.
+    bool labelInline = false;
+    /// @brief Whether the entry, or a group around it, is hidden now.
+    bool hidden = false;
+    /// @brief Whether the entry, and every group around it, is enabled now.
+    bool enabled = true;
 };
 
 struct FloatValue
@@ -356,9 +461,17 @@ struct Vector3Value
     float z = 0.f;
 };
 
-/// @brief Returns the parameters of a node, in the order the node declares them. Empty for a
-/// node that does not exist.
+/// @brief Returns the parameters of a node, in the order the node declares them, with what a
+/// panel needs to edit each (range, options, defaults, expressions, whether it is hidden or
+/// enabled now). Empty for a node that does not exist.
+/// @note Groups are not parameters and are left out, a divider is listed as ParameterType::Other.
+/// The groups and the dividers are in listParameterLayout.
 std::vector<ParameterInfo> listParameters(NodeId node);
+
+/// @brief Returns the order a node's parameters are shown in: groups opened and closed, dividers
+/// and parameters, as the node declares them, with the hide and disable conditions evaluated now.
+/// @note Empty for a node that does not exist. The parameters are the names listParameters gives.
+std::vector<ParameterLayoutItem> listParameterLayout(NodeId node);
 
 /// @brief Reads one component of a float parameter.
 FloatValue getFloat(NodeId node, const std::string& parameter, std::uint32_t component);
@@ -379,6 +492,76 @@ Status
 setString(NodeId node, const std::string& parameter, std::uint32_t component, const std::string& value);
 /// @brief Writes a float parameter of three components.
 Status setVector3(NodeId node, const std::string& parameter, float x, float y, float z);
+
+/// @brief Makes a component read from a daslang expression, such as "sin($F * 0.1)".
+///
+/// The text is kept even when it does not compile, the way the Qt editor did: the person is
+/// typing, and what they typed is not thrown away. The status is therefore ok whenever the
+/// expression was stored, and what is wrong with it is read back from
+/// ParameterInfo::expressionErrors (a broken expression reads as zero, so the node is not left
+/// with an unreadable value). It fails for a parameter that takes no expression (a ramp, a
+/// divider), a component out of range, a component that holds keyframes (the timeline would
+/// overwrite the expression), an empty text (use clearExpression) and a text over 4096
+/// characters.
+Status setExpression(
+    NodeId node,
+    const std::string& parameter,
+    std::uint32_t component,
+    const std::string& expression
+);
+
+/// @brief Takes the expression off a component, which reads the literal it holds again.
+/// Succeeds when there was none.
+Status clearExpression(NodeId node, const std::string& parameter, std::uint32_t component);
+
+/// @brief Puts every component of a parameter back to the default the node declares, and takes
+/// its expressions off. A ramp goes back to its default points.
+/// @note Fails for a parameter that holds keyframes, which would only be overwritten again.
+Status resetParameter(NodeId node, const std::string& parameter);
+
+/// @brief One control point of a ramp.
+struct RampPoint
+{
+    /// @brief Where the point sits along the ramp, usually from 0 to 1.
+    float position = 0.f;
+    float value = 0.f;
+    /// @brief How the curve leaves the point: "constant", "linear" or "bspline".
+    std::string interpolation = "linear";
+};
+
+/// @brief A list of ramp points, which gives Swift a name for the vector it hands to setRamp.
+using RampPointList = std::vector<RampPoint>;
+
+/// @brief The points of a ramp parameter, in the order the node stores them.
+struct RampInfo
+{
+    Status status;
+    std::vector<RampPoint> points;
+    /// @brief The interpolations a point can take, in order.
+    std::vector<ParameterOption> interpolations;
+};
+
+/// @brief Reads a ramp parameter.
+RampInfo getRamp(NodeId node, const std::string& parameter);
+
+/// @brief Replaces the points of a ramp parameter.
+/// @note Needs between 2 and 64 points, finite positions and values, and interpolations getRamp
+/// lists: anything else is refused and the ramp is left as it was, since a ramp the sampler
+/// cannot read has to be an error here, not a changed point there.
+Status setRamp(NodeId node, const std::string& parameter, const std::vector<RampPoint>& points);
+
+/// @brief The names of the attributes a parameter of the `attribute` style can offer.
+struct AttributeNames
+{
+    Status status;
+    std::vector<std::string> names;
+};
+
+/// @brief Lists the attributes on the geometry wired into the node's first input that match the
+/// owners and the types the style of a parameter asks for, once each and sorted.
+/// @note Cooks the input if it is not cooked yet. Fails for a node that has no input wired or a
+/// parameter that is not of the attribute style.
+AttributeNames listAttributeSuggestions(NodeId node, const std::string& parameter);
 
 /** @} */
 
