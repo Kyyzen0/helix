@@ -3,7 +3,6 @@ import CxxStdlib
 import Foundation
 import HelixCore
 import UniformTypeIdentifiers
-import os
 
 /// The 3D file formats Helix imports, which is whatever the engine reads.
 ///
@@ -30,50 +29,5 @@ enum ImportFormats {
     /// Whether Helix imports this file, as opposed to opening it as a scene.
     static func canImport(_ url: URL) -> Bool {
         extensions.contains(url.pathExtension.lowercased())
-    }
-}
-
-/// The files that were opened as a 3D model and wait for the new scene that will hold them.
-///
-/// The system opens a file by asking for a document. A scene file is read by the document. A 3D
-/// file is not a Helix document: it becomes a new scene that imports it, and the document that
-/// makes that scene is created on a thread of SwiftUI's choosing, so the request is parked here.
-final class ImportRequests: Sendable {
-    static let shared = ImportRequests()
-
-    private let pending = OSAllocatedUnfairLock<[URL]>(initialState: [])
-
-    func push(_ url: URL) {
-        pending.withLock { $0.append(url) }
-    }
-
-    func pop() -> URL? {
-        pending.withLock { $0.isEmpty ? nil : $0.removeFirst() }
-    }
-}
-
-/// Opens a 3D file as a new untitled scene instead of as a document of its own.
-///
-/// It has to be created before SwiftUI makes its document controller, which is why `main.swift`
-/// makes one first: the first controller made is the shared one.
-@MainActor
-final class HelixDocumentController: NSDocumentController {
-    override func openDocument(
-        withContentsOf url: URL,
-        display displayDocument: Bool,
-        completionHandler: @escaping (NSDocument?, Bool, (any Error)?) -> Void
-    ) {
-        guard ImportFormats.canImport(url) else {
-            super.openDocument(withContentsOf: url, display: displayDocument, completionHandler: completionHandler)
-            return
-        }
-        ImportRequests.shared.push(url)
-        do {
-            let document = try openUntitledDocumentAndDisplay(displayDocument)
-            completionHandler(document, false, nil)
-        } catch {
-            _ = ImportRequests.shared.pop()
-            completionHandler(nil, false, error)
-        }
     }
 }

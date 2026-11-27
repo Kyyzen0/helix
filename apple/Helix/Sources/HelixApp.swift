@@ -5,13 +5,20 @@ import UniformTypeIdentifiers
 
 struct HelixApp: App {
     init() {
-        // The appearance of the theme chosen last time, before the first window opens.
-        ThemeAppearance.applyStored()
+        // The appearance of the theme chosen last time, before the first window opens. Not here
+        // and now: reading NSApplication.shared this early makes the application object before
+        // SwiftUI does, and SwiftUI then crashes setting up its document classes at launch. The
+        // will-finish-launching notice comes once SwiftUI has made it, and before any window.
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.willFinishLaunchingNotification, object: nil, queue: .main
+        ) { _ in
+            MainActor.assumeIsolated { ThemeAppearance.applyStored() }
+        }
     }
 
     var body: some Scene {
         DocumentGroup(newDocument: { HelixDocument() }) { file in
-            DocumentView(document: file.document)
+            DocumentView(document: file.document, fileURL: file.fileURL)
                 .focusedSceneObject(file.document)
                 .themed()
         }

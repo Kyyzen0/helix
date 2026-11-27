@@ -5,6 +5,8 @@ import UniformTypeIdentifiers
 /// The window of a document: the viewport over the node editor, with a toolbar.
 struct DocumentView: View {
     @ObservedObject var document: HelixDocument
+    /// Where the document's file is, nil for a scene that was never saved.
+    var fileURL: URL?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.undoManager) private var undoManager
     /// Whether the inspector column is shown. Kept across launches, and shared with the menu.
@@ -53,7 +55,10 @@ struct DocumentView: View {
             document.spreadsheet.isShown = pane == TimelineSetting.LowerPane.spreadsheet.rawValue
         }
         .onChange(of: undoManager) { _, manager in document.undoManager = manager }
-        .task { activate() }
+        .task {
+            activate()
+            document.finishOpening(fileURL: fileURL)
+        }
         // A 3D file dropped on the window is imported into the scene.
         .onDrop(of: [.fileURL], isTargeted: nil) { providers in
             guard document.isActive else { return false }
