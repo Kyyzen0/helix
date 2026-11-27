@@ -19,6 +19,9 @@ dist/
 *.tmp
 .probe-*
 build-probe*/
+# Sanitizer builds of the engine and the tests (AddressSanitizer, ThreadSanitizer).
+build-asan/
+build-tsan/
 # The symlink the build agent points at its own build tree.
 build-macos
 # Logs and scratch files a tool leaves in the tree.
