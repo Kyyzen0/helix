@@ -40,3 +40,6 @@ rn_a.txt
 xcuserdata/
 *.xcuserstate
 DerivedData/
+
+# Folder settings the macOS Finder writes.
+.DS_Store
