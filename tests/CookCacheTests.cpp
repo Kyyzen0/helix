@@ -490,6 +490,16 @@ implementation:
     REQUIRE(nt::NodeManifest::loadFromString(manifest + "cache: true\n").getNodeType().cacheable);
 }
 
+TEST_CASE("The geometry import stays out of the cache, since it reads files on disk", "[cookcache]")
+{
+    // A keyed import parameter would make the node vary with time; a cached frame would then skip
+    // the import's own check of the file and its dependencies and show an older version.
+    nt::NodeLoader::loadNodes();
+    const nt::NodeType* import = nt::NodeTypeTable::getNodeType("helix::geometryImport");
+    REQUIRE(import != nullptr);
+    REQUIRE_FALSE(import->cacheable);
+}
+
 TEST_CASE_METHOD(CacheReset, "A simulation resumed from a saved state is the same as one run from the first frame", "[cookcache]")
 {
     const Scene scene = buildScene();

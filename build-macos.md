@@ -382,7 +382,9 @@ simulation), when one of its parameters does (a keyframe, or an expression with 
 something wired into it does. Only those nodes are filed; what does not move with the time is already
 kept by the node itself, and filing every version of it while a slider is dragged would push out the
 frames that matter. A node whose `node.yaml` says `cache: false` is never filed, and nor is what is
-wired after it while it moves with the time. Nothing is kept of a cook that failed, and a cook on a
+wired after it while it moves with the time. `helix::geometryImport` says so: it reads files on
+disk, which the cache key does not see, so a keyed import parameter goes through the import cache's
+own check of the file and its dependencies at every frame. Nothing is kept of a cook that failed, and a cook on a
 worker thread of the background cook, which reads a snapshot of the network, does not use the cache.
 
 **The key.** A cook is filed under a 64 bit hash of everything it reads: the type of the node; the
