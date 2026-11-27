@@ -63,6 +63,28 @@
 		F739EA8BF6DFA06B70586198 /* InspectorSnapshotCommand.swift */ = {isa = PBXBuildFile; fileRef = 1FBFD9A3F44A6807C826589F /* InspectorSnapshotCommand.swift */; };
 		776B6D7CD1DEE5A3D8C1A72B /* HelixDocument+Inspector.swift */ = {isa = PBXBuildFile; fileRef = DF2882B61690998E4E7E4F6D /* HelixDocument+Inspector.swift */; };
 		EAC964D7B3DB9036687C6BC3 /* InspectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDAF0510D8421E7D0F36AC8 /* InspectorTests.swift */; };
+		BC7821A1D8B775F10724538C /* TimelineMath.swift */ = {isa = PBXBuildFile; fileRef = 6084237EBF782A39C4E00629 /* TimelineMath.swift */; };
+		14DF00644448C83D5D961173 /* TimelineMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6084237EBF782A39C4E00629 /* TimelineMath.swift */; };
+		B8E56733E8837520E25319D6 /* TimelineKeys.swift */ = {isa = PBXBuildFile; fileRef = 922A1D79D2A0DD1A1783CFFD /* TimelineKeys.swift */; };
+		B9627642D6CD747A0F7EDCFD /* TimelineKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922A1D79D2A0DD1A1783CFFD /* TimelineKeys.swift */; };
+		B60997DDBB84338821C63EE7 /* TimelineModel.swift */ = {isa = PBXBuildFile; fileRef = AB2A71986B9579E38B992B77 /* TimelineModel.swift */; };
+		D2A9EA24CD9C9C7DCB1ECFE2 /* TimelineModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2A71986B9579E38B992B77 /* TimelineModel.swift */; };
+		F1D2BB9BA052EA053EDA0691 /* TimelineBar.swift */ = {isa = PBXBuildFile; fileRef = 0763E4CE83FED9440E9A1720 /* TimelineBar.swift */; };
+		4E0BF46B4FDDE83C72269A76 /* TimelineBridge.swift */ = {isa = PBXBuildFile; fileRef = A8C3D0A202F6055515BE2D85 /* TimelineBridge.swift */; };
+		67DE8D44F473D13AF312775F /* TimelineSnapshotCommand.swift */ = {isa = PBXBuildFile; fileRef = DDC30C64301F1392D92EF728 /* TimelineSnapshotCommand.swift */; };
+		7725D2864DE7B9756446733D /* SpreadsheetData.swift */ = {isa = PBXBuildFile; fileRef = CDCAE5BC29953DF462403683 /* SpreadsheetData.swift */; };
+		AB0A4109400D60C307F37330 /* SpreadsheetData.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDCAE5BC29953DF462403683 /* SpreadsheetData.swift */; };
+		73E9875B6A471AC2481F6259 /* SpreadsheetModel.swift */ = {isa = PBXBuildFile; fileRef = FE86066298BFFADE6B0143D2 /* SpreadsheetModel.swift */; };
+		6A73A5D938DA7E19C6665A6F /* SpreadsheetModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE86066298BFFADE6B0143D2 /* SpreadsheetModel.swift */; };
+		38B73AE3EAE6783E538B2B67 /* SpreadsheetTable.swift */ = {isa = PBXBuildFile; fileRef = F2C7205F01E219A98F743652 /* SpreadsheetTable.swift */; };
+		C24AE958D5E53C4F5B1BDF9D /* SpreadsheetView.swift */ = {isa = PBXBuildFile; fileRef = 77061C17B125BBCFE178E352 /* SpreadsheetView.swift */; };
+		FC9BCC9D4841B3269393DA2D /* SpreadsheetBridge.swift */ = {isa = PBXBuildFile; fileRef = 5B5498A2917551D1F978EDCE /* SpreadsheetBridge.swift */; };
+		8D15E231BD55D8AAAA24E03A /* SpreadsheetSnapshotCommand.swift */ = {isa = PBXBuildFile; fileRef = 564AE8AD9240154969677DCF /* SpreadsheetSnapshotCommand.swift */; };
+		759E6B1A10FFF3DB994FDBF7 /* HelixDocument+Timeline.swift */ = {isa = PBXBuildFile; fileRef = 18FF823E6FF8F5FB40A89AE3 /* HelixDocument+Timeline.swift */; };
+		20AC52A64C274E856FFD6F76 /* MCPKeyframeHandlers.swift */ = {isa = PBXBuildFile; fileRef = 6108CA1E517EAA3666E470EF /* MCPKeyframeHandlers.swift */; };
+		456FC0A7AD9FB0164EEFDFD1 /* OffscreenRender.swift */ = {isa = PBXBuildFile; fileRef = ABE0D526DFEC1164CE9EB776 /* OffscreenRender.swift */; };
+		ECC499E7F03A1A0B45407D56 /* TimelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4296C9AEB8D4A12CA3A7B577 /* TimelineTests.swift */; };
+		C1DD6E33FF65E05BAD9C027B /* SpreadsheetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 440766BF689E8B73A699BD63 /* SpreadsheetTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -118,6 +140,23 @@
 		1FBFD9A3F44A6807C826589F /* InspectorSnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InspectorSnapshotCommand.swift; path = Sources/Inspector/InspectorSnapshotCommand.swift; sourceTree = "<group>"; };
 		DF2882B61690998E4E7E4F6D /* HelixDocument+Inspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Inspector.swift"; path = "Sources/HelixDocument+Inspector.swift"; sourceTree = "<group>"; };
 		DFDAF0510D8421E7D0F36AC8 /* InspectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InspectorTests.swift; path = Tests/InspectorTests.swift; sourceTree = "<group>"; };
+		6084237EBF782A39C4E00629 /* TimelineMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimelineMath.swift; path = Sources/Timeline/TimelineMath.swift; sourceTree = "<group>"; };
+		922A1D79D2A0DD1A1783CFFD /* TimelineKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimelineKeys.swift; path = Sources/Timeline/TimelineKeys.swift; sourceTree = "<group>"; };
+		AB2A71986B9579E38B992B77 /* TimelineModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimelineModel.swift; path = Sources/Timeline/TimelineModel.swift; sourceTree = "<group>"; };
+		0763E4CE83FED9440E9A1720 /* TimelineBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimelineBar.swift; path = Sources/Timeline/TimelineBar.swift; sourceTree = "<group>"; };
+		A8C3D0A202F6055515BE2D85 /* TimelineBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimelineBridge.swift; path = Sources/Timeline/TimelineBridge.swift; sourceTree = "<group>"; };
+		DDC30C64301F1392D92EF728 /* TimelineSnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimelineSnapshotCommand.swift; path = Sources/Timeline/TimelineSnapshotCommand.swift; sourceTree = "<group>"; };
+		CDCAE5BC29953DF462403683 /* SpreadsheetData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetData.swift; path = Sources/Spreadsheet/SpreadsheetData.swift; sourceTree = "<group>"; };
+		FE86066298BFFADE6B0143D2 /* SpreadsheetModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetModel.swift; path = Sources/Spreadsheet/SpreadsheetModel.swift; sourceTree = "<group>"; };
+		F2C7205F01E219A98F743652 /* SpreadsheetTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetTable.swift; path = Sources/Spreadsheet/SpreadsheetTable.swift; sourceTree = "<group>"; };
+		77061C17B125BBCFE178E352 /* SpreadsheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetView.swift; path = Sources/Spreadsheet/SpreadsheetView.swift; sourceTree = "<group>"; };
+		5B5498A2917551D1F978EDCE /* SpreadsheetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetBridge.swift; path = Sources/Spreadsheet/SpreadsheetBridge.swift; sourceTree = "<group>"; };
+		564AE8AD9240154969677DCF /* SpreadsheetSnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetSnapshotCommand.swift; path = Sources/Spreadsheet/SpreadsheetSnapshotCommand.swift; sourceTree = "<group>"; };
+		18FF823E6FF8F5FB40A89AE3 /* HelixDocument+Timeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Timeline.swift"; path = "Sources/HelixDocument+Timeline.swift"; sourceTree = "<group>"; };
+		6108CA1E517EAA3666E470EF /* MCPKeyframeHandlers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MCPKeyframeHandlers.swift; path = Sources/MCPKeyframeHandlers.swift; sourceTree = "<group>"; };
+		ABE0D526DFEC1164CE9EB776 /* OffscreenRender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OffscreenRender.swift; path = Sources/OffscreenRender.swift; sourceTree = "<group>"; };
+		4296C9AEB8D4A12CA3A7B577 /* TimelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimelineTests.swift; path = Tests/TimelineTests.swift; sourceTree = "<group>"; };
+		440766BF689E8B73A699BD63 /* SpreadsheetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetTests.swift; path = Tests/SpreadsheetTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -160,6 +199,8 @@
 		4CD87A470DCB16C31E9BC98A /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				4296C9AEB8D4A12CA3A7B577 /* TimelineTests.swift */,
+				440766BF689E8B73A699BD63 /* SpreadsheetTests.swift */,
 				D3F54926D9EBC58B30CE4961 /* NodeEditorTests.swift */,
 				DFDAF0510D8421E7D0F36AC8 /* InspectorTests.swift */,
 			);
@@ -201,6 +242,11 @@
 		CA452AC6DB53E1C10D6D7F5F /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				05E51A00A465662BD96BD7D1 /* Timeline */,
+				94678D47A144029645677C7A /* Spreadsheet */,
+				18FF823E6FF8F5FB40A89AE3 /* HelixDocument+Timeline.swift */,
+				6108CA1E517EAA3666E470EF /* MCPKeyframeHandlers.swift */,
+				ABE0D526DFEC1164CE9EB776 /* OffscreenRender.swift */,
 				91F4A5417179B7CC81BBCC04 /* NodeEditor */,
 				03011B942D714D79F3FBB0DB /* Inspector */,
 				DF2882B61690998E4E7E4F6D /* HelixDocument+Inspector.swift */,
@@ -249,6 +295,32 @@
 				F5BF48AA40CAD7891EB709FC /* Helix.app */,
 				DD6EACD4F105EF68A695B5CF /* HelixNodeEditorTests.xctest */,
 			);
+			sourceTree = "<group>";
+		};
+		05E51A00A465662BD96BD7D1 /* Timeline */ = {
+			isa = PBXGroup;
+			children = (
+				6084237EBF782A39C4E00629 /* TimelineMath.swift */,
+				922A1D79D2A0DD1A1783CFFD /* TimelineKeys.swift */,
+				AB2A71986B9579E38B992B77 /* TimelineModel.swift */,
+				0763E4CE83FED9440E9A1720 /* TimelineBar.swift */,
+				A8C3D0A202F6055515BE2D85 /* TimelineBridge.swift */,
+				DDC30C64301F1392D92EF728 /* TimelineSnapshotCommand.swift */,
+			);
+			name = Timeline;
+			sourceTree = "<group>";
+		};
+		94678D47A144029645677C7A /* Spreadsheet */ = {
+			isa = PBXGroup;
+			children = (
+				CDCAE5BC29953DF462403683 /* SpreadsheetData.swift */,
+				FE86066298BFFADE6B0143D2 /* SpreadsheetModel.swift */,
+				F2C7205F01E219A98F743652 /* SpreadsheetTable.swift */,
+				77061C17B125BBCFE178E352 /* SpreadsheetView.swift */,
+				5B5498A2917551D1F978EDCE /* SpreadsheetBridge.swift */,
+				564AE8AD9240154969677DCF /* SpreadsheetSnapshotCommand.swift */,
+			);
+			name = Spreadsheet;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -376,6 +448,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BC7821A1D8B775F10724538C /* TimelineMath.swift */,
+				B8E56733E8837520E25319D6 /* TimelineKeys.swift */,
+				B60997DDBB84338821C63EE7 /* TimelineModel.swift */,
+				F1D2BB9BA052EA053EDA0691 /* TimelineBar.swift */,
+				4E0BF46B4FDDE83C72269A76 /* TimelineBridge.swift */,
+				67DE8D44F473D13AF312775F /* TimelineSnapshotCommand.swift */,
+				7725D2864DE7B9756446733D /* SpreadsheetData.swift */,
+				73E9875B6A471AC2481F6259 /* SpreadsheetModel.swift */,
+				38B73AE3EAE6783E538B2B67 /* SpreadsheetTable.swift */,
+				C24AE958D5E53C4F5B1BDF9D /* SpreadsheetView.swift */,
+				FC9BCC9D4841B3269393DA2D /* SpreadsheetBridge.swift */,
+				8D15E231BD55D8AAAA24E03A /* SpreadsheetSnapshotCommand.swift */,
+				759E6B1A10FFF3DB994FDBF7 /* HelixDocument+Timeline.swift */,
+				20AC52A64C274E856FFD6F76 /* MCPKeyframeHandlers.swift */,
+				456FC0A7AD9FB0164EEFDFD1 /* OffscreenRender.swift */,
 				18485CD047FA97EB2E642D0A /* DocumentView.swift */,
 				903C6F7EEA615A17EE9C33AD /* InspectorValues.swift */,
 				BD86E35DB7E8CC84B46CCD74 /* InspectorFormatting.swift */,
@@ -425,6 +512,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14DF00644448C83D5D961173 /* TimelineMath.swift in Sources */,
+				B9627642D6CD747A0F7EDCFD /* TimelineKeys.swift in Sources */,
+				D2A9EA24CD9C9C7DCB1ECFE2 /* TimelineModel.swift in Sources */,
+				AB0A4109400D60C307F37330 /* SpreadsheetData.swift in Sources */,
+				6A73A5D938DA7E19C6665A6F /* SpreadsheetModel.swift in Sources */,
+				ECC499E7F03A1A0B45407D56 /* TimelineTests.swift in Sources */,
+				C1DD6E33FF65E05BAD9C027B /* SpreadsheetTests.swift in Sources */,
 				3D2B105261C495EB94860605 /* NodeEditorTests.swift in Sources */,
 				EAC964D7B3DB9036687C6BC3 /* InspectorTests.swift in Sources */,
 				EA372CF0ACAF88C0F4625E94 /* InspectorValues.swift in Sources */,

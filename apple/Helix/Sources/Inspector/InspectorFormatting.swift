@@ -128,10 +128,10 @@ struct RowAvailability: Equatable {
         isDisabled = !parameter.enabled || !nodeEditable
     }
 
-    /// Whether one component can be edited by hand. A component that holds keyframes follows the
-    /// timeline and would be overwritten on the next frame, so it is read only here.
+    /// Whether one component can be edited by hand. One that holds keyframes can: the engine keys
+    /// the current frame with what is typed.
     func canEdit(_ parameter: InspectorParameter, component: Int) -> Bool {
-        !isHidden && !isDisabled && !parameter.isAnimated(component)
+        !isHidden && !isDisabled
     }
 }
 
@@ -141,6 +141,9 @@ enum InspectorEditName {
     static func reset(_ label: String) -> String { String(localized: "Reset \(label)") }
     static var editExpression: String { String(localized: "Edit Expression") }
     static var clearExpression: String { String(localized: "Clear Expression") }
+    static var setKeyframe: String { String(localized: "Set Keyframe") }
+    static var removeKeyframe: String { String(localized: "Remove Keyframe") }
+    static var clearKeyframes: String { String(localized: "Clear Keyframes") }
 }
 
 /// The error of an expression, cut down to what a row has room for.

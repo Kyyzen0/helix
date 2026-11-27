@@ -18,6 +18,9 @@ extension HelixDocument: NodeEditorEditing {
         // What the inspector shows (the values, what a condition hides, the errors a cook just
         // found) can have changed with the graph.
         inspector.reload()
+        // So can the keys on the ruler, the range, and what the table follows and shows.
+        timeline.reload()
+        followedNodeChanged(selection: editor.selectedNodes)
     }
 
     /// Makes the editor and the inspector ready, once the scene is loaded.
@@ -29,6 +32,7 @@ extension HelixDocument: NodeEditorEditing {
         // selection is set, so the new selection comes with it.
         inspectorSubscription = editor.$selectedNodes.sink { [weak self] selection in
             self?.inspector.select(nodes: selection)
+            self?.followedNodeChanged(selection: selection)
         }
         refreshEditor(frame: true)
     }
@@ -38,13 +42,19 @@ extension HelixDocument: NodeEditorEditing {
     /// Runs an edit and, when it changed the scene, registers its undo step. Returns what the
     /// edit came to, with the engine's reason when it was refused.
     @discardableResult
-    func performEdit(named name: String, recook: Bool = true, _ body: () -> EditOutcome) -> EditOutcome {
+    func performEdit(
+        named name: String, recook: Bool = true, reframe: Bool = true, _ body: () -> EditOutcome
+    ) -> EditOutcome {
         guard isActive else { return .failed(String(localized: "This scene is closed.")) }
+        // An edit made while playing stops the playback: the frame that goes on moving would make
+        // an edit land on another frame than the one the person was looking at, and a key set by
+        // the edit would be set on a frame that was not the one on screen.
+        timeline.pause()
         // An edit made while a drag goes on is part of the drag's step, which captures the
         // scene itself when it ends.
         if continuousEdit.isActive {
             let outcome = body()
-            if recook { cookGeometry() }
+            if recook { cookGeometry(reframe: reframe) }
             refreshEditor()
             return outcome
         }
@@ -61,7 +71,7 @@ extension HelixDocument: NodeEditorEditing {
         if let afterText, changed {
             registerUndo(named: name, restoring: beforeText, otherwise: afterText)
         }
-        if changed, recook { cookGeometry() }
+        if changed, recook { cookGeometry(reframe: reframe) }
         refreshEditor()
         return outcome
     }
@@ -80,10 +90,13 @@ extension HelixDocument: NodeEditorEditing {
 
     private func restore(_ snapshot: String, otherwise: String, named name: String) {
         let selectedPaths = selectedPathsBeforeRestore()
-        let status = helix.core.restoreScene(std.string(snapshot))
+        timeline.pause()
+        var status = helix.core.Status()
+        // The scene holds the frame it was captured on, and the playhead is not part of an edit.
+        keepingPlayhead { status = helix.core.restoreScene(std.string(snapshot)) }
         if !status.ok { presentedError = String(engine: status.error) }
         registerUndo(named: name, restoring: otherwise, otherwise: snapshot)
-        cookGeometry()
+        cookGeometry(reframe: false)
         reselectAfterRestore(paths: selectedPaths)
     }
 

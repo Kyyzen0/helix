@@ -176,6 +176,10 @@ class KeyframeTrack
             left = &keyframes_[index];
         }
 
+        // A key pins its own value at its own frame, whatever way the segment before it moves: a
+        // step holds the value of the key before it right up to this frame, and not at it.
+        if (frame == right->frame) return right->value;
+
         if (left->interpolation == Interpolation::Step) return left->value;
 
         const floatT span = right->frame - left->frame;

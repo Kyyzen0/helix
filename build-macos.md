@@ -268,8 +268,8 @@ value, interpolation, remove) with Add Point; the curve of a b spline segment is
 Expression…, Clear Expression and Reset to Default. A component with an expression shows its text
 in monospaced accent colour instead of its value. An expression that does not compile is kept, as
 the person is still typing it, shown in red with its first line of error under the row, and reads
-as zero. A component that holds keyframes shows a diamond and is read only here (keyframes are
-edited from the timeline, later).
+as zero. A component that holds keyframes shows a diamond, which is filled when the frame the scene
+sits on has a key of it and hollow when it does not, and is edited like any other (see Keyframes).
 
 **Undo.** Every edit is one step of the window's undo manager, named "Change <label>", "Edit
 Expression", "Clear Expression" or "Reset <label>", through the same scene snapshots as the node
@@ -282,6 +282,118 @@ the viewport or the node editor, which only act while they have the keys.
 `Helix --render-inspector <in.kut | --new-scene> <node name or path> <out.png> [width [height]]
 [--dark]` draws the inspector of one node to a PNG with no window (the panel is laid out in an
 off screen window and its pixels read back), as `--render-node-editor` does for the editor.
+
+### Timeline
+
+A bar at the bottom of the window (View > Show Timeline, `⌥⌘T`; shown by default, and remembered)
+holds the playback controls, the frame, and a ruler. Left to right: go to start, step back, play or
+pause, step forward, go to end, a loop toggle (on by default), then the frame, the first and the last
+frame of the range, and the frame rate. The ruler numbers the frames (the step between two labels
+adapts to the width: 1, 2, 5, 10, 20...), shades the range, and carries the playhead. A click or a
+drag on the ruler moves the playhead and stops the playback. The diamonds on the ruler are the keys of
+the node in front, one diamond for every frame that has a key, however many parameters it holds (see
+Keyframes). The node in front is the one selected in the node editor, or the display node when there
+is no selection or several.
+
+**Keys.** `Space` plays or pauses, `←` and `→` step one frame, `⌥←` and `⌥→` go to the start and the end.
+They act only while the viewport, the node editor or the ruler has the keys, never while a text field
+does, for the reason the viewport keys do. The Timeline menu has the same commands without keys, and
+the two settings: Loop, and Play Every Frame.
+
+**Playback.** The frames follow the clock: a timer ticks at 120 Hz, and each tick moves the playhead
+by the time that went by times the frame rate, keeping the part of a frame that did not make a whole
+one, so 24 frames a second is 24 on average whatever the ticks do. A cook that takes longer than a
+frame skips the frames it missed (**real time**, the default). Play Every Frame shows every frame, one
+after the other, at no more than the frame rate, so a slow scene plays slower and skips nothing. At
+the end of the range the playhead goes back to the start, or stops when Loop is off. While playing,
+the bar says what is really happening, such as "24 fps · 18 shown": the frame rate of the scene, and
+the frames drawn in the last second.
+
+Each frame is `setFrame` then the cook of the display node, on the main thread. **It is synchronous**:
+the engine's background cooking is not safe to drive from the interface yet (the simulation nodes read
+the live network while they cook, and the keyframe store is not locked), so a cook that takes longer
+than a frame stalls the interface for as long as it takes. The viewport keeps the camera where the
+person put it (a frame of playback never reframes the geometry), and the node editor is read again
+when the playback stops, not at every frame. A simulation node replays from its start frame at every
+cook, which makes a frame as pure a function of the frame number as any other, and also makes the
+cook cost grow with the frame; until the cook cache of track four, a heavy simulation plays slower
+the further it goes. Measured on the Mac mini (Release build, the cook and the buffers of the viewport
+without the GPU): about 0.4 ms a frame for `Waves.kut`, 0.05 ms for a keyed transform on the textured
+quad, and for a `helix::simulation` node 0.2, 1.8 and 8 ms at frames 10, 100 and 500 with its default
+particles (1.0, 4 and 18 ms with 20 000 of them). `build-core/helix.app/Contents/bin/tests "[.bench]"`
+measures it again.
+
+**An edit stops the playback.** Any edit (the node editor, the inspector, a key, the range) pauses
+it first, so that what the person changes lands on the frame they were looking at.
+
+**Range and rate** are part of the scene: changing them is a step of undo ("Change Frame Range",
+"Change Frame Rate") and is saved in the file. The frame (the playhead) is not: moving it is never a
+step of undo, and an undo or a redo leaves the playhead where it was (the captured scene holds the
+frame it was captured on, and the document puts the playhead back after restoring it). A change of
+the frame rate dirties the nodes that read the time, since a simulation steps by one over the rate.
+
+`Helix --render-timeline <in.kut> <out.png> [width] [--select <node>] [--frame <n>] [--dark]` draws
+the bar to a PNG with no window, with the diamonds of one node.
+
+### Keyframes
+
+A float component can hold keys: values pinned to frames, with a way to move from one to the next
+(step: hold, then jump; linear; smooth: eased in and out). Its value is a pure function of the frame,
+and the first and last key are held past the ends. Only floats can be keyed; the keys are saved in the
+`.kut` file. They are made, moved and removed from the interface, from the facade and from the MCP
+server alike (`setKeyframe`, `setKeyframeAtCurrentValue`, `removeKeyframe`, `moveKeyframe`,
+`setKeyframeInterpolation`, `clearKeyframes`, `listKeyframes`).
+
+- **Set Keyframe.** The context menu of a float row (or of one component of a vector) has Set
+  Keyframe, which keys the value the component has now on the current frame, Remove Keyframe (enabled
+  when the current frame has a key) and Clear Keyframes, which takes every key off and puts back the
+  value and the expression the component held before it was keyed. A parameter with keys shows a
+  diamond by its label: filled when the current frame has a key, hollow when it does not.
+- **Auto key.** Editing a component that already has keys (typing, a slider, a scrub) sets the key
+  of the current frame, or replaces its value, instead of being undone at the next frame. A new key
+  takes the interpolation of the key before it, or smooth when it is the first. A drag registers one
+  step of undo. A change to a component with no key is a plain edit, and does not make one. Reset to
+  Default is refused for a keyed parameter (clear its keys first), and so is an expression.
+- **On the ruler.** Drag a diamond to move all its keys by whole frames (one step of undo, refused
+  with a message when it would land on a frame where a key of the same component already is, and held
+  inside the range). The context menu of a diamond has Interpolation (Step, Linear, Smooth) and Delete
+  Keyframe. The tooltip lists each key with its value and interpolation.
+- **MCP.** `set_keyframe`, `remove_keyframe`, `clear_keyframes`, `list_keyframes`, `set_time_range`;
+  `render_view` takes a `frame` (it draws that frame, then puts the scene back on the one it was on);
+  `scene_info` lists the animated nodes; `set_parameter` on a keyed component keys the current frame.
+
+Not yet: bezier tangents, a curve editor and a dope sheet, keys on integers, toggles and strings, and
+keys moved or copied across several nodes at once (the ruler shows one node's keys).
+
+### Spreadsheet
+
+The bottom of the window has two views, switched by a control above it: **Network** (the node editor)
+and **Spreadsheet** (View > Show Spreadsheet, `⌥⌘S`). The spreadsheet is a native `NSTableView`: a
+table with 100 000 or a million rows costs what a screenful costs, since the table asks only for the
+cells in view and the pages (512 rows of one attribute) those cells are in are read from the engine on
+demand, then kept. It follows the node in front (the one selected, or the display node), and shows its
+error in place of the table when the node does not cook.
+
+A picker above the table chooses which elements are the rows: Points, Vertices, Faces or Primitives,
+each with its count. The columns are the row number (`#`), the primitive the row belongs to (`prim`,
+when the output has several), then one per component of every attribute of that owner: `P.x P.y P.z`
+for the position (the header tooltip says `Position`), `uv.x uv.y uv.z`, `m.0` to `m.15` for a matrix,
+and the tooltip gives the type. Numbers are monospaced and right aligned, written with six significant
+digits and no trailing zeros; integers are integers, booleans are `true` and `false`. Select rows and
+`⌘C` copies them as tab separated text with the header (up to 100 000 rows). An attribute that only
+some primitives carry cannot be lined up with the rows, so its column shows "–" (listed as a gap), and
+one whose type differs between primitives is shown as "mixed", as the facade refuses to read it.
+
+**How the data gets there.** `cookNodeReport` gives the counts, the columns and the primitive ranges,
+and `readAttribute` gives a page. Both cook a node only when it is dirty, so a clean node costs a
+read. A counter bumped at every cook of a node (`nodeCookGeneration`, one counter for all nodes, so
+two cooks never share a number) comes back with each report and page: when it is not the one the
+cache holds, every cached page is dropped. The report of the last node is also kept by that number,
+which saves counting the triangles again. The table is read again at each frame while it is shown and
+the playhead moves; a hidden table does not cook anything.
+
+`Helix --render-spreadsheet <in.kut> <node> <out.png> [width height] [--owner points|vertices|faces|primitives] [--dark]`
+draws the table of one node to a PNG with no window.
 
 ### Node errors
 
@@ -333,12 +445,13 @@ The tools:
 - `list_parameters`, `set_parameter`: the parameters of a node, and one to write (a number, an
   integer, a boolean, a string, or an array such as `[1, 2, 3]`), read back after the write.
 - `import_file`: imports a 3D file as a node (see Importing 3D files).
-- `set_frame`: moves the scene in time.
+- `set_frame`, `set_time_range`: move the scene in time, and set the range and the frame rate.
+- `set_keyframe`, `remove_keyframe`, `clear_keyframes`, `list_keyframes`: keyframes (see Keyframes).
 - `geometry_summary`: counts, bounds, attributes and materials (base colour, texture size and
   source) of the output of any node.
 - `read_attribute`: the values of an attribute, up to 10 000 elements a call, with the total to page by.
 - `render_view`: a PNG of a node, framed like the viewport, optionally orbited (`azimuth`,
-  `elevation`), up to 2048 pixels a side.
+  `elevation`) and at a given `frame`, up to 2048 pixels a side.
 
 A node is named by its name (`cube1`), its path (`/cube1`) or its id. A call that fails (a node
 that does not exist, a value out of range) returns a result with `isError` and a message, so the

@@ -6,6 +6,7 @@
 #include "Engine/Parameter/Template.h"
 #include "Engine/Primitives/Primitive.h"
 #include "icecream.hpp"
+#include <atomic>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -125,6 +126,10 @@ void nt::Node::cook(nt::CookContext& context)
         resetOutputPackets();
     }
     dirty_ = false;
+
+    // One counter for every node, so no two cooks anywhere in the process share a mark.
+    static std::atomic<std::uint64_t> lastGeneration{0};
+    cookGeneration_.store(++lastGeneration, std::memory_order_relaxed);
 }
 
 std::string nt::Node::getError() const

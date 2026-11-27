@@ -434,6 +434,7 @@ add_library(helixCore STATIC
     src/HelixCore/HelixCore.cpp
     src/HelixCore/HelixCoreParameters.cpp
     src/HelixCore/HelixCoreReport.cpp
+    src/HelixCore/HelixCoreTime.cpp
     src/HelixCore/HelixCoreViewport.cpp
     src/HelixCore/ImageFile.cpp
 )
@@ -757,6 +758,7 @@ if(HELIX_BUILD_TESTS)
         tests/HelixCoreTests.cpp
         tests/NodeErrorTests.cpp
         tests/InspectorFacadeTests.cpp
+        tests/TimelineFacadeTests.cpp
         tests/ExceptionBoundaryTests.cpp
         tests/ViewportLightingTests.cpp
         tests/HelixCoreViewportTests.cpp

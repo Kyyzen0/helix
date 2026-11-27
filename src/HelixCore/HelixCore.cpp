@@ -325,6 +325,11 @@ Status cookNodePacket(NodeId node, std::shared_ptr<const NodePacket>& packet)
     return cookNode(node, packet);
 }
 
+float holdFloatToRange(prm::NodeParameter& parameter, std::uint32_t component, float value)
+{
+    return holdToRange(parameter, component, value);
+}
+
 Status findNodeParameter(NodeId node, const std::string& name, std::shared_ptr<prm::NodeParameter>& out)
 {
     return findParameter(node, name, out);
@@ -764,6 +769,10 @@ Status setFloat(NodeId node, const std::string& parameter, std::uint32_t compone
         if (Status status = findParameter(node, parameter, found); !status.ok) return status;
         if (found->getType() != prm::Type::FLOAT) return wrongType(parameter, "a float");
         if (Status status = checkComponent(*found, component); !status.ok) return status;
+        // A component that holds keyframes takes the value as the key of the current frame, since
+        // a plain write would be put back by the timeline at the next frame.
+        if (detail::isKeyed(node, parameter, component))
+            return detail::keyAtCurrentFrame(node, parameter, component, value);
         found->setFloat(holdToRange(*found, component, value), component);
         markModified();
         return success();
@@ -806,9 +815,17 @@ Status setVector3(NodeId node, const std::string& parameter, float x, float y, f
         if (Status status = findParameter(node, parameter, found); !status.ok) return status;
         if (found->getType() != prm::Type::FLOAT || found->getVectorSize() != 3)
             return wrongType(parameter, "a vector of three floats");
-        found->setFloat(holdToRange(*found, 0, x), 0);
-        found->setFloat(holdToRange(*found, 1, y), 1);
-        found->setFloat(holdToRange(*found, 2, z), 2);
+        const float values[3] = {x, y, z};
+        for (std::uint32_t component = 0; component < 3; ++component)
+        {
+            if (detail::isKeyed(node, parameter, component))
+            {
+                if (Status status = detail::keyAtCurrentFrame(node, parameter, component, values[component]); !status.ok)
+                    return status;
+                continue;
+            }
+            found->setFloat(holdToRange(*found, component, values[component]), component);
+        }
         markModified();
         return success();
     });

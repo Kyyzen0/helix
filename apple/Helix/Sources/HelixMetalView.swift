@@ -106,6 +106,14 @@ final class HelixMetalView: MTKView {
     // search of the node palette, has the keys. The menu holds the same commands, without keys.
     override func keyDown(with event: NSEvent) {
         let modifiers = event.modifierFlags.intersection([.shift, .control, .option, .command])
+        // Space plays, the arrows step, and option with an arrow goes to an end.
+        if let timeline = controller?.timeline,
+           timeline.handleKey(
+               code: event.keyCode, option: modifiers == .option,
+               otherModifiers: !modifiers.subtracting(.option).isEmpty
+           ) {
+            return
+        }
         switch (event.charactersIgnoringModifiers?.lowercased(), modifiers) {
         case ("f", []):
             controller?.requestFrame()

@@ -39,7 +39,7 @@ struct ParameterLabel: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
-            if !parameter.animated.isEmpty { KeyframeBadge() }
+            if !parameter.animated.isEmpty { KeyframeBadge(filled: !parameter.keyed.isEmpty) }
             Spacer(minLength: 0)
         }
         .frame(width: Self.width, alignment: .leading)
@@ -94,6 +94,17 @@ struct ParameterMenu: View {
                     model.clearExpression(parameter.name, component: entry.offset)
                 }
             }
+        }
+        if parameter.kind == .float {
+            Divider()
+            let scope = component.map { [$0] }
+            let keyedHere = component.map { parameter.keyed.contains($0) } ?? !parameter.keyed.isEmpty
+            let animatedHere = component.map { parameter.isAnimated($0) } ?? !parameter.animated.isEmpty
+            Button("Set Keyframe") { model.setKeyframe(parameter.name, components: scope) }
+            Button("Remove Keyframe") { model.removeKeyframe(parameter.name, components: scope) }
+                .disabled(!keyedHere)
+            Button("Clear Keyframes") { model.clearKeyframes(parameter.name, components: scope) }
+                .disabled(!animatedHere)
         }
         Divider()
         Button("Reset to Default") { model.reset(parameter.name) }

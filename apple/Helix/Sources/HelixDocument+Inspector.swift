@@ -25,7 +25,11 @@ extension HelixDocument: InspectorEditing {
     func applyLive(_ edit: InspectorEdit, to node: UInt64) -> EditOutcome {
         guard isActive else { return .failed(String(localized: "This scene is closed.")) }
         let outcome = write(edit, to: node)
-        if outcome.error == nil { cookGeometry() }
+        if outcome.error == nil {
+            cookGeometry()
+            // The table follows a drag too, when it is on screen.
+            spreadsheet.refresh()
+        }
         return outcome
     }
 
@@ -35,6 +39,7 @@ extension HelixDocument: InspectorEditing {
 
     func beginContinuousEdit(named name: String) {
         guard isActive else { return }
+        timeline.pause()
         let before = helix.core.captureScene()
         // An edit that cannot be undone is not made, so a drag whose start cannot be kept does
         // not start either: the live edits that follow are refused.
@@ -57,9 +62,10 @@ extension HelixDocument: InspectorEditing {
     func cancelContinuousEdit() {
         guard let before = continuousEdit.cancel() else { return }
         let paths = selectedPathsBeforeRestore()
-        let status = helix.core.restoreScene(std.string(before))
+        var status = helix.core.Status()
+        keepingPlayhead { status = helix.core.restoreScene(std.string(before)) }
         if !status.ok { presentedError = String(engine: status.error) }
-        cookGeometry()
+        cookGeometry(reframe: false)
         reselectAfterRestore(paths: paths)
     }
 
@@ -100,6 +106,26 @@ extension HelixDocument: InspectorEditing {
             return outcome(helix.core.clearExpression(node, std.string(parameter), UInt32(component)))
         case .reset(let parameter):
             return outcome(helix.core.resetParameter(node, std.string(parameter)))
+        case .setKeyframe(let parameter, let components):
+            let frame = helix.core.timeInfo().frame
+            for component in components {
+                let status = helix.core.setKeyframeAtCurrentValue(node, std.string(parameter), UInt32(component), frame)
+                if !status.ok { return outcome(status) }
+            }
+            return .done
+        case .removeKeyframe(let parameter, let components):
+            let frame = helix.core.timeInfo().frame
+            for component in components {
+                let status = helix.core.removeKeyframe(node, std.string(parameter), UInt32(component), frame)
+                if !status.ok { return outcome(status) }
+            }
+            return .done
+        case .clearKeyframes(let parameter, let components):
+            for component in components {
+                let status = helix.core.clearKeyframes(node, std.string(parameter), UInt32(component))
+                if !status.ok { return outcome(status) }
+            }
+            return .done
         }
     }
 }

@@ -241,9 +241,15 @@ void nt::NetworkManager::setEndFrame(intT frame)
 void nt::NetworkManager::setFps(floatT fps)
 {
     if (fps <= 0) return;
+    if (fps == fps_) return;
 
     fps_ = fps;
     fpsChanged(fps_);
+
+    // A simulation steps one frame at a time, a frame lasting one over the rate, so a new rate
+    // gives a different result at the same frame. Those nodes read the frame, which makes them
+    // time dependent, so they are dirtied the way a move of the frame dirties them.
+    dirtyTimeDependents_();
 }
 
 void nt::NetworkManager::resetTime_()

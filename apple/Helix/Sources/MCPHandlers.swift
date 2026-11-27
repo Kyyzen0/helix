@@ -12,16 +12,16 @@ enum MCPHandlers {
 
     // MARK: Facade values as JSON
 
-    private static func check(_ status: helix.core.Status) throws {
+    static func check(_ status: helix.core.Status) throws {
         guard status.ok else { throw MCPToolError(String(engine: status.error)) }
     }
 
-    private static func nodeList() -> [helix.core.NodeInfo] {
+    static func nodeList() -> [helix.core.NodeInfo] {
         Array(helix.core.listNodes())
     }
 
     /// The identity of a node, which every result gives the same way.
-    private static func identity(_ info: helix.core.NodeInfo) -> JSONValue {
+    static func identity(_ info: helix.core.NodeInfo) -> JSONValue {
         [
             "id": .init(count: info.id),
             "name": .string(String(engine: info.name)),
@@ -30,12 +30,12 @@ enum MCPHandlers {
         ]
     }
 
-    private static func describe(_ id: helix.core.NodeId) -> JSONValue {
+    static func describe(_ id: helix.core.NodeId) -> JSONValue {
         nodeList().first { $0.id == id }.map(identity) ?? ["id": .init(count: id)]
     }
 
     /// Finds a node by name, by path or by id.
-    private static func resolve(_ reference: JSONValue?, argument: String = "node") throws -> helix.core.NodeInfo {
+    static func resolve(_ reference: JSONValue?, argument: String = "node") throws -> helix.core.NodeInfo {
         guard let reference, !reference.isNull else { throw MCPToolError("The argument '\(argument)' is required.") }
         let nodes = nodeList()
 
@@ -80,7 +80,7 @@ enum MCPHandlers {
         [.init(x), .init(y), .init(z)]
     }
 
-    private static func timeJSON() -> JSONValue {
+    static func timeJSON() -> JSONValue {
         let time = helix.core.timeInfo()
         return [
             "frame": .init(time.frame),
@@ -124,6 +124,7 @@ enum MCPHandlers {
             "nodes": .array(nodeEntries),
             "links": .array(linkEntries),
             "display_node": display == 0 ? .null : describe(display),
+            "animated_nodes": .array(Array(helix.core.animatedNodes()).sorted().map { describe($0) }),
             "time": timeJSON(),
             "modified": .bool(helix.core.isSceneModified()),
         ]
@@ -338,6 +339,8 @@ enum MCPHandlers {
         }
         if !info.animatedComponents.empty() {
             entry["animated"] = .array(info.animatedComponents.map { .int(Int64($0)) })
+            // The components that have a key on the frame the scene sits on.
+            entry["keyed"] = .array(info.keyedComponents.map { .int(Int64($0)) })
         }
         if info.type == .Ramp {
             let ramp = helix.core.getRamp(node, info.name)
@@ -372,7 +375,7 @@ enum MCPHandlers {
         return .data(["node": identity(node), "parameters": .array(entries), "layout": .array(layout)])
     }
 
-    private static func findParameterInfo(_ node: helix.core.NodeInfo, _ name: String) throws -> helix.core.ParameterInfo {
+    static func findParameterInfo(_ node: helix.core.NodeInfo, _ name: String) throws -> helix.core.ParameterInfo {
         let parameters = Array(helix.core.listParameters(node.id))
         guard let info = parameters.first(where: { String(engine: $0.name) == name }) else {
             let known = parameters.map { String(engine: $0.name) }.joined(separator: ", ")
@@ -382,7 +385,7 @@ enum MCPHandlers {
     }
 
     /// What a parameter reads back after it was written: its value, and its expression if it has one.
-    private static func parameterResult(_ node: helix.core.NodeInfo, _ name: String) throws -> MCPToolOutput {
+    static func parameterResult(_ node: helix.core.NodeInfo, _ name: String) throws -> MCPToolOutput {
         let info = try findParameterInfo(node, name)
         var result = describeParameter(node.id, info).object ?? [:]
         // The identity and the name are given the way every parameter result gives them.
@@ -678,6 +681,7 @@ enum MCPHandlers {
         let pixelHeight = UInt32(min(height, maxImageSide))
 
         let materialsVisible = try arguments.bool("materials") ?? true
+        let frame = try arguments.number("frame")
         let azimuth = try arguments.number("azimuth")
         let elevation = try arguments.number("elevation")
         var wireframe = helix.core.WireframeMode.Auto
@@ -687,6 +691,12 @@ enum MCPHandlers {
         case "off": wireframe = .Off
         case let other: throw MCPToolError("The wireframe is auto, on or off, not '\(other)'.")
         }
+
+        // A frame asked for is shown, held to the range, and the scene goes back to the frame it
+        // was on afterwards, so a picture of another frame changes nothing the agent set.
+        let previousFrame = helix.core.timeInfo().frame
+        if let frame { helix.core.setFrame(Float(frame)) }
+        defer { if frame != nil { helix.core.setFrame(previousFrame) } }
 
         // The render draws the display node, so the node asked for takes that place for the
         // length of the call and gives it back after, even when it was none.
@@ -723,7 +733,8 @@ enum MCPHandlers {
         try check(helix.core.renderToImage(std.string(file.path), options, true))
         guard let png = try? Data(contentsOf: file) else { throw MCPToolError("The picture could not be read back.") }
 
-        let text = "\(pixelWidth) x \(pixelHeight) PNG of \(String(engine: node.name)): "
+        let shownFrame = helix.core.timeInfo().frame
+        let text = "\(pixelWidth) x \(pixelHeight) PNG of \(String(engine: node.name)) at frame \(shownFrame): "
             + "\(geometry.pointCount) points, \(geometry.triangleCount) triangles."
         return MCPToolOutput(
             content: [

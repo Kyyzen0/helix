@@ -2,6 +2,8 @@
 // list and the values of one attribute. See the Display geometry section of HelixCore.h.
 
 #include "Engine/Attribute/AttributeHandle.h"
+#include "Engine/Network/NetworkManager.h"
+#include "Engine/Network/Node.h"
 #include "Engine/Network/NodePacket.h"
 #include "Engine/Primitives/Mesh.h"
 #include "Graphics/DisplayGeometry.h"
@@ -162,15 +164,43 @@ template <typename T> void copyRange(
 
 GeometryReport cookNodeReport(NodeId node)
 {
+    // The last report made, kept with the cook it describes. A table that asks again for a node
+    // that has not cooked since gets the same report without the work of making it, which for a
+    // large mesh includes splitting every face into triangles to count them.
+    struct Cached
+    {
+        NodeId node = 0;
+        std::uint64_t generation = 0;
+        GeometryReport report;
+    };
+    static Cached cached;
+
     GeometryReport report;
     report.status = guarded([&] {
         std::shared_ptr<const NodePacket> packet;
         if (Status status = detail::cookNodePacket(node, packet); !status.ok) return status;
 
+        report.generation = nt::nm().getNode(node).getCookGeneration();
+        if (report.generation != 0 && cached.node == node && cached.generation == report.generation)
+        {
+            report = cached.report;
+            return success();
+        }
+
         std::vector<const geo::Material*> seenMaterials;
         for (const auto& primitive : packet->getPrimitives())
         {
             if (!primitive) continue;
+            // Where this primitive's elements start, among everything before it. Points,
+            // vertices and faces are counted the way readAttribute walks them.
+            PrimitiveRange range;
+            range.pointStart = report.pointCount;
+            range.vertexStart = report.vertexCount;
+            range.faceStart = report.faceCount;
+            range.pointCount = primitive->getNumPoints();
+            range.vertexCount = elementCount(*primitive, AttributeOwner::Vertex);
+            range.faceCount = elementCount(*primitive, AttributeOwner::Face);
+            report.primitives.push_back(range);
             ++report.primitiveCount;
             report.pointCount += primitive->getNumPoints();
             if (const auto mesh = std::dynamic_pointer_cast<const geo::Mesh>(primitive))
@@ -237,9 +267,16 @@ GeometryReport cookNodeReport(NodeId node)
         gfx::DisplayGeometry geometry;
         gfx::buildDisplayGeometry(geometry, *packet);
         report.triangleCount = geometry.topology.triangleIndices.size() / 3;
+        cached = {node, report.generation, report};
         return success();
     });
     return report;
+}
+
+std::uint64_t nodeCookGeneration(NodeId node)
+{
+    if (!detail::requireNodeInScene(node).ok) return 0;
+    return nt::nm().getNode(node).getCookGeneration();
 }
 
 AttributeValues readAttribute(
@@ -254,6 +291,7 @@ AttributeValues readAttribute(
     values.status = guarded([&] {
         std::shared_ptr<const NodePacket> packet;
         if (Status status = detail::cookNodePacket(node, packet); !status.ok) return status;
+        values.generation = nt::nm().getNode(node).getCookGeneration();
 
         // The elements of every primitive that carries the attribute, one after the other.
         std::uint64_t seen = 0;

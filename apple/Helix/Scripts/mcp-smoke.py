@@ -21,6 +21,7 @@ EXPECTED_TOOLS = {
     "scene_info", "new_scene", "open_scene", "save_scene", "list_node_types", "create_node",
     "delete_node", "connect_nodes", "disconnect_nodes", "set_display_node", "list_parameters",
     "set_parameter", "reset_parameter", "import_file", "set_frame", "geometry_summary", "read_attribute", "render_view",
+    "set_time_range", "set_keyframe", "remove_keyframe", "clear_keyframes", "list_keyframes",
 }
 
 failures = []
@@ -211,6 +212,95 @@ def main(binary):
     check(png_size(other) == (320, 200), "render_view draws a node that is not displayed")
     check(server.data("scene_info")["display_node"]["name"] == "box", "and puts the display node back")
     server.data("delete_node", {"node": spare["id"]})
+
+    # Time and keyframes.
+    check(server.data("scene_info")["animated_nodes"] == [], "scene_info lists no animated node before any key")
+    server.data("create_node", {"type": "helix::transform", "name": "spin"})
+    server.data("connect_nodes", {"from": "box", "to": "spin"})
+    check(server.call("set_keyframe", {"node": "spin", "parameter": "translate", "component": 7, "value": 1})["isError"] is True,
+          "a component out of range is an error")
+    check(server.call("set_keyframe", {"node": "spin", "parameter": "selection", "value": 1})["isError"] is True,
+          "only a float can be keyed")
+    check(server.call("set_keyframe", {"node": "spin", "parameter": "rotate", "component": 1, "value": 1,
+                                       "interpolation": "bounce"})["isError"] is True, "an unknown interpolation is an error")
+    server.data("set_time_range", {"start": 1, "end": 48, "fps": 24})
+    first = server.data("set_keyframe", {"node": "spin", "parameter": "rotate", "component": 1, "frame": 1, "value": 0,
+                                         "interpolation": "linear"})
+    check(first["tracks"][0]["keys"] == [{"frame": 1.0, "value": 0.0, "interpolation": "linear"}]
+          and first["tracks"][0]["base_value"] == 0.0, "set_keyframe returns the keys it made: %r" % (first,))
+    server.data("set_keyframe", {"node": "spin", "parameter": "rotate", "component": 1, "frame": 24, "value": 60})
+    server.data("set_keyframe", {"node": "spin", "parameter": "translate", "component": 0, "frame": 1, "value": 0})
+    server.data("set_keyframe", {"node": "spin", "parameter": "translate", "component": 0, "frame": 24, "value": 5,
+                                 "interpolation": "step"})
+    listed = server.data("list_keyframes", {"node": "spin"})["tracks"]
+    rotate = [t for t in listed if t["parameter"] == "rotate"][0]
+    check(len(listed) == 2 and rotate["component"] == 1 and [k["frame"] for k in rotate["keys"]] == [1.0, 24.0]
+          and rotate["keys"][1]["interpolation"] == "smooth" and rotate["keys"][1]["value"] == 60.0,
+          "list_keyframes round-trips the keys, smooth by default: %r" % (listed,))
+    check([n["name"] for n in server.data("scene_info")["animated_nodes"]] == ["spin"], "scene_info lists the animated node")
+    spin_parameters = {p["name"]: p for p in server.data("list_parameters", {"node": "spin"})["parameters"]}
+    check(spin_parameters["rotate"]["animated"] == [1] and spin_parameters["rotate"]["keyed"] == [1],
+          "list_parameters says which components are animated and keyed now: %r" % (spin_parameters["rotate"],))
+
+    # A key is worth its own value on its own frame, even after a step.
+    server.data("set_frame", {"frame": 24})
+    translate_at_key = [p for p in server.data("list_parameters", {"node": "spin"})["parameters"] if p["name"] == "translate"][0]
+    check(translate_at_key["value"][0] == 5.0 and translate_at_key["keyed"] == [0], "a key holds its value on its frame: %r" % (translate_at_key["value"],))
+
+    server.data("set_display_node", {"node": "spin"})
+    server.data("set_frame", {"frame": 1})
+    _, at_start = render(server, width=240, height=160, wireframe="off")
+    _, at_end = render(server, width=240, height=160, frame=24, wireframe="off")
+    check(png_size(at_start) == (240, 160) and at_start != at_end, "render_view at frame 24 differs from frame 1")
+    check(server.data("scene_info")["time"]["frame"] == 1.0, "render_view puts the frame back")
+    _, again = render(server, width=240, height=160, frame=1, wireframe="off")
+    check(again == at_start, "rendering frame 1 explicitly gives the picture of frame 1")
+    # Purity: going to frame 24, away and back, gives the same picture as the first visit.
+    server.data("set_frame", {"frame": 24})
+    server.data("set_frame", {"frame": 3})
+    server.data("set_frame", {"frame": 24})
+    _, revisited = render(server, width=240, height=160, wireframe="off")
+    check(revisited == at_end, "a frame gives the same picture however it was reached")
+    server.data("set_frame", {"frame": 12})
+    spun = server.data("geometry_summary", {"node": "spin"})["bounds"]["min"]
+    server.data("set_frame", {"frame": 1})
+    check(server.data("geometry_summary", {"node": "spin"})["bounds"]["min"] != spun, "the geometry moves with the frame")
+
+    # Writing a keyed component keys the current frame, instead of being put back by the timeline.
+    server.data("set_frame", {"frame": 12})
+    written = server.data("set_parameter", {"node": "spin", "parameter": "rotate", "component": 1, "value": 10})
+    check(written["value"][1] == 10.0, "set_parameter on a keyed component reads the value back: %r" % (written,))
+    keys = [t for t in server.data("list_keyframes", {"node": "spin"})["tracks"] if t["parameter"] == "rotate"][0]["keys"]
+    check([k["frame"] for k in keys] == [1.0, 12.0, 24.0] and keys[1]["value"] == 10.0,
+          "and it set the key of that frame: %r" % (keys,))
+    server.data("set_frame", {"frame": 1})
+    server.data("set_frame", {"frame": 12})
+    rotate_now = [p for p in server.data("list_parameters", {"node": "spin"})["parameters"] if p["name"] == "rotate"][0]
+    check(rotate_now["value"][1] == 10.0, "the written value is still there after leaving the frame and coming back")
+    check(server.call("reset_parameter", {"node": "spin", "parameter": "rotate"})["isError"] is True,
+          "reset_parameter of a keyed parameter is refused")
+
+    check(server.call("remove_keyframe", {"node": "spin", "parameter": "rotate", "component": 1, "frame": 5})["isError"] is True,
+          "removing a key that is not there is an error")
+    removed = server.data("remove_keyframe", {"node": "spin", "parameter": "rotate", "component": 1})
+    check([k["frame"] for k in removed["tracks"][0]["keys"]] == [1.0, 24.0], "remove_keyframe takes the key of the current frame")
+    cleared = server.data("clear_keyframes", {"node": "spin", "parameter": "rotate"})
+    check(cleared["tracks"] == [], "clear_keyframes takes every key of the parameter")
+    check([p for p in server.data("list_parameters", {"node": "spin"})["parameters"] if p["name"] == "rotate"][0]["value"] == [0.0, 0.0, 0.0],
+          "and the parameter has the value it held before it was keyed")
+    server.data("clear_keyframes", {"node": "spin", "parameter": "translate"})
+    check(server.data("scene_info")["animated_nodes"] == [], "no node is animated after the keys are cleared")
+
+    ranged = server.data("set_time_range", {"start": 20, "end": 100, "fps": 30})["time"]
+    check(ranged["start_frame"] == 20 and ranged["end_frame"] == 100 and ranged["fps"] == 30.0 and ranged["frame"] == 20.0,
+          "set_time_range sets the range and the rate, and holds the frame inside: %r" % (ranged,))
+    check(server.data("set_time_range", {"end": 200})["time"]["start_frame"] == 20, "set_time_range takes one of them")
+    check(server.call("set_time_range", {"start": 300, "end": 20})["isError"] is True, "a range that ends before it starts is an error")
+    check(server.call("set_time_range", {"fps": 0})["isError"] is True, "a rate of zero is an error")
+    check(server.call("set_time_range", {})["isError"] is True, "set_time_range with nothing is an error")
+    server.data("set_time_range", {"start": 1, "end": 240, "fps": 24})
+    server.data("set_display_node", {"node": "box"})
+    server.data("delete_node", {"node": "spin"})
 
     # Links.
     server.data("create_node", {"type": "helix::transform", "name": "mover"})

@@ -148,11 +148,11 @@ final class AvailabilityTests: XCTestCase {
         XCTAssertFalse(RowAvailability(parameter: hidden).canEdit(hidden, component: 0))
     }
 
-    func testAnAnimatedComponentIsReadOnlyAndItsNeighboursAreNot() {
+    func testAnAnimatedComponentCanBeEditedSinceTheEngineKeysTheFrame() {
         let row = parameter(animated: [1])
         let availability = RowAvailability(parameter: row)
         XCTAssertTrue(availability.canEdit(row, component: 0))
-        XCTAssertFalse(availability.canEdit(row, component: 1))
+        XCTAssertTrue(availability.canEdit(row, component: 1))
         XCTAssertTrue(availability.canEdit(row, component: 2))
     }
 
@@ -378,6 +378,7 @@ final class InspectorModelTests: XCTestCase {
         moving.kind = .float
         moving.floats = [1]
         moving.animated = [0]
+        moving.keyed = [0]
         moving.expressions = [""]
         moving.expressionErrors = [""]
         let node = InspectorNode(
@@ -428,15 +429,62 @@ final class InspectorModelTests: XCTestCase {
         XCTAssertTrue(editing.applied.isEmpty)
     }
 
-    func testAnAnimatedComponentRefusesAnEdit() {
+    func testAnAnimatedComponentTakesAnEditAndTheEngineKeysIt() {
         model.select(nodes: [7])
         model.setFloat("moving", component: 0, to: 4)
-        model.setFloat("moving", component: 0, to: 4, live: true)
-        XCTAssertTrue(editing.applied.isEmpty)
-        XCTAssertTrue(editing.live.isEmpty)
-        XCTAssertNotNil(model.rowMessages["moving"])
+        XCTAssertEqual(editing.applied.count, 1)
+        XCTAssertEqual(editing.applied[0].0, .floats(parameter: "moving", values: [0: 4]))
+        XCTAssertEqual(editing.applied[0].1, "Change Moving")
+        model.beginGesture("moving")
+        model.setFloat("moving", component: 0, to: 5, live: true)
+        model.endGesture()
+        XCTAssertEqual(editing.live, [.floats(parameter: "moving", values: [0: 5])])
+        XCTAssertEqual(editing.calls, ["begin Change Moving", "end"])
+    }
+
+    func testAResetOfAnAnimatedParameterIsRefusedWithAReason() {
+        model.select(nodes: [7])
         model.reset("moving")
         XCTAssertTrue(editing.applied.isEmpty)
+        XCTAssertTrue(model.rowMessages["moving"]?.contains("Clear its keyframes") == true)
+    }
+
+    func testSetKeyframeKeysEveryFloatComponentOrTheOnesNamed() {
+        model.select(nodes: [7])
+        model.setKeyframe("size")
+        XCTAssertEqual(editing.applied.last?.0, .setKeyframe(parameter: "size", components: [0, 1, 2]))
+        XCTAssertEqual(editing.applied.last?.1, "Set Keyframe")
+        model.setKeyframe("size", components: [1])
+        XCTAssertEqual(editing.applied.last?.0, .setKeyframe(parameter: "size", components: [1]))
+    }
+
+    func testOnlyAFloatCanBeKeyed() {
+        model.select(nodes: [7])
+        model.setKeyframe("columns")
+        model.setKeyframe("name")
+        XCTAssertTrue(editing.applied.isEmpty)
+    }
+
+    func testRemoveKeyframeTakesOnlyTheComponentsKeyedOnThisFrame() {
+        model.select(nodes: [7])
+        // "moving" has a key on this frame in the fixture: its component 0 is both animated and keyed.
+        model.removeKeyframe("moving")
+        XCTAssertEqual(editing.applied.last?.0, .removeKeyframe(parameter: "moving", components: [0]))
+        XCTAssertEqual(editing.applied.last?.1, "Remove Keyframe")
+        let before = editing.applied.count
+        // Nothing of "size" is keyed, so there is nothing to remove.
+        model.removeKeyframe("size")
+        XCTAssertEqual(editing.applied.count, before)
+    }
+
+    func testClearKeyframesTakesTheAnimatedComponents() {
+        model.select(nodes: [7])
+        model.clearKeyframes("moving")
+        XCTAssertEqual(editing.applied.last?.0, .clearKeyframes(parameter: "moving", components: [0]))
+        XCTAssertEqual(editing.applied.last?.1, "Clear Keyframes")
+        let before = editing.applied.count
+        model.clearKeyframes("size")
+        XCTAssertEqual(editing.applied.count, before)
     }
 
     func testADragFollowsTheValueAndRegistersOnceAtTheEnd() {
