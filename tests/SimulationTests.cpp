@@ -96,6 +96,20 @@ TEST_CASE_METHOD(SimulationReset, "A keyframe track steps when the key says so")
     REQUIRE(track.evaluate(11.f) == Catch::Approx(10.f));
 }
 
+TEST_CASE_METHOD(SimulationReset, "A key holds its own value on its own frame after a step")
+{
+    sim::KeyframeTrack track;
+    track.addKeyframe(1.f, 0.f, sim::Interpolation::Step);
+    track.addKeyframe(24.f, 5.f, sim::Interpolation::Linear);
+    track.addKeyframe(48.f, 2.f, sim::Interpolation::Smooth);
+
+    // The step holds the first value up to the second key, and the second key is worth its own value.
+    REQUIRE(track.evaluate(23.f) == Catch::Approx(0.f));
+    REQUIRE(track.evaluate(24.f) == Catch::Approx(5.f));
+    REQUIRE(track.evaluate(36.f) == Catch::Approx(3.5f));
+    REQUIRE(track.evaluate(48.f) == Catch::Approx(2.f));
+}
+
 TEST_CASE_METHOD(SimulationReset, "A keyframe track eases in and out when the key says so")
 {
     sim::KeyframeTrack track;

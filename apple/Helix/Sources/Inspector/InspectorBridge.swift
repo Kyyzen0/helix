@@ -85,6 +85,7 @@ enum InspectorLoader {
         parameter.expressions = info.expressions.map { String(engine: $0) }
         parameter.expressionErrors = info.expressionErrors.map { String(engine: $0) }
         parameter.animated = Set(info.animatedComponents.map { Int($0) })
+        parameter.keyed = Set(info.keyedComponents.map { Int($0) })
 
         let engineName = std.string(name)
         for component in 0..<parameter.componentCount {

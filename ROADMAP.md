@@ -22,11 +22,13 @@ Done in the tree:
 - **Metal viewport** through `metal-cpp`, in place of Vulkan through MoltenVK.
   See [docs/METAL-RENDERER.md](docs/METAL-RENDERER.md).
 - **Async cooking** on a worker pool, with cancellation and coalescing.
-- **Timeline** with playback, scrubbing, looping and a frame range.
+- **Timeline** with playback, scrubbing, looping and a frame range, in the native
+  interface (M4 below).
 - **Keyframes, first version.** A parameter component holds a track of
   keyframes with step, linear or smooth interpolation, and every track is a
   pure function of the frame (`src/Engine/Simulation/Keyframe.h`,
-  `KeyframeStore.h`). Tangents and a curve editor are still to come.
+  `KeyframeStore.h`). Set, move, delete and change the interpolation of keys
+  from the interface and from MCP. Tangents and a curve editor are still to come.
 - **Simulation nodes**: particles and springs, keyframable from the timeline.
 - **Sweep node**, **user node authoring** from script or expression source,
   and copy on write attributes.
@@ -89,10 +91,34 @@ Done in the tree:
   gives ranges, options, defaults and expressions; `set_parameter` takes an expression;
   `reset_parameter`). See [build-macos.md](build-macos.md).
 
+- **M4, the timeline, keyframes and the spreadsheet.** A bar under the viewport plays the scene
+  (play, pause, step, loop, a range and a frame rate, real-time playback that skips the frames a slow
+  cook misses, or every frame), with a ruler to scrub and the keys of the selected node as diamonds
+  that drag, change interpolation and delete. The inspector keys any float: Set Keyframe, Remove
+  Keyframe and Clear Keyframes in the row menu, a diamond that is filled on a key and hollow between,
+  and editing a keyed value sets the key of the current frame. The bottom of the window switches
+  between the node editor and a spreadsheet, a native `NSTableView` of the points, vertices, faces
+  or primitives of the node in front, read a page at a time. The facade gained the range and rate
+  (`setFrameRange`, `setFps`), the keyframes, and the cook generation of a node; MCP gained
+  `set_keyframe`, `remove_keyframe`, `clear_keyframes`, `list_keyframes` and `set_time_range`, and
+  `render_view` takes a `frame`. An undo never moves the playhead. A change of the frame rate now
+  dirties the simulations, and a key is worth its own value on its own frame after a step (both were
+  bugs). See [build-macos.md](build-macos.md).
+
 Known gaps found on the way, to fix as the work below touches them:
 
-- **Inspector gaps.** Keyframes cannot be edited from the interface (M4); a component that holds
-  keyframes is read only. No file chooser for path strings, no editing of several nodes at once,
+- **Playback gaps.** Playback cooks synchronously on the main thread, since the engine's background
+  cooking is not safe to drive from the interface yet (the simulation nodes read the live network
+  while they cook, and the keyframe store is not locked): a cook slower than a frame stalls the
+  window for that long. A simulation replays from its start frame at every cook, so its cost grows
+  with the frame until the cook cache of track four. Keys are floats only. There is no dope sheet
+  and no curve editor: the ruler shows the keys of one node as diamonds, and tangents are not
+  editable (step, linear and smooth only). An edit stops the playback.
+- **Spreadsheet gaps.** Read only: no editing of a value, no sorting or filtering, no selection of
+  which attributes are shown, and no spreadsheet of a node's second output. An attribute that some
+  primitives carry and others do not shows "–" in its column, since its values cannot be lined up
+  with the rows (reading it per primitive is to do). Copy is capped at 100 000 rows.
+- **Inspector gaps.** No file chooser for path strings, no editing of several nodes at once,
   no dragging of ramp points on the curve (a b spline segment of the curve is drawn
   approximately), and the combo box of an attribute name is a field with a list. A node nothing has
   cooked (outside the chain of the display node) shows no error until it is cooked. The background
@@ -160,7 +186,7 @@ interface keeps working until the last one removes it.
 | ~~M1.5, Helix MCP~~ | Done: `Helix --mcp` is a Model Context Protocol server over the facade, so an AI agent can create, inspect and change a scene, and check the result as data and as a viewport capture. It runs its own engine, with no undo grouping and no script sandbox yet (track two). |
 | ~~M2, the node editor~~ | Done: the window shows the viewport over a node editor. Show, select, move, connect, disconnect and delete nodes, set the display node, and create nodes from a search palette; every edit is one undoable step. See [build-macos.md](build-macos.md). |
 | ~~M3, the inspector~~ | Done: every parameter type in a column beside the viewport, with undo through the macOS `UndoManager`, and per-node cook errors. See [build-macos.md](build-macos.md). |
-| **M4, timeline and spreadsheet** | Playback, keyframes from the interface, and the attribute spreadsheet as a native table. |
+| ~~M4, timeline and spreadsheet~~ | Done: playback, keyframes from the interface and from MCP, and the attribute spreadsheet as a native table. Playback is synchronous on the main thread for now. See [build-macos.md](build-macos.md). |
 | **M5, finish** | Settings, icon, document types, packaging, signing and notarization, then the Qt interface is removed. |
 
 What the native application gets from the platform rather than reimplementing:
@@ -207,8 +233,10 @@ same graph.
    lines, transforms are attributes), four skin influences per point as
    attributes, a deform node, and glTF clips sampled at the current frame as
    a pure function of time.
-4. **Keyframes, second version**: bezier tangents, a curve editor next to the
-   timeline, and keyframed transforms for skeletons.
+4. **Keyframes, second version**: ~~set, move, delete and interpolation from the
+   interface and MCP~~ is done (M4). To do: bezier tangents, a curve editor and a
+   dope sheet next to the timeline, keys on integers and toggles, and keyframed
+   transforms for skeletons.
 5. **2D**: curves, vector shapes and text as geometry, and image operations as
    GPU nodes of the same graph.
 6. **A graph that can express more**: node templates with exposed parameters,
@@ -255,8 +283,8 @@ The reference machine is a Mac mini M4. Everything above must run well on it.
 2. ~~M1, the walking skeleton of the native app~~ done
 3. ~~M1.5, Helix MCP, so the AI track is exercised from the start~~ done
 4. ~~glTF import with UVs~~ and ~~textured viewport shading~~ done (base colour only)
-5. ~~M2, the node editor~~ and ~~M3, the inspector~~ done; M4, the native interface, with cook caching and the scheduler work
-   alongside
+5. ~~M2, the node editor~~, ~~M3, the inspector~~ and ~~M4, the timeline and the spreadsheet~~
+   done; cook caching and the scheduler work next, so playback can leave the main thread
 6. Skeletal animation and keyframes, second version
 7. M5, then the stability and rendering items that remain
 

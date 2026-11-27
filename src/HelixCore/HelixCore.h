@@ -400,7 +400,11 @@ struct ParameterInfo
     /// or there is none. A broken expression reads as zero.
     std::vector<std::string> expressionErrors;
     /// @brief The components that hold keyframes, by index. Their value follows the timeline.
+    /// Writing one sets or replaces the key at the current frame (see setFloat).
     std::vector<std::uint32_t> animatedComponents;
+    /// @brief The animated components that have a key on the current frame exactly, which a
+    /// panel draws as a filled diamond. A subset of `animatedComponents`.
+    std::vector<std::uint32_t> keyedComponents;
 };
 
 /// @brief What an entry of the layout of a node's parameters is.
@@ -484,13 +488,19 @@ Vector3Value getVector3(NodeId node, const std::string& parameter);
 
 /// @brief Writes one component of a float parameter. The engine clamps it to the range the
 /// parameter declares.
+/// @note A component that holds keyframes follows the timeline, so the write would be undone at
+/// the next frame. Instead it sets the key on the current frame, or replaces the one that is
+/// there, with the value (the "auto key" of other tools). A new key takes the interpolation of the
+/// key before it, or smooth when it is the first. The keys on other frames are left alone, and the
+/// parameter keeps showing the value of the track at the current frame.
 Status setFloat(NodeId node, const std::string& parameter, std::uint32_t component, float value);
 /// @brief Writes one component of an integer or toggle parameter.
 Status setInt(NodeId node, const std::string& parameter, std::uint32_t component, std::int64_t value);
 /// @brief Writes one component of a string or dropdown parameter.
 Status
 setString(NodeId node, const std::string& parameter, std::uint32_t component, const std::string& value);
-/// @brief Writes a float parameter of three components.
+/// @brief Writes a float parameter of three components. A component that holds keyframes is keyed
+/// at the current frame, as setFloat does.
 Status setVector3(NodeId node, const std::string& parameter, float x, float y, float z);
 
 /// @brief Makes a component read from a daslang expression, such as "sin($F * 0.1)".
@@ -516,7 +526,8 @@ Status clearExpression(NodeId node, const std::string& parameter, std::uint32_t 
 
 /// @brief Puts every component of a parameter back to the default the node declares, and takes
 /// its expressions off. A ramp goes back to its default points.
-/// @note Fails for a parameter that holds keyframes, which would only be overwritten again.
+/// @note Fails for a parameter that holds keyframes, which would only be overwritten again: clear
+/// its keyframes first.
 Status resetParameter(NodeId node, const std::string& parameter);
 
 /// @brief One control point of a ramp.
@@ -582,8 +593,118 @@ struct TimeInfo
 TimeInfo timeInfo();
 
 /// @brief Moves the scene to a frame, clamped to the playback range.
-/// @note Moving through time does not mark the scene modified.
+/// @note Moving through time does not mark the scene modified. Every keyframed parameter takes
+/// its value at the frame, and only the nodes that read the time cook again: what a node produces
+/// is a pure function of the frame, so jumping back gives what playing forward gave.
 void setFrame(float frame);
+
+/// @brief Sets the first and the last frame of the playback range. The frame is held inside it.
+/// @note Fails when `start` is not below `end`, or a frame is further than a million from zero.
+/// Marks the scene modified, since the range is saved in the file.
+Status setFrameRange(std::int32_t start, std::int32_t end);
+
+/// @brief Sets how many frames make up a second, from above 0 to 1000 at most. The nodes that
+/// read the time cook again, since a simulation steps by the length of a frame.
+/// @note Marks the scene modified, since the rate is saved in the file.
+Status setFps(float fps);
+
+/** @} */
+
+/** @name Keyframes
+ * @{
+ *
+ * A float parameter component can hold keyframes: values pinned to frames, with a way to move from
+ * one to the next. The value of the component is then a pure function of the frame. Every function
+ * here works on one component of a float parameter, and fails with a sentence for any other
+ * parameter, a component out of range, a node that is not there or a value that is not a number.
+ * After any change the parameter reads the value its track holds at the current frame, and the node
+ * and what is wired after it cook again. Frames are floats, so a key can sit between two frames.
+ */
+
+/// @brief How a value moves from one key to the next one. It belongs to the key it starts from.
+enum class Interpolation : std::int32_t
+{
+    /// @brief The value holds until the next key, then jumps.
+    Step,
+    /// @brief The value moves at a constant rate.
+    Linear,
+    /// @brief The value eases in and out of the segment.
+    Smooth
+};
+
+/// @brief One key of a track.
+struct KeyframeInfo
+{
+    float frame = 0.f;
+    float value = 0.f;
+    Interpolation interpolation = Interpolation::Smooth;
+};
+
+/// @brief The keys of one component of one parameter.
+struct KeyframeTrackInfo
+{
+    std::string parameter;
+    std::uint32_t component = 0;
+    /// @brief In order of frame.
+    std::vector<KeyframeInfo> keys;
+    /// @brief The value the component held before it was keyed, which clearKeyframes puts back.
+    float baseValue = 0.f;
+};
+
+/// @brief Sets a key, or replaces the one on that frame.
+/// @note The value is held to the locked ends of the range of the parameter, like setFloat. The
+/// first key of a component remembers the value (and the expression) it held, for clearKeyframes.
+Status setKeyframe(
+    NodeId node,
+    const std::string& parameter,
+    std::uint32_t component,
+    float frame,
+    float value,
+    Interpolation interpolation
+);
+
+/// @brief Sets a key on a frame with the value the component has now, which is what "Set
+/// Keyframe" of a panel does. A key already on the frame keeps its interpolation, a new one takes
+/// the one of the key before it, or smooth for the first.
+Status setKeyframeAtCurrentValue(
+    NodeId node,
+    const std::string& parameter,
+    std::uint32_t component,
+    float frame
+);
+
+/// @brief Removes the key on a frame. Fails when there is none. Removing the last key of a
+/// component puts back the value and the expression it held before it was keyed.
+Status removeKeyframe(NodeId node, const std::string& parameter, std::uint32_t component, float frame);
+
+/// @brief Moves a key to another frame, keeping its value and interpolation. Fails when there is no
+/// key on `fromFrame` or one on `toFrame` already, which is never replaced.
+Status moveKeyframe(
+    NodeId node,
+    const std::string& parameter,
+    std::uint32_t component,
+    float fromFrame,
+    float toFrame
+);
+
+/// @brief Changes how the value leaves the key on a frame. Fails when there is none.
+Status setKeyframeInterpolation(
+    NodeId node,
+    const std::string& parameter,
+    std::uint32_t component,
+    float frame,
+    Interpolation interpolation
+);
+
+/// @brief Removes every key of a component, and puts back the value and the expression it held
+/// before it was keyed. Succeeds when there were none.
+Status clearKeyframes(NodeId node, const std::string& parameter, std::uint32_t component);
+
+/// @brief The tracks of a node, by parameter then component. Empty for a node that has none.
+std::vector<KeyframeTrackInfo> listKeyframes(NodeId node);
+
+/// @brief The nodes that hold at least one key, in no particular order.
+std::vector<NodeId> animatedNodes();
 
 /** @} */
 
@@ -659,10 +780,27 @@ struct MaterialInfo
     std::string missingTexture;
 };
 
+/// @brief Where one primitive's elements sit among the elements of the whole node output, which
+/// are numbered one primitive after the other, as readAttribute reads them.
+struct PrimitiveRange
+{
+    std::uint64_t pointStart = 0;
+    std::uint64_t pointCount = 0;
+    std::uint64_t vertexStart = 0;
+    std::uint64_t vertexCount = 0;
+    std::uint64_t faceStart = 0;
+    std::uint64_t faceCount = 0;
+};
+
 /// @brief What any node produced, in numbers: the counts, the bounds and the attribute list.
 struct GeometryReport
 {
     Status status;
+    /// @brief The mark of the cook this report describes, as nodeCookGeneration gives it.
+    std::uint64_t generation = 0;
+    /// @brief One entry per primitive, in the order readAttribute walks them, so a table can say
+    /// which primitive a row belongs to.
+    std::vector<PrimitiveRange> primitives;
     std::uint64_t pointCount = 0;
     std::uint64_t primitiveCount = 0;
     std::uint64_t vertexCount = 0;
@@ -682,6 +820,9 @@ struct GeometryReport
 struct AttributeValues
 {
     Status status;
+    /// @brief The mark of the cook these values come from, as nodeCookGeneration gives it. When it
+    /// is not the one a cache of earlier pages holds, they are out of date.
+    std::uint64_t generation = 0;
     AttributeValueType type = AttributeValueType::Float;
     std::uint32_t componentCount = 1;
     /// @brief How many elements the attribute has in all, so a caller can page.
@@ -753,6 +894,13 @@ AttributeValues readAttribute(
     std::uint64_t start,
     std::uint64_t count
 );
+
+/// @brief Returns a number that changes every time the node cooks and is never shared by two cooks
+/// of any node, or 0 for a node that has not cooked or does not exist.
+/// @note A caller that keeps what readAttribute returned asks again whenever this is not the number
+/// it saw. Reading it never cooks. cookNodeReport and readAttribute cook a node only when it is
+/// dirty, so asking for a page of a node that is clean reads what is there and costs no cook.
+std::uint64_t nodeCookGeneration(NodeId node);
 
 /// @brief Cooks the display node and counts what it produced.
 /// @note Fails when no node is displayed or the node cannot be cooked.

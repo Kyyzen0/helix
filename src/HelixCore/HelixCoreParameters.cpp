@@ -235,7 +235,12 @@ ParameterInfo describeParameter(
 
         info.expressions.push_back(parameter.getExpression(component).value_or(""));
         info.expressionErrors.push_back(parameter.getExpressionError(component).value_or(""));
-        if (isAnimated(node, info.name, component)) info.animatedComponents.push_back(component);
+        if (isAnimated(node, info.name, component))
+        {
+            info.animatedComponents.push_back(component);
+            const sim::KeyframeTrack* track = sim::KeyframeStore::instance().getTrack({node, info.name, component});
+            if (track && track->hasKeyframe(nt::nm().getFrame())) info.keyedComponents.push_back(component);
+        }
     }
     return info;
 }
@@ -348,7 +353,7 @@ Status resetParameter(NodeId node, const std::string& parameter)
         for (std::uint32_t component = 0; component < found->getVectorSize(); ++component)
             if (isAnimated(node, parameter, component))
                 return failure(
-                    "The parameter '" + parameter + "' holds keyframes, which a reset would only be overwritten by."
+                    "The parameter '" + parameter + "' holds keyframes, which a reset would only be overwritten by. Clear its keyframes first."
                 );
 
         for (unsigned int component = 0; component < found->getVectorSize(); ++component)

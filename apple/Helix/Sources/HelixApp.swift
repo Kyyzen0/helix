@@ -19,6 +19,10 @@ struct HelixCommands: Commands {
     @AppStorage(WireframeSetting.defaultsKey) private var wireframe = WireframeSetting.auto
     @AppStorage(MaterialsSetting.defaultsKey) private var materialsVisible = true
     @AppStorage(InspectorSetting.defaultsKey) private var inspectorShown = true
+    @AppStorage(TimelineSetting.shownKey) private var timelineShown = true
+    @AppStorage(TimelineSetting.loopKey) private var loop = true
+    @AppStorage(TimelineSetting.everyFrameKey) private var everyFrame = false
+    @AppStorage(TimelineSetting.lowerPaneKey) private var lowerPane = TimelineSetting.LowerPane.network.rawValue
 
     var body: some Commands {
         CommandGroup(replacing: .appInfo) {
@@ -47,6 +51,31 @@ struct HelixCommands: Commands {
             Button(inspectorShown ? "Hide Inspector" : "Show Inspector") { inspectorShown.toggle() }
                 .keyboardShortcut("i", modifiers: [.command, .option])
                 .disabled(document == nil)
+            Button(timelineShown ? "Hide Timeline" : "Show Timeline") { timelineShown.toggle() }
+                .keyboardShortcut("t", modifiers: [.command, .option])
+                .disabled(document == nil)
+            Button(spreadsheetShown ? "Show Node Editor" : "Show Spreadsheet") {
+                lowerPane = (spreadsheetShown ? TimelineSetting.LowerPane.network : .spreadsheet).rawValue
+            }
+            .keyboardShortcut("s", modifiers: [.command, .option])
+            .disabled(document == nil)
+        }
+        // The keys of playback (space, the arrows) belong to the views that have the keyboard, for
+        // the reason the viewport keys do. These items have none, and do the same.
+        CommandMenu("Timeline") {
+            Button("Play/Pause") { document?.timeline.perform(.playPause) }
+                .disabled(document == nil || document?.isActive != true)
+            Button("Step Back") { document?.timeline.perform(.stepBack) }
+                .disabled(document == nil || document?.isActive != true)
+            Button("Step Forward") { document?.timeline.perform(.stepForward) }
+                .disabled(document == nil || document?.isActive != true)
+            Button("Go to Start") { document?.timeline.perform(.goToStart) }
+                .disabled(document == nil || document?.isActive != true)
+            Button("Go to End") { document?.timeline.perform(.goToEnd) }
+                .disabled(document == nil || document?.isActive != true)
+            Divider()
+            Toggle("Loop", isOn: $loop)
+            Toggle("Play Every Frame", isOn: $everyFrame)
         }
         CommandMenu("Node") {
             Button("Add Node…") { document?.editor.openPalette() }
@@ -56,6 +85,10 @@ struct HelixCommands: Commands {
                 .disabled(document == nil || document?.isActive != true)
         }
     }
+}
+
+extension HelixCommands {
+    private var spreadsheetShown: Bool { lowerPane == TimelineSetting.LowerPane.spreadsheet.rawValue }
 }
 
 extension HelixCommands {

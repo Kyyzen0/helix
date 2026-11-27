@@ -137,14 +137,19 @@ struct ExpressionDraftField: View {
     }
 }
 
-/// A small diamond for a value that follows keyframes.
+/// A small diamond for a value that follows keyframes: filled when the frame the scene sits on
+/// has a key of it, hollow when it does not.
 struct KeyframeBadge: View {
+    let filled: Bool
+
     var body: some View {
-        Image(systemName: "diamond.fill")
-            .font(.system(size: 7))
+        Image(systemName: filled ? "diamond.fill" : "diamond")
+            .font(.system(size: 8, weight: .semibold))
             .foregroundStyle(Color.orange)
-            .help(Text("This value follows keyframes. Editing keyframes comes with the timeline."))
-            .accessibilityLabel(Text("Animated"))
+            .help(filled
+                ? Text("This value has a keyframe on this frame. Changing it changes the keyframe.")
+                : Text("This value follows keyframes. Changing it sets a keyframe on this frame."))
+            .accessibilityLabel(filled ? Text("Keyframe on this frame") : Text("Animated"))
     }
 }
 

@@ -5,6 +5,8 @@
 #include "Engine/Network/NodePacket.h"
 #include "Engine/Network/NodeType.h"
 #include "Engine/Parameter/NodeParameter.h"
+#include <atomic>
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -152,6 +154,15 @@ class Node
     /// cooking).
     bool isDirty();
 
+    /// @brief Returns a number that changes every time the node cooks, and is never the same for
+    /// two cooks of any node of the process. Zero means the node has not cooked.
+    ///
+    /// A reader that keeps a copy of what the node produced (a table of its attributes) compares
+    /// the number it saw to this one to know the copy is out of date. The number is drawn from
+    /// one counter shared by every node, so a node that takes the place of another after a
+    /// scene is restored cannot be mistaken for the one it replaces.
+    std::uint64_t getCookGeneration() const { return cookGeneration_.load(std::memory_order_relaxed); }
+
     /// @brief Returns whether the node takes any input at all.
     bool takesInput() const;
 
@@ -191,6 +202,8 @@ class Node
     // What the last cook said about itself. A cook can run on a worker thread of the background
     // pool while the interface reads these, so they have a lock of their own.
     mutable std::mutex diagnosticsMutex_;
+    // The mark of the last cook, see getCookGeneration. Atomic since a worker thread cooks.
+    std::atomic<std::uint64_t> cookGeneration_{0};
     std::string error_;
     std::vector<std::string> warnings_;
     helix::nt::NodeId nodeId_;

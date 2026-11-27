@@ -16,6 +16,14 @@ if let flag = arguments.firstIndex(of: InspectorSnapshotCommand.flag) {
     exit(InspectorSnapshotCommand.run(Array(arguments[(flag + 1)...])))
 }
 
+// And the timeline, and the spreadsheet of a node.
+if let flag = arguments.firstIndex(of: TimelineSnapshotCommand.flag) {
+    exit(TimelineSnapshotCommand.run(Array(arguments[(flag + 1)...])))
+}
+if let flag = arguments.firstIndex(of: SpreadsheetSnapshotCommand.flag) {
+    exit(SpreadsheetSnapshotCommand.run(Array(arguments[(flag + 1)...])))
+}
+
 // An AI agent starts the app with this flag and talks to it over standard input and output.
 if arguments.contains(MCPServer.flag) {
     exit(MCPServer.run())

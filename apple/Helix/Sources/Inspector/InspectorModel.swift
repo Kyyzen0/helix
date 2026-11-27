@@ -10,12 +10,19 @@ enum InspectorEdit: Equatable {
     case setExpression(parameter: String, component: Int, text: String)
     case clearExpression(parameter: String, component: Int)
     case reset(parameter: String)
+    /// Keys the value the components have now on the frame the scene sits on.
+    case setKeyframe(parameter: String, components: [Int])
+    /// Takes off the keys on the frame the scene sits on.
+    case removeKeyframe(parameter: String, components: [Int])
+    /// Takes off every key, which puts back the value the components held before they were keyed.
+    case clearKeyframes(parameter: String, components: [Int])
 
     var parameter: String {
         switch self {
         case .floats(let parameter, _), .ints(let parameter, _), .string(let parameter, _, _),
              .ramp(let parameter, _), .setExpression(let parameter, _, _),
-             .clearExpression(let parameter, _), .reset(let parameter):
+             .clearExpression(let parameter, _), .reset(let parameter),
+             .setKeyframe(let parameter, _), .removeKeyframe(let parameter, _), .clearKeyframes(let parameter, _):
             parameter
         }
     }
@@ -129,25 +136,19 @@ final class InspectorModel: ObservableObject {
         case .setExpression: name = InspectorEditName.editExpression
         case .clearExpression: name = InspectorEditName.clearExpression
         case .reset: name = InspectorEditName.reset(label(of: edit.parameter))
+        case .setKeyframe: name = InspectorEditName.setKeyframe
+        case .removeKeyframe: name = InspectorEditName.removeKeyframe
+        case .clearKeyframes: name = InspectorEditName.clearKeyframes
         default: name = InspectorEditName.change(label(of: edit.parameter))
         }
         finish(editing.apply(edit, to: node.id, named: name), parameter: edit.parameter)
         reload()
     }
 
-    /// Whether a component can be written. One that holds keyframes follows the timeline, which
-    /// would put the old value back at the next frame, so the change is refused with a reason
-    /// rather than made and lost. The fields are disabled for it too: this is the guard for a
-    /// change that reaches the model some other way.
-    private func isWritable(_ info: InspectorParameter, component: Int) -> Bool {
-        guard info.isAnimated(component) else { return true }
-        rowMessages[info.name] = String(localized: "This value follows keyframes, and the timeline would undo a change. Editing keyframes comes with the timeline.")
-        return false
-    }
-
     func setFloat(_ parameter: String, component: Int, to value: Double, live: Bool = false) {
-        guard let info = node?.parameters[parameter], component < info.floats.count, value.isFinite,
-              isWritable(info, component: component) else { return }
+        // A component that holds keyframes is written too: the engine sets the key on the current
+        // frame, so the change is kept rather than put back by the timeline.
+        guard let info = node?.parameters[parameter], component < info.floats.count, value.isFinite else { return }
         let held = info.range?.clamped(value) ?? value
         if live { liveEdit(.floats(parameter: parameter, values: [component: held])) } else {
             commit(.floats(parameter: parameter, values: [component: held]))
@@ -155,8 +156,7 @@ final class InspectorModel: ObservableObject {
     }
 
     func setInt(_ parameter: String, component: Int, to value: Int, live: Bool = false) {
-        guard let info = node?.parameters[parameter], component < info.ints.count,
-              isWritable(info, component: component) else { return }
+        guard let info = node?.parameters[parameter], component < info.ints.count else { return }
         let held = info.kind == .toggle ? value : (info.range?.clamped(value) ?? value)
         if live { liveEdit(.ints(parameter: parameter, values: [component: held])) } else {
             commit(.ints(parameter: parameter, values: [component: held]))
@@ -165,7 +165,7 @@ final class InspectorModel: ObservableObject {
 
     func setString(_ parameter: String, component: Int = 0, to value: String) {
         guard let info = node?.parameters[parameter], component < info.strings.count,
-              info.strings[component] != value, isWritable(info, component: component) else { return }
+              info.strings[component] != value else { return }
         commit(.string(parameter: parameter, component: component, value: value))
     }
 
@@ -175,10 +175,44 @@ final class InspectorModel: ObservableObject {
 
     func reset(_ parameter: String) {
         guard let info = node?.parameters[parameter], info.animated.isEmpty else {
-            rowMessages[parameter] = String(localized: "This value follows keyframes, which a reset would only be overwritten by.")
+            rowMessages[parameter] = String(localized: "This value follows keyframes, which a reset would only be overwritten by. Clear its keyframes first.")
             return
         }
         commit(.reset(parameter: parameter))
+    }
+
+    // MARK: Keyframes
+
+    /// The float components of a parameter, which are the ones that can be keyed.
+    private func keyable(_ info: InspectorParameter, components: [Int]?) -> [Int] {
+        guard info.kind == .float else { return [] }
+        let all = Array(0..<info.componentCount)
+        return components.map { requested in all.filter(requested.contains) } ?? all
+    }
+
+    /// Keys the value the components have now on the current frame. Every component of the
+    /// parameter when none are named.
+    func setKeyframe(_ parameter: String, components: [Int]? = nil) {
+        guard let info = node?.parameters[parameter] else { return }
+        let targets = keyable(info, components: components)
+        guard !targets.isEmpty else { return }
+        commit(.setKeyframe(parameter: parameter, components: targets))
+    }
+
+    /// Takes off the keys on the current frame of the components that have one.
+    func removeKeyframe(_ parameter: String, components: [Int]? = nil) {
+        guard let info = node?.parameters[parameter] else { return }
+        let targets = keyable(info, components: components).filter { info.keyed.contains($0) }
+        guard !targets.isEmpty else { return }
+        commit(.removeKeyframe(parameter: parameter, components: targets))
+    }
+
+    /// Takes off every key of the components that hold any, and puts their old values back.
+    func clearKeyframes(_ parameter: String, components: [Int]? = nil) {
+        guard let info = node?.parameters[parameter] else { return }
+        let targets = keyable(info, components: components).filter { info.isAnimated($0) }
+        guard !targets.isEmpty else { return }
+        commit(.clearKeyframes(parameter: parameter, components: targets))
     }
 
     func clearExpression(_ parameter: String, component: Int) {

@@ -9,6 +9,10 @@ struct DocumentView: View {
     @Environment(\.undoManager) private var undoManager
     /// Whether the inspector column is shown. Kept across launches, and shared with the menu.
     @AppStorage(InspectorSetting.defaultsKey) private var inspectorShown = true
+    /// Whether the timeline bar is shown, and what the bottom pane holds. Kept across launches,
+    /// and shared with the menu.
+    @AppStorage(TimelineSetting.shownKey) private var timelineShown = true
+    @AppStorage(TimelineSetting.lowerPaneKey) private var lowerPane = TimelineSetting.LowerPane.network.rawValue
 
     var body: some View {
         VSplitView {
@@ -27,8 +31,12 @@ struct DocumentView: View {
                 }
             }
             .frame(minHeight: 160)
-            NodeEditorView(model: document.editor)
+            lowerPaneView
                 .frame(minHeight: 120, idealHeight: 260)
+        }
+        // The bar sits under the viewport and the lower pane, and the inspector keeps its full height.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if timelineShown, document.isActive { TimelineBar(model: document.timeline) }
         }
         .frame(minWidth: 480, minHeight: 440)
         .inspector(isPresented: $inspectorShown) {
@@ -37,7 +45,13 @@ struct DocumentView: View {
         }
         // The window's undo manager takes the steps of the node editor, and marks the document
         // as edited when it gets one.
-        .onAppear { document.undoManager = undoManager }
+        .onAppear {
+            document.undoManager = undoManager
+            document.spreadsheet.isShown = lowerPane == TimelineSetting.LowerPane.spreadsheet.rawValue
+        }
+        .onChange(of: lowerPane) { _, pane in
+            document.spreadsheet.isShown = pane == TimelineSetting.LowerPane.spreadsheet.rawValue
+        }
         .onChange(of: undoManager) { _, manager in document.undoManager = manager }
         .task { activate() }
         // A 3D file dropped on the window is imported into the scene.
@@ -108,6 +122,30 @@ struct DocumentView: View {
 }
 
 extension DocumentView {
+    /// The bottom pane: the node editor or the spreadsheet, with the switch between them.
+    private var lowerPaneView: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Picker("View", selection: $lowerPane) {
+                    Text("Network").tag(TimelineSetting.LowerPane.network.rawValue)
+                    Text("Spreadsheet").tag(TimelineSetting.LowerPane.spreadsheet.rawValue)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+                Spacer()
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            Divider()
+            if lowerPane == TimelineSetting.LowerPane.spreadsheet.rawValue {
+                SpreadsheetView(model: document.spreadsheet)
+            } else {
+                NodeEditorView(model: document.editor)
+            }
+        }
+    }
+
     /// A new scene takes the engine when it is shown. When another scene holds it, there is
     /// nowhere to put this one: say so, and close the empty window.
     private func activate() {

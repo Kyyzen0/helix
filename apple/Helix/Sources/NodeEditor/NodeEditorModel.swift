@@ -106,6 +106,9 @@ final class NodeEditorModel: ObservableObject {
     @Published var paletteTypes: [EditorNodeType] = []
 
     weak var editing: NodeEditorEditing?
+    /// The timeline of the window, which the space bar and the arrow keys drive while the editor
+    /// has the keys.
+    weak var timeline: TimelineModel?
     private(set) var viewSize = CGSize.zero
     /// The last place of the pointer in the view, for the palette to open at.
     var pointer: CGPoint?

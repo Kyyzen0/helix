@@ -70,6 +70,10 @@ enum MaterialsSetting {
 final class ViewportController {
     weak var view: MTKView?
 
+    /// The timeline of the window, which the space bar and the arrow keys drive while the viewport
+    /// has the keys.
+    weak var timeline: TimelineModel?
+
     nonisolated init() {}
 
     /// Set when the camera should frame the geometry on the next frame drawn, since the aspect

@@ -59,4 +59,15 @@ Status requireNodeInScene(NodeId node);
 /// @brief Notes that the scene has changed since it was saved.
 void noteSceneModified();
 
+/// @brief Pulls a value back to the locked ends of the range a component declares, as a literal
+/// written through the facade is.
+float holdFloatToRange(prm::NodeParameter& parameter, std::uint32_t component, float value);
+
+/// @brief Whether a component of a node's float parameter holds keyframes.
+bool isKeyed(NodeId node, const std::string& parameter, std::uint32_t component);
+
+/// @brief Writes a value into a component that holds keyframes, by setting the key on the current
+/// frame (or replacing the one there). See setFloat in HelixCore.h.
+Status keyAtCurrentFrame(NodeId node, const std::string& parameter, std::uint32_t component, float value);
+
 } // namespace helix::core::detail

@@ -174,6 +174,10 @@ final class NodeEditorEventView: NSView, NSViewToolTipOwner {
     // key would also fire while a text field has the keys.
     override func keyDown(with event: NSEvent) {
         let flags = event.modifierFlags.intersection([.shift, .control, .option, .command])
+        if let timeline = model?.timeline,
+           timeline.handleKey(code: event.keyCode, option: flags == .option, otherModifiers: !flags.subtracting(.option).isEmpty) {
+            return
+        }
         switch event.keyCode {
         case 51, 117: // delete, forward delete
             model?.deleteSelection()

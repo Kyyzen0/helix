@@ -105,6 +105,8 @@ struct InspectorParameter: Equatable, Identifiable, Sendable {
     var expressionErrors: [String] = []
     /// The components that hold keyframes.
     var animated: Set<Int> = []
+    /// The animated components that have a key on the current frame itself.
+    var keyed: Set<Int> = []
 
     var rampPoints: [InspectorRampPoint] = []
     var rampInterpolations: [InspectorOption] = []

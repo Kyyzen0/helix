@@ -47,6 +47,13 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
     /// What the inspector of the window shows and does: the parameters of the selected node.
     let inspector = InspectorModel()
 
+    /// The playhead, the range and the keys of the node in front, and the playback.
+    let timeline = TimelineModel()
+
+    /// The table of the attributes of the node in front.
+    let spreadsheet = SpreadsheetModel()
+    let spreadsheetSource = FacadeSpreadsheetSource()
+
     /// The drag in progress that is to become one step of undo, if there is one.
     var continuousEdit = ContinuousEdit()
 
@@ -127,6 +134,7 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         isActive = true
         cookGeometry()
         prepareEditor()
+        prepareTimeline()
         if let message = openingError {
             presentedError = message
             openingError = nil
@@ -215,22 +223,28 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         presentedError = message
     }
 
-    /// Cooks the display node and hands its geometry to the viewport.
-    func cookGeometry() {
+    /// Cooks the display node and hands its geometry to the viewport. The camera frames the
+    /// geometry afterwards, unless `reframe` is false, which is how the frame of an animation
+    /// changes the picture without taking the camera from the person who placed it.
+    func cookGeometry(reframe: Bool = true) {
         let info = helix.core.updateViewportGeometry()
-        displayNodeName = Self.currentDisplayNodeName()
+        let name = Self.currentDisplayNodeName()
+        // Assigned only when they changed: a published property tells the window it changed
+        // whenever it is written, and playback writes these at every frame.
+        if displayNodeName != name { displayNodeName = name }
         if info.status.ok {
-            pointCount = info.pointCount
-            triangleCount = info.triangleCount
-            viewportMessage = nil
+            if pointCount != info.pointCount { pointCount = info.pointCount }
+            if triangleCount != info.triangleCount { triangleCount = info.triangleCount }
+            if viewportMessage != nil { viewportMessage = nil }
         } else {
-            pointCount = 0
-            triangleCount = 0
-            viewportMessage = displayNodeName == nil
+            if pointCount != 0 { pointCount = 0 }
+            if triangleCount != 0 { triangleCount = 0 }
+            let message = name == nil
                 ? String(localized: "No node is displayed.")
                 : String(engine: info.status.error)
+            if viewportMessage != message { viewportMessage = message }
         }
-        viewport.requestFrame()
+        if reframe { viewport.requestFrame() } else { viewport.redraw() }
     }
 
     private static func currentDisplayNodeName() -> String? {
@@ -249,6 +263,8 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
     /// Gives the engine back, once the window is closed.
     func relinquish() {
         guard isActive else { return }
+        // A playback that goes on would cook a scene the window no longer holds.
+        timeline.pause()
         isActive = false
         // Nothing the viewport calls back into may point at the document once it is closed.
         viewport.onFailure = nil
