@@ -123,10 +123,11 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a5f8af6fe7b0f498e7dda7ca57806fccb" id="r_a5f8af6fe7b0f498e7dda7ca57806fccb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f8af6fe7b0f498e7dda7ca57806fccb">throwError</a> (std::string error)</td></tr>
-<tr class="memdesc:a5f8af6fe7b0f498e7dda7ca57806fccb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stops the cook and displays an error.  <br /></td></tr>
+<tr class="memdesc:a5f8af6fe7b0f498e7dda7ca57806fccb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Records an error on the node, for a person or an agent to read (<a class="el" href="classhelix_1_1nt_1_1Node.html#ae07c9c5fc5b600722de0d4e94895c996" title="The error the last cook of this node ended with, empty when it cooked cleanly or has not cooked since...">nt::Node::getError</a>).  <br /></td></tr>
 <tr class="separator:a5f8af6fe7b0f498e7dda7ca57806fccb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade040afaadbb9f615de2947340b0fb36" id="r_ade040afaadbb9f615de2947340b0fb36"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ade040afaadbb9f615de2947340b0fb36">throwWarning</a> (std::string warning)</td></tr>
-<tr class="memdesc:ade040afaadbb9f615de2947340b0fb36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Displays a warning on the node without interrupting the cook.  <br /></td></tr>
+<tr class="memitem:ade040afaadbb9f615de2947340b0fb36" id="r_ade040afaadbb9f615de2947340b0fb36"><td class="memItemLeft" align="right" valign="top"><a id="ade040afaadbb9f615de2947340b0fb36" name="ade040afaadbb9f615de2947340b0fb36"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>throwWarning</b> (std::string warning)</td></tr>
+<tr class="memdesc:ade040afaadbb9f615de2947340b0fb36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Records a warning on the node without interrupting the cook. <br /></td></tr>
 <tr class="separator:ade040afaadbb9f615de2947340b0fb36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87a40d1ceb063064413d2e20e4e36429" id="r_a87a40d1ceb063064413d2e20e4e36429"><td class="memItemLeft" align="right" valign="top"><a id="a87a40d1ceb063064413d2e20e4e36429" name="a87a40d1ceb063064413d2e20e4e36429"></a>
 <a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">NodeId</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getNodeId</b> () const</td></tr>
@@ -208,7 +209,7 @@ Vector3&#160;</td><td class="memItemRight" valign="bottom"><b>evalParmVector3</b
 <div class="line">HELIX_REGISTER_NODE(circle, Circle)</div>
 <div class="ttc" id="aclasshelix_1_1nt_1_1NodeImpl_html"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeImpl.html">helix::nt::NodeImpl</a></div><div class="ttdoc">The base class a node author subclasses to write a node's behaviour.</div><div class="ttdef"><b>Definition</b> NodeImpl.h:40</div></div>
 <div class="ttc" id="aclasshelix_1_1nt_1_1NodeImpl_html_a55a8520f1cd4c26d373c5e07b84b8ed0"><div class="ttname"><a href="#a55a8520f1cd4c26d373c5e07b84b8ed0">helix::nt::NodeImpl::cook</a></div><div class="ttdeci">virtual void cook()=0</div><div class="ttdoc">Produces this node's output packets from its inputs and parameters.</div></div>
-<div class="ttc" id="aclasshelix_1_1nt_1_1NodeImpl_html_ae4651b0f0f600904bcdc5ae7675b09bb"><div class="ttname"><a href="#ae4651b0f0f600904bcdc5ae7675b09bb">helix::nt::NodeImpl::setOutputPacket</a></div><div class="ttdeci">void setOutputPacket(unsigned int outputIndex, helix::NodePacket packet)</div><div class="ttdoc">Hands finished geometry to one of the node's outputs.</div><div class="ttdef"><b>Definition</b> NodeImpl.cpp:24</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1NodeImpl_html_ae4651b0f0f600904bcdc5ae7675b09bb"><div class="ttname"><a href="#ae4651b0f0f600904bcdc5ae7675b09bb">helix::nt::NodeImpl::setOutputPacket</a></div><div class="ttdeci">void setOutputPacket(unsigned int outputIndex, helix::NodePacket packet)</div><div class="ttdoc">Hands finished geometry to one of the node's outputs.</div><div class="ttdef"><b>Definition</b> NodeImpl.cpp:30</div></div>
 </div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>Every cook time query lives here as a forwarder, so an author writes evalParmFloat("radius") and never names the context behind it. </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a55a8520f1cd4c26d373c5e07b84b8ed0" name="a55a8520f1cd4c26d373c5e07b84b8ed0"></a>
@@ -319,7 +320,7 @@ Vector3&#160;</td><td class="memItemRight" valign="bottom"><b>evalParmVector3</b
 </div><div class="memdoc">
 
 <p>Returns whether anything downstream is asking for this output. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo</a></b></dt><dd>Always true until <a class="el" href="classhelix_1_1nt_1_1Node.html" title="The unique runtime representation of a node.">nt::Node</a> tracks dirtiness per output. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo</a></b></dt><dd>Always true until <a class="el" href="classhelix_1_1nt_1_1Node.html" title="The unique runtime representation of a node.">nt::Node</a> tracks dirtiness per output. </dd></dl>
 
 </div>
 </div>
@@ -351,7 +352,7 @@ Vector3&#160;</td><td class="memItemRight" valign="bottom"><b>evalParmVector3</b
 </div><div class="memdoc">
 
 <p>Hands finished geometry to one of the node's outputs. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo</a></b></dt><dd>std::move the geometry instead of copying it. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo</a></b></dt><dd>std::move the geometry instead of copying it. </dd></dl>
 
 </div>
 </div>
@@ -378,36 +379,8 @@ Vector3&#160;</td><td class="memItemRight" valign="bottom"><b>evalParmVector3</b
 </table>
 </div><div class="memdoc">
 
-<p>Stops the cook and displays an error. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo</a></b></dt><dd>Add visual error to GUI </dd></dl>
-
-</div>
-</div>
-<a id="ade040afaadbb9f615de2947340b0fb36" name="ade040afaadbb9f615de2947340b0fb36"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ade040afaadbb9f615de2947340b0fb36">&#9670;&#160;</a></span>throwWarning()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void helix::nt::NodeImpl::throwWarning </td>
-          <td>(</td>
-          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>warning</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Displays a warning on the node without interrupting the cook. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo</a></b></dt><dd>Add visual warning to GUI </dd></dl>
+<p>Records an error on the node, for a person or an agent to read (<a class="el" href="classhelix_1_1nt_1_1Node.html#ae07c9c5fc5b600722de0d4e94895c996" title="The error the last cook of this node ended with, empty when it cooked cleanly or has not cooked since...">nt::Node::getError</a>). </p>
+<dl class="section note"><dt>Note</dt><dd>It does not stop the cook: it returns, and the node has to return after it, so the outputs it did not set stay empty packets. Only the first error of a cook is kept. Throwing an exception does the same, and the engine records its message. </dd></dl>
 
 </div>
 </div>

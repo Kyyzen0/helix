@@ -127,6 +127,21 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4b2ca6b11354ae78093d4fad9fe10045" id="r_a4b2ca6b11354ae78093d4fad9fe10045"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4b2ca6b11354ae78093d4fad9fe10045">cook</a> (<a class="el" href="classhelix_1_1nt_1_1CookContext.html">nt::CookContext</a> &amp;context)</td></tr>
 <tr class="memdesc:a4b2ca6b11354ae78093d4fad9fe10045"><td class="mdescLeft">&#160;</td><td class="mdescRight">Builds the node's implementation and runs its cook, filling the output packets.  <br /></td></tr>
 <tr class="separator:a4b2ca6b11354ae78093d4fad9fe10045"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae07c9c5fc5b600722de0d4e94895c996" id="r_ae07c9c5fc5b600722de0d4e94895c996"><td class="memItemLeft" align="right" valign="top"><a id="ae07c9c5fc5b600722de0d4e94895c996" name="ae07c9c5fc5b600722de0d4e94895c996"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>getError</b> () const</td></tr>
+<tr class="memdesc:ae07c9c5fc5b600722de0d4e94895c996"><td class="mdescLeft">&#160;</td><td class="mdescRight">The error the last cook of this node ended with, empty when it cooked cleanly or has not cooked since it was last changed. <br /></td></tr>
+<tr class="separator:ae07c9c5fc5b600722de0d4e94895c996"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c7a0d7e31054e619f17692c44ab2d31" id="r_a4c7a0d7e31054e619f17692c44ab2d31"><td class="memItemLeft" align="right" valign="top"><a id="a4c7a0d7e31054e619f17692c44ab2d31" name="a4c7a0d7e31054e619f17692c44ab2d31"></a>
+std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>getWarnings</b> () const</td></tr>
+<tr class="memdesc:a4c7a0d7e31054e619f17692c44ab2d31"><td class="mdescLeft">&#160;</td><td class="mdescRight">What the last cook of this node warned about, in the order it said it. <br /></td></tr>
+<tr class="separator:a4c7a0d7e31054e619f17692c44ab2d31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c62f1cf93887539beecf0697a889d29" id="r_a3c62f1cf93887539beecf0697a889d29"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3c62f1cf93887539beecf0697a889d29">recordError</a> (std::string error)</td></tr>
+<tr class="memdesc:a3c62f1cf93887539beecf0697a889d29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notes that the cook failed. Only the first error of a cook is kept: nodes stop at the first thing that is wrong, and a later one is a consequence of it.  <br /></td></tr>
+<tr class="separator:a3c62f1cf93887539beecf0697a889d29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76696db2146e1036d29f3eb02702ff47" id="r_a76696db2146e1036d29f3eb02702ff47"><td class="memItemLeft" align="right" valign="top"><a id="a76696db2146e1036d29f3eb02702ff47" name="a76696db2146e1036d29f3eb02702ff47"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>recordWarning</b> (std::string warning)</td></tr>
+<tr class="memdesc:a76696db2146e1036d29f3eb02702ff47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notes something the cook went on in spite of. <br /></td></tr>
+<tr class="separator:a76696db2146e1036d29f3eb02702ff47"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7a9aacfa54564c8fe73a57b2fd98571" id="r_af7a9aacfa54564c8fe73a57b2fd98571"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; const <a class="el" href="classhelix_1_1NodePacket.html">helix::NodePacket</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af7a9aacfa54564c8fe73a57b2fd98571">getOutputPacket</a> (unsigned int outputIndex) const</td></tr>
 <tr class="memdesc:af7a9aacfa54564c8fe73a57b2fd98571"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current output geometry.  <br /></td></tr>
 <tr class="separator:af7a9aacfa54564c8fe73a57b2fd98571"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -150,6 +165,13 @@ std::vector&lt; std::weak_ptr&lt; <a class="el" href="classhelix_1_1prm_1_1NodeP
 <tr class="memitem:a83c6c83e59af74291669079957a4e1a7" id="r_a83c6c83e59af74291669079957a4e1a7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a83c6c83e59af74291669079957a4e1a7">isParameterHidden</a> (std::string_view parmName)</td></tr>
 <tr class="memdesc:a83c6c83e59af74291669079957a4e1a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the named parameter's hide condition currently hides it.  <br /></td></tr>
 <tr class="separator:a83c6c83e59af74291669079957a4e1a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3af268315e9e0244cd6efd37d269e559" id="r_a3af268315e9e0244cd6efd37d269e559"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3af268315e9e0244cd6efd37d269e559">isTemplateHidden</a> (const <a class="el" href="classhelix_1_1prm_1_1Template.html">prm::Template</a> &amp;templateEntry)</td></tr>
+<tr class="memdesc:a3af268315e9e0244cd6efd37d269e559"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a template's hide condition currently hides it.  <br /></td></tr>
+<tr class="separator:a3af268315e9e0244cd6efd37d269e559"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6e4b983d9b579ea20f5640e268ece68" id="r_af6e4b983d9b579ea20f5640e268ece68"><td class="memItemLeft" align="right" valign="top"><a id="af6e4b983d9b579ea20f5640e268ece68" name="af6e4b983d9b579ea20f5640e268ece68"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isTemplateEnabled</b> (const <a class="el" href="classhelix_1_1prm_1_1Template.html">prm::Template</a> &amp;templateEntry)</td></tr>
+<tr class="memdesc:af6e4b983d9b579ea20f5640e268ece68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a template's disable condition leaves it enabled. See isTemplateHidden. <br /></td></tr>
+<tr class="separator:af6e4b983d9b579ea20f5640e268ece68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0df3fc97fadd8a7055f83b5c51665c0e" id="r_a0df3fc97fadd8a7055f83b5c51665c0e"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0df3fc97fadd8a7055f83b5c51665c0e">getReferencedValue</a> (const std::string &amp;text)</td></tr>
 <tr class="memdesc:a0df3fc97fadd8a7055f83b5c51665c0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the value text written as prm(name) reads from that parameter, or the text itself when it names no parameter.  <br /></td></tr>
 <tr class="separator:a0df3fc97fadd8a7055f83b5c51665c0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -261,7 +283,8 @@ boost::signals2::signal&lt; void(const std::string &amp;parmName)&gt;&#160;</td>
 </div><div class="memdoc">
 
 <p>Builds the node's implementation and runs its cook, filling the output packets. </p>
-<dl class="section note"><dt>Note</dt><dd>Does nothing while the node is clean. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Does nothing while the node is clean.</dd></dl>
+<p>The cook starts from a clean slate: the error and the warnings of the last cook are forgotten and every output goes back to an empty packet, so a node that fails (or that leaves an output unset) never hands the geometry of an older cook to what is downstream. An exception thrown by the implementation does not leave this function. It is recorded as the node's error, the outputs are left empty, and the cook of the rest of the graph goes on with an empty input where this node was. </p>
 
 </div>
 </div>
@@ -451,6 +474,26 @@ boost::signals2::signal&lt; void(const std::string &amp;parmName)&gt;&#160;</td>
 
 </div>
 </div>
+<a id="a3af268315e9e0244cd6efd37d269e559" name="a3af268315e9e0244cd6efd37d269e559"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3af268315e9e0244cd6efd37d269e559">&#9670;&#160;</a></span>isTemplateHidden()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool helix::nt::Node::isTemplateHidden </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classhelix_1_1prm_1_1Template.html">prm::Template</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>templateEntry</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Whether a template's hide condition currently hides it. </p>
+<dl class="section note"><dt>Note</dt><dd>Unlike isParameterHidden this takes any template of the node, so a group or a divider (which are not parameters) can be asked too. Ancestors are not consulted: a caller that draws groups hides what is inside a hidden group itself. </dd></dl>
+
+</div>
+</div>
 <a id="aa845edc5ff15ceb1925b36b1acf5539b" name="aa845edc5ff15ceb1925b36b1acf5539b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa845edc5ff15ceb1925b36b1acf5539b">&#9670;&#160;</a></span>outputRequested()</h2>
 
@@ -468,6 +511,26 @@ boost::signals2::signal&lt; void(const std::string &amp;parmName)&gt;&#160;</td>
 
 <p>Returns whether anything downstream is asking for one of the node's outputs. </p>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000007">Todo</a></b></dt><dd>Always true until dirtiness is tracked per output. </dd></dl>
+
+</div>
+</div>
+<a id="a3c62f1cf93887539beecf0697a889d29" name="a3c62f1cf93887539beecf0697a889d29"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c62f1cf93887539beecf0697a889d29">&#9670;&#160;</a></span>recordError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void helix::nt::Node::recordError </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>error</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Notes that the cook failed. Only the first error of a cook is kept: nodes stop at the first thing that is wrong, and a later one is a consequence of it. </p>
+<dl class="section note"><dt>Note</dt><dd>Called from the node's implementation (<a class="el" href="classhelix_1_1nt_1_1NodeImpl.html#a5f8af6fe7b0f498e7dda7ca57806fccb" title="Records an error on the node, for a person or an agent to read (nt::Node::getError).">NodeImpl::throwError</a>), so it can run on a worker thread of the background cook while the interface reads the node. </dd></dl>
 
 </div>
 </div>

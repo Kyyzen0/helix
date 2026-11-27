@@ -25,12 +25,14 @@ var searchData=
   ['isrelative_22',['isRelative',['../classhelix_1_1Path.html#a8ea78a8bade7bda73c4cd8ad5d811467',1,'helix::Path']]],
   ['isroot_23',['isRoot',['../classhelix_1_1Path.html#a4f89558b3f87e3edd2cf849c14b4f32e',1,'helix::Path']]],
   ['isstoreshared_24',['isStoreShared',['../classhelix_1_1attr_1_1Attribute.html#aec0b654dd2f6d6bdfae0df74d262adb9',1,'helix::attr::Attribute']]],
-  ['istimedependent_25',['isTimeDependent',['../classhelix_1_1async_1_1CookResult.html#a61c87a95c4d3e78f0c6ab6d379393f3a',1,'helix::async::CookResult']]],
-  ['isunlocked_26',['isUnlocked',['../classhelix_1_1nt_1_1UpdateLock.html#a5f66dd26588287ee3c6b038596fe0d18',1,'helix::nt::UpdateLock']]],
-  ['isvalid_27',['isValid',['../classhelix_1_1Path.html#a5db7d44527aad9437591443f8ec60d82',1,'helix::Path::isValid()'],['../classhelix_1_1NetworkPath.html#ae167f45ad7c2561879c7329e389165a1',1,'helix::NetworkPath::isValid()']]],
-  ['isvalidcomponent_28',['isValidComponent',['../classhelix_1_1Path.html#a4e814a170c10ee1bb7ec07ca5bc352ce',1,'helix::Path']]],
-  ['isvalidformatting_29',['isValidFormatting',['../classhelix_1_1Path.html#a3b3a3086e392740ced93f6631110ff22',1,'helix::Path::isValidFormatting()'],['../classhelix_1_1NetworkPath.html#a7ed913b7d897d40be95f448fe73e2e94',1,'helix::NetworkPath::isValidFormatting()']]],
-  ['isvalidname_30',['isValidName',['../classhelix_1_1Path.html#a4c158f87ffe7142449bfcc962cd783c4',1,'helix::Path']]],
-  ['isvalidnode_31',['isValidNode',['../classhelix_1_1nt_1_1Network.html#a4885bd59d9d6668945974002472b648e',1,'helix::nt::Network::isValidNode()'],['../classhelix_1_1nt_1_1NetworkManager.html#ac8f1edbea45d741e13f23f048d4aba44',1,'helix::nt::NetworkManager::isValidNode()']]],
-  ['iswholeprim_32',['isWholePrim',['../classhelix_1_1SelectionComponent.html#a4387d2419d44acd0c985ffa7cc65fd36',1,'helix::SelectionComponent::isWholePrim()'],['../classhelix_1_1PathSelectionComponent.html#ab6a91f281cb9c6e8fe0d22cf50aea189',1,'helix::PathSelectionComponent::isWholePrim()'],['../classhelix_1_1GroupSelectionComponent.html#a9eeb8beae05db32ee4781364d58d06de',1,'helix::GroupSelectionComponent::isWholePrim()']]]
+  ['istemplateenabled_25',['isTemplateEnabled',['../classhelix_1_1nt_1_1Node.html#af6e4b983d9b579ea20f5640e268ece68',1,'helix::nt::Node']]],
+  ['istemplatehidden_26',['isTemplateHidden',['../classhelix_1_1nt_1_1Node.html#a3af268315e9e0244cd6efd37d269e559',1,'helix::nt::Node']]],
+  ['istimedependent_27',['isTimeDependent',['../classhelix_1_1async_1_1CookResult.html#a61c87a95c4d3e78f0c6ab6d379393f3a',1,'helix::async::CookResult']]],
+  ['isunlocked_28',['isUnlocked',['../classhelix_1_1nt_1_1UpdateLock.html#a5f66dd26588287ee3c6b038596fe0d18',1,'helix::nt::UpdateLock']]],
+  ['isvalid_29',['isValid',['../classhelix_1_1Path.html#a5db7d44527aad9437591443f8ec60d82',1,'helix::Path::isValid()'],['../classhelix_1_1NetworkPath.html#ae167f45ad7c2561879c7329e389165a1',1,'helix::NetworkPath::isValid()']]],
+  ['isvalidcomponent_30',['isValidComponent',['../classhelix_1_1Path.html#a4e814a170c10ee1bb7ec07ca5bc352ce',1,'helix::Path']]],
+  ['isvalidformatting_31',['isValidFormatting',['../classhelix_1_1Path.html#a3b3a3086e392740ced93f6631110ff22',1,'helix::Path::isValidFormatting()'],['../classhelix_1_1NetworkPath.html#a7ed913b7d897d40be95f448fe73e2e94',1,'helix::NetworkPath::isValidFormatting()']]],
+  ['isvalidname_32',['isValidName',['../classhelix_1_1Path.html#a4c158f87ffe7142449bfcc962cd783c4',1,'helix::Path']]],
+  ['isvalidnode_33',['isValidNode',['../classhelix_1_1nt_1_1Network.html#a4885bd59d9d6668945974002472b648e',1,'helix::nt::Network::isValidNode()'],['../classhelix_1_1nt_1_1NetworkManager.html#ac8f1edbea45d741e13f23f048d4aba44',1,'helix::nt::NetworkManager::isValidNode()']]],
+  ['iswholeprim_34',['isWholePrim',['../classhelix_1_1SelectionComponent.html#a4387d2419d44acd0c985ffa7cc65fd36',1,'helix::SelectionComponent::isWholePrim()'],['../classhelix_1_1PathSelectionComponent.html#ab6a91f281cb9c6e8fe0d22cf50aea189',1,'helix::PathSelectionComponent::isWholePrim()'],['../classhelix_1_1GroupSelectionComponent.html#a9eeb8beae05db32ee4781364d58d06de',1,'helix::GroupSelectionComponent::isWholePrim()']]]
 ];
