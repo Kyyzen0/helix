@@ -125,7 +125,7 @@ extension HelixDocument: NodeEditorEditing {
             name = nodes.count == 1 ? String(localized: "Delete Node") : String(localized: "Delete Nodes")
         }
         return performEdit(named: name) {
-            for link in links {
+            for link in EditorLink.removalOrder(links) {
                 let status = unwire(link)
                 if !status.ok { return failure(status) }
             }

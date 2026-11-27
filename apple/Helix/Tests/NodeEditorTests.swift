@@ -83,6 +83,26 @@ final class EditorLayoutTests: XCTestCase {
         XCTAssertEqual(g.nextMultiInput(of: m), 2)
     }
 
+    func testLinksAreRemovedHighestInputFirst() {
+        func link(_ target: UInt64, _ input: Int) -> EditorLink {
+            EditorLink(sourceNode: 9, sourceOutput: 0, targetNode: target, targetInput: input)
+        }
+        let selected: Set<EditorLink> = [link(2, 0), link(2, 2), link(2, 1), link(3, 0), link(3, 1)]
+
+        // The engine closes the gap of a multi-input at once, as an array does when an element
+        // goes. Each input holds the index it had when the links were selected, so every removal
+        // must still find that link at that index.
+        var inputs: [UInt64: [Int]] = [2: [0, 1, 2, 3], 3: [0, 1]]
+        for link in EditorLink.removalOrder(selected) {
+            let wired = inputs[link.targetNode] ?? []
+            XCTAssertTrue(link.targetInput < wired.count && wired[link.targetInput] == link.targetInput,
+                          "input \(link.targetInput) of node \(link.targetNode) moved before it was removed")
+            if link.targetInput < wired.count { inputs[link.targetNode]?.remove(at: link.targetInput) }
+        }
+        XCTAssertEqual(inputs[2], [3])
+        XCTAssertEqual(inputs[3], [])
+    }
+
     func testHitTestingPrefersPortsThenCardsThenLinks() {
         let a = node(1, cube, 0, 0), b = node(2, boolean, 0, 120)
         let link = EditorLink(sourceNode: 1, sourceOutput: 0, targetNode: 2, targetInput: 0)

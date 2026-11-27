@@ -53,6 +53,17 @@ struct EditorLink: Hashable, Sendable {
     var sourceOutput: Int
     var targetNode: UInt64
     var targetInput: Int
+
+    /// The links in an order that removes them one by one without a stale input index: the
+    /// highest input of each node first. Removing a link of a multi-input node closes the gap at
+    /// once, so the links above it move down one input, and a link removed after one below it
+    /// would no longer be where it was.
+    static func removalOrder(_ links: some Collection<EditorLink>) -> [EditorLink] {
+        links.sorted {
+            if $0.targetNode != $1.targetNode { return $0.targetNode < $1.targetNode }
+            return $0.targetInput > $1.targetInput
+        }
+    }
 }
 
 /// The graph as the editor draws it.
