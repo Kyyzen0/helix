@@ -7,8 +7,10 @@ The runs, each ending with the process killed (a window flashes on the screen ea
   1. a plain launch;
   2. a launch that opens a scene (apple/Helix/Samples/Waves.kut);
   3. a launch that opens a 3D file (tests/data/import/textured-quad.glb), which must become a
-     new scene holding a geometryImport node;
-  4. a launch in French (-AppleLanguages "(fr)").
+     new scene holding a geometryImport node that points to the file itself, not to a copy;
+  4. the same with textured-quad.gltf, whose .bin and quadrants.png sit beside it and must be
+     found (no missing texture);
+  5. a launch in French (-AppleLanguages "(fr)").
 
 It must run outside any sandbox that forbids windows. Standard library only. It never uses
 `open` and writes nothing to the user's preferences (-ApplePersistenceIgnoreState).
@@ -48,6 +50,14 @@ def launch(binary, extra, expect=None):
     return None
 
 
+def imported_from(path):
+    """The scene holds one geometryImport node whose filePath is `path`, with no missing texture."""
+    def check(line):
+        return (line.startswith("helix-launch:") and "geometryImport" in line
+                and f" paths={path} " in line and "missingTexture=false" in line)
+    return check
+
+
 def main():
     if len(sys.argv) != 2:
         sys.exit("usage: python3 -I launch-smoke.py <path to the Helix binary>")
@@ -57,10 +67,12 @@ def main():
         binary = os.path.join(binary, "Contents", "MacOS", "Helix")
     waves = os.path.join(ROOT, "apple", "Helix", "Samples", "Waves.kut")
     quad = os.path.join(ROOT, "tests", "data", "import", "textured-quad.glb")
+    gltf = os.path.join(ROOT, "tests", "data", "import", "textured-quad.gltf")
     runs = [
         ("plain launch", [], None),
         ("opens a .kut", [waves], lambda l: l.startswith("helix-launch: scene nodes=") and "nodes=0 " not in l),
-        ("opens a 3D file", [quad], lambda l: l.startswith("helix-launch:") and "geometryImport" in l),
+        ("opens a .glb", [quad], imported_from(quad)),
+        ("opens a .gltf with its files", [gltf], imported_from(gltf)),
         ("French", ["-AppleLanguages", "(fr)"], None),
     ]
     failed = False

@@ -18,7 +18,7 @@ struct HelixApp: App {
 
     var body: some Scene {
         DocumentGroup(newDocument: { HelixDocument() }) { file in
-            DocumentView(document: file.document)
+            DocumentView(document: file.document, fileURL: file.fileURL)
                 .focusedSceneObject(file.document)
                 .themed()
         }

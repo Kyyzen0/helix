@@ -530,9 +530,9 @@ standard library only):
 python3 -I apple/Helix/Scripts/mcp-smoke.py /path/to/Helix.app/Contents/MacOS/Helix
 ```
 
-`apple/Helix/Scripts/launch-smoke.py` launches the built app four times (plain, with a `.kut`, with a
-3D file, in French), kills it each time, and fails if it dies within 6 seconds or if the opened file
-did not become a scene (it reads the line `HELIX_DEBUG_LAUNCH=1` makes the app write to standard
+`apple/Helix/Scripts/launch-smoke.py` launches the built app five times (plain, with a `.kut`, with a
+`.glb`, with a `.gltf` that has a `.bin` and a picture beside it, in French), kills it each time, and fails if it dies within 6 seconds or if the opened file
+did not become a scene that imports the file where it is, not a copy, with its textures (it reads the line `HELIX_DEBUG_LAUNCH=1` makes the app write to standard
 error). It opens a window each time, so it cannot run in a sandbox:
 
 ```sh
@@ -611,6 +611,15 @@ importers and no exporters (`superbuild/deps/assimp.cmake`), and linked into `li
 the app bundle holds no extra library. The tests read the small files in `tests/data/import`,
 which `tests/data/import/make-test-files.sh` writes again (Python 3, and Blender for the Draco,
 FBX and BLEND files).
+
+**Opening a 3D file.** File > Open, a double click and the Dock open a 3D file as a new untitled
+scene. SwiftUI gives the document the bytes of the file, and gives the window its real URL; the
+window imports from that URL once it is shown, so the `filePath` the scene saves is the original
+path, and a `.gltf` finds the `.bin` and the pictures beside it. This is part of opening: it is no
+step of undo and does not mark the scene as edited. The bytes are also copied to a temporary
+folder, as a fallback for the rare file SwiftUI gives no URL for: then the copy is imported and
+kept, the scene points to it, and the beside-files of a `.gltf` are lost. When the real URL is
+used, the copy is deleted.
 
 ### Materials and textures
 

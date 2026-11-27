@@ -68,8 +68,15 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
     /// shared, so it can be read from any thread.
     private nonisolated let fileContents: Data?
 
-    /// The 3D file the scene imports, or nil. Set once, like `fileContents`.
+    /// The copy of the opened 3D file made in a temporary folder, or nil. Set once, like
+    /// `fileContents`. It is only a fallback: the import reads the file where it really is (see
+    /// `finishOpening`), so that the path the scene saves stays valid and a `.gltf` finds its
+    /// `.bin` and textures.
     private nonisolated let importURL: URL?
+
+    /// Whether the 3D file this scene was opened for is still to be imported, which the view does
+    /// once it knows the real URL of the file.
+    private var pendingOpenedImport = false
 
     /// A new scene, with a cube to look at, or with the 3D file that was opened. The engine is
     /// not touched until `activate`.
@@ -90,8 +97,9 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         } else {
             // A 3D file opened through the document group (Open, Dock, double click). A document
             // is given the bytes and not the path (`ReadConfiguration` has no URL), so they are
-            // copied to a temporary folder, under the name of the file, to be imported from. A
-            // `.gltf` whose `.bin` or textures sit beside it loses them: they are not copied.
+            // copied to a temporary folder, under the name of the file. That copy is not what the
+            // scene imports: the window gets the real URL from SwiftUI and `finishOpening`
+            // imports from it. The copy is the fallback for a file SwiftUI gives no URL for.
             fileContents = nil
             importURL = try Self.stage(data, named: configuration.file.preferredFilename ?? "model")
         }
@@ -122,9 +130,10 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         do {
             if let fileContents {
                 try loadScene(from: fileContents)
-            } else if let importURL {
+            } else if importURL != nil {
+                // The import itself waits for the real URL of the file (`finishOpening`).
                 try EngineHost.shared.makeEmptyScene()
-                openingError = importFile(importURL)
+                pendingOpenedImport = true
             } else {
                 try EngineHost.shared.makeDefaultScene()
             }
@@ -136,21 +145,48 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         cookGeometry()
         prepareEditor()
         prepareTimeline()
-        Self.logLaunchDebug()
-        if let message = openingError {
+        if !pendingOpenedImport { Self.logLaunchDebug() }
+    }
+
+    /// Imports the 3D file this scene was opened for, from where it really is: `url` is what
+    /// SwiftUI gives the window. The `geometryImport` node stores the path it imports from and
+    /// the scene saves it, so a path in a temporary folder would be lost, and a `.gltf` would not
+    /// find its `.bin` and textures. Without a URL (SwiftUI should always give one for a file
+    /// that was opened), the temporary copy is imported and kept, since the scene points to it.
+    ///
+    /// Part of opening, so it is no step of undo and does not mark the document as edited. Does
+    /// nothing once done, or for a scene that was not opened from a 3D file.
+    func finishOpening(fileURL url: URL?) {
+        guard pendingOpenedImport, isActive else { return }
+        pendingOpenedImport = false
+        let real = url.flatMap { $0.isFileURL ? $0 : nil }
+        let scoped = real?.startAccessingSecurityScopedResource() ?? false
+        defer { if scoped { real?.stopAccessingSecurityScopedResource() } }
+        if let message = importNode(real ?? importURL ?? URL(fileURLWithPath: "/")) {
             presentedError = message
-            openingError = nil
         }
+        // The copy is not needed once the real file is imported (or has failed to be).
+        if real != nil, let staged = importURL { try? FileManager.default.removeItem(at: staged.deletingLastPathComponent()) }
+        cookGeometry()
+        refreshEditor(frame: true)
+        Self.logLaunchDebug()
     }
 
     /// With `HELIX_DEBUG_LAUNCH=1` in the environment, writes the nodes of the scene that was just
-    /// opened to standard error ("helix-launch: scene nodes=2 types=geometryImport,..."), which
-    /// `Scripts/launch-smoke.py` reads to check that a file opened as a scene.
+    /// opened to standard error ("helix-launch: scene nodes=2 types=geometryImport,... paths=...
+    /// import=..."), which `Scripts/launch-smoke.py` reads to check that a file opened as a scene,
+    /// from the file itself and with its textures.
     private static func logLaunchDebug() {
         guard ProcessInfo.processInfo.environment["HELIX_DEBUG_LAUNCH"] == "1" else { return }
-        let types = helix.core.listNodes().map { String(engine: $0.type) }
-        FileHandle.standardError.write(
-            Data("helix-launch: scene nodes=\(types.count) types=\(types.joined(separator: ","))\n".utf8))
+        let nodes = helix.core.listNodes()
+        let types = nodes.map { String(engine: $0.type) }
+        let paths = nodes.filter { String(engine: $0.type).hasSuffix("geometryImport") }.map {
+            String(engine: helix.core.getString($0.id, "filePath", 0).value)
+        }
+        let missing = String(engine: helix.core.lastImportSummary()).contains("Missing:")
+        FileHandle.standardError.write(Data(
+            ("helix-launch: scene nodes=\(types.count) types=\(types.joined(separator: ","))"
+                + " paths=\(paths.joined(separator: "|")) missingTexture=\(missing)\n").utf8))
     }
 
     /// Asks for a 3D file with an open panel, and imports it into this scene.
@@ -175,9 +211,6 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         }
         importFile(url)
     }
-
-    /// Why the 3D file this scene was opened for could not be imported, until it is shown.
-    private var openingError: String?
 
     /// Imports a 3D file into the scene, makes it the node the viewport shows and frames it.
     /// Returns why it could not be imported, or nil. The file is only read.
