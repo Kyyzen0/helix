@@ -527,6 +527,62 @@ TEST_CASE_METHOD(CoreFixture, "A report on any node gives its counts, bounds and
     REQUIRE_FALSE(core::cookNodeReport(0).status.error.empty());
 }
 
+namespace {
+
+// A cube with a point attribute "tag" of the given type ("float" or "vector"), on its own path.
+core::NodeId taggedCube(const char* path, const char* type)
+{
+    const core::NodeId cube = core::createNode("helix::cube", "", 0.f, 0.f).id;
+    const core::NodeId tag = core::createNode("helix::attributeCreate", "", 0.f, 0.f).id;
+    const core::NodeId named = core::createNode("helix::path", "", 0.f, 0.f).id;
+    REQUIRE(core::setString(tag, "name", 0, "tag").ok);
+    REQUIRE(core::setString(tag, "type", 0, type).ok);
+    REQUIRE(core::setString(named, "path", 0, path).ok);
+    REQUIRE(core::connectNodes(cube, 0, tag, 0).ok);
+    REQUIRE(core::connectNodes(tag, 0, named, 0).ok);
+    return named;
+}
+
+core::NodeId mergedTaggedCubes(const char* firstType, const char* secondType)
+{
+    const core::NodeId first = taggedCube("/a", firstType);
+    const core::NodeId second = taggedCube("/b", secondType);
+    const core::NodeId merge = core::createNode("helix::merge", "", 0.f, 0.f).id;
+    REQUIRE(core::connectNodes(first, 0, merge, 0).ok);
+    REQUIRE(core::connectNodes(second, 0, merge, 1).ok);
+    return merge;
+}
+
+} // namespace
+
+TEST_CASE_METHOD(CoreFixture, "A report flags an attribute whose type differs between primitives")
+{
+    const core::NodeId mixed = mergedTaggedCubes("float", "vector");
+    const core::GeometryReport report = core::cookNodeReport(mixed);
+    REQUIRE(report.status.ok);
+    REQUIRE(report.primitiveCount == 2);
+    const core::AttributeInfo* tag = findAttribute(report, core::AttributeOwner::Point, "tag");
+    REQUIRE(tag != nullptr);
+    REQUIRE(tag->elementCount == 16);
+    REQUIRE(tag->mixedTypes);
+    REQUIRE_FALSE(core::readAttribute(mixed, core::AttributeOwner::Point, "tag", 0, 100).status.ok);
+
+    // The same type over two primitives is one attribute, and not flagged.
+    const core::NodeId same = mergedTaggedCubes("float", "float");
+    const core::GeometryReport sameReport = core::cookNodeReport(same);
+    REQUIRE(sameReport.status.ok);
+    REQUIRE(sameReport.primitiveCount == 2);
+    bool seen = false;
+    for (const core::AttributeInfo& info : sameReport.attributes)
+        if (info.name == "tag")
+        {
+            REQUIRE(info.elementCount == 16);
+            REQUIRE_FALSE(info.mixedTypes);
+            seen = true;
+        }
+    REQUIRE(seen);
+}
+
 TEST_CASE_METHOD(CoreFixture, "An attribute is read in pages, with the total to page by")
 {
     const core::NodeId cube = createDisplayedCube();

@@ -383,6 +383,10 @@ struct AttributeInfo
     std::uint32_t componentCount = 1;
     /// @brief How many elements the attribute has, over every primitive that carries it.
     std::uint64_t elementCount = 0;
+    /// @brief True when primitives carry this name with different types or component counts.
+    /// readAttribute refuses such an attribute, so the type and the component count describe
+    /// only the first primitive that has it.
+    bool mixedTypes = false;
 };
 
 /// @brief What any node produced, in numbers: the counts, the bounds and the attribute list.

@@ -121,7 +121,7 @@ enum MCPTools {
 
             // The results.
             tool("geometry_summary",
-                 "Cooks a node and reports its counts, its bounds and its attributes, as data.",
+                 "Cooks a node and reports its counts, its bounds and its attributes, as data. An attribute with \"mixed_types\": true has different types on different primitives: its type and components are the first primitive's, and read_attribute refuses it.",
                  ["node": nodeReference("The node to cook. The display node when left out.")],
                  readOnly: true, MCPHandlers.geometrySummary),
             tool("read_attribute",

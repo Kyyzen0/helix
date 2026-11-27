@@ -199,6 +199,9 @@ GeometryReport cookNodeReport(NodeId node)
                     if (known != report.attributes.end())
                     {
                         known->elementCount += elementCount(*primitive, owner);
+                        if (known->type != toValueType(attribute->getType())
+                            || known->componentCount != attribute->getTypeSize())
+                            known->mixedTypes = true;
                         continue;
                     }
                     AttributeInfo info;
@@ -249,7 +252,7 @@ AttributeValues readAttribute(
                 values.type = toValueType(attribute->getType());
                 values.componentCount = attribute->getTypeSize();
             }
-            else if (toValueType(attribute->getType()) != values.type)
+            else if (toValueType(attribute->getType()) != values.type || attribute->getTypeSize() != values.componentCount)
                 return failure("The attribute '" + name + "' has different types on the primitives.");
 
             const std::uint64_t size = attribute->getSize();

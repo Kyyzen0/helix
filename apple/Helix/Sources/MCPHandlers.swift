@@ -405,13 +405,16 @@ enum MCPHandlers {
             ]
         }
         let attributes: [JSONValue] = Array(report.attributes).map { attribute in
-            [
+            var entry: [String: JSONValue] = [
                 "owner": .string(ownerName(attribute.owner)),
                 "name": .string(String(engine: attribute.name)),
                 "type": .string(typeName(attribute.type)),
                 "components": .int(Int64(attribute.componentCount)),
                 "count": .init(count: attribute.elementCount),
             ]
+            // read_attribute refuses such an attribute; type and components are the first primitive's.
+            if attribute.mixedTypes { entry["mixed_types"] = true }
+            return .object(entry)
         }
         return .data([
             "node": identity(node),
