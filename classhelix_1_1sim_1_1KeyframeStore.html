@@ -151,6 +151,9 @@ std::vector&lt; <a class="el" href="structhelix_1_1sim_1_1KeyframeTarget.html">K
 std::vector&lt; <a class="el" href="structhelix_1_1sim_1_1KeyframeTarget.html">KeyframeTarget</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>getTargets</b> (<a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">nt::NodeId</a> nodeId) const</td></tr>
 <tr class="memdesc:ae703ad21e3318edb5f5a3388b654b47a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Every value of one node that holds keyframes, in a stable order. <br /></td></tr>
 <tr class="separator:ae703ad21e3318edb5f5a3388b654b47a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7293a75ca2180d0f65bfac282c081b3" id="r_ad7293a75ca2180d0f65bfac282c081b3"><td class="memItemLeft" align="right" valign="top">std::uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad7293a75ca2180d0f65bfac282c081b3">keyOf</a> (<a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">nt::NodeId</a> nodeId) const</td></tr>
+<tr class="memdesc:ad7293a75ca2180d0f65bfac282c081b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a key that stands for every key of one node: which values are animated, the value each holds without keys, and each keyframe's frame, value and interpolation.  <br /></td></tr>
+<tr class="separator:ad7293a75ca2180d0f65bfac282c081b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf0fbc13521309880f97c34c32cb39c0" id="r_acf0fbc13521309880f97c34c32cb39c0"><td class="memItemLeft" align="right" valign="top"><a id="acf0fbc13521309880f97c34c32cb39c0" name="acf0fbc13521309880f97c34c32cb39c0"></a>
 std::optional&lt; floatT &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>getBaseValue</b> (const <a class="el" href="structhelix_1_1sim_1_1KeyframeTarget.html">KeyframeTarget</a> &amp;target) const</td></tr>
 <tr class="memdesc:acf0fbc13521309880f97c34c32cb39c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The value a parameter held before its track was made. <br /></td></tr>
@@ -192,7 +195,7 @@ boost::signals2::signal&lt; void(const <a class="el" href="structhelix_1_1sim_1_
 <div class="line">store.setKeyframe({nodeId, <span class="stringliteral">&quot;translate&quot;</span>, 1}, 1.f, 0.f);</div>
 <div class="line">store.setKeyframe({nodeId, <span class="stringliteral">&quot;translate&quot;</span>, 1}, 24.f, 10.f);</div>
 <div class="line">store.evaluate({nodeId, <span class="stringliteral">&quot;translate&quot;</span>, 1}, 12.5f); <span class="comment">// 4.807692</span></div>
-<div class="ttc" id="aclasshelix_1_1sim_1_1KeyframeStore_html_a9563cc639ceb278a97dd4c2360641d9e"><div class="ttname"><a href="#a9563cc639ceb278a97dd4c2360641d9e">helix::sim::KeyframeStore::instance</a></div><div class="ttdeci">static KeyframeStore &amp; instance()</div><div class="ttdoc">Returns the store holding the scene's keyframes.</div><div class="ttdef"><b>Definition</b> KeyframeStore.cpp:36</div></div>
+<div class="ttc" id="aclasshelix_1_1sim_1_1KeyframeStore_html_a9563cc639ceb278a97dd4c2360641d9e"><div class="ttname"><a href="#a9563cc639ceb278a97dd4c2360641d9e">helix::sim::KeyframeStore::instance</a></div><div class="ttdeci">static KeyframeStore &amp; instance()</div><div class="ttdoc">Returns the store holding the scene's keyframes.</div><div class="ttdef"><b>Definition</b> KeyframeStore.cpp:37</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a82f13a959bcdc96eb8718ca114c87699" name="a82f13a959bcdc96eb8718ca114c87699"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a82f13a959bcdc96eb8718ca114c87699">&#9670;&#160;</a></span>applyToParameters()</h2>
@@ -241,6 +244,26 @@ boost::signals2::signal&lt; void(const <a class="el" href="structhelix_1_1sim_1_
 
 <p>Resolves the value of an animated value at a frame. </p>
 <dl class="section return"><dt>Returns</dt><dd>The value at that frame, or nothing when the value holds no keyframes and keeps its own value. </dd></dl>
+
+</div>
+</div>
+<a id="ad7293a75ca2180d0f65bfac282c081b3" name="ad7293a75ca2180d0f65bfac282c081b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7293a75ca2180d0f65bfac282c081b3">&#9670;&#160;</a></span>keyOf()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::uint64_t helix::sim::KeyframeStore::keyOf </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">nt::NodeId</a></td>          <td class="paramname"><span class="paramname"><em>nodeId</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns a key that stands for every key of one node: which values are animated, the value each holds without keys, and each keyframe's frame, value and interpolation. </p>
+<p>The cook cache files what a simulation made under it, since a simulation reads the track of an animated setting at the frames before the current one and not only the value the setting holds now. A node with no keyframes always gives the same key. </p>
 
 </div>
 </div>

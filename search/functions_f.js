@@ -10,5 +10,6 @@ var searchData=
   ['previewint_7',['previewInt',['../classhelix_1_1prm_1_1Parameter.html#afb0a818ce94f890496856b13a0c671d6',1,'helix::prm::Parameter']]],
   ['previewstring_8',['previewString',['../classhelix_1_1prm_1_1Parameter.html#af164552f105057a52eda745b0976bf2d',1,'helix::prm::Parameter']]],
   ['processpendingcooks_9',['processPendingCooks',['../classhelix_1_1nt_1_1NetworkManager.html#adda1a2bf0e66f86770fd839d26853bcc',1,'helix::nt::NetworkManager']]],
-  ['push_10',['push',['../classhelix_1_1nt_1_1UndoStack.html#ad348ec416f651dbeb36867bdc925d717',1,'helix::nt::UndoStack']]]
+  ['purgenode_10',['purgeNode',['../classhelix_1_1nt_1_1CookCache.html#a20721999f9ca37f5c3bbbfb648127fec',1,'helix::nt::CookCache']]],
+  ['push_11',['push',['../classhelix_1_1nt_1_1UndoStack.html#ad348ec416f651dbeb36867bdc925d717',1,'helix::nt::UndoStack']]]
 ];

@@ -139,6 +139,24 @@ unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>getInputCount
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isCancelled</b> () const</td></tr>
 <tr class="memdesc:aa9a4b89c00f1c66f6d86b38ec55cafab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns whether the cook has been abandoned and should stop. <br /></td></tr>
 <tr class="separator:aa9a4b89c00f1c66f6d86b38ec55cafab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44333b074708a254161384924181518a" id="r_a44333b074708a254161384924181518a"><td class="memItemLeft" align="right" valign="top"><a id="a44333b074708a254161384924181518a" name="a44333b074708a254161384924181518a"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>readsLiveNetwork</b> () const</td></tr>
+<tr class="memdesc:a44333b074708a254161384924181518a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns whether the context reads the live network, as opposed to a snapshot. <br /></td></tr>
+<tr class="separator:a44333b074708a254161384924181518a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa413bf891fc3debf7cde2a43647e0436" id="r_aa413bf891fc3debf7cde2a43647e0436"><td class="memItemLeft" align="right" valign="top"><a id="aa413bf891fc3debf7cde2a43647e0436" name="aa413bf891fc3debf7cde2a43647e0436"></a>
+<a class="el" href="classhelix_1_1nt_1_1NetworkManager.html">helix::nt::NetworkManager</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>manager</b> () const</td></tr>
+<tr class="memdesc:aa413bf891fc3debf7cde2a43647e0436"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the network the cook belongs to. <br /></td></tr>
+<tr class="separator:aa413bf891fc3debf7cde2a43647e0436"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac80bd44b08dee383c698c4ab9036b941" id="r_ac80bd44b08dee383c698c4ab9036b941"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classhelix_1_1nt_1_1Node.html">helix::nt::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac80bd44b08dee383c698c4ab9036b941">inputSourceNode</a> (unsigned int inputIndex)</td></tr>
+<tr class="memdesc:ac80bd44b08dee383c698c4ab9036b941"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the node wired into an input, or null when nothing is.  <br /></td></tr>
+<tr class="separator:ac80bd44b08dee383c698c4ab9036b941"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73070f6fbf9ade4809cbfefd60fbacd4" id="r_a73070f6fbf9ade4809cbfefd60fbacd4"><td class="memItemLeft" align="right" valign="top"><a id="a73070f6fbf9ade4809cbfefd60fbacd4" name="a73070f6fbf9ade4809cbfefd60fbacd4"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>attachNode</b> (<a class="el" href="classhelix_1_1nt_1_1Node.html">helix::nt::Node</a> *node)</td></tr>
+<tr class="memdesc:a73070f6fbf9ade4809cbfefd60fbacd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tells the context which node it cooks, so a read of the scene time is noted on it. <br /></td></tr>
+<tr class="separator:a73070f6fbf9ade4809cbfefd60fbacd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e446bb57039a53920d6dc8e8a4292be" id="r_a7e446bb57039a53920d6dc8e8a4292be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7e446bb57039a53920d6dc8e8a4292be">noteTimeDependency</a> () const</td></tr>
+<tr class="memdesc:a7e446bb57039a53920d6dc8e8a4292be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notes that the cooking node reads the scene time, as reading the frame does.  <br /></td></tr>
+<tr class="separator:a7e446bb57039a53920d6dc8e8a4292be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a44b2e691abd7f5a85b0c5a1341408e37" id="r_a44b2e691abd7f5a85b0c5a1341408e37"><td class="memItemLeft" align="right" valign="top">floatT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a44b2e691abd7f5a85b0c5a1341408e37">getFrame</a> () const</td></tr>
 <tr class="memdesc:a44b2e691abd7f5a85b0c5a1341408e37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the frame the scene sits on.  <br /></td></tr>
 <tr class="separator:a44b2e691abd7f5a85b0c5a1341408e37"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -284,6 +302,54 @@ Vector3&#160;</td><td class="memItemRight" valign="bottom"><b>evalParmVector3</b
 
 <p>Returns the frame the scene sits on. </p>
 <dl class="section note"><dt>Note</dt><dd>The frame can be fractional. </dd></dl>
+
+</div>
+</div>
+<a id="ac80bd44b08dee383c698c4ab9036b941" name="ac80bd44b08dee383c698c4ab9036b941"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac80bd44b08dee383c698c4ab9036b941">&#9670;&#160;</a></span>inputSourceNode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classhelix_1_1nt_1_1Node.html">nt::Node</a> * helix::nt::CookContext::inputSourceNode </td>
+          <td>(</td>
+          <td class="paramtype">unsigned int</td>          <td class="paramname"><span class="paramname"><em>inputIndex</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns the node wired into an input, or null when nothing is. </p>
+<dl class="section note"><dt>Note</dt><dd>Only for a context that reads the live network, and null for any other. </dd></dl>
+
+</div>
+</div>
+<a id="a7e446bb57039a53920d6dc8e8a4292be" name="a7e446bb57039a53920d6dc8e8a4292be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e446bb57039a53920d6dc8e8a4292be">&#9670;&#160;</a></span>noteTimeDependency()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void helix::nt::CookContext::noteTimeDependency </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Notes that the cooking node reads the scene time, as reading the frame does. </p>
+<dl class="section note"><dt>Note</dt><dd>Used when the cook cache answers a cook that would have read it. </dd></dl>
 
 </div>
 </div>

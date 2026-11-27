@@ -99,8 +99,10 @@ $(function(){ initResizable(false); });
 <div id="doc-content">
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#friends">Friends</a> &#124;
 <a href="classhelix_1_1nt_1_1Node-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">helix::nt::Node Class Reference</div></div>
 </div><!--header-->
@@ -111,6 +113,12 @@ $(function(){ initResizable(false); });
 
 <p><code>#include &lt;<a class="el" href="Node_8h_source.html">Node.h</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhelix_1_1nt_1_1Node_1_1CacheState.html">CacheState</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">What the cook cache knows about the node after its last cook.  <a href="structhelix_1_1nt_1_1Node_1_1CacheState.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a56e925224bd56f889e53b20463305347" id="r_a56e925224bd56f889e53b20463305347"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a56e925224bd56f889e53b20463305347">Node</a> (<a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">helix::nt::NodeId</a> nodeId, const <a class="el" href="structhelix_1_1nt_1_1NodeType.html">nt::NodeType</a> &amp;nodeType, const <a class="el" href="classhelix_1_1Path.html">Path</a> &amp;path)</td></tr>
@@ -202,6 +210,21 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>isDirty</b> ()</td></
 <tr class="memitem:a10c44c5ad8c875408a327235f3fd075c" id="r_a10c44c5ad8c875408a327235f3fd075c"><td class="memItemLeft" align="right" valign="top">std::uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a10c44c5ad8c875408a327235f3fd075c">getCookGeneration</a> () const</td></tr>
 <tr class="memdesc:a10c44c5ad8c875408a327235f3fd075c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a number that changes every time the node cooks, and is never the same for two cooks of any node of the process. Zero means the node has not cooked.  <br /></td></tr>
 <tr class="separator:a10c44c5ad8c875408a327235f3fd075c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a709e58a76fdc4feaab85288796bdeaed" id="r_a709e58a76fdc4feaab85288796bdeaed"><td class="memItemLeft" align="right" valign="top"><a id="a709e58a76fdc4feaab85288796bdeaed" name="a709e58a76fdc4feaab85288796bdeaed"></a>
+<a class="el" href="structhelix_1_1nt_1_1Node_1_1CacheState.html">CacheState</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getCacheState</b> () const</td></tr>
+<tr class="memdesc:a709e58a76fdc4feaab85288796bdeaed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns what the cook cache knows about the node after its last cook. <br /></td></tr>
+<tr class="separator:a709e58a76fdc4feaab85288796bdeaed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7553de260fa7741e7abfcbf1e8fe8976" id="r_a7553de260fa7741e7abfcbf1e8fe8976"><td class="memItemLeft" align="right" valign="top"><a id="a7553de260fa7741e7abfcbf1e8fe8976" name="a7553de260fa7741e7abfcbf1e8fe8976"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>readsTime</b> () const</td></tr>
+<tr class="memdesc:a7553de260fa7741e7abfcbf1e8fe8976"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns whether the last cook of the node read the scene time. <br /></td></tr>
+<tr class="separator:a7553de260fa7741e7abfcbf1e8fe8976"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a582237e4ebdc61ab161ffc5748871ba8" id="r_a582237e4ebdc61ab161ffc5748871ba8"><td class="memItemLeft" align="right" valign="top"><a id="a582237e4ebdc61ab161ffc5748871ba8" name="a582237e4ebdc61ab161ffc5748871ba8"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>noteReadsTime</b> ()</td></tr>
+<tr class="memdesc:a582237e4ebdc61ab161ffc5748871ba8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notes that the cook read the scene time. Called by the cook context. <br /></td></tr>
+<tr class="separator:a582237e4ebdc61ab161ffc5748871ba8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab45a87aa4560506bebe2019dc86d0c56" id="r_ab45a87aa4560506bebe2019dc86d0c56"><td class="memItemLeft" align="right" valign="top">std::uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab45a87aa4560506bebe2019dc86d0c56">getCookStateKey</a> () const</td></tr>
+<tr class="memdesc:ab45a87aa4560506bebe2019dc86d0c56"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the key of everything this cook depends on except the frame, or zero when the cook is not using the cook cache.  <br /></td></tr>
+<tr class="separator:ab45a87aa4560506bebe2019dc86d0c56"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a662bebbccd07384366df735abd6633b8" id="r_a662bebbccd07384366df735abd6633b8"><td class="memItemLeft" align="right" valign="top"><a id="a662bebbccd07384366df735abd6633b8" name="a662bebbccd07384366df735abd6633b8"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>takesInput</b> () const</td></tr>
 <tr class="memdesc:a662bebbccd07384366df735abd6633b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns whether the node takes any input at all. <br /></td></tr>
@@ -229,6 +252,12 @@ boost::signals2::signal&lt; void(<a class="el" href="Types_8h.html#a7ee202d2a627
 boost::signals2::signal&lt; void(const std::string &amp;parmName)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>parameterChanged</b></td></tr>
 <tr class="memdesc:afe353ce7287f1ec56d761e6059a408e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">A signal emitted when one parameter's value changes, carrying its name. <br /></td></tr>
 <tr class="separator:afe353ce7287f1ec56d761e6059a408e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:a55d45d6be3cbe81f0e8f7e3a7b2009a9" id="r_a55d45d6be3cbe81f0e8f7e3a7b2009a9"><td class="memItemLeft" align="right" valign="top"><a id="a55d45d6be3cbe81f0e8f7e3a7b2009a9" name="a55d45d6be3cbe81f0e8f7e3a7b2009a9"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>CookCacheAttempt</b></td></tr>
+<tr class="separator:a55d45d6be3cbe81f0e8f7e3a7b2009a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The unique runtime representation of a node. </p>
@@ -341,6 +370,34 @@ boost::signals2::signal&lt; void(const std::string &amp;parmName)&gt;&#160;</td>
 
 <p>Returns a number that changes every time the node cooks, and is never the same for two cooks of any node of the process. Zero means the node has not cooked. </p>
 <p>A reader that keeps a copy of what the node produced (a table of its attributes) compares the number it saw to this one to know the copy is out of date. The number is drawn from one counter shared by every node, so a node that takes the place of another after a scene is restored cannot be mistaken for the one it replaces. </p>
+
+</div>
+</div>
+<a id="ab45a87aa4560506bebe2019dc86d0c56" name="ab45a87aa4560506bebe2019dc86d0c56"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab45a87aa4560506bebe2019dc86d0c56">&#9670;&#160;</a></span>getCookStateKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::uint64_t helix::nt::Node::getCookStateKey </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the key of everything this cook depends on except the frame, or zero when the cook is not using the cook cache. </p>
+<dl class="section note"><dt>Note</dt><dd>Only meaningful while the node cooks. A solver files its saved states under it. </dd></dl>
 
 </div>
 </div>

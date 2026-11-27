@@ -141,6 +141,9 @@ std::vector&lt; <a class="el" href="structhelix_1_1nt_1_1NodeLink.html">NodeLink
 <tr class="memitem:a20e5d8466eb600a013cc7b48d0bf2757" id="r_a20e5d8466eb600a013cc7b48d0bf2757"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a20e5d8466eb600a013cc7b48d0bf2757">setTimeDependent</a> (const <a class="el" href="structhelix_1_1nt_1_1Unit.html">Unit</a> &amp;dependent, bool dependsOnTime)</td></tr>
 <tr class="memdesc:a20e5d8466eb600a013cc7b48d0bf2757"><td class="mdescLeft">&#160;</td><td class="mdescRight">Records whether a unit reads the scene time.  <br /></td></tr>
 <tr class="separator:a20e5d8466eb600a013cc7b48d0bf2757"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ccd66fc3340748084280b82826c0a1c" id="r_a5ccd66fc3340748084280b82826c0a1c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5ccd66fc3340748084280b82826c0a1c">hasTimeDependentParameter</a> (<a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">NodeId</a> nodeId) const</td></tr>
+<tr class="memdesc:a5ccd66fc3340748084280b82826c0a1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether any parameter of the node reads the scene time.  <br /></td></tr>
+<tr class="separator:a5ccd66fc3340748084280b82826c0a1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b60c768e84fe0da3460c1c559a0eec9" id="r_a9b60c768e84fe0da3460c1c559a0eec9"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structhelix_1_1nt_1_1Unit.html">Unit</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9b60c768e84fe0da3460c1c559a0eec9">getTimeDependents</a> () const</td></tr>
 <tr class="memdesc:a9b60c768e84fe0da3460c1c559a0eec9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns every unit the scene time reaches, in no particular order.  <br /></td></tr>
 <tr class="separator:a9b60c768e84fe0da3460c1c559a0eec9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -245,6 +248,26 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> ()</td></tr
 
 <p>Returns every unit the scene time reaches, in no particular order. </p>
 <dl class="section note"><dt>Note</dt><dd>Covers the units that read the time and everything downstream of them. </dd></dl>
+
+</div>
+</div>
+<a id="a5ccd66fc3340748084280b82826c0a1c" name="a5ccd66fc3340748084280b82826c0a1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ccd66fc3340748084280b82826c0a1c">&#9670;&#160;</a></span>hasTimeDependentParameter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool helix::nt::NetworkGraph::hasTimeDependentParameter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">NodeId</a></td>          <td class="paramname"><span class="paramname"><em>nodeId</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Whether any parameter of the node reads the scene time. </p>
+<dl class="section note"><dt>Note</dt><dd>Only the parameters themselves, not the node cooking or what feeds it. </dd></dl>
 
 </div>
 </div>

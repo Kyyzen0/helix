@@ -11,6 +11,8 @@ var searchData=
   ['sharestoretag_8',['ShareStoreTag',['../structhelix_1_1attr_1_1ShareStoreTag.html',1,'helix::attr']]],
   ['skeleton_9',['Skeleton',['../structhelix_1_1geo_1_1Skeleton.html',1,'helix::geo']]],
   ['skeletonreader_10',['SkeletonReader',['../classhelix_1_1import_1_1SkeletonReader.html',1,'helix::import']]],
-  ['springsettings_11',['SpringSettings',['../structhelix_1_1sim_1_1SpringSettings.html',1,'helix::sim']]],
-  ['springsolver_12',['SpringSolver',['../classhelix_1_1sim_1_1SpringSolver.html',1,'helix::sim']]]
+  ['solvercheckpoints_11',['SolverCheckpoints',['../structhelix_1_1sim_1_1SolverCheckpoints.html',1,'helix::sim']]],
+  ['springsettings_12',['SpringSettings',['../structhelix_1_1sim_1_1SpringSettings.html',1,'helix::sim']]],
+  ['springsolver_13',['SpringSolver',['../classhelix_1_1sim_1_1SpringSolver.html',1,'helix::sim']]],
+  ['springstate_14',['SpringState',['../structhelix_1_1sim_1_1SpringState.html',1,'helix::sim']]]
 ];

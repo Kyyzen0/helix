@@ -33,5 +33,6 @@ var searchData=
   ['primpath_30',['PrimPath',['../classhelix_1_1PrimPath.html',1,'helix']]],
   ['processpendingcooks_31',['processPendingCooks',['../classhelix_1_1nt_1_1NetworkManager.html#adda1a2bf0e66f86770fd839d26853bcc',1,'helix::nt::NetworkManager']]],
   ['processresult_32',['ProcessResult',['../structhelix_1_1import_1_1ProcessResult.html',1,'helix::import']]],
-  ['push_33',['push',['../classhelix_1_1nt_1_1UndoStack.html#ad348ec416f651dbeb36867bdc925d717',1,'helix::nt::UndoStack']]]
+  ['purgenode_33',['purgeNode',['../classhelix_1_1nt_1_1CookCache.html#a20721999f9ca37f5c3bbbfb648127fec',1,'helix::nt::CookCache']]],
+  ['push_34',['push',['../classhelix_1_1nt_1_1UndoStack.html#ad348ec416f651dbeb36867bdc925d717',1,'helix::nt::UndoStack']]]
 ];

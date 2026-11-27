@@ -196,6 +196,12 @@ Vector3&#160;</td><td class="memItemRight" valign="bottom"><b>evalParmVector3</b
 <a class="el" href="classhelix_1_1prm_1_1Ramp.html">helix::prm::Ramp</a>&#160;</td><td class="memItemRight" valign="bottom"><b>evalParmRamp</b> (std::string_view parmName) const</td></tr>
 <tr class="memdesc:a722a82831c89f83e0691d39582eba01b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Snapshots a ramp parameter into a sampler for use during the cook. <br /></td></tr>
 <tr class="separator:a722a82831c89f83e0691d39582eba01b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf834f482cab6b511d513e8adc61d114" id="r_adf834f482cab6b511d513e8adc61d114"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="structhelix_1_1nt_1_1CachedState.html">CachedState</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adf834f482cab6b511d513e8adc61d114">findSolverState</a> (unsigned int slot, std::int64_t maxIndex) const</td></tr>
+<tr class="memdesc:adf834f482cab6b511d513e8adc61d114"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the state a solver of this node saved, at the highest whole frame not above <code>maxIndex</code>, or nothing.  <br /></td></tr>
+<tr class="separator:adf834f482cab6b511d513e8adc61d114"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8ab9b20f159532d64368e3b4e89063a" id="r_ad8ab9b20f159532d64368e3b4e89063a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad8ab9b20f159532d64368e3b4e89063a">saveSolverState</a> (unsigned int slot, std::int64_t index, std::shared_ptr&lt; const void &gt; state, std::size_t bytes) const</td></tr>
+<tr class="memdesc:ad8ab9b20f159532d64368e3b4e89063a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the state of a solver after <code>index</code> whole frames, see findSolverState.  <br /></td></tr>
+<tr class="separator:ad8ab9b20f159532d64368e3b4e89063a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The base class a node author subclasses to write a node's behaviour. </p>
@@ -207,7 +213,7 @@ Vector3&#160;</td><td class="memItemRight" valign="bottom"><b>evalParmVector3</b
 <div class="line">    <span class="keywordtype">void</span> <a class="code hl_function" href="#a55a8520f1cd4c26d373c5e07b84b8ed0">cook</a>()<span class="keyword"> override </span>{ <a class="code hl_function" href="#ae4651b0f0f600904bcdc5ae7675b09bb">setOutputPacket</a>(0, buildMesh()); }</div>
 <div class="line">};</div>
 <div class="line">HELIX_REGISTER_NODE(circle, Circle)</div>
-<div class="ttc" id="aclasshelix_1_1nt_1_1NodeImpl_html"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeImpl.html">helix::nt::NodeImpl</a></div><div class="ttdoc">The base class a node author subclasses to write a node's behaviour.</div><div class="ttdef"><b>Definition</b> NodeImpl.h:40</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1NodeImpl_html"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeImpl.html">helix::nt::NodeImpl</a></div><div class="ttdoc">The base class a node author subclasses to write a node's behaviour.</div><div class="ttdef"><b>Definition</b> NodeImpl.h:44</div></div>
 <div class="ttc" id="aclasshelix_1_1nt_1_1NodeImpl_html_a55a8520f1cd4c26d373c5e07b84b8ed0"><div class="ttname"><a href="#a55a8520f1cd4c26d373c5e07b84b8ed0">helix::nt::NodeImpl::cook</a></div><div class="ttdeci">virtual void cook()=0</div><div class="ttdoc">Produces this node's output packets from its inputs and parameters.</div></div>
 <div class="ttc" id="aclasshelix_1_1nt_1_1NodeImpl_html_ae4651b0f0f600904bcdc5ae7675b09bb"><div class="ttname"><a href="#ae4651b0f0f600904bcdc5ae7675b09bb">helix::nt::NodeImpl::setOutputPacket</a></div><div class="ttdeci">void setOutputPacket(unsigned int outputIndex, helix::NodePacket packet)</div><div class="ttdoc">Hands finished geometry to one of the node's outputs.</div><div class="ttdef"><b>Definition</b> NodeImpl.cpp:30</div></div>
 </div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>Every cook time query lives here as a forwarder, so an author writes evalParmFloat("radius") and never names the context behind it. </dd></dl>
@@ -237,6 +243,45 @@ Vector3&#160;</td><td class="memItemRight" valign="bottom"><b>evalParmVector3</b
 
 <p>Produces this node's output packets from its inputs and parameters. </p>
 <dl class="section post"><dt>Postcondition</dt><dd>Any output left unset stays an empty packet. </dd></dl>
+
+</div>
+</div>
+<a id="adf834f482cab6b511d513e8adc61d114" name="adf834f482cab6b511d513e8adc61d114"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf834f482cab6b511d513e8adc61d114">&#9670;&#160;</a></span>findSolverState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; <a class="el" href="structhelix_1_1nt_1_1CachedState.html">CachedState</a> &gt; helix::nt::NodeImpl::findSolverState </td>
+          <td>(</td>
+          <td class="paramtype">unsigned int</td>          <td class="paramname"><span class="paramname"><em>slot</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::int64_t</td>          <td class="paramname"><span class="paramname"><em>maxIndex</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the state a solver of this node saved, at the highest whole frame not above <code>maxIndex</code>, or nothing. </p>
+<p>A solver that is always worked out from its first frame can resume from the state an earlier cook left behind instead. The states are filed in the cook cache (see <a class="el" href="classhelix_1_1nt_1_1CookCache.html" title="The memory of the cook: finished cooks of nodes that move with the time, and the saved states of the ...">nt::CookCache</a>) under everything this cook depends on except the frame, so a state is only found by a cook that would have reached it itself: any change to a parameter, an input or a keyframe of the node loses the states. Nothing is found when the cache is off, and for a cook on a worker thread, which does not use the cache.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">slot</td><td>Tells the solvers of one node apart, when it has several. </td></tr>
+    <tr><td class="paramname">maxIndex</td><td>The most whole frames after the first frame the caller wants a state at. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -321,6 +366,53 @@ Vector3&#160;</td><td class="memItemRight" valign="bottom"><b>evalParmVector3</b
 
 <p>Returns whether anything downstream is asking for this output. </p>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo</a></b></dt><dd>Always true until <a class="el" href="classhelix_1_1nt_1_1Node.html" title="The unique runtime representation of a node.">nt::Node</a> tracks dirtiness per output. </dd></dl>
+
+</div>
+</div>
+<a id="ad8ab9b20f159532d64368e3b4e89063a" name="ad8ab9b20f159532d64368e3b4e89063a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8ab9b20f159532d64368e3b4e89063a">&#9670;&#160;</a></span>saveSolverState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void helix::nt::NodeImpl::saveSolverState </td>
+          <td>(</td>
+          <td class="paramtype">unsigned int</td>          <td class="paramname"><span class="paramname"><em>slot</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::int64_t</td>          <td class="paramname"><span class="paramname"><em>index</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::shared_ptr&lt; const void &gt;</td>          <td class="paramname"><span class="paramname"><em>state</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>bytes</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Saves the state of a solver after <code>index</code> whole frames, see findSolverState. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bytes</td><td>The estimated size of the state, which the cache budget counts. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
