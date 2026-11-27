@@ -40,6 +40,9 @@ inline Status guarded(const std::function<Status()>& action)
     }
 }
 
+/// @brief Cooks a node on the calling thread and returns what its first output produced.
+Status cookNodePacket(NodeId node, std::shared_ptr<const NodePacket>& packet);
+
 /// @brief Cooks the display node on the calling thread and returns what it produced.
 Status cookDisplayPacket(std::shared_ptr<const NodePacket>& packet);
 

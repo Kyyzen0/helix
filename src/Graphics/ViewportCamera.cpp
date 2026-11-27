@@ -48,6 +48,12 @@ void ViewportCamera::orbit(glm::vec2 delta)
     pitch_ = std::clamp(pitch_ + delta.y * orbitSpeed, -maxPitch, maxPitch);
 }
 
+void ViewportCamera::setAngles(float yaw, float pitch)
+{
+    yaw_ = yaw;
+    pitch_ = std::clamp(pitch, -maxPitch, maxPitch);
+}
+
 void ViewportCamera::pan(glm::vec2 delta)
 {
     const glm::vec3 forward = getForward();

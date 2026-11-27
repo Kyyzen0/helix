@@ -56,6 +56,15 @@ Done in the tree:
   skinned mesh, and the current pose of a `.blend`. Model I/O hands USD quads over as triangles.
   See [build-macos.md](build-macos.md).
 
+- **M1.5, Helix MCP.** `Helix --mcp` runs a Model Context Protocol server on standard input and
+  output, with no window, over the same facade as the interface. An agent creates, wires,
+  parameterizes and imports nodes, sets the display node and the frame, saves and opens scenes,
+  then checks the result as data (`geometry_summary`, `read_attribute`: counts, bounds, attributes
+  and values of any node) and as a picture (`render_view`, from any angle). Its own engine runs
+  in its own process, so it works on its own scene and not on the one open in a window; its changes
+  are not grouped into undoable steps yet, and scripts are not sandboxed (track two, items 4 and
+  5). See [build-macos.md](build-macos.md).
+
 Known gaps found on the way, to fix as the work below touches them:
 
 - **The engine is a singleton: one scene at a time.** The native app refuses a second
@@ -94,7 +103,7 @@ interface keeps working until the last one removes it.
 | --- | --- |
 | ~~M0, the base~~ | Done: the engine builds and is tested without Qt, and the `HelixCore` facade is importable from Swift. |
 | ~~M1, the walking skeleton~~ | Done, trackpad navigation still to be validated on hardware: a Swift app that opens a `.kut` document and shows the cooked display geometry in a Metal viewport (`MTKView`), with trackpad orbit, pan and zoom. Every layer is crossed once, end to end. |
-| **M1.5, Helix MCP** | A Model Context Protocol server over the facade, so an AI agent can create, inspect and change a scene, and check the result as data and as a viewport capture. |
+| ~~M1.5, Helix MCP~~ | Done: `Helix --mcp` is a Model Context Protocol server over the facade, so an AI agent can create, inspect and change a scene, and check the result as data and as a viewport capture. It runs its own engine, with no undo grouping and no script sandbox yet (track two). |
 | **M2, the node editor** | Show, select, move and connect nodes; create them from a search palette. |
 | **M3, the inspector** | Every parameter type, with undo through the macOS `UndoManager`. |
 | **M4, timeline and spreadsheet** | Playback, keyframes from the interface, and the attribute spreadsheet as a native table. |
@@ -111,12 +120,14 @@ trackpad, dark mode, full screen and window tabs.
 The facade is the one API for people and machines. An AI can do anything the
 interface can, and can check what it did.
 
-1. **MCP server** over the facade (M1.5 above), shipped inside the app and
-   usable headlessly.
-2. **Results as data**: attribute queries, counts and bounds on any node's
-   output, so an agent reads what the graph produced.
-3. **Results as images**: viewport captures and renders on request, from any
-   camera, at any frame.
+1. ~~**MCP server** over the facade (M1.5 above), shipped inside the app and
+   usable headlessly.~~ Done. Attaching an agent to the scene open in a window, rather than to
+   its own engine, is still to do.
+2. ~~**Results as data**: attribute queries, counts and bounds on any node's
+   output, so an agent reads what the graph produced.~~ Done (`cookNodeReport`, `readAttribute`).
+3. ~~**Results as images**: viewport captures and renders on request, from any
+   camera, at any frame.~~ Done for an orbit camera framed on the geometry, at the current frame
+   (`render_view`, `set_frame`); a free camera is still to do.
 4. **Intent grouped undo**: the changes an agent makes are one undoable step
    that names what it meant to do.
 5. **Sandboxed scripts**: code an agent writes runs without access to the rest
@@ -186,7 +197,7 @@ The reference machine is a Mac mini M4. Everything above must run well on it.
 
 1. ~~M0, the engine without Qt and the facade~~ done
 2. ~~M1, the walking skeleton of the native app~~ done
-3. M1.5, Helix MCP, so the AI track is exercised from the start
+3. ~~M1.5, Helix MCP, so the AI track is exercised from the start~~ done
 4. ~~glTF import with UVs~~ done; textured viewport shading next
 5. M2 to M4, the native interface, with cook caching and the scheduler work
    alongside

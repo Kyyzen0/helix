@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		54138808B32DE3EFC888A110 /* MCPHandlers.swift */ = {isa = PBXBuildFile; fileRef = 331ECFCBA0A158F0DB4C98B2 /* MCPHandlers.swift */; };
+		368C30DFA56067FD2B43F2FF /* MCPTools.swift */ = {isa = PBXBuildFile; fileRef = 398FE0956997104A8A94C077 /* MCPTools.swift */; };
+		EC4C2A2B61E414CA353E7542 /* MCPServer.swift */ = {isa = PBXBuildFile; fileRef = 44A86D134CE0E6260BCBFFA4 /* MCPServer.swift */; };
+		236B3E31E15D6EF0EA3D140D /* MCPJSON.swift */ = {isa = PBXBuildFile; fileRef = A1BBD3F488386F817B258945 /* MCPJSON.swift */; };
 		5E2B8D4A1C7F9063B8D1A4E7 /* ImportFormats.swift */ = {isa = PBXBuildFile; fileRef = 9A1C4E7B2D5F8031A6B94C20 /* ImportFormats.swift */; };
 		18485CD047FA97EB2E642D0A /* DocumentView.swift */ = {isa = PBXBuildFile; fileRef = BA89128C69AD540AF5DB2885 /* DocumentView.swift */; };
 		778229516B283DD35DA34D13 /* EngineHost.swift */ = {isa = PBXBuildFile; fileRef = D3267E492841E7AB897616F8 /* EngineHost.swift */; };
@@ -25,6 +29,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		331ECFCBA0A158F0DB4C98B2 /* MCPHandlers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MCPHandlers.swift; path = Sources/MCPHandlers.swift; sourceTree = "<group>"; };
+		398FE0956997104A8A94C077 /* MCPTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MCPTools.swift; path = Sources/MCPTools.swift; sourceTree = "<group>"; };
+		44A86D134CE0E6260BCBFFA4 /* MCPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MCPServer.swift; path = Sources/MCPServer.swift; sourceTree = "<group>"; };
+		A1BBD3F488386F817B258945 /* MCPJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MCPJSON.swift; path = Sources/MCPJSON.swift; sourceTree = "<group>"; };
 		F5BF48AA40CAD7891EB709FC /* Helix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Helix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A1C4E7B2D5F8031A6B94C20 /* ImportFormats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ImportFormats.swift; path = Sources/ImportFormats.swift; sourceTree = "<group>"; };
 		BA89128C69AD540AF5DB2885 /* DocumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DocumentView.swift; path = Sources/DocumentView.swift; sourceTree = "<group>"; };
@@ -79,6 +87,10 @@
 				C487B92355DA31AAC19BB695 /* HelixMetalView.swift */,
 				8949648E5078146AEA910130 /* NavigationSettings.swift */,
 				FEFB88B45D0D09B01B758F7D /* Present.metal */,
+				A1BBD3F488386F817B258945 /* MCPJSON.swift */,
+				44A86D134CE0E6260BCBFFA4 /* MCPServer.swift */,
+				398FE0956997104A8A94C077 /* MCPTools.swift */,
+				331ECFCBA0A158F0DB4C98B2 /* MCPHandlers.swift */,
 				B8C2943CF65CE26DE83D3576 /* SnapshotCommand.swift */,
 				B066A6C7E5D201772BE45D04 /* ViewportController.swift */,
 				E27EC0CCDEB296D5F887B697 /* ViewportRenderer.swift */,
@@ -228,6 +240,10 @@
 				0EBBB41BFE29A7683A9F84AE /* HelixMetalView.swift */,
 				366B6A1E32AD956F46E94013 /* NavigationSettings.swift */,
 				201044A22A24DDDAC52A68AE /* Present.metal */,
+				236B3E31E15D6EF0EA3D140D /* MCPJSON.swift */,
+				EC4C2A2B61E414CA353E7542 /* MCPServer.swift */,
+				368C30DFA56067FD2B43F2FF /* MCPTools.swift */,
+				54138808B32DE3EFC888A110 /* MCPHandlers.swift */,
 				359F572082373577572A31AB /* SnapshotCommand.swift */,
 				3242A6FC463E79AA58E9AD3B /* ViewportController.swift */,
 				C213E1CE61AFC2D6C1AB70AA /* ViewportRenderer.swift */,

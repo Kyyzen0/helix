@@ -261,3 +261,23 @@ TEST_CASE("A viewport camera goes back to where a new one starts on reset")
     camera.reset();
     REQUIRE(camera == ViewportCamera());
 }
+
+TEST_CASE("A viewport camera set to angles lands where orbiting to them would, whatever it was")
+{
+    ViewportCamera camera;
+    camera.orbit({73.f, -21.f});
+    camera.setAngles(glm::radians(-135.f), glm::radians(20.f));
+    REQUIRE(camera == ViewportCamera());
+
+    // Looking down negative z from the front: the camera sits on the positive z side.
+    camera.setAngles(0.f, 0.f);
+    REQUIRE(camera.getPosition().z > 0.f);
+    REQUIRE(camera.getPosition().x == Approx(0.f).margin(1e-4));
+    REQUIRE(camera.getPosition().y == Approx(0.f).margin(1e-4));
+    REQUIRE(glm::length(camera.getPosition()) == Approx(15.f));
+
+    // Straight up is held short of the pole.
+    camera.setAngles(0.f, glm::radians(90.f));
+    const glm::vec3 position = camera.getPosition();
+    REQUIRE(glm::length(glm::vec2(position.x, position.z)) > 0.01f);
+}

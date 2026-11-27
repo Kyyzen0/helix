@@ -190,6 +190,9 @@ Status moveNode(NodeId node, float x, float y);
 /// @brief Makes a node the one the viewport shows.
 Status setDisplayNode(NodeId node);
 
+/// @brief Makes the viewport show no node. Succeeds when none was shown.
+Status clearDisplayNode();
+
 /// @brief Returns the node the viewport shows, or 0 when there is none.
 NodeId displayNode();
 
@@ -337,6 +340,83 @@ void setFrame(float frame);
  * @{
  */
 
+/// @brief The box around some geometry, in world units.
+struct Bounds
+{
+    /// @brief False when there is no geometry, and the corners mean nothing.
+    bool valid = false;
+    float minX = 0.f;
+    float minY = 0.f;
+    float minZ = 0.f;
+    float maxX = 0.f;
+    float maxY = 0.f;
+    float maxZ = 0.f;
+};
+
+/// @brief Which elements of the geometry own an attribute.
+enum class AttributeOwner : std::int32_t
+{
+    Point,
+    Vertex,
+    Face,
+    Primitive
+};
+
+/// @brief What an attribute stores per element.
+enum class AttributeValueType : std::int32_t
+{
+    Int,
+    Float,
+    Vector3,
+    Bool,
+    Matrix4
+};
+
+/// @brief One column of the geometry a node produced.
+struct AttributeInfo
+{
+    AttributeOwner owner = AttributeOwner::Point;
+    /// @brief The name, such as "Position" (the point position every mesh has).
+    std::string name;
+    AttributeValueType type = AttributeValueType::Float;
+    /// @brief How many numbers one element holds: 1, 3 for a vector, 16 for a matrix.
+    std::uint32_t componentCount = 1;
+    /// @brief How many elements the attribute has, over every primitive that carries it.
+    std::uint64_t elementCount = 0;
+};
+
+/// @brief What any node produced, in numbers: the counts, the bounds and the attribute list.
+struct GeometryReport
+{
+    Status status;
+    std::uint64_t pointCount = 0;
+    std::uint64_t primitiveCount = 0;
+    std::uint64_t vertexCount = 0;
+    std::uint64_t faceCount = 0;
+    std::uint64_t triangleCount = 0;
+    /// @brief The box around the points, not valid when there are none.
+    Bounds bounds;
+    /// @brief Every attribute (the position included), once per owner and name.
+    std::vector<AttributeInfo> attributes;
+};
+
+/// @brief The values of a run of elements of one attribute.
+struct AttributeValues
+{
+    Status status;
+    AttributeValueType type = AttributeValueType::Float;
+    std::uint32_t componentCount = 1;
+    /// @brief How many elements the attribute has in all, so a caller can page.
+    std::uint64_t totalCount = 0;
+    /// @brief The index of the first element returned.
+    std::uint64_t start = 0;
+    /// @brief The values of a Float, Vector3 or Matrix4 attribute, `componentCount` per element
+    /// (a matrix row by row). Empty for the other types.
+    std::vector<float> floats;
+    /// @brief The values of an Int or Bool attribute (a bool as 0 or 1). Empty for the others.
+    std::vector<std::int64_t> ints;
+};
+
 /// @brief What the display node produced, in numbers.
 struct GeometrySummary
 {
@@ -372,6 +452,30 @@ struct DisplayBuffers
     std::vector<float> pointPositions;
 };
 
+/// @brief Cooks any node and reports what it produced: the counts, the bounds and the
+/// attributes.
+/// @note Fails when the node does not exist or cannot be cooked. The cook runs on the calling
+/// thread, at the current frame, and does not change the display node. A node that produced
+/// more than one primitive (an import that does not merge its meshes) reports their sum.
+GeometryReport cookNodeReport(NodeId node);
+
+/// @brief Cooks any node and reads a run of values of one attribute.
+/// @param owner which elements own the attribute.
+/// @param name the attribute, such as "Position".
+/// @param start the index of the first element.
+/// @param count how many elements at most. Fewer come back at the end of the attribute, and none
+/// when `start` is past it.
+/// @note When the node produced several primitives, their elements follow one another in the
+/// order of the primitives, and a primitive that lacks the attribute adds none. Fails when the
+/// node has no attribute of that name on that owner.
+AttributeValues readAttribute(
+    NodeId node,
+    AttributeOwner owner,
+    const std::string& name,
+    std::uint64_t start,
+    std::uint64_t count
+);
+
 /// @brief Cooks the display node and counts what it produced.
 /// @note Fails when no node is displayed or the node cannot be cooked.
 GeometrySummary cookDisplaySummary();
@@ -405,19 +509,6 @@ DisplayBuffers cookDisplayBuffers();
  * distance. The functions below move it in the units a pointer or a trackpad gives, which are
  * pixels of the view, and none of them redraws: the caller asks for a new frame.
  */
-
-/// @brief The box around some geometry, in world units.
-struct Bounds
-{
-    /// @brief False when there is no geometry, and the corners mean nothing.
-    bool valid = false;
-    float minX = 0.f;
-    float minY = 0.f;
-    float minZ = 0.f;
-    float maxX = 0.f;
-    float maxY = 0.f;
-    float maxZ = 0.f;
-};
 
 /// @brief What the viewport holds after the display node was cooked.
 struct ViewportGeometryInfo
@@ -506,6 +597,15 @@ void panViewport(float deltaX, float deltaY);
 /// one. The amount is in the same unit as a step of a pinch or a wheel, a tenth of the distance
 /// per unit.
 void dollyViewport(float amount);
+
+/// @brief Turns the camera to an absolute direction, keeping its centre and distance.
+/// @param azimuthDegrees the angle around the vertical axis. The camera of a new viewport sits at
+/// -135, and 0 looks down the negative z axis.
+/// @param elevationDegrees the angle above the horizontal plane, held between -89 and 89 so the
+/// view does not flip. The camera of a new viewport sits at 20.
+/// @note Call it before frameViewport, which frames the geometry at the angles of the moment:
+/// framing first and orbiting after can turn a corner of the box out of the view.
+void orbitViewportTo(float azimuthDegrees, float elevationDegrees);
 
 /// @brief Puts the camera back where a new viewport starts.
 void resetViewport();

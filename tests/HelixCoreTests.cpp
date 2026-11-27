@@ -469,3 +469,126 @@ TEST_CASE_METHOD(CoreFixture, "The facade cooks on the calling thread even after
     REQUIRE(summary.status.ok);
     REQUIRE(summary.pointCount == 8);
 }
+
+namespace {
+
+const core::AttributeInfo* findAttribute(
+    const core::GeometryReport& report,
+    core::AttributeOwner owner,
+    const std::string& name
+)
+{
+    for (const core::AttributeInfo& info : report.attributes)
+        if (info.owner == owner && info.name == name) return &info;
+    return nullptr;
+}
+
+} // namespace
+
+TEST_CASE_METHOD(CoreFixture, "A report on any node gives its counts, bounds and attributes")
+{
+    const core::NodeId shown = createDisplayedCube();
+    const core::CreateNodeResult other = core::createNode("helix::cube", "second", 0.f, 0.f);
+    REQUIRE(other.status.ok);
+    REQUIRE(core::setVector3(other.id, "size", 4.f, 2.f, 6.f).ok);
+
+    // The cook of a node that is not displayed leaves the display node alone.
+    const core::GeometryReport report = core::cookNodeReport(other.id);
+    REQUIRE(report.status.ok);
+    REQUIRE(core::displayNode() == shown);
+    REQUIRE(report.pointCount == 8);
+    REQUIRE(report.faceCount == 6);
+    REQUIRE(report.vertexCount == 24);
+    REQUIRE(report.triangleCount == 12);
+    REQUIRE(report.primitiveCount == 1);
+    REQUIRE(report.bounds.valid);
+    REQUIRE(report.bounds.minX == -2.f);
+    REQUIRE(report.bounds.maxX == 2.f);
+    REQUIRE(report.bounds.minY == -1.f);
+    REQUIRE(report.bounds.maxY == 1.f);
+    REQUIRE(report.bounds.minZ == -3.f);
+    REQUIRE(report.bounds.maxZ == 3.f);
+
+    const core::AttributeInfo* position =
+        findAttribute(report, core::AttributeOwner::Point, "Position");
+    REQUIRE(position != nullptr);
+    REQUIRE(position->type == core::AttributeValueType::Vector3);
+    REQUIRE(position->componentCount == 3);
+    REQUIRE(position->elementCount == 8);
+
+    // The summary of the display node agrees with the report on the same node.
+    const core::GeometrySummary summary = core::cookDisplaySummary();
+    const core::GeometryReport shownReport = core::cookNodeReport(shown);
+    REQUIRE(shownReport.pointCount == summary.pointCount);
+    REQUIRE(shownReport.faceCount == summary.faceCount);
+    REQUIRE(shownReport.triangleCount == summary.triangleCount);
+
+    REQUIRE_FALSE(core::cookNodeReport(987654).status.ok);
+    REQUIRE_FALSE(core::cookNodeReport(0).status.error.empty());
+}
+
+TEST_CASE_METHOD(CoreFixture, "An attribute is read in pages, with the total to page by")
+{
+    const core::NodeId cube = createDisplayedCube();
+    REQUIRE(core::setVector3(cube, "size", 2.f, 2.f, 2.f).ok);
+
+    const core::AttributeValues all =
+        core::readAttribute(cube, core::AttributeOwner::Point, "Position", 0, 100);
+    REQUIRE(all.status.ok);
+    REQUIRE(all.type == core::AttributeValueType::Vector3);
+    REQUIRE(all.componentCount == 3);
+    REQUIRE(all.totalCount == 8);
+    REQUIRE(all.start == 0);
+    REQUIRE(all.floats.size() == 8 * 3);
+    REQUIRE(all.ints.empty());
+    for (const float value : all.floats)
+        REQUIRE(std::abs(value) == 1.f);
+
+    const core::AttributeValues page =
+        core::readAttribute(cube, core::AttributeOwner::Point, "Position", 6, 5);
+    REQUIRE(page.status.ok);
+    REQUIRE(page.totalCount == 8);
+    REQUIRE(page.start == 6);
+    REQUIRE(page.floats.size() == 2 * 3);
+    REQUIRE(std::equal(page.floats.begin(), page.floats.end(), all.floats.begin() + 6 * 3));
+
+    // Past the end there is nothing, and that is not an error.
+    const core::AttributeValues past =
+        core::readAttribute(cube, core::AttributeOwner::Point, "Position", 50, 5);
+    REQUIRE(past.status.ok);
+    REQUIRE(past.totalCount == 8);
+    REQUIRE(past.floats.empty());
+
+    // A count that would overflow the end of the range is held to the attribute.
+    const core::AttributeValues huge = core::readAttribute(
+        cube, core::AttributeOwner::Point, "Position", 2, ~std::uint64_t(0)
+    );
+    REQUIRE(huge.status.ok);
+    REQUIRE(huge.floats.size() == 6 * 3);
+}
+
+TEST_CASE_METHOD(CoreFixture, "Reading an attribute that is not there, or on a bad node, is an error")
+{
+    const core::NodeId cube = createDisplayedCube();
+
+    const core::AttributeValues missing =
+        core::readAttribute(cube, core::AttributeOwner::Point, "nope", 0, 10);
+    REQUIRE_FALSE(missing.status.ok);
+    REQUIRE(missing.status.error.find("nope") != std::string::npos);
+    REQUIRE(missing.floats.empty());
+
+    // The position belongs to the points, not to the faces.
+    REQUIRE_FALSE(core::readAttribute(cube, core::AttributeOwner::Face, "Position", 0, 10).status.ok);
+    REQUIRE_FALSE(core::readAttribute(424242, core::AttributeOwner::Point, "Position", 0, 10).status.ok);
+}
+
+TEST_CASE_METHOD(CoreFixture, "The display node can be cleared, and clearing none is not an error")
+{
+    REQUIRE(core::clearDisplayNode().ok);
+    const core::NodeId cube = createDisplayedCube();
+    REQUIRE(core::displayNode() == cube);
+    REQUIRE(core::clearDisplayNode().ok);
+    REQUIRE(core::displayNode() == 0);
+    REQUIRE_FALSE(core::cookDisplaySummary().status.ok);
+    REQUIRE(core::listNodes().size() == 1);
+}
