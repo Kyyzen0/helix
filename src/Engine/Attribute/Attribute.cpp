@@ -6,6 +6,7 @@
 #include <mutex>
 #include <optional>
 #include <stdexcept>
+#include <type_traits>
 
 namespace helix {
 
@@ -84,7 +85,18 @@ void attr::Attribute::detach()
 void attr::Attribute::resize(size_t size)
 {
     detach();
-    std::visit([&](auto& storePtr) { storePtr->resize(size); }, store_);
+    std::visit(
+        [&](auto& storePtr) {
+            using Value = typename std::decay_t<decltype(*storePtr)>::value_type;
+            // Eigen leaves a default constructed vector or matrix uninitialised: the new elements
+            // are zero, as they are for the numbers and the booleans.
+            if constexpr (std::is_base_of_v<Eigen::EigenBase<Value>, Value>)
+                storePtr->resize(size, Value::Zero());
+            else
+                storePtr->resize(size);
+        },
+        store_
+    );
 }
 
 void attr::Attribute::compact(const std::vector<bool>& keep)

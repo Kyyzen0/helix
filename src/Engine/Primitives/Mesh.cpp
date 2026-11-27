@@ -170,7 +170,8 @@ bool geo::Mesh::intrinsicHandlesBound() const
 
 void geo::Mesh::mergeAppend(
     std::shared_ptr<attr::Attribute> dst,
-    std::shared_ptr<attr::Attribute> src
+    std::shared_ptr<attr::Attribute> src,
+    Offset firstDst
 )
 {
     ensureWritable_();
@@ -182,7 +183,43 @@ void geo::Mesh::mergeAppend(
 
     if (dstType != srcType) throw std::runtime_error("mergeAppend type missmatch.");
 
-    attr::visitType(srcType, [&]<typename Value>() { mergeAppendImpl<Value>(dst, src); });
+    attr::visitType(srcType, [&]<typename Value>() { mergeAppendImpl<Value>(dst, src, firstDst); });
+}
+
+void geo::Mesh::prepareMergedAttributes_(const Mesh& other, attr::AttributeOwner owner)
+{
+    // An attribute the other mesh has and this one lacks is created here, so the existing
+    // elements get its default value and the appended range receives the other values.
+    for (const std::shared_ptr<attr::Attribute>& otherAttribute : other.getAttributeStore(owner))
+    {
+        if (!otherAttribute || otherAttribute->isIntrinsic() || otherAttribute->isInternal()) continue;
+        // The material index points into a table: merge() remaps it with the materials.
+        if (owner == attr::AttrOwner::FACE && otherAttribute->getName() == attr::names::materialIndex)
+            continue;
+        // A name held with another type keeps this mesh's attribute: tryAddAttribute would
+        // replace it, dropping its values.
+        if (getAttribByName(owner, otherAttribute->getName(), true)) continue;
+        tryAddAttribute(owner, otherAttribute->getName(), otherAttribute->getType());
+    }
+}
+
+void geo::Mesh::mergeAttributes_(const Mesh& other, attr::AttributeOwner owner, Offset firstDst)
+{
+    // The stores were grown by addPoints / addFaces: the other values land in the appended
+    // range only, so every attribute keeps exactly the element count of its owner.
+    for (const std::shared_ptr<attr::Attribute>& otherAttribute : other.getAttributeStore(owner))
+    {
+        if (!otherAttribute || otherAttribute->isIntrinsic() || otherAttribute->isInternal()) continue;
+        // The material index points into a table: merge() remaps it with the materials.
+        if (owner == attr::AttrOwner::FACE && otherAttribute->getName() == attr::names::materialIndex)
+            continue;
+        std::shared_ptr<attr::Attribute> attribute =
+            getAttribByName(owner, otherAttribute->getName());
+        // Another type under the same name: this mesh keeps its attribute, and the appended
+        // range holds the default values.
+        if (!attribute || attribute->getType() != otherAttribute->getType()) continue;
+        mergeAppend(attribute, otherAttribute, firstDst);
+    }
 }
 
 void geo::Mesh::applyTransform(const Matrix4& mat, TransformClass transformClass)
@@ -248,6 +285,11 @@ void geo::Mesh::merge(Mesh& other)
 {
     ensureWritable_();
     const Offset firstNewFace = getNumFaces();
+    const Offset firstNewVertex = getNumVerts();
+    const Offset firstNewPoint = getNumPoints();
+    prepareMergedAttributes_(other, attr::AttrOwner::POINT);
+    prepareMergedAttributes_(other, attr::AttrOwner::VERTEX);
+    prepareMergedAttributes_(other, attr::AttrOwner::FACE);
     // Copy points from other to self.
     const std::vector<Offset> newPoints = addPoints(other.posPointHandle_.getSpan());
 
@@ -274,46 +316,9 @@ void geo::Mesh::merge(Mesh& other)
     // TODO: check closed status
     addFaces(pointOffsetsFlat, vertexCounts, true);
 
-    // Merge vertex attributes
-    for (std::shared_ptr<attr::Attribute> otherAttribute : other.vertexAttributes_)
-    {
-        String otherAttributeName = otherAttribute->getName();
-        std::shared_ptr<attr::Attribute> attribute =
-            getAttribByName(attr::AttrOwner::VERTEX, otherAttributeName);
-
-        if (attribute)
-        {
-            mergeAppend(attribute, otherAttribute);
-        }
-    }
-
-    for (std::shared_ptr<attr::Attribute> otherAttribute : other.pointAttributes_)
-    {
-        String otherAttributeName = otherAttribute->getName();
-        std::shared_ptr<attr::Attribute> attribute =
-            getAttribByName(attr::AttrOwner::POINT, otherAttributeName);
-
-        bool alreadyExists = static_cast<bool>(attribute);
-
-        if (alreadyExists)
-        {
-            mergeAppend(attribute, otherAttribute);
-        }
-    }
-
-    for (std::shared_ptr<attr::Attribute> otherAttribute : other.faceAttributes_)
-    {
-        String otherAttributeName = otherAttribute->getName();
-        std::shared_ptr<attr::Attribute> attribute =
-            getAttribByName(attr::AttrOwner::FACE, otherAttributeName);
-
-        bool alreadyExists = static_cast<bool>(attribute);
-
-        if (alreadyExists)
-        {
-            mergeAppend(attribute, otherAttribute);
-        }
-    }
+    mergeAttributes_(other, attr::AttrOwner::VERTEX, firstNewVertex);
+    mergeAttributes_(other, attr::AttrOwner::POINT, firstNewPoint);
+    mergeAttributes_(other, attr::AttrOwner::FACE, firstNewFace);
 
     // The appended faces point into the other mesh's table: bring them into this one.
     if (!materials_.empty() || !other.materials_.empty())

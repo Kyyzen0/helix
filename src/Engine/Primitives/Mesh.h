@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Primitives/Material.h"
 #include "Engine/Primitives/Primitive.h"
+#include <algorithm>
 #include <atomic>
 #include <mutex>
 #include <span>
@@ -335,25 +336,35 @@ class Mesh : public Primitive
     }
     void ensurePositionWritableSlow_();
     void bindIntrinsicHandles_(bool detach);
-    void mergeAppend(std::shared_ptr<attr::Attribute> dst, std::shared_ptr<attr::Attribute> src);
+    // Writes the values of src into dst from firstDst on. dst already has the final element count.
+    void mergeAppend(
+        std::shared_ptr<attr::Attribute> dst,
+        std::shared_ptr<attr::Attribute> src,
+        Offset firstDst
+    );
+    // Creates on this mesh the custom attributes of the other mesh it lacks (same name and type).
+    void prepareMergedAttributes_(const Mesh& other, attr::AttributeOwner owner);
+    // Copies the custom attribute values of the other mesh into the range starting at firstDst.
+    void mergeAttributes_(const Mesh& other, attr::AttributeOwner owner, Offset firstDst);
     template <typename T>
-    void mergeAppendImpl(std::shared_ptr<attr::Attribute> dst, std::shared_ptr<attr::Attribute> src)
+    void mergeAppendImpl(
+        std::shared_ptr<attr::Attribute> dst,
+        std::shared_ptr<attr::Attribute> src,
+        Offset firstDst
+    )
     {
         auto dstHandle = attr::AttributeHandle<T>(dst);
         auto srcHandle = attr::AttributeHandleRO<T>(src);
 
+        // Never write past the destination, whatever size the source attribute has.
         const Offset srcCount = srcHandle.getSize();
         const Offset dstCount = dstHandle.getSize();
+        if (firstDst >= dstCount) return;
+        const Offset count = std::min(srcCount, dstCount - firstDst);
 
-        dstHandle.resize(dstCount + srcCount);
-
-        for (Offset i = 0; i < srcCount; ++i)
-        {
-            const T value = srcHandle.getValue(i);
-            const Offset dstOffset = dstCount + i;
-            dstHandle.setValue(dstOffset, value);
-        }
-    };
+        for (Offset i = 0; i < count; ++i)
+            dstHandle.setValue(firstDst + i, srcHandle.getValue(i));
+    }
 
     // What the material_index face attribute points into. Immutable materials, shared by pointer.
     std::vector<std::shared_ptr<const Material>> materials_;

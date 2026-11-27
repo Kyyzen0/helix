@@ -426,3 +426,37 @@ TEST_CASE_METHOD(NMReset, "A node downstream of the import keeps the materials",
     REQUIRE(upstream->materials().front() == mesh->materials().front());
     REQUIRE(upstream->materials().front()->baseColorTexture == mesh->materials().front()->baseColorTexture);
 }
+
+TEST_CASE_METHOD(NMReset, "Merging two imports of a textured file keeps the uv of the second copy", "[import][material][merge]")
+{
+    nt::NodeLoader::loadNodes();
+    auto& nm = nt::nm();
+    const nt::NodeId first = nm.createNode("helix::geometryImport");
+    const nt::NodeId second = nm.createNode("helix::geometryImport");
+    for (const nt::NodeId importer : {first, second})
+        nm.getNode(importer).getParameter("filePath").lock()->setString(dataFile("textured-quad.glb").string());
+    const nt::NodeId merge = nm.createNode("helix::merge");
+    nm.connectNodes(first, 0, merge, 0);
+    nm.connectNodes(second, 0, merge, 1);
+    nm.cook(merge);
+
+    const auto mesh = std::dynamic_pointer_cast<const geo::Mesh>(nm.getNode(merge).getOutputPacket(0)->getPrimitive(0));
+    REQUIRE(mesh);
+    REQUIRE(mesh->getNumFaces() == 4);
+    const Offset half = mesh->getNumVerts() / 2;
+    REQUIRE(half * 2 == mesh->getNumVerts());
+    const auto attribute = mesh->getAttribByName(attr::AttributeOwner::VERTEX, attr::names::uv);
+    REQUIRE(attribute);
+    REQUIRE(attribute->getSize() == mesh->getNumVerts());
+    const attr::AttributeHandleRO<Vector3> uvs(attribute);
+    bool anyNonZero = false;
+    for (Offset vertex = 0; vertex < half; ++vertex)
+    {
+        REQUIRE(uvs.getValue(half + vertex) == uvs.getValue(vertex));
+        anyNonZero = anyNonZero || uvs.getValue(vertex) != Vector3(0, 0, 0);
+    }
+    REQUIRE(anyNonZero);
+    // The two copies share the material, so the picture is sampled over both.
+    REQUIRE(mesh->materials().size() == 1);
+}
+

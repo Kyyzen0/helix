@@ -685,3 +685,130 @@ TEST_CASE("ajout de face apres lecture des face starts")
     REQUIRE(after[0] == 0);
     REQUIRE(after[1] == 3);
 }
+
+namespace {
+
+// A triangle with a point attribute, a vertex attribute (uv, Normal) and a face attribute, each
+// holding a value that tells the mesh it came from.
+std::shared_ptr<geo::Mesh> mergeSource(float seed, bool withUv)
+{
+    auto mesh = std::make_shared<geo::Mesh>();
+    const Offset a = mesh->addPoint(Vector3(seed, 0, 0));
+    const Offset b = mesh->addPoint(Vector3(seed + 1, 0, 0));
+    const Offset c = mesh->addPoint(Vector3(seed, 1, 0));
+    mesh->addFace({a, b, c});
+    mesh->addFace({a, c, b});
+    auto weight = mesh->addAttribute<floatT>(attr::AttributeOwner::POINT, "weight");
+    auto normal = mesh->addAttribute<Vector3>(attr::AttributeOwner::VERTEX, "Normal");
+    auto tag = mesh->addAttribute<intT>(attr::AttributeOwner::FACE, "tag");
+    for (Offset p = 0; p < 3; ++p) weight.setValue(p, seed + 0.5f + static_cast<float>(p));
+    for (Offset v = 0; v < 6; ++v) normal.setValue(v, Vector3(seed, static_cast<float>(v), 1));
+    for (Offset f = 0; f < 2; ++f) tag.setValue(f, static_cast<intT>(seed) * 10 + static_cast<intT>(f));
+    if (withUv)
+    {
+        auto uv = mesh->addAttribute<Vector3>(attr::AttributeOwner::VERTEX, attr::names::uv);
+        for (Offset v = 0; v < 6; ++v) uv.setValue(v, Vector3(seed + 0.25f, static_cast<float>(v) / 8.f, 0));
+    }
+    return mesh;
+}
+
+void requireOwnerCounts(const geo::Mesh& mesh)
+{
+    const std::pair<attr::AttributeOwner, Offset> owners[] = {
+        {attr::AttributeOwner::POINT, mesh.getNumPoints()},
+        {attr::AttributeOwner::VERTEX, mesh.getNumVerts()},
+        {attr::AttributeOwner::FACE, mesh.getNumFaces()},
+    };
+    for (const auto& [owner, count] : owners)
+        for (const auto& attribute : mesh.getAttributes(owner, true))
+            REQUIRE(attribute->getSize() == count);
+}
+
+} // namespace
+
+TEST_CASE("Merging puts the values of the other mesh in the appended range, for every owner", "[merge][copyOnWrite]")
+{
+    auto base = mergeSource(1.f, true);
+    auto other = mergeSource(5.f, true);
+    base->merge(*other);
+
+    REQUIRE(base->getNumPoints() == 6);
+    REQUIRE(base->getNumVerts() == 12);
+    REQUIRE(base->getNumFaces() == 4);
+    requireOwnerCounts(*base);
+
+    const auto weight = attr::AttributeHandleRO<floatT>(base->getAttribByName(attr::AttributeOwner::POINT, "weight"));
+    const auto normal = attr::AttributeHandleRO<Vector3>(base->getAttribByName(attr::AttributeOwner::VERTEX, "Normal"));
+    const auto uv = attr::AttributeHandleRO<Vector3>(base->getAttribByName(attr::AttributeOwner::VERTEX, attr::names::uv));
+    const auto tag = attr::AttributeHandleRO<intT>(base->getAttribByName(attr::AttributeOwner::FACE, "tag"));
+    for (Offset p = 0; p < 3; ++p)
+    {
+        REQUIRE(weight.getValue(p) == 1.5f + static_cast<float>(p));
+        REQUIRE(weight.getValue(3 + p) == 5.5f + static_cast<float>(p));
+    }
+    for (Offset v = 0; v < 6; ++v)
+    {
+        REQUIRE(normal.getValue(v) == Vector3(1, static_cast<float>(v), 1));
+        REQUIRE(normal.getValue(6 + v) == Vector3(5, static_cast<float>(v), 1));
+        REQUIRE(uv.getValue(v) == Vector3(1.25f, static_cast<float>(v) / 8.f, 0));
+        REQUIRE(uv.getValue(6 + v) == Vector3(5.25f, static_cast<float>(v) / 8.f, 0));
+    }
+    REQUIRE(tag.getValue(0) == 10);
+    REQUIRE(tag.getValue(1) == 11);
+    REQUIRE(tag.getValue(2) == 50);
+    REQUIRE(tag.getValue(3) == 51);
+
+    // The other mesh is left as it was.
+    REQUIRE(other->getNumVerts() == 6);
+    requireOwnerCounts(*other);
+    const auto otherUv = attr::AttributeHandleRO<Vector3>(other->getAttribByName(attr::AttributeOwner::VERTEX, attr::names::uv));
+    REQUIRE(otherUv.getValue(5) == Vector3(5.25f, 5.f / 8.f, 0));
+}
+
+TEST_CASE("Merging creates the attribute the other mesh has and this one lacks", "[merge][copyOnWrite]")
+{
+    auto base = mergeSource(1.f, false);
+    auto other = mergeSource(5.f, true);
+    base->merge(*other);
+
+    requireOwnerCounts(*base);
+    const auto uvAttribute = base->getAttribByName(attr::AttributeOwner::VERTEX, attr::names::uv);
+    REQUIRE(uvAttribute);
+    const attr::AttributeHandleRO<Vector3> uv(uvAttribute);
+    REQUIRE(uv.getValue(0) == Vector3(0, 0, 0));
+    REQUIRE(uv.getValue(5) == Vector3(0, 0, 0));
+    REQUIRE(uv.getValue(6) == Vector3(5.25f, 0.f, 0));
+    REQUIRE(uv.getValue(11) == Vector3(5.25f, 5.f / 8.f, 0));
+}
+
+TEST_CASE("Merging gives the appended range defaults for an attribute only this mesh has", "[merge][copyOnWrite]")
+{
+    auto base = mergeSource(1.f, true);
+    auto other = mergeSource(5.f, false);
+    // A clone that shares its stores with the base keeps its own values.
+    const auto copy = std::static_pointer_cast<geo::Mesh>(base->clone());
+    base->merge(*other);
+
+    requireOwnerCounts(*base);
+    const attr::AttributeHandleRO<Vector3> uv(base->getAttribByName(attr::AttributeOwner::VERTEX, attr::names::uv));
+    REQUIRE(uv.getValue(5) == Vector3(1.25f, 5.f / 8.f, 0));
+    REQUIRE(uv.getValue(6) == Vector3(0, 0, 0));
+    REQUIRE(copy->getNumVerts() == 6);
+    requireOwnerCounts(*copy);
+}
+
+TEST_CASE("Merging keeps this mesh's attribute when the other holds the name with another type", "[merge][copyOnWrite]")
+{
+    auto base = mergeSource(1.f, false);
+    auto other = std::make_shared<geo::Mesh>(*mergeSource(5.f, false));
+    other->addAttribute<intT>(attr::AttributeOwner::POINT, "mixed");
+    base->addAttribute<floatT>(attr::AttributeOwner::POINT, "mixed").setValue(1, 3.f);
+    base->merge(*other);
+
+    requireOwnerCounts(*base);
+    const auto mixed = base->getAttribByName(attr::AttributeOwner::POINT, "mixed");
+    REQUIRE(mixed->getType() == attr::AttributeType::floatT);
+    const attr::AttributeHandleRO<floatT> values(mixed);
+    REQUIRE(values.getValue(1) == 3.f);
+    REQUIRE(values.getValue(4) == 0.f);
+}
