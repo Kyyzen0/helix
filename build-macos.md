@@ -480,7 +480,7 @@ extension:
 | `.fbx` `.stl` `.ply` `.dae` `.3ds` `.3mf` `.dxf` `.x3d` `.x` | Assimp | STL, 3MF and DXF are Z up by the convention of the format. |
 | `.obj` | the engine's own reader | Points, faces and texture coordinates (`uv`). Normals are computed, as they always were. |
 | `.usd` `.usda` `.usdc` `.usdz` | Model I/O | Quads come through as triangles. |
-| `.blend` | Blender, in the background | Converted to GLB (modifiers applied, no animation, skin or pictures), and kept under `~/Library/Caches/<bundle id>/blend` (the app) or `HelixBlendCache` in the temporary folder, keyed by path, size, date and the version of Blender. The Blender is the one in the node's `Blender` setting, `/Applications/Blender.app`, or one Spotlight finds. |
+| `.blend` | Blender, in the background | Converted to GLB (modifiers applied except the armature one, with the skin and the actions, no pictures), and kept under `~/Library/Caches/<bundle id>/blend` (the app) or `HelixBlendCache` in the temporary folder, keyed by path, size, date and the version of Blender. The Blender is the one in the node's `Blender` setting, `/Applications/Blender.app`, or one Spotlight finds. |
 
 Assimp is a static library built by the superbuild into `build-super/deps` with only those
 importers and no exporters (`superbuild/deps/assimp.cmake`), and linked into `libhelixEngine`, so
@@ -521,6 +521,87 @@ is at row `(1 - v) * height`. `.kut` files do not store materials: the import no
 long that took and the peak memory of the process. It reads the same settings as the window, and a
 launch argument overrides one: `Helix -materialsVisible NO --render-snapshot ...` draws without
 materials.
+
+### Skeletal animation
+
+A rigged file (glTF, GLB, and the other Assimp formats that carry a skin) comes in with its skeleton,
+its skin weights and its clips. Skeletons are geometry: the joints are points, the bones are lines,
+and the transforms are attributes, so the nodes that shape a mesh work on a skeleton too, and the
+spreadsheet and `read_attribute` show it.
+
+**What the import node gives.** `helix::geometryImport` has two outputs:
+
+- **Output 0**, the mesh, with the skin on every point: the int attributes `skin_joint0` to
+  `skin_joint3` (the index of a joint, which is a point of the skeleton) and the float attributes
+  `skin_weight0` to `skin_weight3`. The weights of a point sum to 1; a vertex pulled by more than
+  four joints keeps its four strongest and the rest is shared between them (the summary counts those
+  vertices); an unused influence is joint 0 with weight 0; a point with no weight at all (a mesh of
+  the file that is not skinned, merged with one that is) is not moved by the skin. The mesh is the
+  bind pose, as it was.
+- **Output 1**, the skeleton: a mesh with one point per joint (at its rest position, in the space of
+  the mesh), one open two point face per bone (parent to child, so it draws as a line), and the point
+  attributes `joint_parent` (int, `-1` for a root), `rest_local` (matrix, the rest transform relative
+  to the parent), `inverse_bind` (matrix, the mesh space to the joint space) and `pose` (matrix, the
+  current world transform of the joint, the rest one until a pose node sets it). It is an empty mesh
+  when the file has no rig. The names of the joints and the clips are not attributes: they sit in a
+  table the mesh shares by pointer, like the materials, which is not saved in a `.kut` file (the import
+  node reads it again, as it does the materials).
+
+The joints are collected once for the whole file, by node, and ordered depth first, so a parent
+always comes before its children and every mesh of a merge indexes the same list. A node that is not
+a bone but sits between two bones is kept as a joint, so the hierarchy is not cut; the nodes above
+the first bone (the armature object of a Blender export) are not joints, and their transform is kept
+as the base of the root. A file with several unrelated skins gives one skeleton with several roots.
+The summary says the joints, the roots, the skinned meshes and every clip with its name and length.
+
+**Conventions.** `inverse_bind` is what the file gives (the inverse bind matrix of a glTF, the
+offset matrix of Assimp's bones) with the correction of the up axis undone, and `pose` has it applied,
+so the skin matrix of a joint is `pose * inverse_bind` and is the identity when the skeleton stands in
+the pose the mesh was bound in. The node that holds a skinned mesh does not place it: glTF says the
+skeleton does, and Assimp folds the mesh transform into the offset matrices of the formats that have
+one, so a skinned mesh is not baked with the transform of its node (an unskinned mesh is, as before).
+A skeleton in a file whose node pose is not its bind pose shows the mesh deformed in the rest pose, as
+the file says. The import's `Size` scales the joints with the mesh and the translations of the clips
+and the root with them.
+
+**`helix::skeletonPose`** takes a skeleton and gives it back posed, which is what the deform reads.
+
+| Parameter | |
+| --- | --- |
+| `clip` | The clip to play, by name. Empty plays the first one. A name the skeleton does not have is a node error that lists the clips it has. |
+| `speed` | A multiple of the scene time, default 1. 0 holds the pose of `offset`, a negative speed plays backward. |
+| `offset` | Seconds added to the clip time, default 0. |
+| `loop` | `loop` starts the clip over, `hold` stays on the first or last pose, `once` plays it one time and then returns to the rest pose. |
+
+The clip time is `offset + time * speed`, with the scene time `(frame - 1) / fps` (see Timeline), so
+the pose is a pure function of the frame, whatever order the frames are visited in. A joint the clip
+does not animate keeps its rest transform, and a track that animates only some of translation,
+rotation and scale replaces only those. Rotations take the shortest arc between keys, and a track is
+linear or stepped as the file says. The output has the positions of the joints and the `pose`
+attribute set. A skeleton with no clip passes through in its rest pose with a warning, and an empty
+input (a file with no rig) passes through with a warning.
+
+**`helix::skinDeform`** takes the skinned mesh (input 0) and the posed skeleton (input 1) and does
+linear blend skinning: `P' = sum(w_i * pose_i * inverse_bind_i) * P` over the four influences, in
+parallel over the points (about 0.8 ms for the 74 000 points of the dragon). The normals of the
+points and vertices turn with the same blend and are brought back to unit length (the `Deform
+Normals` toggle), and every other attribute and the material table stay. A mesh with no skin attribute
+is a node error, a joint index outside the skeleton is a node error that names the point, and a mesh
+of a packet that has no skin passes through with a warning.
+
+**Wiring.** `geometryImport` output 0 to `skinDeform` input 0, `geometryImport` output 1 to
+`skeletonPose`, `skeletonPose` to `skinDeform` input 1, and display the deform. To see the bones,
+display the pose node. Through MCP, `connect_nodes` takes `output: 1` for the skeleton, and
+`geometry_summary` of any node that produced a skeleton reports `skeleton: {joints, roots, clips:
+[{name, duration, channels}]}`, which is how to find the names `clip` takes.
+
+**Limits.** Cubic spline tracks are played as straight lines between their keys (the import says how
+many). No blend shapes (morph targets), no inverse kinematics, no retargeting, and no blending between
+clips. The skin is computed on the CPU (the GPU later). The skeleton and the clips are not saved in a
+`.kut`. USD (Model I/O) skins are not read, and neither are the animations of an FBX (the skeleton and
+skin are). The viewport draws the bones as thin lines in the line colour, which is dark on the
+default background. A `Transform` node moves the joints as points but not their matrices, so move a
+skeleton with the clips and the root, not with that node.
 
 ## The parser tools
 

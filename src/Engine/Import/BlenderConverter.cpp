@@ -41,8 +41,11 @@ wanted = dict(
     export_normals=True,
     export_texcoords=True,
     export_image_format="NONE",
-    export_animations=False,
-    export_skins=False,
+    # Skins and animations are exported so a rigged .blend keeps its armature and its actions.
+    # export_apply applies every modifier except the armature one (the exporter says so), so the
+    # mesh stays bound to its skeleton.
+    export_animations=True,
+    export_skins=True,
     export_morph=False,
     export_cameras=False,
     export_lights=False,
@@ -281,7 +284,10 @@ fs::path convertBlendToGlb(const fs::path& blendFile, const std::string& configu
 
     const std::string version = blenderVersion(blender);
     const std::string key = absolute.string() + "|" + std::to_string(size) + "|" +
-                            std::to_string(static_cast<long long>(modified)) + "|" + version;
+                            std::to_string(static_cast<long long>(modified)) + "|" + version +
+                            // Bumped when the export script changes what the glb holds, so an
+                            // older conversion (made without skins) is not served again.
+                            "|skins1";
     const fs::path directory = blendCacheDirectory();
     const fs::path output = directory / (hashToName(key) + ".glb");
 

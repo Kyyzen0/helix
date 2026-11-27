@@ -598,7 +598,7 @@ enum MCPHandlers {
             }
             return .object(entry)
         }
-        return .data([
+        var summary: [String: JSONValue] = [
             "node": identity(node),
             "point_count": .init(count: report.pointCount),
             "primitive_count": .init(count: report.primitiveCount),
@@ -608,7 +608,24 @@ enum MCPHandlers {
             "bounds": bounds,
             "attributes": .array(attributes),
             "materials": .array(materials),
-        ])
+        ]
+        // A skeleton is reported only when the node produced one: its joints, its roots, and the
+        // clips a Skeleton Pose node can play (by name) with their length in seconds.
+        if report.skeleton.present {
+            let clips: [JSONValue] = Array(report.skeleton.clips).map { clip in
+                [
+                    "name": .string(String(engine: clip.name)),
+                    "duration": .init(clip.duration),
+                    "channels": .init(count: clip.channelCount),
+                ]
+            }
+            summary["skeleton"] = [
+                "joints": .init(count: report.skeleton.jointCount),
+                "roots": .init(count: report.skeleton.rootCount),
+                "clips": .array(clips),
+            ]
+        }
+        return .data(.object(summary))
     }
 
     private static func owner(_ text: String) throws -> helix.core.AttributeOwner {

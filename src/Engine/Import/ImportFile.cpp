@@ -234,10 +234,36 @@ std::string ImportSummary::text() const
         out << ".";
     }
 
+    if (jointCount > 0)
+    {
+        out << " Skeleton: " << jointCount << (jointCount == 1 ? " joint" : " joints");
+        if (rootJointCount > 1) out << " (" << rootJointCount << " roots)";
+        if (skinnedMeshCount > 0)
+            out << ", " << skinnedMeshCount << (skinnedMeshCount == 1 ? " skinned mesh" : " skinned meshes");
+        if (clips.empty())
+            out << ", no clip";
+        else
+        {
+            out << ", " << clips.size() << (clips.size() == 1 ? " clip: " : " clips: ");
+            for (std::size_t i = 0; i < clips.size(); ++i)
+                out << (i ? ", " : "") << clips[i].first << " " << std::fixed << std::setprecision(2) << clips[i].second
+                    << " s";
+        }
+        out << ".";
+        if (overInfluencedVertices > 0)
+            out << " " << overInfluencedVertices << (overInfluencedVertices == 1 ? " vertex has" : " vertices have")
+                << " more than 4 influences and keep the 4 strongest.";
+        if (cubicTracks > 0)
+            out << " " << cubicTracks << (cubicTracks == 1 ? " track is a cubic spline" : " tracks are cubic splines")
+                << " and play as straight lines between keys.";
+    }
+
     std::vector<std::string> left;
-    if (animationCount > 0)
+    // Animations and skins the file holds that were not kept: a skinned mesh with no skeleton to
+    // follow stays in its bind pose.
+    if (animationCount > 0 && jointCount == 0)
         left.push_back(std::to_string(animationCount) + (animationCount == 1 ? " animation" : " animations"));
-    if (skinnedMeshCount > 0)
+    if (skinnedMeshCount > 0 && jointCount == 0)
         left.push_back(
             std::to_string(skinnedMeshCount) + (skinnedMeshCount == 1 ? " skinned mesh (bind pose only)" : " skinned meshes (bind pose only)")
         );

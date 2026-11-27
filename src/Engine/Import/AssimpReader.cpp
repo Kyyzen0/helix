@@ -1,3 +1,4 @@
+#include "Engine/Import/AssimpSkeleton.h"
 #include "Engine/Import/ImageDecode.h"
 #include "Engine/Import/ImportFile.h"
 #include "Engine/Import/Readers.h"
@@ -18,14 +19,6 @@
 namespace helix::import {
 
 namespace {
-
-Matrix4 toMatrix(const aiMatrix4x4& m)
-{
-    Matrix4 matrix;
-    matrix << m.a1, m.a2, m.a3, m.a4, m.b1, m.b2, m.b3, m.b4, m.c1, m.c2, m.c3, m.c4, m.d1, m.d2,
-        m.d3, m.d4;
-    return matrix;
-}
 
 // STL is a list of triangles that name their corners one by one, so its corners are welded to
 // get the shared points a mesh is edited with. Formats that already index their points are not.
@@ -253,7 +246,9 @@ RawScene readWithAssimp(const std::filesystem::path& file, std::vector<std::file
     Assimp::Importer importer;
     // The importer owns the file access it is given. It outlives every read below.
     if (openedFiles) importer.SetIOHandler(new RecordingIOSystem(opened));
-    // The animations of an fbx are not read at all, and no mesh is turned into a skeleton.
+    // The animations of an fbx are not read, so an fbx comes in with its skeleton and skin and
+    // with no clip. Turning pivots into plain transforms is left off for the same reason: the
+    // clips of an fbx have not been checked against this reader.
     importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ANIMATIONS, false);
     importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
     // A file with a million triangles is one mesh. Assimp's default would split it at 1M vertices.
@@ -298,12 +293,10 @@ RawScene readWithAssimp(const std::filesystem::path& file, std::vector<std::file
     unsigned flags = aiProcess_SortByPType | aiProcess_ValidateDataStructure |
                      aiProcess_RemoveComponent;
     if (needsWelding(extension)) flags |= aiProcess_JoinIdenticalVertices;
-    // Skins, animations, cameras and lights are not used, so they are dropped before they cost
-    // memory. The embedded pictures stay: the base colour textures are decoded from them below.
-    importer.SetPropertyInteger(
-        AI_CONFIG_PP_RVC_FLAGS,
-        aiComponent_ANIMATIONS | aiComponent_CAMERAS | aiComponent_LIGHTS | aiComponent_BONEWEIGHTS
-    );
+    // Cameras and lights are not used, so they are dropped before they cost memory. The skins and
+    // animations stay, they are read below. So do the embedded pictures: the base colour textures
+    // are decoded from them.
+    importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
     try
     {
         scene = importer.ApplyPostProcessing(flags);
@@ -333,6 +326,9 @@ RawScene readWithAssimp(const std::filesystem::path& file, std::vector<std::file
         }
         return materialOf[sourceIndex];
     };
+
+    // The joints of every bone of the file, and what the clips say about them.
+    SkeletonReader skeleton(*scene);
 
     // Assimp meshes that survive the sort hold one kind of primitive each.
     std::vector<int> meshOf(scene->mNumMeshes, -1);
@@ -398,8 +394,20 @@ RawScene readWithAssimp(const std::filesystem::path& file, std::vector<std::file
             mesh.indices.insert(mesh.indices.end(), face.mIndices, face.mIndices + face.mNumIndices);
         }
 
+        skeleton.readSkin(source, mesh);
+
         meshOf[m] = static_cast<int>(result.meshes.size());
         result.meshes.push_back(std::move(mesh));
+    }
+
+    // A skeleton no kept mesh is skinned to has nothing to move: the file is read as plain geometry.
+    const bool anySkin = std::any_of(result.meshes.begin(), result.meshes.end(), [](const RawMesh& mesh) {
+        return !mesh.skinJoints.empty();
+    });
+    if (anySkin)
+    {
+        skeleton.readClips();
+        result.skeleton = skeleton.take();
     }
 
     // The hierarchy, from the root down, so every mesh knows where it sits.
@@ -413,7 +421,7 @@ RawScene readWithAssimp(const std::filesystem::path& file, std::vector<std::file
     {
         const Pending current = pending.back();
         pending.pop_back();
-        const Matrix4 world = current.parent * toMatrix(current.node->mTransformation);
+        const Matrix4 world = current.parent * assimpMatrix(current.node->mTransformation);
         for (unsigned i = 0; i < current.node->mNumMeshes; ++i)
         {
             const unsigned sourceIndex = current.node->mMeshes[i];

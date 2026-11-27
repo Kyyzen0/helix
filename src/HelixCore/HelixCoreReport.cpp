@@ -2,6 +2,7 @@
 // list and the values of one attribute. See the Display geometry section of HelixCore.h.
 
 #include "Engine/Attribute/AttributeHandle.h"
+#include "Engine/Attribute/AttributeNames.h"
 #include "Engine/Network/NetworkManager.h"
 #include "Engine/Network/Node.h"
 #include "Engine/Network/NodePacket.h"
@@ -224,6 +225,29 @@ GeometryReport cookNodeReport(NodeId node)
                     }
                     info.missingTexture = material->missingTexture;
                     report.materials.push_back(std::move(info));
+                }
+                // A skeleton is a mesh whose points are the joints: its parents say how many roots it
+                // has, and the table it carries lists the clips.
+                if (!report.skeleton.present && mesh->skeleton())
+                {
+                    const auto parents = std::as_const(*mesh).getAttribByName(attr::AttributeOwner::POINT, attr::names::jointParent);
+                    if (parents && parents->getType() == attr::AttributeType::intT)
+                    {
+                        report.skeleton.present = true;
+                        report.skeleton.jointCount = mesh->getNumPoints();
+                        const attr::AttributeHandleRO<helix::intT> parentHandle(parents);
+                        for (std::size_t joint = 0; joint < parentHandle.getSize(); ++joint)
+                            if (parentHandle.getValue(joint) < 0) ++report.skeleton.rootCount;
+                        for (const std::shared_ptr<const geo::AnimationClip>& clip : mesh->skeleton()->clips)
+                        {
+                            if (!clip) continue;
+                            ClipInfo info;
+                            info.name = clip->name;
+                            info.duration = clip->duration;
+                            info.channelCount = clip->channelCount();
+                            report.skeleton.clips.push_back(std::move(info));
+                        }
+                    }
                 }
                 const auto positions = mesh->pointPosSpan();
                 for (std::size_t point = 0; point < positions.size(); ++point)

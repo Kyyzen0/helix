@@ -1,0 +1,61 @@
+version: 1
+
+name: skeletonPose
+namespace: helix
+label: Skeleton Pose
+tags: [skeleton, animation, pose, clip, rig]
+
+inputs:
+  - label: Skeleton
+outputs: 1
+
+implementation:
+  kind: cpp
+  library: helixOps
+  constructor: skeletonPose
+
+icon: icon.svg
+
+parameters:
+  - name: clip_divider
+    label: Clip
+    type: divider
+    icon: clock
+
+  - name: clip
+    label: Clip
+    type: string
+    tooltip: >
+      The name of the clip to play. Empty plays the first clip of the skeleton. geometry_summary
+      lists the clips of a skeleton with their length, and the import reports them when it reads
+      the file. A name the skeleton does not have is an error that lists the ones it has.
+
+  - name: speed
+    label: Speed
+    type: float
+    default: 1
+    range: {min: -4, max: 4}
+    tooltip: >
+      How fast the clip plays, as a multiple of the scene time. 2 plays it twice as fast, 0 holds
+      it still on the frame the offset gives, and a negative speed plays it backward.
+
+  - name: offset
+    label: Offset
+    type: float
+    default: 0
+    range: {min: -10, max: 10}
+    tooltip: >
+      Seconds added to the clip time (the scene time multiplied by the speed). A positive offset
+      starts the clip part way through.
+
+  - name: loop
+    label: Loop
+    type: dropdown
+    default: loop
+    tooltip: >
+      What the skeleton does when the clip time leaves the clip. Loop starts it over, Hold stays on
+      the first or the last pose, and Once plays it one time and then returns to the rest pose.
+    options:
+      - {value: loop, label: Loop}
+      - {value: hold, label: Hold}
+      - {value: once, label: "Once, then rest"}

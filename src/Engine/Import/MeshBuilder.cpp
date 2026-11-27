@@ -2,6 +2,7 @@
 #include "Engine/Attribute/AttributeNames.h"
 #include "Engine/Primitives/Mesh.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <set>
 
@@ -33,6 +34,11 @@ struct Gathered
     std::vector<Offset> faceCounts;
     std::vector<Offset> indices;
     std::vector<intT> faceMaterials;
+    // The four joints and weights of every point. A point of a mesh that is not skinned has
+    // weight 0 on all of them, which leaves it where it is.
+    std::vector<std::array<intT, attr::names::skinInfluenceCount>> skinJoints;
+    std::vector<std::array<float, attr::names::skinInfluenceCount>> skinWeights;
+    bool hasSkin = false;
     bool hasNormals = false;
     bool hasUvs = false;
     bool hasColors = false;
@@ -73,6 +79,21 @@ void gather(Gathered& out, const RawMesh& mesh, const Matrix4& world)
     out.normalMissing.resize(base + vertexCount, !hasNormals);
     out.uvs.resize(base + vertexCount, Vector3::Zero());
     out.colors.resize(base + vertexCount, Vector3::Ones());
+
+    constexpr int kInfluences = attr::names::skinInfluenceCount;
+    out.skinJoints.resize(base + vertexCount, {});
+    out.skinWeights.resize(base + vertexCount, {});
+    if (mesh.skinJoints.size() == kInfluences * vertexCount && mesh.skinWeights.size() == kInfluences * vertexCount)
+    {
+        out.hasSkin = true;
+        for (std::size_t v = 0; v < vertexCount; ++v)
+            for (int i = 0; i < kInfluences; ++i)
+            {
+                out.skinJoints[base + v][i] = static_cast<intT>(mesh.skinJoints[kInfluences * v + i]);
+                out.skinWeights[base + v][i] = mesh.skinWeights[kInfluences * v + i];
+            }
+    }
+
     for (std::size_t v = 0; v < vertexCount; ++v)
     {
         if (hasNormals)
@@ -183,6 +204,20 @@ std::shared_ptr<geo::Mesh> toMesh(
             colors.setValue(corner, data.colors[data.indices[corner]]);
     }
 
+    if (data.hasSkin)
+    {
+        for (int i = 0; i < attr::names::skinInfluenceCount; ++i)
+        {
+            auto joints = mesh->addAttribute<intT>(attr::AttributeOwner::POINT, attr::names::skinJoint[i]);
+            auto weights = mesh->addAttribute<floatT>(attr::AttributeOwner::POINT, attr::names::skinWeight[i]);
+            for (Offset point = 0; point < data.skinJoints.size(); ++point)
+            {
+                joints.setValue(point, data.skinJoints[point][i]);
+                weights.setValue(point, data.skinWeights[point][i]);
+            }
+        }
+    }
+
     // The mesh carries the materials its faces use, in the order they first appear, and the
     // index of a face points into that table.
     std::vector<intT> remap(sceneMaterials.size(), -1);
@@ -208,6 +243,58 @@ std::shared_ptr<geo::Mesh> toMesh(
     return mesh;
 }
 
+// The skeleton of a file as a mesh: a point per joint at its rest position, an open two point face
+// per bone, and the transforms as point attributes. The correction of the up axis is applied to
+// everything that lives in the space of the meshes, so the skeleton stands inside them.
+std::shared_ptr<geo::Mesh> toSkeletonMesh(const RawSkeleton& raw, const Matrix4& correction)
+{
+    auto mesh = std::make_shared<geo::Mesh>("/skeleton");
+    const std::size_t count = raw.joints.size();
+
+    std::vector<Vector3> positions;
+    positions.reserve(count);
+    std::vector<Offset> bonePoints;
+    std::vector<Offset> boneCounts;
+    for (std::size_t joint = 0; joint < count; ++joint)
+    {
+        const RawJoint& source = raw.joints[joint];
+        positions.push_back(Vector3((correction * source.restWorld).col(3).head<3>()));
+        if (source.parent >= 0)
+        {
+            bonePoints.push_back(static_cast<Offset>(source.parent));
+            bonePoints.push_back(joint);
+            boneCounts.push_back(2);
+        }
+    }
+    mesh->addPoints(positions);
+    if (!boneCounts.empty()) mesh->addFaces(bonePoints, boneCounts, false);
+
+    auto parents = mesh->addAttribute<intT>(attr::AttributeOwner::POINT, attr::names::jointParent);
+    auto rest = mesh->addAttribute<Matrix4>(attr::AttributeOwner::POINT, attr::names::restLocal);
+    auto inverseBind = mesh->addAttribute<Matrix4>(attr::AttributeOwner::POINT, attr::names::inverseBind);
+    auto pose = mesh->addAttribute<Matrix4>(attr::AttributeOwner::POINT, attr::names::pose);
+    const Matrix4 uncorrect = correction.inverse();
+
+    auto table = std::make_shared<geo::Skeleton>();
+    table->jointNames.reserve(count);
+    table->rootBase.reserve(count);
+    for (std::size_t joint = 0; joint < count; ++joint)
+    {
+        const RawJoint& source = raw.joints[joint];
+        parents.setValue(joint, source.parent);
+        rest.setValue(joint, source.restLocal);
+        // The skinned vertices are in the corrected space, so what takes them to the joint is the
+        // file's matrix after the correction is undone.
+        inverseBind.setValue(joint, Matrix4(source.inverseBind * uncorrect));
+        pose.setValue(joint, Matrix4(correction * source.restWorld));
+        table->jointNames.push_back(source.name);
+        table->rootBase.push_back(source.parent < 0 ? Matrix4(correction * source.parentBase) : Matrix4(Matrix4::Identity()));
+    }
+    table->clips = raw.clips;
+    mesh->setSkeleton(std::move(table));
+    return mesh;
+}
+
 } // namespace
 
 ImportedFile buildMeshes(
@@ -229,7 +316,11 @@ ImportedFile buildMeshes(
         const RawMesh& mesh = scene.meshes[instance.mesh];
         if (!options.mergeMeshes) groups.emplace_back();
         if (groups.back().name.empty()) groups.back().name = mesh.name;
-        gather(groups.back(), mesh, correction * instance.world);
+        // A skinned mesh is placed by its skeleton, not by the node that holds it: the inverse
+        // bind matrices already carry the way from the mesh to the joints (glTF says so, and Assimp
+        // folds the mesh transform into the offset matrices of the formats that have one).
+        const bool skinned = !mesh.skinJoints.empty();
+        gather(groups.back(), mesh, skinned ? correction : correction * instance.world);
     }
 
     ImportedFile result;
@@ -273,6 +364,22 @@ ImportedFile buildMeshes(
         result.meshes.push_back(mesh);
     }
     summary.meshCount = result.meshes.size();
+
+    // The skeleton only matters when a mesh that was kept is skinned to it.
+    const bool anySkin = std::any_of(groups.begin(), groups.end(), [](const Gathered& group) {
+        return group.hasSkin && !group.faceCounts.empty();
+    });
+    if (anySkin && !scene.skeleton.joints.empty())
+    {
+        result.skeleton = toSkeletonMesh(scene.skeleton, correction);
+        summary.jointCount = scene.skeleton.joints.size();
+        for (const RawJoint& joint : scene.skeleton.joints)
+            if (joint.parent < 0) ++summary.rootJointCount;
+        for (const auto& clip : scene.skeleton.clips)
+            summary.clips.emplace_back(clip->name, clip->duration);
+        summary.overInfluencedVertices = scene.skeleton.overInfluencedVertices;
+        summary.cubicTracks = scene.skeleton.cubicTracks;
+    }
 
     summary.materialCount = scene.materials.size();
     std::set<const geo::Image*> distinctImages;
