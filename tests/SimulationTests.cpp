@@ -11,6 +11,7 @@
 #include "Engine/Simulation/KeyframeStore.h"
 #include "Engine/Simulation/ParticleSolver.h"
 #include "Engine/Simulation/SpringSolver.h"
+#include "TestPaths.h"
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
@@ -570,7 +571,7 @@ TEST_CASE_METHOD(SimulationReset, "The scene and its keyframes travel together t
     nm.setEndFrame(60);
     nm.setFps(30);
 
-    const std::string path = "/tmp/helix_simulation_keyframes_roundtrip.json";
+    const std::string path = helix::test::tempPath("helix_simulation_keyframes_roundtrip.json");
     nt::Serializer serializer;
     serializer.save(nm, path);
 

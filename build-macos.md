@@ -81,6 +81,64 @@ A run from the build tree works as well, without an install step:
 build-super/helix-build/helix.app/Contents/MacOS/helix
 ```
 
+## Building the engine without Qt
+
+The engine (`helixEngine`), the nodes (`helixOps`), the Metal renderer
+(`helixGraphics`), the `helixCore` facade and the `tests` target need no Qt.
+`-DHELIX_BUILD_GUI=OFF` leaves the Qt interface out: no Qt is searched for or
+linked, the `helix` application, `helixGuiTests` and the one engine test that
+goes through a Qt type (`ParameterItemTests.cpp`) are not built, and Objective-C++
+is not enabled. The default is `ON`, which is the build described above.
+
+With the dependencies of an earlier superbuild already in `build-super/deps`,
+nothing needs to be built again but Helix itself. This configures a build folder
+`build-core` straight against them, with the sources of the fetched libraries
+that the superbuild already holds (no network is needed):
+
+```sh
+source toolchain/env.sh
+D="$PWD/build-super"
+cmake -S . -B build-core -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DHELIX_SUPERBUILD=OFF \
+    -DHELIX_BUILD_GUI=OFF \
+    -DCMAKE_PREFIX_PATH="$D/deps" \
+    -DHELIX_DEPS_PREFIX="$D/deps" \
+    -DFETCHCONTENT_FULLY_DISCONNECTED=ON \
+    -DFETCHCONTENT_SOURCE_DIR_YAML-CPP="$D/helix-build/_deps/yaml-cpp-src" \
+    -DFETCHCONTENT_SOURCE_DIR_CATCH2="$D/helix-build/_deps/catch2-src" \
+    -DFETCHCONTENT_SOURCE_DIR_METALCPP="$D/helix-build/_deps/metalcpp-src"
+cmake --build build-core --target tests helixCore helixOps
+build-core/helix.app/Contents/bin/tests
+```
+
+Without an earlier superbuild, `cmake -S . -B build-super -G Ninja
+-DHELIX_SUPERBUILD=ON -DHELIX_BUILD_GUI=OFF` builds the dependencies as
+usual but skips the Qt download. Leave `-DHELIX_SUPERBUILD=OFF` and the
+fetch settings out of the command above, and give `CMAKE_PREFIX_PATH` the
+dependency prefix of that build (`build-super/deps`).
+
+If the bison of the toolchain crashes on the host (`toolchain/bison/shim/bison
+--version` ends with a segmentation fault), add `-DDAS_FLEX_BISON_DISABLED=ON`
+to the configure command. daslang then builds from the parsers committed in
+`extern/daslang/src/parser`, the ones the version check of
+[The parser tools](#the-parser-tools) is there to keep up to date.
+
+The tests that draw with Metal skip themselves, with the message "No Metal
+device available", where the process cannot reach a GPU, as in a sandbox.
+
+### The Swift check of the facade
+
+`src/HelixCore/HelixCore.h` is the header a native Swift application imports
+(`src/HelixCore/module.modulemap`, with C++ interoperability). The small tool in
+`apple/HelixCoreSmoke` proves it: it starts the engine, creates a cube, cooks it
+and prints the number of points.
+
+```sh
+cmake --build build-core --target helixCore helixOps
+apple/HelixCoreSmoke/build.sh
+```
+
 ## The parser tools
 
 daslang regenerates its parsers from a grammar during the build, with bison

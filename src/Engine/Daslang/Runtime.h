@@ -110,6 +110,17 @@ class CompiledProgram
 };
 
 /**
+ * @brief Names the folder holding daslib, for a host that does not run from the bundle.
+ *
+ * daslang finds its standard library in a folder next to the bin folder of the running
+ * executable. A host that sits elsewhere names that folder here instead.
+ *
+ * @param rootDirectory The folder that holds daslib.
+ * @note Has to be called before the first script is compiled.
+ */
+void setStandardLibraryRoot(const std::string& rootDirectory);
+
+/**
  * @brief Shared host for the daslang runtime.
  *
  * Owns the one time setup of the daslang module system and turns source text

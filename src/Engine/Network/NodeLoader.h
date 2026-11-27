@@ -37,6 +37,23 @@ class BOOST_SYMBOL_EXPORT NodeLoader
     static std::filesystem::path getNodesDirectory();
 
     /**
+     * @brief Names the folders the nodes are read from, for a host that is not laid out like
+     * the application bundle.
+     *
+     * A host such as a native application, or a command line tool outside the bundle, finds
+     * neither the nodes nor the node library next to its own executable. Naming the two
+     * folders makes the loader look there first.
+     *
+     * @param nodesDirectory The folder holding one folder per node. Empty keeps the default.
+     * @param libraryDirectory The folder holding the node library. Empty keeps the default.
+     * @note Has to be called before loadNodes, which reads the folders once.
+     */
+    static void setDirectories(
+        const std::filesystem::path& nodesDirectory,
+        const std::filesystem::path& libraryDirectory
+    );
+
+    /**
      * @brief Returns the directory the user's own node folders live in.
      *
      * The directory holds one folder per user node, each with a node.yaml and

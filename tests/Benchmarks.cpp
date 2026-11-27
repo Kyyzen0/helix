@@ -8,6 +8,7 @@
 #include "Engine/Parameter/Ramp.h"
 #include "Engine/Primitives/Mesh.h"
 #include "Engine/Serializer/Serializer.h"
+#include "TestPaths.h"
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
@@ -436,7 +437,7 @@ TEST_CASE_METHOD(NMReset, "Scene load")
     auto& nm = nt::nm();
 
     addTransformChain(99, 10);
-    const std::string path = "/tmp/helix_bench_scene_100_nodes.json";
+    const std::string path = helix::test::tempPath("helix_bench_scene_100_nodes.json");
     nt::Serializer serializer;
     serializer.save(nm, path);
 

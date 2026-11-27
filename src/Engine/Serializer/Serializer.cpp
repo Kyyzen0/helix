@@ -15,6 +15,7 @@
 #include <fstream>
 #include <iostream>
 #include <numeric>
+#include <stdexcept>
 #include <unordered_map>
 
 ParameterSerializable toSerializable(helix::prm::Parameter& parameter)
@@ -126,48 +127,57 @@ namespace helix::nt {
 void Serializer::save(NetworkManager& networkManager, std::string filePath)
 {
     std::ofstream file(filePath);
-    cereal::JSONOutputArchive save(file);
+    if (!file) throw std::runtime_error("Couldn't open " + filePath + " for writing");
 
-    NetworkSerializable networkModel;
-
-    Network& network = networkManager.network();
-    auto nodes = network.nodes();
-
-    // Build NodeId -> index mapping and serialize nodes
-    std::unordered_map<nt::NodeId, unsigned int> nodeIdToIndex;
-    unsigned int index = 0;
-    networkModel.nodes.reserve(nodes.size());
-
-    for (auto [nodeId, node] : nodes)
     {
-        nodeIdToIndex[nodeId] = index++;
-        networkModel.nodes.push_back(NodeSnapshot::capture(node));
-    }
+        cereal::JSONOutputArchive save(file);
 
-    // Serialize node links (collect from output side to avoid duplicates)
-    for (auto [nodeId, node] : nodes)
-    {
-        for (const nt::NodeLink& nodeLink : network.graph().getOutputs(nodeId))
+        NetworkSerializable networkModel;
+
+        Network& network = networkManager.network();
+        auto nodes = network.nodes();
+
+        // Build NodeId -> index mapping and serialize nodes
+        std::unordered_map<nt::NodeId, unsigned int> nodeIdToIndex;
+        unsigned int index = 0;
+        networkModel.nodes.reserve(nodes.size());
+
+        for (auto [nodeId, node] : nodes)
         {
-            NodeLinkSerializable nodeLinkModel;
-            nodeLinkModel.inputNodeIndex = nodeIdToIndex[nodeLink.sourceNode];
-            nodeLinkModel.inputSocketIndex = nodeLink.sourceOutput;
-            nodeLinkModel.outputNodeIndex = nodeIdToIndex[nodeLink.targetNode];
-            nodeLinkModel.outputSocketIndex = nodeLink.targetInput;
-            networkModel.nodeLinks.push_back(nodeLinkModel);
+            nodeIdToIndex[nodeId] = index++;
+            networkModel.nodes.push_back(NodeSnapshot::capture(node));
         }
+
+        // Serialize node links (collect from output side to avoid duplicates)
+        for (auto [nodeId, node] : nodes)
+        {
+            for (const nt::NodeLink& nodeLink : network.graph().getOutputs(nodeId))
+            {
+                NodeLinkSerializable nodeLinkModel;
+                nodeLinkModel.inputNodeIndex = nodeIdToIndex[nodeLink.sourceNode];
+                nodeLinkModel.inputSocketIndex = nodeLink.sourceOutput;
+                nodeLinkModel.outputNodeIndex = nodeIdToIndex[nodeLink.targetNode];
+                nodeLinkModel.outputSocketIndex = nodeLink.targetInput;
+                networkModel.nodeLinks.push_back(nodeLinkModel);
+            }
+        }
+
+        networkModel.timeline.startFrame = networkManager.getStartFrame();
+        networkModel.timeline.endFrame = networkManager.getEndFrame();
+        networkModel.timeline.fps = networkManager.getFps();
+        networkModel.timeline.frame = networkManager.getFrame();
+
+        save(CEREAL_NVP(networkModel));
+
+        // The keyframes are stored next to the network. They name their node by
+        // path, so they survive the new node ids a load hands out.
+        save(CEREAL_NVP(sim::KeyframeStore::instance()));
     }
 
-    networkModel.timeline.startFrame = networkManager.getStartFrame();
-    networkModel.timeline.endFrame = networkManager.getEndFrame();
-    networkModel.timeline.fps = networkManager.getFps();
-    networkModel.timeline.frame = networkManager.getFrame();
-
-    save(CEREAL_NVP(networkModel));
-
-    // The keyframes are stored next to the network. They name their node by
-    // path, so they survive the new node ids a load hands out.
-    save(CEREAL_NVP(sim::KeyframeStore::instance()));
+    // The archive writes its closing brackets as it goes out of scope, so the stream is only
+    // checked once it has.
+    file.flush();
+    if (!file) throw std::runtime_error("Couldn't write " + filePath);
 }
 
 void Serializer::load(NetworkManager& networkManager, std::string filePath)

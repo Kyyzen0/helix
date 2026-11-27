@@ -16,9 +16,18 @@ set(HELIX_SOURCE_ROOT "${CMAKE_BINARY_DIR}/superbuild/Source")
 # Collects each dependency as it is added, so helix can depend on the whole set.
 set(HELIX_DEPS)
 
+# Leaving the Qt interface out skips the Qt download, and builds the engine, the nodes and
+# the tests without Qt.
+option(HELIX_BUILD_GUI "Build the Qt interface" ON)
+
 # Include Qt first, since the folder it unpacks into is the second prefix
 # everything below searches.
-include(deps/qt.cmake)
+if(HELIX_BUILD_GUI)
+    include(deps/qt.cmake)
+    set(HELIX_PREFIX_PATH "${HELIX_DEPS_PREFIX}|${HELIX_QT_PREFIX}")
+else()
+    set(HELIX_PREFIX_PATH "${HELIX_DEPS_PREFIX}")
+endif()
 
 # The settings shared by the dependencies and by helix, so one compiler, language
 # standard and ABI covers the whole prefix.
@@ -26,7 +35,7 @@ include(deps/qt.cmake)
 # Joins the two search prefixes with a bar, which LIST_SEPARATOR turns back into
 # a semicolon in each sub project.
 set(HELIX_TOOLCHAIN_CMAKE_ARGS
-    -DCMAKE_PREFIX_PATH:STRING=${HELIX_DEPS_PREFIX}|${HELIX_QT_PREFIX}
+    -DCMAKE_PREFIX_PATH:STRING=${HELIX_PREFIX_PATH}
     -DCMAKE_CXX_STANDARD:STRING=20
     -DCMAKE_CXX_STANDARD_REQUIRED:BOOL=ON
     -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
@@ -131,7 +140,7 @@ include(deps/fastnoise2.cmake)
 
 # The settings of helix itself that a caller may give to the superbuild, which are handed
 # on to the build of helix when they are set.
-set(HELIX_PASSTHROUGH_ARGS)
+set(HELIX_PASSTHROUGH_ARGS -DHELIX_BUILD_GUI:BOOL=${HELIX_BUILD_GUI})
 if(HELIX_METAL_CPP_DIR)
     list(APPEND HELIX_PASSTHROUGH_ARGS -DHELIX_METAL_CPP_DIR:PATH=${HELIX_METAL_CPP_DIR})
 endif()

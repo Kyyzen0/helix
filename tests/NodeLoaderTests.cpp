@@ -7,6 +7,7 @@
 #include "Engine/Network/NetworkManager.h"
 #include "Engine/Primitives/Mesh.h"
 #include "Engine/Serializer/Serializer.h"
+#include "TestPaths.h"
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <filesystem>
@@ -250,7 +251,7 @@ TEST_CASE("A user node survives a save and a reload of the project")
     nm.connectNodes(grid, 0, user, 0);
     nm.cook(user);
 
-    const std::string path = "/tmp/helix_user_node_roundtrip.json";
+    const std::string path = helix::test::tempPath("helix_user_node_roundtrip.json");
     nt::Serializer serializer;
     serializer.save(nm, path);
 

@@ -192,6 +192,8 @@ std::shared_ptr<CompiledProgram> CompiledProgram::clone() const
     return std::shared_ptr<CompiledProgram>(new CompiledProgram({impl_->fileAccess, impl_->program, context}));
 }
 
+void setStandardLibraryRoot(const std::string& rootDirectory) { das::setDasRoot(rootDirectory); }
+
 Runtime& Runtime::instance()
 {
     static Runtime runtime;

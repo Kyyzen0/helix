@@ -40,11 +40,19 @@ if(HELIX_SUPERBUILD)
     return()
 endif()
 
+# The Qt interface can be left out, to build the engine, the nodes, the Metal renderer, the
+# core facade and the engine tests without Qt installed:
+#
+#   cmake -DHELIX_SUPERBUILD=OFF -DHELIX_BUILD_GUI=OFF ...
+option(HELIX_BUILD_GUI "Build the Qt interface (the helix application and its tests)" ON)
+
 # The one file that hands a Metal texture to the Qt Quick scene graph is Objective-C++,
 # since the scene graph takes its Metal objects as Objective-C ids.
-enable_language(OBJCXX)
-set(CMAKE_OBJCXX_STANDARD 20)
-set(CMAKE_OBJCXX_STANDARD_REQUIRED ON)
+if(HELIX_BUILD_GUI)
+    enable_language(OBJCXX)
+    set(CMAKE_OBJCXX_STANDARD 20)
+    set(CMAKE_OBJCXX_STANDARD_REQUIRED ON)
+endif()
 
 # The installed libraries sit in one directory, so they find each other next to
 # themselves. The executable overrides this, since it sits in bin.
@@ -132,9 +140,11 @@ set(ENGINE_INCLUDE_DIRECTORIES
 #
 # The scene graph of Qt Quick runs on Metal on macOS, and the viewport hands it
 # a Metal texture, so Qt needs nothing beyond the Quick module for it.
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets SvgWidgets Quick Qml QuickControls2 ShaderTools)
-qt_standard_project_setup()
-ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
+if(HELIX_BUILD_GUI)
+    find_package(Qt6 REQUIRED COMPONENTS Core Widgets SvgWidgets Quick Qml QuickControls2 ShaderTools)
+    qt_standard_project_setup()
+    ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
+endif()
 
 # glm
 find_package(glm REQUIRED)
@@ -392,7 +402,15 @@ if(HELIX_HAS_METAL_COMPILER)
     add_dependencies(helixGraphics helixMetalLib)
 endif()
 
+# The facade a native Swift application imports: a small, standard library only header over
+# the engine and the renderer, with no Qt and none of the engine's third party types in it.
+add_library(helixCore STATIC src/HelixCore/HelixCore.cpp)
+target_link_libraries(helixCore PUBLIC helixEngine helixGraphics)
+target_include_directories(helixCore PUBLIC src)
+target_compile_definitions(helixCore PRIVATE HELIX_VERSION="${PROJECT_VERSION}")
 
+
+if(HELIX_BUILD_GUI)
 # QML application
 qt_add_executable(${AppExec}
     src/Gui/main.cpp
@@ -597,7 +615,7 @@ target_include_directories(${AppExec} PRIVATE
     src/Gui/Parameters
     src/Gui/Viewport
 )
-
+endif()
 
 # A macOS install is a bundle, so its content sits inside the bundle.
 set(HELIX_APP_DIR "${CMAKE_PROJECT_NAME}.app/Contents/")
@@ -614,7 +632,9 @@ set(HELIX_BUNDLE_DIR "." CACHE STRING "Folder the application bundle is installe
 # compile nodes
 add_subdirectory(nodes)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Packaging.cmake)
+if(HELIX_BUILD_GUI)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Packaging.cmake)
+endif()
 
 
 
@@ -675,7 +695,6 @@ if(HELIX_BUILD_TESTS)
         tests/DuplicateNodeTests.cpp
         tests/CopyToPointsNodeTests.cpp
         tests/TransformTests.cpp
-        tests/ParameterItemTests.cpp
         tests/StyleTests.cpp
         tests/AttributeNoiseNodeTests.cpp
         tests/MountainNodeTests.cpp
@@ -687,10 +706,18 @@ if(HELIX_BUILD_TESTS)
         tests/CookPlanTests.cpp
         tests/CopyOnWriteTests.cpp
         tests/SimulationTests.cpp
-        src/Gui/Parameters/ParameterItem.cpp
+        tests/HelixCoreTests.cpp
     )
-    set_target_properties(${TestExec} PROPERTIES AUTOMOC ON)
-    target_link_libraries(${TestExec} PRIVATE helixEngine helixGraphics Qt6::Core Catch2::Catch2WithMain)
+    # The one test of the engine that goes through a Qt type, the item QML holds for a parameter.
+    if(HELIX_BUILD_GUI)
+        target_sources(${TestExec} PRIVATE
+            tests/ParameterItemTests.cpp
+            src/Gui/Parameters/ParameterItem.cpp
+        )
+        set_target_properties(${TestExec} PROPERTIES AUTOMOC ON)
+        target_link_libraries(${TestExec} PRIVATE Qt6::Core)
+    endif()
+    target_link_libraries(${TestExec} PRIVATE helixEngine helixGraphics helixCore Catch2::Catch2WithMain)
     target_include_directories(${TestExec} PRIVATE src)
     if(HELIX_HAS_METAL_COMPILER)
         add_dependencies(${TestExec} helixMetalLib)
@@ -709,14 +736,15 @@ if(HELIX_BUILD_TESTS)
     target_link_libraries(${BenchExec} PRIVATE helixEngine Catch2::Catch2WithMain)
 
     # GUI unit tests, Qt and yaml-cpp only, no engine
-    add_executable(helixGuiTests
-        tests/gui/ThemeLoaderTests.cpp
-        src/Gui/Style/ThemeLoader.cpp
-    )
-    target_link_libraries(helixGuiTests PRIVATE Qt6::Gui yaml-cpp::yaml-cpp Catch2::Catch2WithMain)
-    target_include_directories(helixGuiTests PRIVATE src)
-    target_compile_definitions(helixGuiTests PRIVATE
-        HELIX_DEV_STATIC_DIR="${CMAKE_SOURCE_DIR}/static"
-    )
+    if(HELIX_BUILD_GUI)
+        add_executable(helixGuiTests
+            tests/gui/ThemeLoaderTests.cpp
+            src/Gui/Style/ThemeLoader.cpp
+        )
+        target_link_libraries(helixGuiTests PRIVATE Qt6::Gui yaml-cpp::yaml-cpp Catch2::Catch2WithMain)
+        target_include_directories(helixGuiTests PRIVATE src)
+        target_compile_definitions(helixGuiTests PRIVATE
+            HELIX_DEV_STATIC_DIR="${CMAKE_SOURCE_DIR}/static"
+        )
+    endif()
 endif()
-
