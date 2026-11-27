@@ -30,9 +30,10 @@
  * another thread (to be uploaded to the GPU, say) freely.
  *
  * @par Rendering
- * There is no Metal drawing here yet. The viewport renderer of helixGraphics will be driven
- * from this facade once the native application shows the viewport, and the buffers returned by
- * cookDisplayBuffers are what it will be fed.
+ * The viewport renderer of helixGraphics is driven from the Viewport section below. Metal
+ * objects cross this boundary as opaque `void*` pointers, so that no Metal, metal-cpp, glm or
+ * Eigen header is included here, and the section says for each pointer who retains it and for
+ * how long.
  */
 
 #include <cstdint>
@@ -104,7 +105,8 @@ Status openScene(const std::string& path);
 /// @brief Writes the scene to a .kut file, and marks it unmodified.
 /// @note The write is atomic. The scene goes to a temporary file in the same folder, which
 /// replaces the destination in one rename, so a failed write leaves the previous file whole.
-/// @note The display node is not stored in the file, so it is not set again by openScene.
+/// @note The display node is stored in the file, and shown again by openScene. A file from
+/// before the display node was stored shows the last top level node whose output nothing reads.
 Status saveScene(const std::string& path);
 
 /// @brief Returns whether the scene changed since it was created, opened or saved.
@@ -342,6 +344,151 @@ GeometrySummary cookDisplaySummary();
 /// @brief Cooks the display node and returns its geometry as flat buffers.
 /// @note Fails when no node is displayed or the node cannot be cooked.
 DisplayBuffers cookDisplayBuffers();
+
+/** @} */
+
+/** @name Viewport
+ * @{
+ *
+ * @par Metal objects across the boundary
+ * - The `MTLDevice` given to startViewport is borrowed for the call. The facade retains its own
+ *   reference and keeps it until stopViewport.
+ * - The `MTLCommandBuffer` given to encodeViewport is borrowed for the call. The facade neither
+ *   commits it nor waits for it. It attaches a completion handler, which the command buffer
+ *   itself retains until the GPU has finished, so the buffer is free to be committed and
+ *   released as usual.
+ * - The `MTLTexture` returned in ViewportFrame is owned by the facade, which does not retain it
+ *   for the caller. It is valid until the next encodeViewport that changes the frame size, until
+ *   stopViewport, or until the engine shuts down, whichever comes first. A caller that encodes
+ *   its own pass into the same command buffer (to copy or sample the texture) takes its own
+ *   reference with `takeUnretainedValue` on the Swift side, and the command buffer then holds
+ *   it until the pass has run. A texture replaced by a resize stays alive until the frames
+ *   that read it have finished.
+ *
+ * @par The camera
+ * The viewport has one orbit camera, kept by the facade. It looks at a centre point from a
+ * distance. The functions below move it in the units a pointer or a trackpad gives, which are
+ * pixels of the view, and none of them redraws: the caller asks for a new frame.
+ */
+
+/// @brief The box around some geometry, in world units.
+struct Bounds
+{
+    /// @brief False when there is no geometry, and the corners mean nothing.
+    bool valid = false;
+    float minX = 0.f;
+    float minY = 0.f;
+    float minZ = 0.f;
+    float maxX = 0.f;
+    float maxY = 0.f;
+    float maxZ = 0.f;
+};
+
+/// @brief What the viewport holds after the display node was cooked.
+struct ViewportGeometryInfo
+{
+    /// @brief Fails when no node is displayed or the node cannot be cooked. The viewport then
+    /// holds no geometry and draws the grid alone.
+    Status status;
+    std::uint64_t pointCount = 0;
+    std::uint64_t triangleCount = 0;
+    Bounds bounds;
+};
+
+/// @brief What one viewport frame is drawn with.
+struct ViewportFrameOptions
+{
+    /// @brief The size of the frame in device pixels.
+    std::uint32_t pixelWidth = 0;
+    std::uint32_t pixelHeight = 0;
+    /// @brief The number of device pixels per point of the interface.
+    float pixelRatio = 1.f;
+    /// @brief The colour the frame is cleared to, each channel from 0 to 1.
+    float backgroundRed = 0.13f;
+    float backgroundGreen = 0.14f;
+    float backgroundBlue = 0.16f;
+    float backgroundAlpha = 1.f;
+    /// @brief The colour the geometry is shaded in, each channel from 0 to 1.
+    float geometryRed = 0.62f;
+    float geometryGreen = 0.64f;
+    float geometryBlue = 0.68f;
+    bool wireframeVisible = true;
+    bool pointsVisible = false;
+};
+
+/// @brief The texture one viewport frame was recorded into.
+struct ViewportFrame
+{
+    Status status;
+    /// @brief An `id<MTLTexture>` in RGBA8 (unorm), or null when nothing was drawn. See the
+    /// notes above for how long it is valid.
+    void* colorTexture = nullptr;
+    std::uint32_t pixelWidth = 0;
+    std::uint32_t pixelHeight = 0;
+};
+
+/// @brief Starts the viewport renderer on a Metal device, with the shaders in
+/// `Contents/Resources/helix.metallib` of the application bundle.
+/// @param metalDevice an `id<MTLDevice>`, borrowed for the call, or null for the default device
+/// of the machine.
+/// @note The device must be the one the caller's own Metal objects (its command queue and its
+/// drawable textures) come from, since the texture is sampled by the caller's command buffer.
+/// Starting twice stops the first renderer.
+Status startViewport(void* metalDevice);
+
+/// @brief Releases the renderer and the device. The camera and the geometry are kept.
+void stopViewport();
+
+/// @brief Returns whether startViewport succeeded and stopViewport has not been called since.
+bool isViewportRunning();
+
+/// @brief Cooks the display node and gives its geometry to the viewport.
+/// @note Call it when the scene or the display node changed. A change of the camera needs no
+/// cook. The bounds returned are what frameViewport frames.
+ViewportGeometryInfo updateViewportGeometry();
+
+/// @brief Turns the camera around its centre by a drag of that many pixels, with the pointer
+/// convention of a window: x grows to the right and y grows downward.
+void orbitViewport(float deltaX, float deltaY);
+
+/// @brief Slides the camera and its centre across the view by a drag of that many pixels, so
+/// the scene follows the pointer.
+void panViewport(float deltaX, float deltaY);
+
+/// @brief Moves the camera toward its centre for a negative amount and away for a positive
+/// one. The amount is in the same unit as a step of a pinch or a wheel, a tenth of the distance
+/// per unit.
+void dollyViewport(float amount);
+
+/// @brief Puts the camera back where a new viewport starts.
+void resetViewport();
+
+/// @brief Moves the camera so the geometry cached by the last updateViewportGeometry fills the
+/// view, keeping the angles. Does nothing when the viewport holds no geometry.
+/// @param aspect the width of the view divided by its height.
+/// @return Whether there was geometry to frame.
+bool frameViewport(float aspect);
+
+/// @brief Records one frame into a command buffer of the caller.
+///
+/// The frame is drawn by the GPU when the caller commits the command buffer. Nothing is
+/// committed and nothing is waited for here, so it can run on the interactive path.
+/// @param commandBuffer an `id<MTLCommandBuffer>` with no encoder open, borrowed for the call.
+/// @return The texture the frame is drawn into. The caller copies or samples it in a later pass
+/// of the same command buffer.
+ViewportFrame encodeViewport(void* commandBuffer, const ViewportFrameOptions& options);
+
+/// @brief Cooks the display node, draws it off screen and writes a PNG.
+///
+/// This waits for the GPU, and is meant for a capture, a test or an AI checking its work, not
+/// for the interactive path. It uses a renderer of its own on the default device, so it works
+/// with no window and does not disturb a running viewport.
+/// @param path where the PNG goes, replaced when it exists.
+/// @param options the size and the colours. A size of zero is an error.
+/// @param useViewportCamera whether to look through the camera of the viewport. When false,
+/// the camera is a new one that frames the geometry from the default angles.
+Status
+renderToImage(const std::string& path, const ViewportFrameOptions& options, bool useViewportCamera);
 
 /** @} */
 

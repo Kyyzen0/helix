@@ -33,6 +33,7 @@ swiftc -O \
     -o "$out/HelixCoreSmoke" \
     -L "$build" -L "$deps/lib" -lhelixCore -lhelixGraphics -lhelixEngine -ltbb \
     -framework Metal -framework Foundation -framework QuartzCore \
+    -framework ImageIO -framework CoreGraphics -framework CoreFoundation \
     -Xlinker -rpath -Xlinker "$build" \
     -Xlinker -rpath -Xlinker "$deps/lib"
 

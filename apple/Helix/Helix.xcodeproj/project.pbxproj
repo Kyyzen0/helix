@@ -1,0 +1,402 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		18485CD047FA97EB2E642D0A /* DocumentView.swift */ = {isa = PBXBuildFile; fileRef = BA89128C69AD540AF5DB2885 /* DocumentView.swift */; };
+		778229516B283DD35DA34D13 /* EngineHost.swift */ = {isa = PBXBuildFile; fileRef = D3267E492841E7AB897616F8 /* EngineHost.swift */; };
+		C78E938AA9B588158567FA3E /* HelixApp.swift */ = {isa = PBXBuildFile; fileRef = 38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */; };
+		876DE517FD07C5B8353EF30F /* HelixDocument.swift */ = {isa = PBXBuildFile; fileRef = 22137D970CE01AF6540E6B07 /* HelixDocument.swift */; };
+		0EBBB41BFE29A7683A9F84AE /* HelixMetalView.swift */ = {isa = PBXBuildFile; fileRef = C487B92355DA31AAC19BB695 /* HelixMetalView.swift */; };
+		366B6A1E32AD956F46E94013 /* NavigationSettings.swift */ = {isa = PBXBuildFile; fileRef = 8949648E5078146AEA910130 /* NavigationSettings.swift */; };
+		201044A22A24DDDAC52A68AE /* Present.metal */ = {isa = PBXBuildFile; fileRef = FEFB88B45D0D09B01B758F7D /* Present.metal */; };
+		359F572082373577572A31AB /* SnapshotCommand.swift */ = {isa = PBXBuildFile; fileRef = B8C2943CF65CE26DE83D3576 /* SnapshotCommand.swift */; };
+		3242A6FC463E79AA58E9AD3B /* ViewportController.swift */ = {isa = PBXBuildFile; fileRef = B066A6C7E5D201772BE45D04 /* ViewportController.swift */; };
+		C213E1CE61AFC2D6C1AB70AA /* ViewportRenderer.swift */ = {isa = PBXBuildFile; fileRef = E27EC0CCDEB296D5F887B697 /* ViewportRenderer.swift */; };
+		85D58ED727147DA0DC51A478 /* ViewportView.swift */ = {isa = PBXBuildFile; fileRef = A60E5D3D69B45D8B43B4079E /* ViewportView.swift */; };
+		7D2E8F1A615A1C75D07154BA /* main.swift */ = {isa = PBXBuildFile; fileRef = 1897A9FB8B71C86CA11ECFA9 /* main.swift */; };
+		DA4ADC244272174D4FCF5BE5 /* Localizable.xcstrings */ = {isa = PBXBuildFile; fileRef = 23E63BC6190D9F3DD3106758 /* Localizable.xcstrings */; };
+		C2BEB0A13646DB198814C495 /* Assets.xcassets */ = {isa = PBXBuildFile; fileRef = 75046E84DAE53AA83B440071 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		F5BF48AA40CAD7891EB709FC /* Helix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Helix.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BA89128C69AD540AF5DB2885 /* DocumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DocumentView.swift; path = Sources/DocumentView.swift; sourceTree = "<group>"; };
+		D3267E492841E7AB897616F8 /* EngineHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EngineHost.swift; path = Sources/EngineHost.swift; sourceTree = "<group>"; };
+		38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelixApp.swift; path = Sources/HelixApp.swift; sourceTree = "<group>"; };
+		22137D970CE01AF6540E6B07 /* HelixDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelixDocument.swift; path = Sources/HelixDocument.swift; sourceTree = "<group>"; };
+		C487B92355DA31AAC19BB695 /* HelixMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelixMetalView.swift; path = Sources/HelixMetalView.swift; sourceTree = "<group>"; };
+		8949648E5078146AEA910130 /* NavigationSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NavigationSettings.swift; path = Sources/NavigationSettings.swift; sourceTree = "<group>"; };
+		FEFB88B45D0D09B01B758F7D /* Present.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; name = Present.metal; path = Sources/Present.metal; sourceTree = "<group>"; };
+		B8C2943CF65CE26DE83D3576 /* SnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SnapshotCommand.swift; path = Sources/SnapshotCommand.swift; sourceTree = "<group>"; };
+		B066A6C7E5D201772BE45D04 /* ViewportController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewportController.swift; path = Sources/ViewportController.swift; sourceTree = "<group>"; };
+		E27EC0CCDEB296D5F887B697 /* ViewportRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewportRenderer.swift; path = Sources/ViewportRenderer.swift; sourceTree = "<group>"; };
+		A60E5D3D69B45D8B43B4079E /* ViewportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewportView.swift; path = Sources/ViewportView.swift; sourceTree = "<group>"; };
+		1897A9FB8B71C86CA11ECFA9 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = main.swift; path = Sources/main.swift; sourceTree = "<group>"; };
+		14DB42E39D1CB1DB287A6688 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Resources/Info.plist; sourceTree = "<group>"; };
+		23E63BC6190D9F3DD3106758 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = Resources/Localizable.xcstrings; sourceTree = "<group>"; };
+		75046E84DAE53AA83B440071 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Resources/Assets.xcassets; sourceTree = "<group>"; };
+		0401FFA12457675F0BB5F2ED /* build-engine.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = build-engine.sh; path = Scripts/build-engine.sh; sourceTree = "<group>"; };
+		43258E627B8EA2747E3196C6 /* embed-engine.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = embed-engine.sh; path = Scripts/embed-engine.sh; sourceTree = "<group>"; };
+		336FB461269DA3BA527AA869 /* make-icon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = make-icon.swift; path = Scripts/make-icon.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EB741EB20F8932ADC61B0107 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		EE79BB3A790BB6C76F854E89 /* Helix */ = {
+			isa = PBXGroup;
+			children = (
+				CA452AC6DB53E1C10D6D7F5F /* Sources */,
+				36DD8FEC2A722EA27EAAF5D5 /* Resources */,
+				E5FFFBC4627114A25F5B2CA0 /* Scripts */,
+				3936A56E033FE156B0D38F79 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CA452AC6DB53E1C10D6D7F5F /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				BA89128C69AD540AF5DB2885 /* DocumentView.swift */,
+				D3267E492841E7AB897616F8 /* EngineHost.swift */,
+				38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */,
+				22137D970CE01AF6540E6B07 /* HelixDocument.swift */,
+				C487B92355DA31AAC19BB695 /* HelixMetalView.swift */,
+				8949648E5078146AEA910130 /* NavigationSettings.swift */,
+				FEFB88B45D0D09B01B758F7D /* Present.metal */,
+				B8C2943CF65CE26DE83D3576 /* SnapshotCommand.swift */,
+				B066A6C7E5D201772BE45D04 /* ViewportController.swift */,
+				E27EC0CCDEB296D5F887B697 /* ViewportRenderer.swift */,
+				A60E5D3D69B45D8B43B4079E /* ViewportView.swift */,
+				1897A9FB8B71C86CA11ECFA9 /* main.swift */,
+			);
+			sourceTree = "<group>";
+		};
+		36DD8FEC2A722EA27EAAF5D5 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				14DB42E39D1CB1DB287A6688 /* Info.plist */,
+				23E63BC6190D9F3DD3106758 /* Localizable.xcstrings */,
+				75046E84DAE53AA83B440071 /* Assets.xcassets */,
+			);
+			sourceTree = "<group>";
+		};
+		E5FFFBC4627114A25F5B2CA0 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				0401FFA12457675F0BB5F2ED /* build-engine.sh */,
+				43258E627B8EA2747E3196C6 /* embed-engine.sh */,
+				336FB461269DA3BA527AA869 /* make-icon.swift */,
+			);
+			sourceTree = "<group>";
+		};
+		3936A56E033FE156B0D38F79 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F5BF48AA40CAD7891EB709FC /* Helix.app */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		42AEFBAE01D2DFD981F7DA7D /* Helix */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0C42E992F8137C5B02B02528 /* Build configuration list for PBXNativeTarget "Helix" */;
+			buildPhases = (
+				097300DDB7892A9A448F7ACD /* Build the engine */,
+				838248CAA0E23712048A3C4E /* Sources */,
+				EB741EB20F8932ADC61B0107 /* Frameworks */,
+				B38B8EFCFFAEB0E290034F10 /* Resources */,
+				2445746D61D14C070BA4F7AF /* Embed the engine */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Helix;
+			productName = Helix;
+			productReference = F5BF48AA40CAD7891EB709FC /* Helix.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46F86FAA6BBF9AC94A7E4595 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+			};
+			buildConfigurationList = 24DF83E70DFC898B71CD8E2E /* Build configuration list for PBXProject "Helix" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = EE79BB3A790BB6C76F854E89;
+			productRefGroup = 3936A56E033FE156B0D38F79 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				42AEFBAE01D2DFD981F7DA7D /* Helix */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B38B8EFCFFAEB0E290034F10 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA4ADC244272174D4FCF5BE5 /* Localizable.xcstrings */,
+				C2BEB0A13646DB198814C495 /* Assets.xcassets */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		097300DDB7892A9A448F7ACD /* Build the engine */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build the engine";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"$SRCROOT/Scripts/build-engine.sh\"\n";
+		};
+		2445746D61D14C070BA4F7AF /* Embed the engine */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Embed the engine";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"$SRCROOT/Scripts/embed-engine.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		838248CAA0E23712048A3C4E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				18485CD047FA97EB2E642D0A /* DocumentView.swift */,
+				778229516B283DD35DA34D13 /* EngineHost.swift */,
+				C78E938AA9B588158567FA3E /* HelixApp.swift */,
+				876DE517FD07C5B8353EF30F /* HelixDocument.swift */,
+				0EBBB41BFE29A7683A9F84AE /* HelixMetalView.swift */,
+				366B6A1E32AD956F46E94013 /* NavigationSettings.swift */,
+				201044A22A24DDDAC52A68AE /* Present.metal */,
+				359F572082373577572A31AB /* SnapshotCommand.swift */,
+				3242A6FC463E79AA58E9AD3B /* ViewportController.swift */,
+				C213E1CE61AFC2D6C1AB70AA /* ViewportRenderer.swift */,
+				85D58ED727147DA0DC51A478 /* ViewportView.swift */,
+				7D2E8F1A615A1C75D07154BA /* main.swift */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		6F905A43007BE6B231A545FC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LIBRARY = "libc++";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 0.7.0;
+				CURRENT_PROJECT_VERSION = 1;
+				SDKROOT = macosx;
+				ARCHS = arm64;
+				SWIFT_VERSION = 6.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+			};
+			name = Debug;
+		};
+		4BE09664ADD0F2AC47E4A29B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LIBRARY = "libc++";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 0.7.0;
+				CURRENT_PROJECT_VERSION = 1;
+				SDKROOT = macosx;
+				ARCHS = arm64;
+				SWIFT_VERSION = 6.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				MTL_ENABLE_DEBUG_INFO = NO;
+			};
+			name = Release;
+		};
+		6A584EED5F7B7BC177986E1D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = Helix;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kyyzen.helix;
+				INFOPLIST_FILE = Resources/Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				HELIX_BUILD_CORE = "$(SRCROOT)/../../build-core";
+				HELIX_DEPS_PREFIX = "$(SRCROOT)/../../build-super/deps";
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
+				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/../../src/HelixCore";
+				OTHER_SWIFT_FLAGS = "-Xcc -std=c++20";
+				LIBRARY_SEARCH_PATHS = (
+					"$(HELIX_BUILD_CORE)",
+					"$(HELIX_DEPS_PREFIX)/lib",
+				);
+				OTHER_LDFLAGS = (
+					"-lhelixCore",
+					"-lhelixGraphics",
+					"-lhelixEngine",
+					"-ltbb",
+					"-framework",
+					"Metal",
+					"-framework",
+					"QuartzCore",
+					"-framework",
+					"ImageIO",
+					"-framework",
+					"CoreGraphics",
+					"-framework",
+					"CoreFoundation",
+					"-framework",
+					"Foundation",
+				);
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/../Frameworks",
+				);
+				ENABLE_HARDENED_RUNTIME = NO;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "-";
+				DEVELOPMENT_TEAM = "";
+			};
+			name = Debug;
+		};
+		FF782D319EAC4107CADA173C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = Helix;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kyyzen.helix;
+				INFOPLIST_FILE = Resources/Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				HELIX_BUILD_CORE = "$(SRCROOT)/../../build-core";
+				HELIX_DEPS_PREFIX = "$(SRCROOT)/../../build-super/deps";
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
+				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/../../src/HelixCore";
+				OTHER_SWIFT_FLAGS = "-Xcc -std=c++20";
+				LIBRARY_SEARCH_PATHS = (
+					"$(HELIX_BUILD_CORE)",
+					"$(HELIX_DEPS_PREFIX)/lib",
+				);
+				OTHER_LDFLAGS = (
+					"-lhelixCore",
+					"-lhelixGraphics",
+					"-lhelixEngine",
+					"-ltbb",
+					"-framework",
+					"Metal",
+					"-framework",
+					"QuartzCore",
+					"-framework",
+					"ImageIO",
+					"-framework",
+					"CoreGraphics",
+					"-framework",
+					"CoreFoundation",
+					"-framework",
+					"Foundation",
+				);
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/../Frameworks",
+				);
+				ENABLE_HARDENED_RUNTIME = NO;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "-";
+				DEVELOPMENT_TEAM = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		24DF83E70DFC898B71CD8E2E /* Build configuration list for PBXProject "Helix" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F905A43007BE6B231A545FC /* Debug */,
+				4BE09664ADD0F2AC47E4A29B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0C42E992F8137C5B02B02528 /* Build configuration list for PBXNativeTarget "Helix" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6A584EED5F7B7BC177986E1D /* Debug */,
+				FF782D319EAC4107CADA173C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+}

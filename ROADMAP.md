@@ -35,14 +35,19 @@ Done in the tree:
   facade gives a Swift application a plain C++ API over the engine. Swift
   imports it through C++ interoperability (`apple/HelixCoreSmoke`). See
   [build-macos.md](build-macos.md).
+- **M1, the walking skeleton.** `apple/Helix` is a Swift app that opens a `.kut` document
+  and draws the cooked display geometry in a Metal viewport, with trackpad orbit, pan and
+  zoom. The scene file now stores its display node. The facade drives the viewport renderer
+  and can render the display node to a PNG (`renderToImage`), which is how the app and an AI
+  check what was drawn without a window. See [build-macos.md](build-macos.md).
 
 Known gaps found on the way, to fix as the work below touches them:
 
+- **The engine is a singleton: one scene at a time.** The native app refuses a second
+  document with an alert. Several scenes at once need a multi-instance `NetworkManager`.
 - The node loader does not find node types in nested folders, so the focused
   simulation nodes (`nodes/simulation/particles`, `springs`) are skipped by
   their tests.
-- The display node is not saved in a scene file, so a reopened scene shows
-  nothing until one is chosen.
 - The engine prints debug output (`ic|`) in release builds.
 - The `bison` shipped by the toolchain script crashes on recent macOS; the
   build uses the parsers committed in daslang instead.
@@ -58,7 +63,7 @@ interface keeps working until the last one removes it.
 | Milestone | What it delivers |
 | --- | --- |
 | ~~M0, the base~~ | Done: the engine builds and is tested without Qt, and the `HelixCore` facade is importable from Swift. |
-| **M1, the walking skeleton** | A Swift app that opens a `.kut` document and shows the cooked display geometry in a Metal viewport (`MTKView`), with trackpad orbit, pan and zoom. Every layer is crossed once, end to end. |
+| ~~M1, the walking skeleton~~ | Done, trackpad navigation still to be validated on hardware: a Swift app that opens a `.kut` document and shows the cooked display geometry in a Metal viewport (`MTKView`), with trackpad orbit, pan and zoom. Every layer is crossed once, end to end. |
 | **M1.5, Helix MCP** | A Model Context Protocol server over the facade, so an AI agent can create, inspect and change a scene, and check the result as data and as a viewport capture. |
 | **M2, the node editor** | Show, select, move and connect nodes; create them from a search palette. |
 | **M3, the inspector** | Every parameter type, with undo through the macOS `UndoManager`. |
@@ -150,7 +155,7 @@ The reference machine is a Mac mini M4. Everything above must run well on it.
 ## Order of work
 
 1. ~~M0, the engine without Qt and the facade~~ done
-2. M1, the walking skeleton of the native app
+2. ~~M1, the walking skeleton of the native app~~ done
 3. M1.5, Helix MCP, so the AI track is exercised from the start
 4. glTF import with UVs and textured viewport shading
 5. M2 to M4, the native interface, with cook caching and the scheduler work

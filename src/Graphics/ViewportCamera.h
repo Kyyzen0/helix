@@ -21,6 +21,22 @@ class ViewportCamera
     /// @note Close to the centre the camera keeps moving forward and carries the centre with it.
     void dolly(float amount);
 
+    /// @brief Puts the camera back where a new viewport starts: looking at the origin from a
+    /// distance of 15, at the default angles.
+    void reset();
+
+    /// @brief Moves the centre and the distance so a box fills the view, keeping the angles.
+    ///
+    /// The box is fitted by its bounding sphere, so it stays whole at any angle the camera is
+    /// orbited to. A box with no extent (a single point) is framed like a unit sphere.
+    ///
+    /// @param minimum the corner of the box with the smallest coordinates.
+    /// @param maximum the corner of the box with the largest coordinates.
+    /// @param aspect the view width divided by its height.
+    /// @note The distance is held between the closest distance of `dolly` and a share of the far
+    /// plane, so a huge box is framed as large as the view can show it, not clipped away.
+    void frameBounds(glm::vec3 minimum, glm::vec3 maximum, float aspect);
+
     /// @brief Moves the camera to a transform, looking down its negative z axis with the centre at
     /// the current distance.
     ///

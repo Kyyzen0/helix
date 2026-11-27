@@ -15,6 +15,7 @@
 #include <fstream>
 #include <iostream>
 #include <numeric>
+#include <optional>
 #include <stdexcept>
 #include <unordered_map>
 
@@ -124,6 +125,39 @@ void applySerializable(helix::nt::Node& node, const std::vector<ParameterSeriali
 
 namespace helix::nt {
 
+namespace {
+
+// Returns the index of the node to display after a load, or nothing when none is.
+//
+// A file that stores its display node gets it back, "none" included. A file from before the
+// display node was saved gets the last top level node whose output no other node reads, which
+// is the end of a chain and what a person would normally look at.
+std::optional<unsigned int> chooseDisplayNode(const NetworkSerializable& model)
+{
+    const unsigned int count = static_cast<unsigned int>(model.nodes.size());
+    if (model.hasDisplayNodeIndex)
+    {
+        if (model.displayNodeIndex < 0 ||
+            static_cast<unsigned int>(model.displayNodeIndex) >= count)
+            return std::nullopt;
+        return static_cast<unsigned int>(model.displayNodeIndex);
+    }
+
+    std::vector<bool> hasOutput(count, false);
+    for (const NodeLinkSerializable& link : model.nodeLinks)
+    {
+        if (link.inputNodeIndex < count) hasOutput[link.inputNodeIndex] = true;
+    }
+    for (unsigned int index = count; index-- > 0;)
+    {
+        const bool topLevel = model.nodes[index].getPath().split().size() == 1;
+        if (topLevel && !hasOutput[index]) return index;
+    }
+    return std::nullopt;
+}
+
+} // namespace
+
 void Serializer::save(NetworkManager& networkManager, std::string filePath)
 {
     std::ofstream file(filePath);
@@ -160,6 +194,14 @@ void Serializer::save(NetworkManager& networkManager, std::string filePath)
                 nodeLinkModel.outputSocketIndex = nodeLink.targetInput;
                 networkModel.nodeLinks.push_back(nodeLinkModel);
             }
+        }
+
+        // The display node is stored by its place in the node list, like the links.
+        networkModel.displayNodeIndex = -1;
+        if (const std::optional<nt::NodeId> display = networkManager.getDisplayNode())
+        {
+            if (const auto found = nodeIdToIndex.find(*display); found != nodeIdToIndex.end())
+                networkModel.displayNodeIndex = static_cast<int>(found->second);
         }
 
         networkModel.timeline.startFrame = networkManager.getStartFrame();
@@ -240,6 +282,10 @@ void Serializer::load(NetworkManager& networkManager, std::string filePath)
     // The keyframes come after the nodes, because they name their node by
     // path and are bound to it once it exists.
     load(sim::KeyframeStore::instance());
+
+    // The display node goes last, once everything it cooks from exists.
+    if (const std::optional<unsigned int> display = chooseDisplayNode(networkModel))
+        networkManager.setDisplayNode(nodeIds[*display]);
 }
 
 } // namespace helix::nt

@@ -404,8 +404,17 @@ endif()
 
 # The facade a native Swift application imports: a small, standard library only header over
 # the engine and the renderer, with no Qt and none of the engine's third party types in it.
-add_library(helixCore STATIC src/HelixCore/HelixCore.cpp)
-target_link_libraries(helixCore PUBLIC helixEngine helixGraphics)
+add_library(helixCore STATIC
+    src/HelixCore/HelixCore.cpp
+    src/HelixCore/HelixCoreViewport.cpp
+    src/HelixCore/ImageFile.cpp
+)
+# ImageIO writes the PNG of renderToImage.
+find_library(HELIX_IMAGEIO_FRAMEWORK ImageIO REQUIRED)
+find_library(HELIX_COREGRAPHICS_FRAMEWORK CoreGraphics REQUIRED)
+find_library(HELIX_COREFOUNDATION_FRAMEWORK CoreFoundation REQUIRED)
+target_link_libraries(helixCore PUBLIC helixEngine helixGraphics
+    ${HELIX_IMAGEIO_FRAMEWORK} ${HELIX_COREGRAPHICS_FRAMEWORK} ${HELIX_COREFOUNDATION_FRAMEWORK})
 target_include_directories(helixCore PUBLIC src)
 target_compile_definitions(helixCore PRIVATE HELIX_VERSION="${PROJECT_VERSION}")
 
@@ -707,6 +716,7 @@ if(HELIX_BUILD_TESTS)
         tests/CopyOnWriteTests.cpp
         tests/SimulationTests.cpp
         tests/HelixCoreTests.cpp
+        tests/HelixCoreViewportTests.cpp
     )
     # The one test of the engine that goes through a Qt type, the item QML holds for a parameter.
     if(HELIX_BUILD_GUI)

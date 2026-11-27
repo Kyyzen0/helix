@@ -1,0 +1,489 @@
+{
+    "networkModel": {
+        "nodes": [
+            {
+                "typeName": "helix::transform",
+                "path": "/lift1",
+                "posX": 0.0,
+                "posY": 240.0,
+                "parameters": [
+                    {
+                        "name": "selection",
+                        "floatValues": [],
+                        "intValues": [],
+                        "stringValues": [
+                            ""
+                        ],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "translate",
+                        "floatValues": [
+                            0.0,
+                            0.5,
+                            0.0
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "rotate",
+                        "floatValues": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "scale",
+                        "floatValues": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "uniform_scale",
+                        "floatValues": [
+                            1.0
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    }
+                ]
+            },
+            {
+                "typeName": "helix::sineWave",
+                "path": "/wave1",
+                "posX": 0.0,
+                "posY": 120.0,
+                "parameters": [
+                    {
+                        "name": "attribute_divider",
+                        "floatValues": [],
+                        "intValues": [
+                            0
+                        ],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "name",
+                        "floatValues": [],
+                        "intValues": [],
+                        "stringValues": [
+                            "Position"
+                        ],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "type",
+                        "floatValues": [],
+                        "intValues": [],
+                        "stringValues": [
+                            "vector"
+                        ],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "alongVector",
+                        "floatValues": [],
+                        "intValues": [
+                            1
+                        ],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "alongVectorAttribute",
+                        "floatValues": [],
+                        "intValues": [],
+                        "stringValues": [
+                            "Normal"
+                        ],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "operation",
+                        "floatValues": [],
+                        "intValues": [],
+                        "stringValues": [
+                            "add"
+                        ],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "wave_divider",
+                        "floatValues": [],
+                        "intValues": [
+                            0
+                        ],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "radial",
+                        "floatValues": [],
+                        "intValues": [
+                            1
+                        ],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "center",
+                        "floatValues": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "frequency",
+                        "floatValues": [
+                            0.6000000238418579
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "offset",
+                        "floatValues": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "amplitude",
+                        "floatValues": [
+                            0.800000011920929
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "range",
+                        "floatValues": [],
+                        "intValues": [],
+                        "stringValues": [
+                            "zeroCentered"
+                        ],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "remap",
+                        "floatValues": [],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [],
+                        "instances": [
+                            [
+                                {
+                                    "name": "position",
+                                    "floatValues": [
+                                        0.0
+                                    ],
+                                    "intValues": [],
+                                    "stringValues": [],
+                                    "expressions": [
+                                        {
+                                            "nullopt": true
+                                        }
+                                    ],
+                                    "instances": []
+                                },
+                                {
+                                    "name": "value",
+                                    "floatValues": [
+                                        0.0
+                                    ],
+                                    "intValues": [],
+                                    "stringValues": [],
+                                    "expressions": [
+                                        {
+                                            "nullopt": true
+                                        }
+                                    ],
+                                    "instances": []
+                                },
+                                {
+                                    "name": "interp",
+                                    "floatValues": [],
+                                    "intValues": [],
+                                    "stringValues": [
+                                        "linear"
+                                    ],
+                                    "expressions": [
+                                        {
+                                            "nullopt": true
+                                        }
+                                    ],
+                                    "instances": []
+                                }
+                            ],
+                            [
+                                {
+                                    "name": "position",
+                                    "floatValues": [
+                                        1.0
+                                    ],
+                                    "intValues": [],
+                                    "stringValues": [],
+                                    "expressions": [
+                                        {
+                                            "nullopt": true
+                                        }
+                                    ],
+                                    "instances": []
+                                },
+                                {
+                                    "name": "value",
+                                    "floatValues": [
+                                        1.0
+                                    ],
+                                    "intValues": [],
+                                    "stringValues": [],
+                                    "expressions": [
+                                        {
+                                            "nullopt": true
+                                        }
+                                    ],
+                                    "instances": []
+                                },
+                                {
+                                    "name": "interp",
+                                    "floatValues": [],
+                                    "intValues": [],
+                                    "stringValues": [
+                                        "linear"
+                                    ],
+                                    "expressions": [
+                                        {
+                                            "nullopt": true
+                                        }
+                                    ],
+                                    "instances": []
+                                }
+                            ]
+                        ]
+                    }
+                ]
+            },
+            {
+                "typeName": "helix::grid",
+                "path": "/grid1",
+                "posX": 0.0,
+                "posY": 0.0,
+                "parameters": [
+                    {
+                        "name": "size",
+                        "floatValues": [
+                            12.0,
+                            12.0
+                        ],
+                        "intValues": [],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            },
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "rows",
+                        "floatValues": [],
+                        "intValues": [
+                            60
+                        ],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    },
+                    {
+                        "name": "columns",
+                        "floatValues": [],
+                        "intValues": [
+                            60
+                        ],
+                        "stringValues": [],
+                        "expressions": [
+                            {
+                                "nullopt": true
+                            }
+                        ],
+                        "instances": []
+                    }
+                ]
+            }
+        ],
+        "nodeLinks": [
+            {
+                "inputNodeIndex": 1,
+                "inputSocketIndex": 0,
+                "outputNodeIndex": 0,
+                "outputSocketIndex": 0
+            },
+            {
+                "inputNodeIndex": 2,
+                "inputSocketIndex": 0,
+                "outputNodeIndex": 1,
+                "outputSocketIndex": 0
+            }
+        ],
+        "timeline": {
+            "startFrame": 1,
+            "endFrame": 240,
+            "fps": 24.0,
+            "frame": 1.0
+        },
+        "displayNodeIndex": 0
+    },
+    "sim::KeyframeStore::instance()": {
+        "records_": []
+    }
+}

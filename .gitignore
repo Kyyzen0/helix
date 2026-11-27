@@ -32,3 +32,8 @@ _git_*
 .tmpprobe*/
 qmlcache_test.cpp.*
 rn_a.txt
+
+# Xcode user state and build products of the native app.
+xcuserdata/
+*.xcuserstate
+DerivedData/

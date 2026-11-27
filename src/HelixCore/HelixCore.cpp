@@ -1,4 +1,5 @@
 #include "HelixCore/HelixCore.h"
+#include "HelixCore/HelixCoreInternal.h"
 #include "Engine/Core/Path.h"
 #include "Engine/Daslang/Runtime.h"
 #include "Engine/Network/NetworkManager.h"
@@ -28,32 +29,15 @@
 
 namespace helix::core {
 
+using detail::failure;
+using detail::guarded;
+using detail::success;
+
 namespace {
 
 // Everything here runs on the one thread the header names, so plain variables do.
 bool initialized = false;
 bool sceneModified = false;
-
-Status success() { return Status{true, {}}; }
-
-Status failure(std::string message) { return Status{false, std::move(message)}; }
-
-// Runs an engine call, turning whatever it throws into a failed status.
-Status guarded(const std::function<Status()>& action)
-{
-    try
-    {
-        return action();
-    }
-    catch (const std::exception& error)
-    {
-        return failure(error.what());
-    }
-    catch (...)
-    {
-        return failure("The engine failed for an unknown reason.");
-    }
-}
 
 Status requireInitialized()
 {
@@ -248,6 +232,12 @@ Status writeAtomically(const std::filesystem::path& destination)
 }
 
 } // namespace
+
+namespace detail {
+
+Status cookDisplayPacket(std::shared_ptr<const NodePacket>& packet) { return cookDisplay(packet); }
+
+} // namespace detail
 
 Status initialize(const InitOptions& options)
 {

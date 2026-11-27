@@ -25,6 +25,13 @@ constexpr float dollySpeed = 0.1f;
 // The closest the camera gets to the centre.
 constexpr float minDistance = 1.f;
 
+// The share of the far plane the camera stays within when it frames a box, so the box is not
+// clipped by the far plane.
+constexpr float maxFramedDistance = 0.45f * 1000.f;
+
+// Room left around a framed box, as a factor on the distance.
+constexpr float frameMargin = 1.15f;
+
 const float fieldOfView = glm::radians(45.f);
 constexpr float nearPlane = 0.1f;
 constexpr float farPlane = 1000.f;
@@ -64,6 +71,24 @@ void ViewportCamera::dolly(float amount)
     // Moves the centre forward by the part of the step past the closest distance.
     center_ += getForward() * (minDistance - targetDistance);
     distance_ = minDistance;
+}
+
+void ViewportCamera::reset() { *this = ViewportCamera(); }
+
+void ViewportCamera::frameBounds(glm::vec3 minimum, glm::vec3 maximum, float aspect)
+{
+    center_ = (minimum + maximum) * 0.5f;
+
+    float radius = 0.5f * glm::length(maximum - minimum);
+    if (!(radius > 1e-4f)) radius = 1.f;
+
+    // The sphere has to fit the narrower of the two half angles of the view.
+    const float halfVertical = fieldOfView * 0.5f;
+    const float halfHorizontal = std::atan(std::tan(halfVertical) * std::max(aspect, 1e-3f));
+    const float halfAngle = std::min(halfVertical, halfHorizontal);
+
+    distance_ =
+        std::clamp(radius / std::sin(halfAngle) * frameMargin, minDistance, maxFramedDistance);
 }
 
 void ViewportCamera::placeAt(const glm::mat4& transform)

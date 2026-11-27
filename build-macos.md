@@ -139,6 +139,41 @@ cmake --build build-core --target helixCore helixOps
 apple/HelixCoreSmoke/build.sh
 ```
 
+### The native application
+
+`apple/Helix` is a standard Xcode project: a SwiftUI document app (`.kut` scenes) with a Metal
+viewport over the `HelixCore` facade. It needs the `build-core` of the section above, and
+macOS 15, Xcode 26 or newer and the Metal toolchain.
+
+```sh
+cmake --build build-core --target tests helixCore helixOps   # once, and after engine changes
+xcodebuild -project apple/Helix/Helix.xcodeproj -scheme Helix -configuration Debug build
+```
+
+The project builds the engine again before it compiles (a build phase that runs `cmake --build
+build-core --target helixCore helixOps`, a no-op when nothing changed; set `HELIX_BUILD_CORE` to
+use another folder), links the static libraries, and a second phase makes the bundle stand on
+its own:
+
+```
+Helix.app/Contents/
+├── MacOS/Helix
+├── Frameworks/    libhelixEngine, libhelixOps (the nodes), tbb and boost, with run paths
+│                  rewritten to sit next to each other
+└── Resources/     nodes/, daslib/, helix.metallib (the engine's shaders), default.metallib
+                   (the one shader that puts a frame on screen), the icon and the strings
+```
+
+The signature is ad hoc ("Sign to Run Locally"), with no team.
+
+The engine holds one scene, so the app opens one document at a time and refuses a second with
+an alert. The scene file type is `com.kyyzen.helix.scene` (`.kut`, JSON text).
+
+`Helix --render-snapshot <in.kut | --new-scene> <out.png> [width height]` opens a scene, frames
+its geometry, draws it off screen and writes a PNG, with no window. It is the check of the whole
+chain without a screen. `apple/Helix/Samples` holds two scenes to try it on, written by
+`apple/Helix/Samples/make-samples.sh`.
+
 ## The parser tools
 
 daslang regenerates its parsers from a grammar during the build, with bison
