@@ -58,7 +58,15 @@ enum GeometryLimits {
     }
 
     /// A count of points in whole millions, which is how the messages say it ("about 16 million").
+    /// A value typed in the inspector can be as large as 1e30, and converting that to Int would stop
+    /// the app while it asks whether to go on: the count is capped at a million million points,
+    /// which still reads as far too many, and a count that is not a number says the cap.
     static func millions(_ points: Double) -> Int {
-        Int((points / 1_000_000).rounded())
+        let millions = (points / 1_000_000).rounded()
+        guard millions.isFinite else { return maximumMillions }
+        return Int(min(max(millions, 0), Double(maximumMillions)))
     }
+
+    /// The most the messages say, in millions.
+    static let maximumMillions = 1_000_000
 }

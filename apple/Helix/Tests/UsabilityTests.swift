@@ -122,6 +122,10 @@ final class GeometryLimitsTests: XCTestCase {
         XCTAssertEqual(GeometryLimits.millions(16_000_000), 16)
         XCTAssertEqual(GeometryLimits.millions(5_400_000), 5)
         XCTAssertEqual(GeometryLimits.millions(5_600_000), 6)
+        // A huge value typed in the inspector must not stop the app while it asks.
+        XCTAssertEqual(GeometryLimits.millions(2.4e31), GeometryLimits.maximumMillions)
+        XCTAssertEqual(GeometryLimits.millions(.infinity), GeometryLimits.maximumMillions)
+        XCTAssertEqual(GeometryLimits.millions(.nan), GeometryLimits.maximumMillions)
     }
 }
 
