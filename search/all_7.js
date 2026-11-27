@@ -14,7 +14,7 @@ var searchData=
   ['getbindings_11',['getBindings',['../classhelix_1_1script_1_1PointScript.html#a930cd2193ec2e37076e7cd88570879a1',1,'helix::script::PointScript']]],
   ['getchild_12',['getChild',['../classhelix_1_1prm_1_1Template.html#a339a80d209fa94b028536dbdf9b0ff33',1,'helix::prm::Template']]],
   ['getchildnodeids_13',['getChildNodeIds',['../classhelix_1_1nt_1_1Network.html#ad3adb64cde2fc33f5603d360a0e1bc98',1,'helix::nt::Network::getChildNodeIds()'],['../classhelix_1_1nt_1_1NetworkManager.html#a99b4b4f4e943012c95d457d8ab36ed73',1,'helix::nt::NetworkManager::getChildNodeIds(const Path &amp;scope)']]],
-  ['getcookgeneration_14',['getCookGeneration',['../classhelix_1_1nt_1_1NetworkManager.html#ae28485a1601cf4719775e2f75bf3cc38',1,'helix::nt::NetworkManager']]],
+  ['getcookgeneration_14',['getCookGeneration',['../classhelix_1_1nt_1_1NetworkManager.html#ae28485a1601cf4719775e2f75bf3cc38',1,'helix::nt::NetworkManager::getCookGeneration()'],['../classhelix_1_1nt_1_1Node.html#a10c44c5ad8c875408a327235f3fd075c',1,'helix::nt::Node::getCookGeneration()']]],
   ['getcookorder_15',['getCookOrder',['../classhelix_1_1nt_1_1NetworkGraph.html#a8fae72711fe4f7078b94635eda2e46e8',1,'helix::nt::NetworkGraph']]],
   ['getdata_16',['getData',['../classhelix_1_1nt_1_1NodeTypeTable.html#a3c9f7b71f087c4648a24aef9e47a3841',1,'helix::nt::NodeTypeTable']]],
   ['getdependents_17',['getDependents',['../classhelix_1_1nt_1_1NetworkGraph.html#a003275746c4bbbc27c919bf4e18fb7c6',1,'helix::nt::NetworkGraph']]],
