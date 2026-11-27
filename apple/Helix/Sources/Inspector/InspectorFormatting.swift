@@ -149,12 +149,14 @@ enum InspectorEditName {
 /// The error of an expression, cut down to what a row has room for.
 enum ExpressionErrorText {
     /// The first line of what the expression engine says, without its "error[30151]: " code.
-    /// The rest (the file, the line, a copy of the source) is for the log.
+    /// The rest (the file, the line, a copy of the source) is for the log. The line is said in the
+    /// language of the app when the table knows it, as every message of the engine is.
     static func short(_ message: String) -> String {
         var line = message.split(whereSeparator: \.isNewline).first.map(String.init) ?? message
         if line.hasPrefix("error["), let close = line.firstIndex(of: "]") {
             line = String(line[line.index(after: close)...]).trimmingCharacters(in: CharacterSet(charactersIn: ": "))
         }
+        line = EngineMessages.localized(line)
         return line.count > 160 ? String(line.prefix(160)) + "…" : line
     }
 }

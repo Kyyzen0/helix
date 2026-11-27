@@ -40,7 +40,7 @@ enum StarterExample: CaseIterable, Identifiable, Sendable {
             return created.status.ok ? created.id : nil
         }
         func fail(_ status: helix.core.Status) -> String? {
-            status.ok ? nil : String(engine: status.error)
+            status.ok ? nil : String(engineMessage: status.error)
         }
         switch self {
         case .cube:

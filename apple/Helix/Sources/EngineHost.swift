@@ -10,6 +10,14 @@ extension String {
     }
 }
 
+extension String {
+    /// A message of the engine for a person, in the language of the app: see `EngineMessages`.
+    /// For the errors, warnings and refusals the interface shows, not for a name or a path.
+    init(engineMessage text: std.string) {
+        self = EngineMessages.localized(String(engine: text))
+    }
+}
+
 /// What can go wrong between the application and the engine, in words meant for a person.
 enum HelixError: LocalizedError {
     case engine(String)
@@ -43,7 +51,7 @@ enum HelixError: LocalizedError {
 
     /// Turns a status of the facade into an error, or returns when it succeeded.
     static func check(_ status: helix.core.Status) throws {
-        guard status.ok else { throw HelixError.engine(String(engine: status.error)) }
+        guard status.ok else { throw HelixError.engine(String(engineMessage: status.error)) }
     }
 }
 
@@ -58,6 +66,9 @@ final class EngineHost {
 
     private weak var owner: AnyObject?
     private var started = false
+
+    /// The document that holds the engine now, or nil when none does.
+    var activeDocument: HelixDocument? { owner as? HelixDocument }
 
     /// The Metal device the engine and the views share.
     let metalDevice = MTLCreateSystemDefaultDevice()

@@ -33,15 +33,14 @@ final class ThemeTests: XCTestCase {
     func testTheAccentIsVisibleAgainstTheWindowAndTheCards() {
         for palette in palettes {
             for ground in [palette.window, palette.surface] {
-                XCTAssertGreaterThanOrEqual(palette.accentOrSystem.contrast(with: ground), 3, "\(name(palette)) accent on \(ground.hexString)")
+                XCTAssertGreaterThanOrEqual(palette.accent.contrast(with: ground), 3, "\(name(palette)) accent on \(ground.hexString)")
             }
         }
     }
 
     func testTextOnTheAccentIsLegible() {
         for palette in palettes {
-            // White on the blue of macOS is what every system button is: held to the 3 of large text.
-            XCTAssertGreaterThanOrEqual(palette.onAccent.contrast(with: palette.accentOrSystem), palette.followsSystemColors ? 3 : 4.5, name(palette))
+            XCTAssertGreaterThanOrEqual(palette.onAccent.contrast(with: palette.accent), 4.5, name(palette))
         }
     }
 
@@ -81,11 +80,21 @@ final class ThemeTests: XCTestCase {
         }
     }
 
-    func testCustomThemesHaveTheirOwnAccentAndTheSystemOnesKeepTheSystems() {
-        XCTAssertNil(ThemePalette.light.accent)
-        XCTAssertNil(ThemePalette.dark.accent)
-        XCTAssertNotNil(ThemePalette.helix.accent)
-        XCTAssertNotNil(ThemePalette.ember.accent)
+    /// Red means an error, and nothing else: the selection, the playhead and the display flag keep
+    /// away from it in every theme, and from each other.
+    func testRedIsLeftToErrors() {
+        let red = ThemePalette.errorRed
+        for palette in palettes {
+            XCTAssertGreaterThanOrEqual(palette.accent.hueDistance(to: red), 20, "\(name(palette)) accent is too close to red")
+            XCTAssertGreaterThanOrEqual(palette.displayFlag.hueDistance(to: red), 20, "\(name(palette)) display flag is too close to red")
+            XCTAssertGreaterThanOrEqual(palette.accent.hueDistance(to: palette.displayFlag), 20, "\(name(palette)) accent and display flag look alike")
+        }
+    }
+
+    func testEveryThemeHasItsOwnFixedAccent() {
+        // No theme borrows the accent of macOS, which is red on some Macs.
+        let accents = Set(palettes.map { $0.accent.hexString })
+        XCTAssertEqual(accents.count, palettes.count)
         for theme in Theme.allCases {
             XCTAssertEqual(theme.followsSystemColors, theme.palette(systemIsDark: false).followsSystemColors, theme.rawValue)
         }

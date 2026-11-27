@@ -1,3 +1,4 @@
+#include "Engine/Import/ImportFile.h"
 #include "Engine/Network/NetworkManager.h"
 #include "HelixCore/HelixCore.h"
 #include <algorithm>
@@ -12,6 +13,7 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <thread>
 #include <unistd.h>
 
 namespace core = helix::core;
@@ -948,4 +950,34 @@ TEST_CASE_METHOD(CoreFixture, "The revision does not move for a call that change
     (void)core::captureScene();
     (void)core::listNodes();
     REQUIRE(core::sceneRevision() == before);
+}
+
+TEST_CASE_METHOD(CoreFixture, "Warming the import cache from another thread makes the import that follows read nothing")
+{
+    TempFolder folder;
+    const fs::path file = folder.path / "warmed.glb";
+    fs::copy_file(fs::path(HELIX_TEST_DATA_DIR) / "import" / "textured-quad.glb", file);
+
+    const std::size_t reads = helix::import::importReadCount();
+    core::Status warmed;
+    std::thread worker([&] { warmed = core::warmImportCache(file.string()); });
+    worker.join();
+    REQUIRE(warmed.ok);
+    REQUIRE(helix::import::importReadCount() == reads + 1);
+    // Warming makes no node: the scene is as it was.
+    REQUIRE(core::listNodes().empty());
+
+    const core::CreateNodeResult imported = core::importFile(file.string());
+    REQUIRE(imported.status.ok);
+    REQUIRE(helix::import::importReadCount() == reads + 1);
+    REQUIRE(core::listNodes().size() == 1);
+}
+
+TEST_CASE_METHOD(CoreFixture, "Warming the import cache says why a file cannot be read, as importFile does")
+{
+    TempFolder folder;
+    const core::Status missing = core::warmImportCache((folder.path / "absent.glb").string());
+    REQUIRE_FALSE(missing.ok);
+    REQUIRE(missing.error == core::importFile((folder.path / "absent.glb").string()).status.error);
+    REQUIRE_FALSE(core::warmImportCache("").ok);
 }

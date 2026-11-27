@@ -119,6 +119,9 @@ final class InspectorModel: ObservableObject {
     }
 
     private func finish(_ outcome: EditOutcome, parameter: String?) {
+        // An edit waiting for an answer is neither done nor refused: the value is shown as it is
+        // in the scene, which `commit` reads again.
+        if outcome.deferred { return }
         if let error = outcome.error {
             message = error
             if let parameter { rowMessages[parameter] = error }

@@ -13,7 +13,7 @@ final class FacadeSpreadsheetSource: SpreadsheetSource {
 
     func report(node: UInt64) -> Result<SpreadsheetReport, SpreadsheetFailure> {
         let report = helix.core.cookNodeReport(node)
-        guard report.status.ok else { return .failure(SpreadsheetFailure(message: String(engine: report.status.error))) }
+        guard report.status.ok else { return .failure(SpreadsheetFailure(message: String(engineMessage: report.status.error))) }
         var result = SpreadsheetReport(
             generation: report.generation,
             pointCount: Int(clamping: report.pointCount),

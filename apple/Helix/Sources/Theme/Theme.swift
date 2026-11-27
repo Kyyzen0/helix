@@ -43,6 +43,29 @@ struct RGB: Equatable, Sendable {
         return (max(first, second) + 0.05) / (min(first, second) + 0.05)
     }
 
+    /// The hue in degrees, from 0 to 360 (0 is red). Meaningless for a grey, which has none.
+    var hue: Double {
+        let high = max(red, green, blue), low = min(red, green, blue)
+        let spread = high - low
+        guard spread > 0 else { return 0 }
+        var degrees: Double
+        if high == red {
+            degrees = (green - blue) / spread
+        } else if high == green {
+            degrees = 2 + (blue - red) / spread
+        } else {
+            degrees = 4 + (red - green) / spread
+        }
+        degrees *= 60
+        return degrees < 0 ? degrees + 360 : degrees
+    }
+
+    /// How far apart two hues are on the colour wheel, from 0 to 180 degrees.
+    func hueDistance(to other: RGB) -> Double {
+        let gap = abs(hue - other.hue)
+        return min(gap, 360 - gap)
+    }
+
     /// This colour moved towards another by a fraction.
     func mixed(with other: RGB, by fraction: Double) -> RGB {
         RGB(
@@ -139,14 +162,17 @@ struct ThemePalette: Equatable, Sendable {
     let surface: RGB
     let text: RGB
     let textSecondary: RGB
-    /// nil keeps the accent colour of the system.
-    let accent: RGB?
+    /// The colour of selection, focus and the playhead. Fixed by the theme, whatever the accent
+    /// of macOS is: on a Mac whose accent is red it would be the colour of an error.
+    let accent: RGB
 
     // The node editor.
     let nodeGrid: RGB
     let nodeCardStroke: RGB
     let nodeLink: RGB
     let nodePort: RGB
+    /// The flag and the bar of the node the viewport shows. Its own colour, neither the accent
+    /// of the selection nor the red of an error.
     let displayFlag: RGB
 
     // The timeline.
@@ -160,14 +186,13 @@ struct ThemePalette: Equatable, Sendable {
     /// The lines of the ground grid, which the shader draws half transparent and fading out.
     let viewportGrid: RGB
 
-    /// The accent colour of macOS when the system's is kept: the default blue of each appearance.
-    /// Only the measurements use it; the views take the real accent colour.
-    var accentOrSystem: RGB { accent ?? (isDark ? RGB(hex: 0x0A84FF) : RGB(hex: 0x007AFF)) }
+    /// The red that means an error, and nothing else. The views draw it with the system red; this
+    /// is the value the tests measure the other colours against.
+    static let errorRed = RGB(hex: 0xFF3B30)
 
-    /// The colour of text and symbols drawn on the accent: white on the blue of the system, and
-    /// whichever of black and white reads better on the accent of a custom theme.
+    /// The colour of text and symbols drawn on the accent: whichever of black and white reads
+    /// better on it.
     var onAccent: RGB {
-        guard let accent else { return RGB(hex: 0xFFFFFF) }
         let white = RGB(hex: 0xFFFFFF)
         let black = RGB(hex: 0x000000)
         return accent.contrast(with: white) >= accent.contrast(with: black) ? white : black
@@ -183,10 +208,10 @@ extension ThemePalette {
     static let light = ThemePalette(
         theme: .light, isDark: false, followsSystemColors: true,
         window: RGB(hex: 0xECECEC), surface: RGB(hex: 0xFFFFFF),
-        text: RGB(hex: 0x1D1D1F), textSecondary: RGB(hex: 0x58585C), accent: nil,
+        text: RGB(hex: 0x1D1D1F), textSecondary: RGB(hex: 0x58585C), accent: RGB(hex: 0x5B4FD6),
         nodeGrid: RGB(hex: 0xD0D0D0), nodeCardStroke: RGB(hex: 0xB4B4B4),
         nodeLink: RGB(hex: 0x767676), nodePort: RGB(hex: 0x737373),
-        displayFlag: RGB(hex: 0x007AFF),
+        displayFlag: RGB(hex: 0x0A84D6),
         rulerLine: RGB(hex: 0xA8A8A8), cachedBar: RGB(hex: 0x0A60FF), keyframe: RGB(hex: 0xFF9500),
         viewportBackground: slate, viewportGeometry: facadeGeometry, viewportGrid: facadeGrid
     )
@@ -194,10 +219,10 @@ extension ThemePalette {
     static let dark = ThemePalette(
         theme: .dark, isDark: true, followsSystemColors: true,
         window: RGB(hex: 0x1E1E1E), surface: RGB(hex: 0x353535),
-        text: RGB(hex: 0xF2F2F7), textSecondary: RGB(hex: 0xA1A1A6), accent: nil,
+        text: RGB(hex: 0xF2F2F7), textSecondary: RGB(hex: 0xA1A1A6), accent: RGB(hex: 0x8B7CFF),
         nodeGrid: RGB(hex: 0x3A3A3A), nodeCardStroke: RGB(hex: 0x6A6A6A),
         nodeLink: RGB(hex: 0x8C8C8C), nodePort: RGB(hex: 0xB3B3B3),
-        displayFlag: RGB(hex: 0x0A84FF),
+        displayFlag: RGB(hex: 0x40B4FF),
         rulerLine: RGB(hex: 0x6A6A6A), cachedBar: RGB(hex: 0x0A84FF), keyframe: RGB(hex: 0xFF9F0A),
         viewportBackground: slate, viewportGeometry: facadeGeometry, viewportGrid: facadeGrid
     )
@@ -222,7 +247,7 @@ extension ThemePalette {
         text: RGB(hex: 0xF5EDE6), textSecondary: RGB(hex: 0xB9AA9C), accent: RGB(hex: 0xFF7A1A),
         nodeGrid: RGB(hex: 0x3B342E), nodeCardStroke: RGB(hex: 0x6A5A4D),
         nodeLink: RGB(hex: 0xA8927F), nodePort: RGB(hex: 0xC0AA95),
-        displayFlag: RGB(hex: 0xFFC247),
+        displayFlag: RGB(hex: 0x4DD0C8),
         rulerLine: RGB(hex: 0x6A5A4D), cachedBar: RGB(hex: 0xD6482F), keyframe: RGB(hex: 0xFFC247),
         viewportBackground: RGB(hex: 0x14110F), viewportGeometry: RGB(hex: 0xE8D5C4), viewportGrid: RGB(hex: 0x6E5B4A)
     )

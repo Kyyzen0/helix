@@ -38,6 +38,14 @@ final class HelixDocument: ReferenceFileDocument {
     @Published private(set) var isActive = false
     /// A failure to tell the person about, in an alert.
     @Published var presentedError: String?
+    /// An edit that would make a very large geometry, waiting for the person to say to go on.
+    @Published var largeEditRequest: LargeEditRequest?
+    /// A quiet word over the viewport when it holds a very large geometry. Nil otherwise.
+    @Published var heavyNotice: String?
+    /// The file being read for an import, while the sheet over the window says so.
+    @Published private(set) var importProgress: ImportProgress?
+    /// The question asked when another scene holds the engine: close it, and open this one?
+    @Published var switchRequest: SceneSwitchRequest?
 
     let viewport = ViewportController()
 
@@ -56,6 +64,24 @@ final class HelixDocument: ReferenceFileDocument {
 
     /// The drag in progress that is to become one step of undo, if there is one.
     var continuousEdit = ContinuousEdit()
+
+    /// Tells when a cook brings the camera to the geometry.
+    private var framing = FramingPolicy()
+
+    /// The value a drag was taking a node to when it went past what is asked about, held until
+    /// the drag ends (see `HelixDocument+Limits`).
+    var heldLargeEdit: LargeEditRequest?
+
+    /// Which read the sheet of an import stands for, so that a read that was cancelled does not
+    /// import when it ends (see `HelixDocument+Import`).
+    var importGeneration = 0
+    func setImportProgress(_ progress: ImportProgress?) { importProgress = progress }
+
+    /// The window of the document, which the view hands over. Weak: the window owns the view.
+    weak var window: NSWindow?
+
+    /// Holds the answer of the Save panel of the scene that is being closed to make room.
+    var sceneCloser: SceneCloser?
 
     /// Keeps the inspector following the selection of the node editor.
     var inspectorSubscription: AnyCancellable?
@@ -81,7 +107,7 @@ final class HelixDocument: ReferenceFileDocument {
 
     /// Whether the 3D file this scene was opened for is still to be imported, which the view does
     /// once it knows the real URL of the file.
-    private var pendingOpenedImport = false
+    private(set) var pendingOpenedImport = false
 
     /// A new scene, with a cube to look at, or with the 3D file that was opened. The engine is
     /// not touched until `activate`.
@@ -108,7 +134,11 @@ final class HelixDocument: ReferenceFileDocument {
             fileContents = nil
             importURL = try Self.stage(data, named: configuration.file.preferredFilename ?? "model")
         }
-        try Self.onMainThread { try self.activate() }
+        // Another scene holding the engine is not a failure of this file: the window opens and
+        // asks whether to close the other one (see `HelixDocument+SceneSwitch`).
+        try Self.onMainThread {
+            do { try self.activate() } catch HelixError.busy {}
+        }
     }
 
     private nonisolated static func stage(_ data: Data, named name: String) throws -> URL {
@@ -155,6 +185,8 @@ final class HelixDocument: ReferenceFileDocument {
         prepareTimeline()
         startKeepingSavedScene()
         if !pendingOpenedImport { Self.logLaunchDebug() }
+        scheduleDebugOpenSecondScene()
+        scheduleDebugFramingCheck()
     }
 
     /// Imports the 3D file this scene was opened for, from where it really is: `url` is what
@@ -165,17 +197,30 @@ final class HelixDocument: ReferenceFileDocument {
     ///
     /// Part of opening, so it is no step of undo and does not mark the document as edited. Does
     /// nothing once done, or for a scene that was not opened from a 3D file.
-    func finishOpening(fileURL url: URL?) {
+    func finishOpening(fileURL url: URL?) async {
         guard pendingOpenedImport, isActive else { return }
         pendingOpenedImport = false
         let real = url.flatMap { $0.isFileURL ? $0 : nil }
         let scoped = real?.startAccessingSecurityScopedResource() ?? false
         defer { if scoped { real?.stopAccessingSecurityScopedResource() } }
-        if let message = importNode(real ?? importURL ?? URL(fileURLWithPath: "/")) {
+        let target = real ?? importURL ?? URL(fileURLWithPath: "/")
+        // The file is read off the main thread, behind a sheet with a Cancel button, so the new
+        // window does not freeze for seconds on a large model. Cancelling leaves the scene as a
+        // new one is, empty.
+        let read = await readForImport(target)
+        guard isActive else { return }
+        switch read {
+        case .ready:
+            if let message = importNode(target) { presentedError = message }
+        case .failed(let message):
             presentedError = message
+        case .cancelled:
+            break
         }
         // The copy is not needed once the real file is imported (or has failed to be).
         if real != nil, let staged = importURL { try? FileManager.default.removeItem(at: staged.deletingLastPathComponent()) }
+        // The scene is a new one that holds the model, not the model's file (see `HelixDocument+Window`).
+        await makeUntitledScene()
         cookGeometry()
         showAndSelectDisplayNode()
         Self.logLaunchDebug()
@@ -216,7 +261,7 @@ final class HelixDocument: ReferenceFileDocument {
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        importFile(url)
+        startImport(url)
     }
 
     /// Imports a file that was dropped on the window, when it is a 3D file Helix reads.
@@ -225,7 +270,7 @@ final class HelixDocument: ReferenceFileDocument {
             presentedError = String(localized: "Helix cannot import this kind of file.")
             return
         }
-        importFile(url)
+        startImport(url)
     }
 
     /// Imports a 3D file into the scene, makes it the node the viewport shows and frames it.
@@ -248,11 +293,11 @@ final class HelixDocument: ReferenceFileDocument {
     }
 
     /// Makes the import node and shows it, with no undo and no cook.
-    private func importNode(_ url: URL) -> String? {
+    func importNode(_ url: URL) -> String? {
         let result = helix.core.importFile(std.string(url.path))
-        guard result.status.ok else { return String(engine: result.status.error) }
+        guard result.status.ok else { return String(engineMessage: result.status.error) }
         let display = helix.core.setDisplayNode(result.id)
-        guard display.ok else { return String(engine: display.error) }
+        guard display.ok else { return String(engineMessage: display.error) }
         return nil
     }
 
@@ -273,7 +318,7 @@ final class HelixDocument: ReferenceFileDocument {
         // The facade borrows the device for the call and keeps its own reference.
         let status = helix.core.startViewport(Unmanaged.passUnretained(device as AnyObject).toOpaque())
         guard status.ok else {
-            reportViewportFailure(String(engine: status.error))
+            reportViewportFailure(String(engineMessage: status.error))
             return nil
         }
         return device
@@ -284,10 +329,11 @@ final class HelixDocument: ReferenceFileDocument {
         presentedError = message
     }
 
-    /// Cooks the display node and hands its geometry to the viewport. The camera frames the
-    /// geometry afterwards, unless `reframe` is false, which is how the frame of an animation
-    /// changes the picture without taking the camera from the person who placed it.
-    func cookGeometry(reframe: Bool = true) {
+    /// Cooks the display node and hands its geometry to the viewport. The camera is left where the
+    /// person put it (see `FramingPolicy`): it frames only when `reframe` asks for it, or when the
+    /// viewport had nothing to show and now has something, which is how a first node, or an
+    /// opened scene, is brought into view.
+    func cookGeometry(reframe: Bool = false) {
         let info = helix.core.updateViewportGeometry()
         let name = Self.currentDisplayNodeName()
         // Assigned only when they changed: a published property tells the window it changed
@@ -297,15 +343,22 @@ final class HelixDocument: ReferenceFileDocument {
             if pointCount != info.pointCount { pointCount = info.pointCount }
             if triangleCount != info.triangleCount { triangleCount = info.triangleCount }
             if viewportMessage != nil { viewportMessage = nil }
+            updateHeavyNotice(pointCount: info.pointCount)
         } else {
             if pointCount != 0 { pointCount = 0 }
             if triangleCount != 0 { triangleCount = 0 }
+            updateHeavyNotice(pointCount: 0)
             let message = name == nil
                 ? String(localized: "No node is displayed.")
-                : String(engine: info.status.error)
+                : String(engineMessage: info.status.error)
             if viewportMessage != message { viewportMessage = message }
         }
-        if reframe { viewport.requestFrame() } else { viewport.redraw() }
+        let hasGeometry = info.status.ok && (info.pointCount > 0 || info.triangleCount > 0)
+        if framing.shouldFrame(hasGeometry: hasGeometry, requested: reframe) {
+            viewport.requestFrame()
+        } else {
+            viewport.redraw()
+        }
     }
 
     private static func currentDisplayNodeName() -> String? {

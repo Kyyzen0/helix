@@ -48,9 +48,23 @@ struct DocumentView: View {
         // An empty untitled scene gives way to the scene that was opened: its window closes.
         .onChange(of: document.wasReplaced) { _, replaced in if replaced { dismiss() } }
         .task {
-            activate()
-            document.finishOpening(fileURL: fileURL)
+            if activate() { await document.finishOpening(fileURL: fileURL) }
             HelixDocument.logWindowSize()
+        }
+        .background(WindowReader(document: document))
+        // The sheet of an import: the file is being read, and Cancel leaves the scene as it was.
+        .sheet(isPresented: Binding(
+            get: { document.importProgress != nil },
+            set: { if !$0 { document.cancelImport() } }
+        )) {
+            ImportProgressSheet(fileName: document.importProgress?.fileName ?? "") { document.cancelImport() }
+        }
+        .onChange(of: document.switchRequest) { _, request in
+            // `Scripts/launch-smoke.py` answers the question for a run with no person.
+            guard request != nil, let answer = HelixDocument.debugSwitchAnswer else { return }
+            Task { @MainActor in
+                if answer == "close" { answerSwitch(confirm: true) } else { answerSwitch(confirm: false) }
+            }
         }
         // A 3D file dropped on the window is imported into the scene.
         .onDrop(of: [.fileURL], isTargeted: nil) { providers in
@@ -66,16 +80,13 @@ struct DocumentView: View {
         }
         .toolbar { toolbar }
         .alert(
-            "Helix could not do that",
-            isPresented: Binding(
-                get: { document.presentedError != nil },
-                set: { if !$0 { document.presentedError = nil } }
-            ),
-            presenting: document.presentedError
-        ) { _ in
-            Button("OK", role: .cancel) {}
-        } message: { message in
-            Text(message)
+            prompt?.title ?? Text(verbatim: ""),
+            isPresented: Binding(get: { prompt != nil }, set: { if !$0 { dismissError() } }),
+            presenting: prompt
+        ) { prompt in
+            promptButtons(prompt)
+        } message: { prompt in
+            Text(verbatim: prompt.message)
         }
     }
 
@@ -122,16 +133,109 @@ extension DocumentView {
     }
 
     /// A new scene takes the engine when it is shown. When another scene holds it, there is
-    /// nowhere to put this one: say so, and close the empty window.
-    private func activate() {
+    /// nowhere to put this one until that one is closed: ask whether to close it. Returns whether
+    /// this scene holds the engine.
+    private func activate() -> Bool {
         do {
             try document.activate()
+            return true
         } catch HelixError.busy {
-            NSApplication.shared.presentError(HelixError.busy)
-            dismiss()
+            document.askToSwitch(fileURL: fileURL)
+            return false
         } catch {
             document.presentedError = error.localizedDescription
+            return false
         }
+    }
+
+    /// What the window asks, in the order of what matters most: to close the other scene, to go
+    /// on with a very large geometry, then a failure.
+    private var prompt: DocumentPrompt? {
+        if let request = document.switchRequest { return .switchScene(request) }
+        if let request = document.largeEditRequest { return .largeEdit(request) }
+        if let error = document.presentedError { return .error(error) }
+        return nil
+    }
+
+    private func dismissError() {
+        // The buttons of the other questions answer them; only a failure is cleared by being seen.
+        if case .error = prompt { document.presentedError = nil }
+    }
+
+    @ViewBuilder
+    private func promptButtons(_ prompt: DocumentPrompt) -> some View {
+        switch prompt {
+        case .switchScene:
+            Button("Close and Open") { answerSwitch(confirm: true) }
+            Button("Cancel", role: .cancel) { answerSwitch(confirm: false) }
+        case .largeEdit:
+            Button("Continue") { document.confirmLargeEdit() }
+            Button("Cancel", role: .cancel) { document.cancelLargeEdit() }
+        case .error:
+            Button("OK", role: .cancel) { document.presentedError = nil }
+        }
+    }
+
+    /// Closes the open scene and opens this one, or leaves things as they are and closes this
+    /// window.
+    private func answerSwitch(confirm: Bool) {
+        guard document.switchRequest != nil else { return }
+        guard confirm else {
+            document.cancelSwitch()
+            dismiss()
+            return
+        }
+        document.switchRequest = nil
+        let url = fileURL
+        Task { @MainActor in
+            if await !document.confirmSwitch(fileURL: url) { dismiss() }
+        }
+    }
+}
+
+/// What the window of a document asks the person, one question at a time.
+private enum DocumentPrompt {
+    case switchScene(SceneSwitchRequest)
+    case largeEdit(LargeEditRequest)
+    case error(String)
+
+    var title: Text {
+        switch self {
+        case .switchScene(let request): Text(verbatim: request.title)
+        case .largeEdit: Text("Very large geometry")
+        case .error: Text("Helix could not do that")
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .switchScene: String(localized: "Helix works on one scene at a time.")
+        case .largeEdit(let request): request.message
+        case .error(let message): message
+        }
+    }
+}
+
+/// The sheet over a window while a file is read for an import.
+struct ImportProgressSheet: View {
+    let fileName: String
+    let onCancel: () -> Void
+    @Environment(\.interfaceSize) private var size
+
+    var body: some View {
+        VStack(spacing: size.points(14)) {
+            Text("Importing \(fileName)…")
+                .uiFont(.headline)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+            ProgressView()
+                .progressViewStyle(.linear)
+            Button("Cancel", role: .cancel, action: onCancel)
+                .keyboardShortcut(.cancelAction)
+        }
+        .padding(size.points(20))
+        .frame(width: size.points(340))
+        .accessibilityElement(children: .contain)
     }
 }
 
@@ -212,6 +316,7 @@ struct ViewportPane: View {
     @ObservedObject var editor: NodeEditorModel
     @Environment(\.theme) private var theme
     @Environment(\.viewportStill) private var still
+    @AppStorage(NavigationLegendSetting.hiddenKey) private var legendHidden = false
 
     init(document: HelixDocument) {
         self.document = document
@@ -238,6 +343,30 @@ struct ViewportPane: View {
                     .foregroundStyle(.secondary)
                     .padding()
                     .allowsHitTesting(false)
+                    // The viewport is dark in every theme, so what sits on it is drawn as on dark.
+                    .environment(\.colorScheme, .dark)
+            }
+        }
+        // How to move around, at the bottom left, until the person hides it.
+        .overlay(alignment: .bottomLeading) {
+            if document.isActive, !isEmpty, !legendHidden {
+                NavigationLegend { legendHidden = true }
+                    .environment(\.colorScheme, .dark)
+                    .padding(10)
+            }
+        }
+        // A very large geometry is said once, quietly, without a button.
+        .overlay(alignment: .top) {
+            if let notice = document.heavyNotice {
+                Label(notice, systemImage: "info.circle")
+                    .uiFont(.caption)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Capsule().fill(.regularMaterial))
+                    .overlay(Capsule().stroke(Color.primary.opacity(0.12)))
+                    .padding(.top, 8)
+                    .allowsHitTesting(false)
+                    .accessibilityAddTraits(.updatesFrequently)
             }
         }
     }

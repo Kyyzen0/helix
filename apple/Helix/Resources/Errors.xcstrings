@@ -1,0 +1,2029 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "The skeleton has no clip named '%@'. It has: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The skeleton has no clip named '%@'. It has: %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le squelette n’a pas de clip nommé « %1$@ ». Clips disponibles : %2$@."
+          }
+        }
+      }
+    },
+    "Joint %@ has a parent index that is not a joint of the skeleton.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Joint %@ has a parent index that is not a joint of the skeleton."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’articulation %@ a un parent qui n’est pas une articulation du squelette."
+          }
+        }
+      }
+    },
+    "The parents of the joints form a loop, so the skeleton has no root to pose from.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The parents of the joints form a loop, so the skeleton has no root to pose from."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les parents des articulations forment une boucle : le squelette n’a pas de racine d’où partir."
+          }
+        }
+      }
+    },
+    "Connect a skeleton to the input: the second output of a Geometry Import node reading a rigged file.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect a skeleton to the input: the second output of a Geometry Import node reading a rigged file."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Branchez un squelette à l’entrée : la seconde sortie d’un nœud Import de géométrie qui lit un fichier rigué."
+          }
+        }
+      }
+    },
+    "The input is not a skeleton: it has no joint_parent and rest_local point attributes. Use the second output of a Geometry Import node that reads a rigged file.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The input is not a skeleton: it has no joint_parent and rest_local point attributes. Use the second output of a Geometry Import node that reads a rigged file."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’entrée n’est pas un squelette : elle n’a pas les attributs de point joint_parent et rest_local. Utilisez la seconde sortie d’un nœud Import de géométrie qui lit un fichier rigué."
+          }
+        }
+      }
+    },
+    "Connect the posed skeleton to the second input: the output of a Skeleton Pose node.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect the posed skeleton to the second input: the output of a Skeleton Pose node."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Branchez le squelette posé à la seconde entrée : la sortie d’un nœud Pose de squelette."
+          }
+        }
+      }
+    },
+    "The second input is not a posed skeleton: it has no pose and inverse_bind point attributes. Connect the output of a Skeleton Pose node.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The second input is not a posed skeleton: it has no pose and inverse_bind point attributes. Connect the output of a Skeleton Pose node."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La seconde entrée n’est pas un squelette posé : elle n’a pas les attributs de point pose et inverse_bind. Branchez la sortie d’un nœud Pose de squelette."
+          }
+        }
+      }
+    },
+    "The skeleton's pose or inverse_bind attribute does not hold a matrix for every joint.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The skeleton's pose or inverse_bind attribute does not hold a matrix for every joint."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’attribut pose ou inverse_bind du squelette ne contient pas une matrice pour chaque articulation."
+          }
+        }
+      }
+    },
+    "The mesh has no skin: it needs the point attributes skin_joint0 to skin_joint3 and skin_weight0 to skin_weight3. A rigged file gets them when Geometry Import reads it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The mesh has no skin: it needs the point attributes skin_joint0 to skin_joint3 and skin_weight0 to skin_weight3. A rigged file gets them when Geometry Import reads it."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le maillage n’a pas de skin : il lui faut les attributs de point skin_joint0 à skin_joint3 et skin_weight0 à skin_weight3. Un fichier rigué les reçoit quand Import de géométrie le lit."
+          }
+        }
+      }
+    },
+    "Point %@ is skinned to joint %@, but the skeleton has %@ joints.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Point %@ is skinned to joint %@, but the skeleton has %@ joints."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le point %1$@ est lié à l’articulation %2$@, mais le squelette n’a que %3$@ articulations."
+          }
+        }
+      }
+    },
+    "The attribute needs a name.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The attribute needs a name."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’attribut a besoin d’un nom."
+          }
+        }
+      }
+    },
+    "Unknown attribute type.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown attribute type."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type d’attribut inconnu."
+          }
+        }
+      }
+    },
+    "Unknown operation.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown operation."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opération inconnue."
+          }
+        }
+      }
+    },
+    "Unknown noise type.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown noise type."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type de bruit inconnu."
+          }
+        }
+      }
+    },
+    "Unknown fractal type.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown fractal type."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type de fractale inconnu."
+          }
+        }
+      }
+    },
+    "Unknown range.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown range."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plage inconnue."
+          }
+        }
+      }
+    },
+    "Unknown attach point.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown attach point."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Point d’attache inconnu."
+          }
+        }
+      }
+    },
+    "The attribute %@ can't be written as this type.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The attribute %@ can't be written as this type."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’attribut %@ ne peut pas être écrit avec ce type."
+          }
+        }
+      }
+    },
+    "The attribute %@ can't hold %@ values.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The attribute %@ can't hold %@ values."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’attribut %1$@ ne peut pas contenir de valeurs de type %2$@."
+          }
+        }
+      }
+    },
+    "The attribute %@ can't hold normals.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The attribute %@ can't hold normals."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’attribut %@ ne peut pas contenir de normales."
+          }
+        }
+      }
+    },
+    "Noise along vector needs a point attribute named %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noise along vector needs a point attribute named %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le bruit le long d’un vecteur a besoin d’un attribut de point nommé %@."
+          }
+        }
+      }
+    },
+    "Noise along vector needs %@ to be a vector attribute.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noise along vector needs %@ to be a vector attribute."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le bruit le long d’un vecteur a besoin que %@ soit un attribut vecteur."
+          }
+        }
+      }
+    },
+    "Wave along vector needs a point attribute named %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wave along vector needs a point attribute named %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’onde le long d’un vecteur a besoin d’un attribut de point nommé %@."
+          }
+        }
+      }
+    },
+    "Wave along vector needs %@ to be a vector attribute.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wave along vector needs %@ to be a vector attribute."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’onde le long d’un vecteur a besoin que %@ soit un attribut vecteur."
+          }
+        }
+      }
+    },
+    "The piece attribute can't be named %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The piece attribute can't be named %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’attribut des morceaux ne peut pas s’appeler %@."
+          }
+        }
+      }
+    },
+    "Sweep needs a profile shape wired into the second input.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweep needs a profile shape wired into the second input."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le balayage a besoin d’une forme de profil branchée à la seconde entrée."
+          }
+        }
+      }
+    },
+    "Sweep needs a profile of at least two points.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweep needs a profile of at least two points."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le balayage a besoin d’un profil d’au moins deux points."
+          }
+        }
+      }
+    },
+    "This user node's source is not available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This user node's source is not available."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le code source de ce nœud utilisateur n’est pas disponible."
+          }
+        }
+      }
+    },
+    "Couldn't open %@: there is no such file.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't open %@: there is no such file."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’ouvrir %@ : ce fichier n’existe pas."
+          }
+        }
+      }
+    },
+    "Couldn't open %@ for writing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't open %@ for writing"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’ouvrir %@ en écriture"
+          }
+        }
+      }
+    },
+    "Couldn't open %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't open %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’ouvrir %@."
+          }
+        }
+      }
+    },
+    "Couldn't open %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't open %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’ouvrir %@"
+          }
+        }
+      }
+    },
+    "%@ is a folder, not a file.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is a folder, not a file."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ est un dossier, pas un fichier."
+          }
+        }
+      }
+    },
+    "%@ is larger than 2 GB, which Helix does not import.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is larger than 2 GB, which Helix does not import."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ dépasse 2 Go, taille que Helix n’importe pas."
+          }
+        }
+      }
+    },
+    "%@ is empty.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is empty."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ est vide."
+          }
+        }
+      }
+    },
+    "There is not enough memory to import %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is not enough memory to import %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il n’y a pas assez de mémoire pour importer %@."
+          }
+        }
+      }
+    },
+    "A file with no extension cannot be imported. Helix reads %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A file with no extension cannot be imported. Helix reads %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un fichier sans extension ne peut pas être importé. Helix lit %@."
+          }
+        }
+      }
+    },
+    "Files of type %@ cannot be imported. Helix reads %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files of type %@ cannot be imported. Helix reads %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les fichiers de type %1$@ ne peuvent pas être importés. Helix lit %2$@."
+          }
+        }
+      }
+    },
+    "The file could not be imported: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file could not be imported: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier n’a pas pu être importé : %@"
+          }
+        }
+      }
+    },
+    "The file could not be imported.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file could not be imported."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier n’a pas pu être importé."
+          }
+        }
+      }
+    },
+    "Couldn't read %@: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't read %@: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de lire %1$@ : %2$@"
+          }
+        }
+      }
+    },
+    "Couldn't read %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't read %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de lire %@."
+          }
+        }
+      }
+    },
+    "Couldn't create the conversion folder %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't create the conversion folder %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de créer le dossier de conversion %@."
+          }
+        }
+      }
+    },
+    "Couldn't store the converted file in %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't store the converted file in %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de ranger le fichier converti dans %@."
+          }
+        }
+      }
+    },
+    "The file holds no surface to import.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file holds no surface to import."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier ne contient aucune surface à importer."
+          }
+        }
+      }
+    },
+    "The file holds no object Model I/O can read.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file holds no object Model I/O can read."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier ne contient aucun objet que Model I/O sache lire."
+          }
+        }
+      }
+    },
+    "The obj file is damaged: a line does not hold the number it should.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The obj file is damaged: a line does not hold the number it should."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier obj est abîmé : une ligne ne contient pas le nombre attendu."
+          }
+        }
+      }
+    },
+    "The obj file holds no vertex.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The obj file holds no vertex."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier obj ne contient aucun sommet."
+          }
+        }
+      }
+    },
+    "Unsupported format.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unsupported format."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Format non pris en charge."
+          }
+        }
+      }
+    },
+    "The file could not be read: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file could not be read: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier n’a pas pu être lu : %@"
+          }
+        }
+      }
+    },
+    "The file could not be read.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file could not be read."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier n’a pas pu être lu."
+          }
+        }
+      }
+    },
+    "The file is damaged: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file is damaged: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier est abîmé : %@"
+          }
+        }
+      }
+    },
+    "The file is damaged.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file is damaged."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier est abîmé."
+          }
+        }
+      }
+    },
+    "Model I/O could not read the file: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model I/O could not read the file: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model I/O n’a pas pu lire le fichier : %@"
+          }
+        }
+      }
+    },
+    "This version of macOS cannot read .%@ files.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This version of macOS cannot read .%@ files."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette version de macOS ne sait pas lire les fichiers .%@."
+          }
+        }
+      }
+    },
+    "Opening .blend files needs Blender installed (blender.org).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opening .blend files needs Blender installed (blender.org)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour ouvrir des fichiers .blend, il faut installer Blender (blender.org)."
+          }
+        }
+      }
+    },
+    "Blender was not found at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blender was not found at %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blender est introuvable à l’emplacement %@."
+          }
+        }
+      }
+    },
+    "Blender could not be started (%@).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blender could not be started (%@)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blender n’a pas pu démarrer (%@)."
+          }
+        }
+      }
+    },
+    "Blender took longer than %@ minutes to convert the file and was stopped.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blender took longer than %@ minutes to convert the file and was stopped."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blender a mis plus de %@ minutes à convertir le fichier et a été arrêté."
+          }
+        }
+      }
+    },
+    "Blender could not convert the file: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blender could not convert the file: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blender n’a pas pu convertir le fichier : %@"
+          }
+        }
+      }
+    },
+    "The engine is not initialized.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The engine is not initialized."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le moteur n’est pas démarré."
+          }
+        }
+      }
+    },
+    "There is no node %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is no node %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il n’y a pas de nœud %@."
+          }
+        }
+      }
+    },
+    "There is no node type '%@'.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is no node type '%@'."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il n’y a pas de type de nœud « %@ »."
+          }
+        }
+      }
+    },
+    "'%@' cannot name a node, use letters, digits and underscores.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "'%@' cannot name a node, use letters, digits and underscores."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %@ » ne peut pas nommer un nœud : utilisez des lettres, des chiffres et des tirets bas."
+          }
+        }
+      }
+    },
+    "A node named '%@' already exists.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A node named '%@' already exists."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nœud nommé « %@ » existe déjà."
+          }
+        }
+      }
+    },
+    "The node %@ has no output %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The node %@ has no output %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nœud %1$@ n’a pas de sortie %2$@."
+          }
+        }
+      }
+    },
+    "The node %@ has no input %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The node %@ has no input %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nœud %1$@ n’a pas d’entrée %2$@."
+          }
+        }
+      }
+    },
+    "The link would make the node depend on itself.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The link would make the node depend on itself."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce lien ferait dépendre le nœud de lui-même."
+          }
+        }
+      }
+    },
+    "Those two ports are not linked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Those two ports are not linked."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ces deux ports ne sont pas reliés."
+          }
+        }
+      }
+    },
+    "Nothing is wired into the first input of the node.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing is wired into the first input of the node."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien n’est branché à la première entrée du nœud."
+          }
+        }
+      }
+    },
+    "The node produced no geometry.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The node produced no geometry."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nœud n’a produit aucune géométrie."
+          }
+        }
+      }
+    },
+    "No node is displayed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No node is displayed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun nœud n’est affiché."
+          }
+        }
+      }
+    },
+    "The display node produced no geometry.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The display node produced no geometry."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nœud affiché n’a produit aucune géométrie."
+          }
+        }
+      }
+    },
+    "The folder %@ does not exist.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The folder %@ does not exist."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le dossier %@ n’existe pas."
+          }
+        }
+      }
+    },
+    "Couldn't save the scene: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't save the scene: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’enregistrer la scène : %@"
+          }
+        }
+      }
+    },
+    "Couldn't restore the scene: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't restore the scene: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de restaurer la scène : %@"
+          }
+        }
+      }
+    },
+    "There is no scene file at %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is no scene file at %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il n’y a pas de fichier de scène à l’emplacement %@."
+          }
+        }
+      }
+    },
+    "No file name was given.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No file name was given."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun nom de fichier n’a été donné."
+          }
+        }
+      }
+    },
+    "No file was given.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No file was given."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun fichier n’a été donné."
+          }
+        }
+      }
+    },
+    "No folder was given.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No folder was given."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun dossier n’a été donné."
+          }
+        }
+      }
+    },
+    "Couldn't use %@ as the cache folder.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't use %@ as the cache folder."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’utiliser %@ comme dossier de cache."
+          }
+        }
+      }
+    },
+    "The import node has no file path parameter.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The import node has no file path parameter."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nœud d’import n’a pas de paramètre de chemin de fichier."
+          }
+        }
+      }
+    },
+    "The attribute '%@' has different types on the primitives.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The attribute '%@' has different types on the primitives."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’attribut « %@ » n’a pas le même type sur toutes les primitives."
+          }
+        }
+      }
+    },
+    "The node has no %@ attribute named '%@'.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The node has no %@ attribute named '%@'."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nœud n’a pas d’attribut %1$@ nommé « %2$@ »."
+          }
+        }
+      }
+    },
+    "The node has no parameter named '%@'.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The node has no parameter named '%@'."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nœud n’a pas de paramètre nommé « %@ »."
+          }
+        }
+      }
+    },
+    "Component %@ is out of range, the parameter holds %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Component %@ is out of range, the parameter holds %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La composante %1$@ n’existe pas : le paramètre en compte %2$@."
+          }
+        }
+      }
+    },
+    "The parameter '%@' holds no value an expression can drive.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The parameter '%@' holds no value an expression can drive."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le paramètre « %@ » ne contient aucune valeur qu’une expression puisse piloter."
+          }
+        }
+      }
+    },
+    "The parameter '%@' takes one of its options, not an expression.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The parameter '%@' takes one of its options, not an expression."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le paramètre « %@ » prend l’une de ses options, pas une expression."
+          }
+        }
+      }
+    },
+    "The parameter '%@' holds keyframes, and the timeline would overwrite an expression.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The parameter '%@' holds keyframes, and the timeline would overwrite an expression."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le paramètre « %@ » porte des images clés, et la chronologie écraserait une expression."
+          }
+        }
+      }
+    },
+    "An expression cannot be empty. Clear the expression instead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An expression cannot be empty. Clear the expression instead."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une expression ne peut pas être vide. Supprimez plutôt l’expression."
+          }
+        }
+      }
+    },
+    "The expression is longer than %@ characters.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The expression is longer than %@ characters."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’expression dépasse %@ caractères."
+          }
+        }
+      }
+    },
+    "The parameter '%@' holds no value to reset.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The parameter '%@' holds no value to reset."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le paramètre « %@ » ne contient aucune valeur à réinitialiser."
+          }
+        }
+      }
+    },
+    "The parameter '%@' holds keyframes, which a reset would only be overwritten by. Clear its keyframes first.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The parameter '%@' holds keyframes, which a reset would only be overwritten by. Clear its keyframes first."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le paramètre « %@ » porte des images clés, qui écraseraient la réinitialisation. Supprimez d’abord ses images clés."
+          }
+        }
+      }
+    },
+    "The parameter '%@' is not a ramp.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The parameter '%@' is not a ramp."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le paramètre « %@ » n’est pas une rampe."
+          }
+        }
+      }
+    },
+    "A ramp has between %@ and %@ points, not %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A ramp has between %@ and %@ points, not %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une rampe a entre %1$@ et %2$@ points, pas %3$@."
+          }
+        }
+      }
+    },
+    "Point %@ of the ramp has a position or a value that is not a number.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Point %@ of the ramp has a position or a value that is not a number."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le point %@ de la rampe a une position ou une valeur qui n’est pas un nombre."
+          }
+        }
+      }
+    },
+    "Point %@ of the ramp has an unknown interpolation '%@'.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Point %@ of the ramp has an unknown interpolation '%@'."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le point %1$@ de la rampe a une interpolation inconnue : « %2$@ »."
+          }
+        }
+      }
+    },
+    "The parameter '%@' does not name an attribute.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The parameter '%@' does not name an attribute."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le paramètre « %@ » ne désigne pas un attribut."
+          }
+        }
+      }
+    },
+    "The parameter '%@' is not a float, and only a float can hold keyframes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The parameter '%@' is not a float, and only a float can hold keyframes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le paramètre « %@ » n’est pas un nombre décimal, et seul un nombre décimal peut porter des images clés."
+          }
+        }
+      }
+    },
+    "A keyframe sits on a frame within a million of zero.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A keyframe sits on a frame within a million of zero."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une image clé doit se trouver à moins d’un million d’images de zéro."
+          }
+        }
+      }
+    },
+    "A keyframe holds a number.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A keyframe holds a number."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une image clé contient un nombre."
+          }
+        }
+      }
+    },
+    "The value is not a number, so it cannot be keyed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The value is not a number, so it cannot be keyed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La valeur n’est pas un nombre : elle ne peut pas recevoir d’image clé."
+          }
+        }
+      }
+    },
+    "There is no keyframe on that frame.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is no keyframe on that frame."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il n’y a pas d’image clé sur cette image."
+          }
+        }
+      }
+    },
+    "There is a keyframe on that frame already.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is a keyframe on that frame already."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il y a déjà une image clé sur cette image."
+          }
+        }
+      }
+    },
+    "The range ends after it starts: the last frame is above the first.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The range ends after it starts: the last frame is above the first."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La plage doit finir après avoir commencé : la dernière image doit dépasser la première."
+          }
+        }
+      }
+    },
+    "A frame of the range sits within a million of zero.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A frame of the range sits within a million of zero."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une image de la plage doit se trouver à moins d’un million d’images de zéro."
+          }
+        }
+      }
+    },
+    "The frame rate is above 0 and at most 1000 frames a second.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The frame rate is above 0 and at most 1000 frames a second."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La cadence doit être supérieure à 0 et ne pas dépasser 1000 images par seconde."
+          }
+        }
+      }
+    },
+    "The viewport is not started.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The viewport is not started."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La vue 3D n’est pas démarrée."
+          }
+        }
+      }
+    },
+    "No command buffer was given.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No command buffer was given."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun tampon de commandes n’a été donné."
+          }
+        }
+      }
+    },
+    "The image needs a width and a height.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The image needs a width and a height."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’image a besoin d’une largeur et d’une hauteur."
+          }
+        }
+      }
+    },
+    "Nothing was drawn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing was drawn."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien n’a été dessiné."
+          }
+        }
+      }
+    },
+    "Couldn't create %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't create %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de créer %@."
+          }
+        }
+      }
+    },
+    "Couldn't write %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't write %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’écrire %@."
+          }
+        }
+      }
+    },
+    "Couldn't replace %@: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't replace %@: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de remplacer %1$@ : %2$@"
+          }
+        }
+      }
+    },
+    "can't locate variable '%@'": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "can't locate variable '%@'"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom inconnu : « %@ »"
+          }
+        }
+      }
+    },
+    "syntax error, unexpected %@, expecting %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "syntax error, unexpected %@, expecting %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expression mal écrite : %1$@ inattendu, %2$@ attendu"
+          }
+        }
+      }
+    },
+    "syntax error, unexpected %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "syntax error, unexpected %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expression incomplète ou mal écrite : %@ inattendu"
+          }
+        }
+      }
+    },
+    "no matching functions or generics: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no matching functions or generics: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fonction inconnue, ou mauvais arguments : %@"
+          }
+        }
+      }
+    },
+    "%@: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ : %2$@"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -3506,6 +3506,703 @@
           }
         }
       }
+    },
+    "Importing %@…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importing %@…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importation de %@…"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuler"
+          }
+        }
+      }
+    },
+    "Continue": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuer"
+          }
+        }
+      }
+    },
+    "Close and Open": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close and Open"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermer et ouvrir"
+          }
+        }
+      }
+    },
+    "Very large geometry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Very large geometry"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Géométrie très volumineuse"
+          }
+        }
+      }
+    },
+    "Helix works on one scene at a time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helix works on one scene at a time."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helix travaille sur une seule scène à la fois."
+          }
+        }
+      }
+    },
+    "Close “%@” and open “%@”?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close “%@” and open “%@”?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermer « %1$@ » et ouvrir « %2$@ » ?"
+          }
+        }
+      }
+    },
+    "This will make about %lld million points and may take a while and use a lot of memory. Continue?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This will make about %lld million points and may take a while and use a lot of memory. Continue?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cela produira environ %lld millions de points, et peut prendre du temps et beaucoup de mémoire. Continuer ?"
+          }
+        }
+      }
+    },
+    "The geometry has about %lld million points. The viewport and the edits may be slow.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The geometry has about %lld million points. The viewport and the edits may be slow."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La géométrie compte environ %lld millions de points. La vue 3D et les modifications peuvent être lentes."
+          }
+        }
+      }
+    },
+    "Untitled": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Untitled"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans titre"
+          }
+        }
+      }
+    },
+    "Getting Started": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Getting Started"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Premiers pas"
+          }
+        }
+      }
+    },
+    "Show Navigation Help": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Navigation Help"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher l’aide à la navigation"
+          }
+        }
+      }
+    },
+    "Helix builds shapes from steps you connect, called nodes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helix builds shapes from steps you connect, called nodes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helix construit des formes à partir d’étapes que l’on relie : les nœuds."
+          }
+        }
+      }
+    },
+    "Navigation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navigation"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navigation"
+          }
+        }
+      }
+    },
+    "Hide this help. Help > Show Navigation Help brings it back.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide this help. Help > Show Navigation Help brings it back."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Masquer cette aide. Aide > Afficher l’aide à la navigation la fait revenir."
+          }
+        }
+      }
+    },
+    "Hide navigation help": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide navigation help"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Masquer l’aide à la navigation"
+          }
+        }
+      }
+    },
+    "Drag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glisser"
+          }
+        }
+      }
+    },
+    "Orbit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orbit"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tourner"
+          }
+        }
+      }
+    },
+    "⌥ drag, or middle button": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌥ drag, or middle button"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌥ glisser, ou bouton du milieu"
+          }
+        }
+      }
+    },
+    "Pan": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pan"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déplacer"
+          }
+        }
+      }
+    },
+    "⌃ drag, right button, or wheel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌃ drag, right button, or wheel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌃ glisser, bouton droit ou molette"
+          }
+        }
+      }
+    },
+    "Zoom": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoom"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoomer"
+          }
+        }
+      }
+    },
+    "Two-finger scroll": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Two-finger scroll"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Défilement à deux doigts"
+          }
+        }
+      }
+    },
+    "⇧ two-finger scroll": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⇧ two-finger scroll"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⇧ défilement à deux doigts"
+          }
+        }
+      }
+    },
+    "⌘ two-finger scroll, or pinch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘ two-finger scroll, or pinch"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘ défilement à deux doigts, ou pincement"
+          }
+        }
+      }
+    },
+    "F": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "F"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "F"
+          }
+        }
+      }
+    },
+    "Frame the geometry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frame the geometry"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cadrer la géométrie"
+          }
+        }
+      }
+    },
+    "Create something": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create something"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créer quelque chose"
+          }
+        }
+      }
+    },
+    "Open the Add menu, or click a button of the shelf under the 3D view, to make a node: a cube, a grid, a sphere. On an empty scene you can also start from an example.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the Add menu, or click a button of the shelf under the 3D view, to make a node: a cube, a grid, a sphere. On an empty scene you can also start from an example."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrez le menu Ajouter, ou cliquez sur un bouton du bandeau sous la vue 3D, pour créer un nœud : un cube, une grille, une sphère. Sur une scène vide, vous pouvez aussi partir d’un exemple."
+          }
+        }
+      }
+    },
+    "Import a model": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import a model"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importer un modèle"
+          }
+        }
+      }
+    },
+    "Choose Add ▸ Import a 3D Model (⌘I), or drop a file on the window. Helix reads glTF, FBX, OBJ and more. The file itself is never changed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Add ▸ Import a 3D Model (⌘I), or drop a file on the window. Helix reads glTF, FBX, OBJ and more. The file itself is never changed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez Ajouter ▸ Importer un modèle 3D (⌘I), ou déposez un fichier sur la fenêtre. Helix lit glTF, FBX, OBJ et d’autres formats. Le fichier lui-même n’est jamais modifié."
+          }
+        }
+      }
+    },
+    "Move around the 3D view": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move around the 3D view"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se déplacer dans la vue 3D"
+          }
+        }
+      }
+    },
+    "Drag to orbit, hold ⌥ to pan, scroll with ⌘ or pinch to zoom, and press F to frame what you made. The card at the bottom left of the view says it again; Help ▸ Show Navigation Help brings it back.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag to orbit, hold ⌥ to pan, scroll with ⌘ or pinch to zoom, and press F to frame what you made. The card at the bottom left of the view says it again; Help ▸ Show Navigation Help brings it back."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glissez pour tourner autour de l’objet, gardez ⌥ pour déplacer la vue, faites défiler avec ⌘ ou pincez pour zoomer, et appuyez sur F pour cadrer ce que vous avez fait. La carte en bas à gauche de la vue le rappelle ; Aide ▸ Afficher l’aide à la navigation la fait revenir."
+          }
+        }
+      }
+    },
+    "Nodes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nodes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nœuds"
+          }
+        }
+      }
+    },
+    "A node is one step. Connect the output at the bottom of a node to the input at the top of the next. The flag marks the node the 3D view shows: double-click a node to show it. A node in error has a red outline and a warning triangle; select it to read why.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A node is one step. Connect the output at the bottom of a node to the input at the top of the next. The flag marks the node the 3D view shows: double-click a node to show it. A node in error has a red outline and a warning triangle; select it to read why."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nœud est une étape. Reliez la sortie, en bas d’un nœud, à l’entrée, en haut du suivant. Le drapeau marque le nœud que la vue 3D montre : double-cliquez sur un nœud pour l’afficher. Un nœud en erreur a un contour rouge et un triangle d’avertissement ; sélectionnez-le pour lire la cause."
+          }
+        }
+      }
+    },
+    "The inspector": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The inspector"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’inspecteur"
+          }
+        }
+      }
+    },
+    "Select a node to set its parameters on the right. Drag a slider or type a number. Right-click a parameter for expressions and keyframes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select a node to set its parameters on the right. Drag a slider or type a number. Right-click a parameter for expressions and keyframes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sélectionnez un nœud pour régler ses paramètres, à droite. Faites glisser un curseur ou tapez un nombre. Un clic droit sur un paramètre donne accès aux expressions et aux images clés."
+          }
+        }
+      }
+    },
+    "The timeline": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The timeline"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La chronologie"
+          }
+        }
+      }
+    },
+    "Press the space bar to play. Right-click a parameter to key it: the diamonds on the ruler are its keys, and the line with a small triangle is the current frame.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Press the space bar to play. Right-click a parameter to key it: the diamonds on the ruler are its keys, and the line with a small triangle is the current frame."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appuyez sur la barre d’espace pour lancer la lecture. Un clic droit sur un paramètre y pose une image clé : les losanges de la règle sont les images clés, et la ligne surmontée d’un petit triangle est l’image courante."
+          }
+        }
+      }
+    },
+    "Save": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrer"
+          }
+        }
+      }
+    },
+    "⌘S saves the scene as a .kut file. A 3D file you open becomes a new scene that holds the model, and saving asks where to put it: the model itself is never written to.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘S saves the scene as a .kut file. A 3D file you open becomes a new scene that holds the model, and saving asks where to put it: the model itself is never written to."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘S enregistre la scène dans un fichier .kut. Un fichier 3D que vous ouvrez devient une nouvelle scène qui contient le modèle, et l’enregistrement demande où la ranger : le modèle lui-même n’est jamais modifié."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

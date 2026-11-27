@@ -77,7 +77,7 @@ final class ViewportRenderer: NSObject, MTKViewDelegate {
         // The facade borrows the command buffer for the call and keeps nothing of it.
         let frame = helix.core.encodeViewport(Unmanaged.passUnretained(commandBuffer as AnyObject).toOpaque(), options)
         guard frame.status.ok, let pointer = frame.colorTexture else {
-            if !frame.status.ok { reportFailure(String(engine: frame.status.error)) }
+            if !frame.status.ok { reportFailure(String(engineMessage: frame.status.error)) }
             return nil
         }
 

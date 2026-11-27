@@ -19,11 +19,25 @@ extension HelixDocument: InspectorEditing {
     }
 
     func apply(_ edit: InspectorEdit, to node: UInt64, named name: String) -> EditOutcome {
-        performEdit(named: name) { write(edit, to: node) }
+        // A value that would make a geometry too large to be an accident is asked about first.
+        if let points = largeEstimate(of: edit, on: node) {
+            largeEditRequest = LargeEditRequest(edit: edit, node: node, name: name, points: points)
+            return .waiting
+        }
+        return performEdit(named: name) { write(edit, to: node) }
     }
 
     func applyLive(_ edit: InspectorEdit, to node: UInt64) -> EditOutcome {
         guard isActive else { return .failed(String(localized: "This scene is closed.")) }
+        // A drag does not stop to ask: the value that is too large is held, and asked about when
+        // the drag ends, with the scene still as it was.
+        if let points = largeEstimate(of: edit, on: node) {
+            heldLargeEdit = LargeEditRequest(
+                edit: edit, node: node, name: continuousEdit.active?.name ?? InspectorEditName.change(edit.parameter), points: points
+            )
+            return .done
+        }
+        heldLargeEdit = nil
         let outcome = write(edit, to: node)
         if outcome.error == nil {
             cookGeometry()
@@ -51,6 +65,12 @@ extension HelixDocument: InspectorEditing {
 
     func endContinuousEdit() {
         guard continuousEdit.isActive else { return }
+        defer {
+            if let held = heldLargeEdit {
+                heldLargeEdit = nil
+                largeEditRequest = held
+            }
+        }
         let after = helix.core.captureScene()
         let afterText = after.status.ok ? String(engineBytes: after.data) : nil
         if let registration = continuousEdit.end(after: afterText), let afterText {
@@ -62,20 +82,21 @@ extension HelixDocument: InspectorEditing {
 
     /// Puts the scene back as it was when the drag began, and registers nothing.
     func cancelContinuousEdit() {
+        heldLargeEdit = nil
         guard let before = continuousEdit.cancel() else { return }
         let paths = selectedPathsBeforeRestore()
         var status = helix.core.Status()
         keepingPlayhead { status = helix.core.restoreScene(std.string(before)) }
-        if !status.ok { presentedError = String(engine: status.error) }
+        if !status.ok { presentedError = String(engineMessage: status.error) }
         cookGeometry(reframe: false)
         reselectAfterRestore(paths: paths)
     }
 
     // MARK: Writing
 
-    private func write(_ edit: InspectorEdit, to node: UInt64) -> EditOutcome {
+    func write(_ edit: InspectorEdit, to node: UInt64) -> EditOutcome {
         func outcome(_ status: helix.core.Status) -> EditOutcome {
-            status.ok ? .done : .failed(String(engine: status.error))
+            status.ok ? .done : .failed(String(engineMessage: status.error))
         }
         switch edit {
         case .floats(let parameter, let values):

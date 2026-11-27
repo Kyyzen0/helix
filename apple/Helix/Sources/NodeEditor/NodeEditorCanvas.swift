@@ -151,11 +151,18 @@ struct NodeEditorPainter {
                 with: .color(colors.displayFlag)
             )
         }
-        // A card whose node failed is outlined in red, selected or not: the selection shows in its
-        // fill and in the badge, since a failure must not be hidden by being picked.
+        // Red is for errors alone. A card whose node failed gets a thick red outline and the
+        // triangle below, selected or not: the selection shows in its fill and in an accent ring
+        // inside the outline, since a failure must not be hidden by being picked.
         let failed = node.error != nil
-        let outline: Color = failed ? .red : (selected ? accent : cardStroke)
-        context.stroke(shape, with: .color(outline), lineWidth: (selected || failed) ? 2.5 : 1)
+        if failed {
+            context.stroke(shape, with: .color(colors.error), lineWidth: 3.5)
+            if selected, card.width > 14 {
+                context.stroke(Path(roundedRect: card.insetBy(dx: 3.5, dy: 3.5), cornerRadius: max(radius - 3, 1)), with: .color(accent), lineWidth: 1.5)
+            }
+        } else {
+            context.stroke(shape, with: .color(selected ? accent : cardStroke), lineWidth: selected ? 2.5 : 1)
+        }
         paintBadge(of: node, in: card, &context)
 
         paintPorts(of: node, type: type, &context)
@@ -189,19 +196,20 @@ struct NodeEditorPainter {
         }
     }
 
-    /// A red dot with a mark for a node that failed, a yellow one for a warning, at the bottom
-    /// right of the card where the display flag is not.
+    /// A red triangle for a node that failed, an orange circle for one that only warns, at the
+    /// bottom right of the card where the display flag is not. Drawn at every zoom, at a size
+    /// that does not shrink with it below what reads: a failure must not disappear when the
+    /// graph is zoomed out to see all of it.
     private func paintBadge(of node: EditorNode, in card: CGRect, _ context: inout GraphicsContext) {
-        guard zoom >= 0.3, node.error != nil || !node.warnings.isEmpty else { return }
+        guard node.error != nil || !node.warnings.isEmpty else { return }
         let failed = node.error != nil
-        let radius = max(6.5 * zoom, 4)
-        let centre = CGPoint(x: card.maxX - radius - 4 * zoom, y: card.maxY - radius - 3 * zoom)
-        let circle = Path(ellipseIn: CGRect(x: centre.x - radius, y: centre.y - radius, width: radius * 2, height: radius * 2))
-        context.fill(circle, with: .color(failed ? .red : .yellow))
-        let mark = context.resolve(
-            Text(verbatim: "!").font(.system(size: max(radius * 1.35, 7), weight: .heavy)).foregroundColor(failed ? .white : .black)
-        )
-        context.draw(mark, at: centre)
+        let side = max(15 * zoom, 13)
+        let rect = CGRect(x: card.maxX - side - 3 * zoom, y: card.maxY - side - 2 * zoom, width: side, height: side)
+        // A card-coloured disc behind it keeps the glyph readable over the outline and the ports.
+        context.fill(Path(ellipseIn: rect.insetBy(dx: -1.5, dy: -1.5)), with: .color(cardFill))
+        var symbol = context.resolve(Image(systemName: failed ? "exclamationmark.triangle.fill" : "exclamationmark.circle.fill"))
+        symbol.shading = .color(failed ? colors.error : Color.orange)
+        context.draw(symbol, in: rect)
     }
 
     /// The text cut short with an ellipsis when it does not fit.

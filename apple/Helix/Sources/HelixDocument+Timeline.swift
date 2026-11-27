@@ -85,14 +85,14 @@ extension HelixDocument: TimelineEditing {
     func setRange(start: Int, end: Int) -> EditOutcome {
         performEdit(named: String(localized: "Change Frame Range"), reframe: false) {
             let status = helix.core.setFrameRange(Int32(clamping: start), Int32(clamping: end))
-            return status.ok ? .done : .failed(String(engine: status.error))
+            return status.ok ? .done : .failed(String(engineMessage: status.error))
         }
     }
 
     func setFps(_ fps: Double) -> EditOutcome {
         performEdit(named: String(localized: "Change Frame Rate"), reframe: false) {
             let status = helix.core.setFps(Float(fps))
-            return status.ok ? .done : .failed(String(engine: status.error))
+            return status.ok ? .done : .failed(String(engineMessage: status.error))
         }
     }
 
@@ -115,7 +115,7 @@ extension HelixDocument: TimelineEditing {
                             Float(done.frame + delta), Float(done.frame)
                         )
                     }
-                    return .failed(String(engine: status.error))
+                    return .failed(String(engineMessage: status.error))
                 }
                 moved.append(key)
             }
@@ -131,7 +131,7 @@ extension HelixDocument: TimelineEditing {
                     node, std.string(key.parameter), UInt32(key.component), Float(key.frame),
                     TimelineLoader.facade(interpolation)
                 )
-                if !status.ok { return .failed(String(engine: status.error)) }
+                if !status.ok { return .failed(String(engineMessage: status.error)) }
             }
             return .done
         }
@@ -143,7 +143,7 @@ extension HelixDocument: TimelineEditing {
         return performEdit(named: name, reframe: false) {
             for key in keys {
                 let status = helix.core.removeKeyframe(node, std.string(key.parameter), UInt32(key.component), Float(key.frame))
-                if !status.ok { return .failed(String(engine: status.error)) }
+                if !status.ok { return .failed(String(engineMessage: status.error)) }
             }
             return .done
         }

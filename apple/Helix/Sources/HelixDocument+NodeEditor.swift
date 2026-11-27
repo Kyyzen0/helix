@@ -40,10 +40,11 @@ extension HelixDocument: NodeEditorEditing {
     // MARK: Undo
 
     /// Runs an edit and, when it changed the scene, registers its undo step. Returns what the
-    /// edit came to, with the engine's reason when it was refused.
+    /// edit came to, with the engine's reason when it was refused. The camera stays where it
+    /// is unless `reframe` is set (see `FramingPolicy`).
     @discardableResult
     func performEdit(
-        named name: String, recook: Bool = true, reframe: Bool = true, _ body: () -> EditOutcome
+        named name: String, recook: Bool = true, reframe: Bool = false, _ body: () -> EditOutcome
     ) -> EditOutcome {
         guard isActive else { return .failed(String(localized: "This scene is closed.")) }
         // An edit made while playing stops the playback: the frame that goes on moving would make
@@ -60,7 +61,7 @@ extension HelixDocument: NodeEditorEditing {
         }
         let before = helix.core.captureScene()
         // An edit that cannot be undone is not made.
-        guard before.status.ok else { return .failed(String(engine: before.status.error)) }
+        guard before.status.ok else { return .failed(String(engineMessage: before.status.error)) }
 
         let outcome = body()
 
@@ -94,7 +95,7 @@ extension HelixDocument: NodeEditorEditing {
         var status = helix.core.Status()
         // The scene holds the frame it was captured on, and the playhead is not part of an edit.
         keepingPlayhead { status = helix.core.restoreScene(std.string(snapshot)) }
-        if !status.ok { presentedError = String(engine: status.error) }
+        if !status.ok { presentedError = String(engineMessage: status.error) }
         registerUndo(named: name, restoring: otherwise, otherwise: snapshot)
         cookGeometry(reframe: false)
         reselectAfterRestore(paths: selectedPaths)
@@ -114,7 +115,7 @@ extension HelixDocument: NodeEditorEditing {
     }
 
     private func failure(_ status: helix.core.Status) -> EditOutcome {
-        .failed(String(engine: status.error))
+        .failed(String(engineMessage: status.error))
     }
 
     private func outcome(_ status: helix.core.Status) -> EditOutcome {
