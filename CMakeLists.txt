@@ -568,6 +568,13 @@ set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.helix3d.Helix")
 set(MACOSX_BUNDLE_BUNDLE_NAME "Helix")
 set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
 set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")
+# The Dock and Finder read the application icon from the bundle resources,
+# so the icon file is compiled into the bundle and named in the description.
+set(MACOSX_BUNDLE_ICON_FILE Helix.icns)
+set(HELIX_APP_ICON "${CMAKE_CURRENT_SOURCE_DIR}/assets/logo/Helix.icns")
+set_source_files_properties("${HELIX_APP_ICON}" PROPERTIES
+    MACOSX_PACKAGE_LOCATION "Resources"
+)
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Info.plist.in"
     "${CMAKE_BINARY_DIR}/Info.plist"
@@ -580,8 +587,10 @@ set_target_properties(${AppExec} PROPERTIES
     MACOSX_BUNDLE_BUNDLE_NAME "Helix"
     MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+    MACOSX_BUNDLE_ICON_FILE "${MACOSX_BUNDLE_ICON_FILE}"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
 )
+target_sources(${AppExec} PRIVATE "${HELIX_APP_ICON}")
 
 target_link_libraries(${AppExec} PRIVATE helixEngine helixGraphics argparse::argparse Qt6::Quick Qt6::QuickControls2)
 if(HELIX_HAS_METAL_COMPILER)
