@@ -28,9 +28,11 @@ struct HelixCommands: Commands {
                 .keyboardShortcut("i", modifiers: .command)
                 .disabled(document == nil || document?.isActive != true)
         }
+        // The keys F, shift W and shift M belong to the viewport, which handles them itself
+        // while it has the keys. A menu shortcut without the command key would also fire while a
+        // text field has them, and typing an "M" in the palette must not hide the materials.
         CommandGroup(before: .toolbar) {
             Button("Frame Geometry") { document?.requestFrame() }
-                .keyboardShortcut("f", modifiers: [])
                 .disabled(document == nil)
             Picker("Wireframe", selection: wireframeBinding) {
                 ForEach(WireframeSetting.allCases) { setting in
@@ -38,9 +40,14 @@ struct HelixCommands: Commands {
                 }
             }
             Button("Cycle Wireframe") { wireframeBinding.wrappedValue = wireframe.next }
-                .keyboardShortcut("w", modifiers: .shift)
             Toggle("Materials", isOn: materialsBinding)
-                .keyboardShortcut("m", modifiers: .shift)
+        }
+        CommandMenu("Node") {
+            Button("Add Node…") { document?.editor.openPalette() }
+                .keyboardShortcut("k", modifiers: .command)
+                .disabled(document == nil || document?.isActive != true)
+            Button("Frame Nodes") { document?.editor.frameSelection() }
+                .disabled(document == nil || document?.isActive != true)
         }
     }
 }

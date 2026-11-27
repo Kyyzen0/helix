@@ -160,7 +160,23 @@ enum MCPHandlers {
     // MARK: The graph
 
     static func listNodeTypes(_ arguments: Arguments) throws -> MCPToolOutput {
-        let types = helix.core.listNodeTypes().map { JSONValue.string(String(engine: $0)) }
+        let types = helix.core.listNodeTypeInfos().map { info -> JSONValue in
+            .object([
+                "name": .string(String(engine: info.name)),
+                "label": .string(String(engine: info.label)),
+                "tags": .array(info.tags.map { .string(String(engine: $0)) }),
+                // The inputs are numbered from zero in this order, and a multi input port takes
+                // every input from its own position onward.
+                "inputs": .array(info.inputs.map { port in
+                    .object([
+                        "label": .string(String(engine: port.label)),
+                        "multi_input": .bool(port.multiInput),
+                        "optional": .bool(port.optional),
+                    ])
+                }),
+                "output_count": .int(Int64(info.outputCount)),
+            ])
+        }
         return .data(["types": .array(types)])
     }
 

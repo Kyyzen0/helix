@@ -2,27 +2,37 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// The window of a document: the viewport, with a toolbar over it.
+/// The window of a document: the viewport over the node editor, with a toolbar.
 struct DocumentView: View {
     @ObservedObject var document: HelixDocument
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.undoManager) private var undoManager
 
     var body: some View {
-        ZStack {
-            // The viewport is made once the document holds the engine, since it draws what the
-            // engine holds.
-            if document.isActive {
-                ViewportView(document: document)
+        VSplitView {
+            ZStack {
+                // The viewport is made once the document holds the engine, since it draws what
+                // the engine holds.
+                if document.isActive {
+                    ViewportView(document: document)
+                }
+                if let message = document.viewportMessage {
+                    Text(message)
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                        .padding()
+                        .allowsHitTesting(false)
+                }
             }
-            if let message = document.viewportMessage {
-                Text(message)
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-                    .padding()
-                    .allowsHitTesting(false)
-            }
+            .frame(minHeight: 160)
+            NodeEditorView(model: document.editor)
+                .frame(minHeight: 120, idealHeight: 260)
         }
-        .frame(minWidth: 480, minHeight: 320)
+        .frame(minWidth: 480, minHeight: 440)
+        // The window's undo manager takes the steps of the node editor, and marks the document
+        // as edited when it gets one.
+        .onAppear { document.undoManager = undoManager }
+        .onChange(of: undoManager) { _, manager in document.undoManager = manager }
         .task { activate() }
         // A 3D file dropped on the window is imported into the scene.
         .onDrop(of: [.fileURL], isTargeted: nil) { providers in
@@ -49,6 +59,15 @@ struct DocumentView: View {
                 }
                 .monospacedDigit()
                 .foregroundStyle(.secondary)
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    document.editor.openPalette()
+                } label: {
+                    Label("Add Node", systemImage: "plus")
+                }
+                .disabled(!document.isActive)
+                .help("Add a node (Tab in the node editor, ⌘K)")
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {

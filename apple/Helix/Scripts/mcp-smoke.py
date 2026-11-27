@@ -122,7 +122,16 @@ def main(binary):
 
     # Building a scene.
     check(server.data("scene_info")["nodes"] == [], "the scene starts empty")
-    check("helix::cube" in server.data("list_node_types")["types"], "list_node_types has helix::cube")
+    types = {t["name"]: t for t in server.data("list_node_types")["types"]}
+    check("helix::cube" in types, "list_node_types has helix::cube")
+    check(types["helix::cube"]["label"] == "Cube" and types["helix::cube"]["inputs"] == []
+          and types["helix::cube"]["output_count"] == 1, "list_node_types describes the cube: label, no inputs, one output")
+    check([p["label"] for p in types["helix::boolean"]["inputs"]] == ["A", "B"]
+          and not any(p["multi_input"] for p in types["helix::boolean"]["inputs"]),
+          "list_node_types gives the two single inputs of boolean")
+    check(types["helix::merge"]["inputs"][-1]["multi_input"] is True, "list_node_types flags the multi input of merge")
+    check("combine" in types["helix::merge"]["tags"] and isinstance(types["helix::merge"]["inputs"][0]["optional"], bool),
+          "list_node_types gives tags and optional")
     cube = server.data("create_node", {"type": "helix::cube", "name": "box"})
     check(cube["name"] == "box" and cube["path"] == "/box" and cube["type"] == "helix::cube" and cube["id"],
           "create_node returns id, name, path and type")

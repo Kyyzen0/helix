@@ -64,7 +64,10 @@ enum MCPTools {
 
             // The graph.
             tool("list_node_types",
-                 "Lists the type names create_node accepts, such as helix::cube.",
+                 "Lists the node types create_node accepts. Each has a name such as helix::cube, a label, tags, " +
+                 "its input ports (in order, with label, multi_input and optional) and its output_count. " +
+                 "Inputs are numbered from 0 in the order listed, outputs from 0, and a multi_input port takes " +
+                 "every input from its own position onward: connect_nodes needs these numbers.",
                  [:], readOnly: true, MCPHandlers.listNodeTypes),
             tool("create_node",
                  "Creates a node of a type, at the root of the scene. It is not displayed until set_display_node.",

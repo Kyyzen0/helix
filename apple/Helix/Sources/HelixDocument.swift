@@ -40,6 +40,13 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
 
     let viewport = ViewportController()
 
+    /// What the node editor of the window shows and does.
+    let editor = NodeEditorModel()
+
+    /// The undo manager of the window, which the view hands over once it has one. Weak, since
+    /// the window owns it and it holds no reference to the document.
+    weak var undoManager: UndoManager?
+
     /// The file the scene is read from, or nil for a new scene. Set once, before the document is
     /// shared, so it can be read from any thread.
     private nonisolated let fileContents: Data?
@@ -109,6 +116,7 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
         }
         isActive = true
         cookGeometry()
+        prepareEditor()
         if let message = openingError {
             presentedError = message
             openingError = nil
@@ -143,24 +151,29 @@ final class HelixDocument: @preconcurrency ReferenceFileDocument {
 
     /// Imports a 3D file into the scene, makes it the node the viewport shows and frames it.
     /// Returns why it could not be imported, or nil. The file is only read.
+    ///
+    /// Once the scene is shown, the import is a step of undo. While it opens, it is not: there is
+    /// nothing before it to go back to.
     @discardableResult
     func importFile(_ url: URL) -> String? {
+        guard isActive else { return importNode(url) }
+        let outcome = performEdit(named: String(localized: "Import")) {
+            importNode(url).map { .failed($0) } ?? .done
+        }
+        if let error = outcome.error {
+            presentedError = error
+            return error
+        }
+        viewport.requestFrame()
+        return nil
+    }
+
+    /// Makes the import node and shows it, with no undo and no cook.
+    private func importNode(_ url: URL) -> String? {
         let result = helix.core.importFile(std.string(url.path))
-        guard result.status.ok else {
-            let message = String(engine: result.status.error)
-            if isActive { presentedError = message }
-            return message
-        }
+        guard result.status.ok else { return String(engine: result.status.error) }
         let display = helix.core.setDisplayNode(result.id)
-        guard display.ok else {
-            let message = String(engine: display.error)
-            if isActive { presentedError = message }
-            return message
-        }
-        if isActive {
-            cookGeometry()
-            viewport.requestFrame()
-        }
+        guard display.ok else { return String(engine: display.error) }
         return nil
     }
 

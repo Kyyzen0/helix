@@ -19,6 +19,7 @@
 #include <filesystem>
 #include <functional>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <system_error>
 #include <thread>
@@ -245,6 +246,47 @@ Status writeAtomically(const std::filesystem::path& destination)
     return success();
 }
 
+// What the facade tells about a type, from the type itself.
+NodeTypeInfo describeType(
+    const std::string& name,
+    const std::string& label,
+    const std::vector<std::string>& tags,
+    const nt::NodeType& type
+)
+{
+    NodeTypeInfo info;
+    info.name = name;
+    info.label = label;
+    info.tags = tags;
+    info.outputCount = type.maxOutputs;
+    for (const nt::InputPort& port : type.inputPorts)
+        info.inputs.push_back({port.label, port.multiInput, port.optional});
+    return info;
+}
+
+// Describes a type or an alias by its full name, or returns false when there is none.
+bool describeTypeNamed(const std::string& fullName, NodeTypeInfo& info)
+{
+    if (const nt::NodeType* type = nt::NodeTypeTable::getNodeType(fullName))
+    {
+        info = describeType(type->getFullName(), type->getLabel(), type->tags, *type);
+        return true;
+    }
+    if (const nt::NodeAlias* alias = nt::NodeTypeTable::getNodeAlias(fullName))
+    {
+        const nt::NodeType* aliased = nt::NodeTypeTable::getNodeType(alias->aliasedType);
+        if (!aliased) return false;
+        info = describeType(alias->getFullName(), alias->getLabel(), alias->tags, *aliased);
+        return true;
+    }
+    return false;
+}
+
+// The engine's own undo stack records every edit made through the facade, and nothing reads it:
+// the interface undoes with scene snapshots. Left alone it would keep a copy of everything a
+// person deleted for as long as the scene is open, so every edit empties it.
+void dropEngineUndo() { nt::nm().undoStack().clear(); }
+
 } // namespace
 
 namespace detail {
@@ -339,6 +381,44 @@ Status saveScene(const std::string& path)
 
 bool isSceneModified() { return initialized && sceneModified; }
 
+SceneSnapshot captureScene()
+{
+    SceneSnapshot result;
+    result.status = guarded([&] {
+        if (Status status = requireInitialized(); !status.ok) return status;
+        std::ostringstream stream;
+        nt::Serializer().save(nt::nm(), stream);
+        result.data = stream.str();
+        return success();
+    });
+    return result;
+}
+
+Status restoreScene(const std::string& data)
+{
+    return guarded([&] {
+        if (Status status = requireInitialized(); !status.ok) return status;
+
+        // Loading fires the signals that mark the scene as changed, and a restore is not a
+        // judgement on whether the file on disk matches, so the flag is put back as it was.
+        const bool wasModified = sceneModified;
+        ensureSynchronousCooking();
+        try
+        {
+            std::istringstream stream(data);
+            nt::Serializer().load(nt::nm(), stream);
+        }
+        catch (const std::exception& error)
+        {
+            nt::nm().clear();
+            sceneModified = wasModified;
+            return failure(std::string("Couldn't restore the scene: ") + error.what());
+        }
+        sceneModified = wasModified;
+        return success();
+    });
+}
+
 std::vector<NodeInfo> listNodes()
 {
     std::vector<NodeInfo> nodes;
@@ -365,6 +445,28 @@ std::vector<LinkInfo> listLinks()
                std::tie(b.sourceNode, b.sourceOutput, b.targetNode, b.targetInput);
     });
     return links;
+}
+
+NodeTypeInfoResult nodeTypeInfo(const std::string& type)
+{
+    NodeTypeInfoResult result;
+    result.status = guarded([&] {
+        if (Status status = requireInitialized(); !status.ok) return status;
+        if (!describeTypeNamed(type, result.info)) return failure("There is no node type '" + type + "'.");
+        return success();
+    });
+    return result;
+}
+
+std::vector<NodeTypeInfo> listNodeTypeInfos()
+{
+    std::vector<NodeTypeInfo> infos;
+    for (const std::string& name : listNodeTypes())
+    {
+        NodeTypeInfo info;
+        if (describeTypeNamed(name, info)) infos.push_back(std::move(info));
+    }
+    return infos;
 }
 
 std::vector<std::string> listNodeTypes()
@@ -399,6 +501,7 @@ CreateNodeResult createNode(const std::string& type, const std::string& name, fl
         }
 
         result.id = nt::nm().createNode(type, Path("/"), name, Vector2(x, y));
+        dropEngineUndo();
         return success();
     });
     return result;
@@ -410,6 +513,7 @@ Status deleteNode(NodeId node)
         if (Status status = requireInitialized(); !status.ok) return status;
         if (Status status = requireNode(node); !status.ok) return status;
         nt::nm().deleteNode(node);
+        dropEngineUndo();
         return success();
     });
 }
@@ -430,6 +534,7 @@ Status connectNodes(
             return failure("The link would make the node depend on itself.");
 
         nt::nm().connectNodes(sourceNode, sourceOutput, targetNode, targetInput);
+        dropEngineUndo();
         return success();
     });
 }
@@ -450,6 +555,7 @@ Status disconnectNodes(
             return failure("Those two ports are not linked.");
 
         nt::nm().disconnectNodes(link);
+        dropEngineUndo();
         return success();
     });
 }
@@ -460,6 +566,7 @@ Status moveNode(NodeId node, float x, float y)
         if (Status status = requireInitialized(); !status.ok) return status;
         if (Status status = requireNode(node); !status.ok) return status;
         nt::nm().moveNode(node, Vector2(x, y));
+        dropEngineUndo();
         return success();
     });
 }
@@ -543,6 +650,7 @@ CreateNodeResult importFile(const std::string& path)
             return failure("The import node has no file path parameter.");
         }
         filePath->setString(file.string());
+        dropEngineUndo();
         importSummary = summary.text();
         return success();
     });

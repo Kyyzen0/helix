@@ -26,9 +26,9 @@ final class MCPServer {
 
     static let instructions = """
         Helix is a procedural 3D tool: a scene is a graph of nodes. Work in this order: \
-        list_node_types, create_node for each step, connect_nodes to wire them, \
-        set_parameter to adjust a node, and set_display_node to say which node's output is the \
-        result. Then check it: geometry_summary gives the counts, bounds and attributes as data, \
+        list_node_types (it gives the input and output ports of each type), create_node for each \
+        step, connect_nodes to wire them, set_parameter to adjust a node, and set_display_node to \
+        say which node's output is the result. Then check it: geometry_summary gives the counts, bounds and attributes as data, \
         read_attribute gives values, and render_view gives a picture. Nodes are named by name, \
         path or id. A failed call returns isError with a message: read it and retry.
         """

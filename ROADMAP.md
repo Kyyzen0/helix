@@ -71,7 +71,24 @@ Done in the tree:
   are not grouped into undoable steps yet, and scripts are not sandboxed (track two, items 4 and
   5). See [build-macos.md](build-macos.md).
 
+- **M2, the node editor.** The document window is the viewport over a node editor (SwiftUI `Canvas`,
+  events in AppKit). Nodes are shown, selected, moved, connected and deleted, the display node is set
+  by a double click, and nodes are created from a search palette that chains a new node under the
+  selected one. Every edit is a step of the window's undo manager that keeps a snapshot of the scene
+  (`captureScene` and `restoreScene` in the facade), and import is undoable too. `list_node_types`
+  of the MCP server now gives the ports of each type. Single-key shortcuts (F, Shift+W, Shift+M)
+  moved from menu items to the views, so they no longer fire while a text field has the keys.
+
 Known gaps found on the way, to fix as the work below touches them:
+
+- **Node editor gaps.** No rename of a node. A node that fails to cook shows nothing on its card:
+  `throwError` only prints (`src/Engine/Network/NodeImpl.cpp`), so a per-node error needs the
+  cook to report it. Selection, pan and zoom are not saved in the file. No subnetworks (the editor
+  shows the root of the scene), and ports are untyped, so any output connects to any input. A
+  restore (undo) gives the nodes new ids, which only matters to a client that holds ids across it.
+- **A node that crashes takes the process down.** Cooking runs in the process of the app or of
+  `Helix --mcp`, so a bug in one node ends the session, as the null read `attributeNoise` made on a
+  mesh with no points did (fixed). Cooking isolated in its own process (track four) is the cure.
 
 - **The engine is a singleton: one scene at a time.** The native app refuses a second
   document with an alert. Several scenes at once need a multi-instance `NetworkManager`.
@@ -125,7 +142,7 @@ interface keeps working until the last one removes it.
 | ~~M0, the base~~ | Done: the engine builds and is tested without Qt, and the `HelixCore` facade is importable from Swift. |
 | ~~M1, the walking skeleton~~ | Done, trackpad navigation still to be validated on hardware: a Swift app that opens a `.kut` document and shows the cooked display geometry in a Metal viewport (`MTKView`), with trackpad orbit, pan and zoom. Every layer is crossed once, end to end. |
 | ~~M1.5, Helix MCP~~ | Done: `Helix --mcp` is a Model Context Protocol server over the facade, so an AI agent can create, inspect and change a scene, and check the result as data and as a viewport capture. It runs its own engine, with no undo grouping and no script sandbox yet (track two). |
-| **M2, the node editor** | Show, select, move and connect nodes; create them from a search palette. |
+| ~~M2, the node editor~~ | Done: the window shows the viewport over a node editor. Show, select, move, connect, disconnect and delete nodes, set the display node, and create nodes from a search palette; every edit is one undoable step. See [build-macos.md](build-macos.md). |
 | **M3, the inspector** | Every parameter type, with undo through the macOS `UndoManager`. |
 | **M4, timeline and spreadsheet** | Playback, keyframes from the interface, and the attribute spreadsheet as a native table. |
 | **M5, finish** | Settings, icon, document types, packaging, signing and notarization, then the Qt interface is removed. |
@@ -222,7 +239,7 @@ The reference machine is a Mac mini M4. Everything above must run well on it.
 2. ~~M1, the walking skeleton of the native app~~ done
 3. ~~M1.5, Helix MCP, so the AI track is exercised from the start~~ done
 4. ~~glTF import with UVs~~ and ~~textured viewport shading~~ done (base colour only)
-5. M2 to M4, the native interface, with cook caching and the scheduler work
+5. ~~M2, the node editor~~ done; M3 and M4, the native interface, with cook caching and the scheduler work
    alongside
 6. Skeletal animation and keyframes, second version
 7. M5, then the stability and rendering items that remain

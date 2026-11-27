@@ -92,4 +92,16 @@ final class ViewportController {
     func redraw() {
         view?.needsDisplay = true
     }
+
+    /// Moves the wireframe setting to the next one, for the key that does it. The menu reads the
+    /// same user default, so it follows.
+    func cycleWireframe() {
+        UserDefaults.standard.set(WireframeSetting.current.next.rawValue, forKey: WireframeSetting.defaultsKey)
+        redraw()
+    }
+
+    func toggleMaterials() {
+        UserDefaults.standard.set(!MaterialsSetting.isVisible, forKey: MaterialsSetting.defaultsKey)
+        redraw()
+    }
 }
