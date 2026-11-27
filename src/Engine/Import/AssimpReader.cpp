@@ -82,8 +82,13 @@ std::string decodePercent(const std::string& text)
 }
 
 // The file a texture path names, looked for next to the model, then under its own (absolute)
-// path, then by its file name next to the model. Empty when none exists.
-std::filesystem::path locateTexture(const TextureContext& context, const std::string& written)
+// path, then by its file name next to the model. Empty when none exists. Every path that was
+// tried and is not a file is added to the list given, so the import cache can see one appear.
+std::filesystem::path locateTexture(
+    const TextureContext& context,
+    const std::string& written,
+    std::vector<std::filesystem::path>& tried
+)
 {
     std::string path = written;
     std::replace(path.begin(), path.end(), '\\', '/');
@@ -92,18 +97,21 @@ std::filesystem::path locateTexture(const TextureContext& context, const std::st
     if (plain != path) spellings.push_back(plain);
 
     std::error_code error;
+    const auto isFile = [&](const std::filesystem::path& candidate) {
+        if (std::filesystem::is_regular_file(candidate, error)) return true;
+        if (std::find(tried.begin(), tried.end(), candidate) == tried.end()) tried.push_back(candidate);
+        return false;
+    };
     for (const std::string& spelling : spellings)
     {
         const std::filesystem::path candidate(spelling);
-        if (candidate.is_relative() && std::filesystem::is_regular_file(context.folder / candidate, error))
-            return context.folder / candidate;
-        if (candidate.is_absolute() && std::filesystem::is_regular_file(candidate, error)) return candidate;
+        if (candidate.is_relative() && isFile(context.folder / candidate)) return context.folder / candidate;
+        if (candidate.is_absolute() && isFile(candidate)) return candidate;
     }
     for (const std::string& spelling : spellings)
     {
         const std::filesystem::path name = std::filesystem::path(spelling).filename();
-        if (!name.empty() && std::filesystem::is_regular_file(context.folder / name, error))
-            return context.folder / name;
+        if (!name.empty() && isFile(context.folder / name)) return context.folder / name;
     }
     return {};
 }
@@ -166,9 +174,17 @@ void readTexture(const aiMaterial& source, TextureContext& context, RawMaterial&
     }
     else
     {
-        const std::filesystem::path file = locateTexture(context, written);
+        std::vector<std::filesystem::path> tried;
+        const std::filesystem::path file = locateTexture(context, written, tried);
         if (file.empty())
         {
+            // The cache watches the places the picture could appear in, so copying it next to the
+            // model later makes the file read again.
+            if (context.opened)
+                for (const std::filesystem::path& candidate : tried)
+                    if (std::find(context.opened->begin(), context.opened->end(), candidate) ==
+                        context.opened->end())
+                        context.opened->push_back(candidate);
             material.missingTexture = "texture \"" + written.substr(0, 200) + "\" not found next to the model";
             return;
         }

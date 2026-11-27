@@ -460,3 +460,33 @@ TEST_CASE_METHOD(NMReset, "Merging two imports of a textured file keeps the uv o
     REQUIRE(mesh->materials().size() == 1);
 }
 
+TEST_CASE("A picture missing at import is looked for again when the model is imported again", "[import][material]")
+{
+    TempFolder folder;
+    copyExternalQuad(folder.path, false);
+    const fs::path gltf = folder.path / "textured-quad.gltf";
+
+    bool fromCache = true;
+    import::clearImportCache();
+    const auto first = import::importFile(gltf, {}, &fromCache);
+    REQUIRE_FALSE(fromCache);
+    REQUIRE_FALSE(first->meshes.front()->materials().front()->baseColorTexture);
+    REQUIRE_FALSE(first->meshes.front()->materials().front()->missingTexture.empty());
+
+    // Still missing: the cache serves it, with no new read.
+    const std::size_t reads = import::importReadCount();
+    const auto again = import::importFile(gltf, {}, &fromCache);
+    REQUIRE(fromCache);
+    REQUIRE(import::importReadCount() == reads);
+    REQUIRE(again == first);
+
+    // The picture is copied next to the model: the file is read again, with its texture.
+    fs::copy_file(dataFile("quadrants.png"), folder.path / "quadrants.png");
+    const auto third = import::importFile(gltf, {}, &fromCache);
+    REQUIRE_FALSE(fromCache);
+    REQUIRE(import::importReadCount() == reads + 1);
+    const geo::Material& material = *third->meshes.front()->materials().front();
+    REQUIRE(material.baseColorTexture);
+    REQUIRE(material.missingTexture.empty());
+    requireQuadrants(*third->meshes.front());
+}
