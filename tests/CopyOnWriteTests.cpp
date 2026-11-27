@@ -506,6 +506,8 @@ TEST_CASE("Other attributes of a copy detach when they grow", "[copyOnWrite]")
     geo::Mesh copy = source;
     copy.addPoint(Vector3(5, 5, 5));
     attr::AttributeHandleFloat copyHeights = copy.addAttribute<floatT>(attr::AttrOwner::POINT, "height");
+    // addPoint grows the positions only, so the attribute grows to the new point count here.
+    copyHeights.resize(copy.getNumPoints());
     copyHeights.setValue(4, 40.f);
     copyHeights.setValue(0, 99.f);
 
@@ -657,7 +659,8 @@ TEST_CASE("Threads copy and transform one published packet without disturbing it
         std::vector<std::vector<Vector3>> results(threadCount);
         std::vector<Offset> pointCounts(threadCount, 0);
         std::vector<Offset> faceCounts(threadCount, 0);
-        std::vector<bool> bound(threadCount, false);
+        // One byte each: threads writing neighbouring bits of a std::vector<bool> would race.
+        std::vector<char> bound(threadCount, 0);
         std::vector<std::thread> threads;
         for (size_t t = 0; t < threadCount; ++t)
         {
@@ -716,7 +719,8 @@ TEST_CASE("Threads run a point script on copies of one input without disturbing 
     const script::ScriptContext context(0, input);
     StartGate gate(threadCount);
     std::vector<std::shared_ptr<geo::Mesh>> outputs(threadCount);
-    std::vector<bool> succeeded(threadCount, false);
+    // One byte each: threads writing neighbouring bits of a std::vector<bool> would race.
+    std::vector<char> succeeded(threadCount, 0);
     std::vector<std::thread> threads;
     for (size_t t = 0; t < threadCount; ++t)
     {
