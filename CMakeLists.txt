@@ -247,6 +247,20 @@ foreach(daslang_target IN LISTS daslang_targets)
     endif()
 endforeach()
 
+# daslang adds -fno-rtti to its release flags. A translation unit built without RTTI that throws
+# or catches a standard exception emits its own hidden copy of the typeinfo of std::exception,
+# std::logic_error and the others, instead of using the one of libc++. Every image that links the
+# archive then ends up with a private copy, and `catch (const std::exception&)` stops matching
+# what another image throws (the engine, the node libraries and the tests are separate images).
+# The whole of daslang is therefore built with RTTI, which also lets the files of Helix that
+# subclass its types be compiled like any other.
+foreach(daslang_target IN LISTS daslang_targets)
+    get_target_property(daslang_target_type ${daslang_target} TYPE)
+    if(NOT daslang_target_type STREQUAL "INTERFACE_LIBRARY" AND NOT daslang_target_type STREQUAL "UTILITY")
+        target_compile_options(${daslang_target} PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-frtti>")
+    endif()
+endforeach()
+
 # daslang exposes its public headers only as a private requirement, so the
 # include path is added by hand.
 list(APPEND ENGINE_INCLUDE_DIRECTORIES ${DASLANG_DIR}/include)
@@ -262,15 +276,6 @@ set(HELIX_DEV_STAGE_DIR "${CMAKE_BINARY_DIR}/helix.app/Contents")
 # daslib sits beside the staged bin directory so daslang resolves its standard
 # library the same way it does from an install.
 file(COPY ${DAS_DASLIB_DIR} DESTINATION ${HELIX_DEV_STAGE_DIR})
-
-# daslang is built without RTTI, so the files that subclass its types match it.
-# Otherwise their typeinfo references daslang symbols that were never emitted.
-set_source_files_properties(
-    src/Engine/Daslang/Runtime.cpp
-    src/Engine/Expression/ExpressionFunctions.cpp
-    src/Engine/Script/GeometryFunctions.cpp
-    PROPERTIES COMPILE_OPTIONS "-fno-rtti"
-)
 
 # Release flags for Apple silicon. They are set here, after the third party
 # libraries above, so they reach helix's own targets (the engine, the graphics
@@ -732,6 +737,7 @@ if(HELIX_BUILD_TESTS)
         tests/CopyOnWriteTests.cpp
         tests/SimulationTests.cpp
         tests/HelixCoreTests.cpp
+        tests/ExceptionBoundaryTests.cpp
         tests/HelixCoreViewportTests.cpp
     )
     # The one test of the engine that goes through a Qt type, the item QML holds for a parameter.

@@ -493,19 +493,8 @@ CreateNodeResult importFile(const std::string& path)
 
         // The default settings the new node has, so the cook of the node finds the result of
         // this read in the cache.
-        import::ImportSummary summary;
-        try
-        {
-            summary = import::importFile(file, import::ImportOptions{})->summary;
-        }
-        catch (const import::ImportError& error)
-        {
-            return failure(error.what());
-        }
-        catch (...)
-        {
-            return failure(import::describeCurrentException());
-        }
+        const import::ImportSummary summary =
+            import::importFile(file, import::ImportOptions{})->summary;
 
         // The node is named after the file when that name is free and valid. Otherwise the
         // engine picks a free one.

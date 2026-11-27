@@ -82,9 +82,9 @@ RawScene readWithAssimp(const std::filesystem::path& file)
         // counted before it is dropped.
         scene = importer.ReadFile(file.string().c_str(), 0);
     }
-    catch (...)
+    catch (const std::exception& error)
     {
-        throw ImportError("The file could not be read: " + describeCurrentException());
+        throw ImportError(std::string("The file could not be read: ") + error.what());
     }
     if (!scene)
     {
@@ -113,9 +113,9 @@ RawScene readWithAssimp(const std::filesystem::path& file)
     {
         scene = importer.ApplyPostProcessing(flags);
     }
-    catch (...)
+    catch (const std::exception& error)
     {
-        throw ImportError("The file is damaged: " + describeCurrentException());
+        throw ImportError(std::string("The file is damaged: ") + error.what());
     }
     if (!scene || !scene->mRootNode)
     {

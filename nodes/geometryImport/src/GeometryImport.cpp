@@ -53,16 +53,9 @@ void GeometryImport::readFileInto(helix::NodePacket& packet)
     {
         imported = import::importFile(std::filesystem::path(filePath), options);
     }
-    catch (const import::ImportError& error)
+    catch (const std::exception& error)
     {
         throwError(error.what());
-        return;
-    }
-    catch (...)
-    {
-        // Not catch (const std::exception&), which does not match across the libraries of this
-        // build (see describeCurrentException).
-        throwError(import::describeCurrentException());
         return;
     }
 

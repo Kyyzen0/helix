@@ -87,16 +87,6 @@ std::shared_ptr<const ImportedFile> importFile(
     bool* fromCache = nullptr
 );
 
-/**
- * @brief Describes the exception being handled, for a person.
- *
- * Call it from inside a `catch (...)` block. It exists because `catch (const std::exception&)`
- * does not catch what it should in a build where every image carries a private copy of the
- * typeinfo of std::exception, as the engine, the node library and the tests do with the current
- * toolchain. The standard types that matter are caught by their own, shared, typeinfo here.
- */
-std::string describeCurrentException();
-
 /// @brief Forgets what importFile kept.
 void clearImportCache();
 

@@ -406,7 +406,40 @@ TEST_CASE_METHOD(CoreFixture, "Opening a missing or broken file reports an error
     // A file that is not a scene is reported, and no exception escapes.
     const fs::path broken = folder.file("broken.kut");
     std::ofstream(broken) << "this is not a scene";
-    REQUIRE_FALSE(core::openScene(broken.string()).ok);
+    const core::Status brokenStatus = core::openScene(broken.string());
+    REQUIRE_FALSE(brokenStatus.ok);
+
+    // The status carries the message of the exception the engine threw, not the fallback of
+    // the guard for an exception it cannot name. That fallback appears when
+    // `catch (const std::exception&)` misses what a library of the engine throws.
+    REQUIRE(brokenStatus.error.find("Couldn't read") != std::string::npos);
+    REQUIRE(brokenStatus.error.find("unknown reason") == std::string::npos);
+}
+
+TEST_CASE_METHOD(CoreFixture, "A damaged 3D file is reported with the reason, not an unknown failure")
+{
+    TempFolder folder;
+    const fs::path damaged = folder.file("damaged.glb");
+    std::ofstream(damaged) << "glTF this is not a binary glTF container";
+
+    const core::CreateNodeResult result = core::importFile(damaged.string());
+    REQUIRE_FALSE(result.status.ok);
+    REQUIRE_FALSE(result.status.error.empty());
+    REQUIRE(result.status.error.find("unknown reason") == std::string::npos);
+}
+
+TEST_CASE_METHOD(CoreFixture, "A failure inside the engine reports the exception message")
+{
+    TempFolder folder;
+    REQUIRE(core::createNode("helix::cube", "", 0.f, 0.f).status.ok);
+
+    // Saving into a folder that is read only makes the serializer throw a std::runtime_error
+    // from inside libhelixEngine.
+    fs::permissions(folder.path, fs::perms::owner_read | fs::perms::owner_exec);
+    const core::Status saved = core::saveScene(folder.file("scene.kut").string());
+    REQUIRE_FALSE(saved.ok);
+    REQUIRE_FALSE(saved.error.empty());
+    REQUIRE(saved.error.find("unknown reason") == std::string::npos);
 }
 
 TEST_CASE_METHOD(CoreFixture, "Time reports the frame, the range and the rate")

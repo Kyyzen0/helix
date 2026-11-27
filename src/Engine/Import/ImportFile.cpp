@@ -160,30 +160,6 @@ ImportedFile readFile(const fs::path& file, const Format& format, const ImportOp
 
 ImportError::~ImportError() = default;
 
-std::string describeCurrentException()
-{
-    try
-    {
-        throw;
-    }
-    catch (const std::bad_alloc&)
-    {
-        return "There is not enough memory to import the file.";
-    }
-    catch (const std::runtime_error& error)
-    {
-        return error.what();
-    }
-    catch (const std::logic_error& error)
-    {
-        return error.what();
-    }
-    catch (...)
-    {
-        return "The file could not be imported.";
-    }
-}
-
 std::string ImportSummary::text() const
 {
     auto count = [](std::size_t n, const char* one, const char* many) {
@@ -332,9 +308,13 @@ std::shared_ptr<const ImportedFile> importFile(
     {
         throw ImportError("There is not enough memory to import " + file.filename().string() + ".");
     }
+    catch (const std::exception& error)
+    {
+        throw ImportError(std::string("The file could not be imported: ") + error.what());
+    }
     catch (...)
     {
-        throw ImportError("The file could not be imported: " + describeCurrentException());
+        throw ImportError("The file could not be imported.");
     }
 
     {

@@ -208,9 +208,9 @@ RawScene readWithModelIO(const std::filesystem::path& file)
             throw ImportError(std::string("Model I/O could not read the file: ") +
                               [[exception reason] UTF8String]);
         }
-        catch (...)
+        catch (const std::exception& error)
         {
-            throw ImportError("The file could not be read: " + describeCurrentException());
+            throw ImportError(std::string("The file could not be read: ") + error.what());
         }
     }
 }

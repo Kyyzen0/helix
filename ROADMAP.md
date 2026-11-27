@@ -64,6 +64,14 @@ Known gaps found on the way, to fix as the work below touches them:
   simulation nodes (`nodes/simulation/particles`, `springs`) are skipped by
   their tests.
 - The engine prints debug output (`ic|`) in release builds.
+- **daslang is built with RTTI now, and `libhelixEngine.dylib` grew by 7.9 MB (48.6 to 56.5 MB,
+  +16%) because of it.** daslang adds `-fno-rtti` to its release flags, and a file built that way
+  that throws or catches a standard exception emits a private copy of the typeinfo of
+  `std::exception`, so `catch (const std::exception&)` missed what another image threw (the
+  engine, the node library and the tests are separate images). `CMakeLists.txt` adds `-frtti` to
+  every daslang target, and `tests/ExceptionBoundaryTests.cpp` fails if an image defines such a
+  copy again. Getting the size back means building only the daslang files that never touch an
+  exception without RTTI, which needs the daslang build files to say which.
 - The `bison` shipped by the toolchain script crashes on recent macOS; the
   build uses the parsers committed in daslang instead.
 
