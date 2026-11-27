@@ -32,9 +32,11 @@ var searchData=
   ['settimedependent_29',['setTimeDependent',['../classhelix_1_1nt_1_1NetworkGraph.html#a20e5d8466eb600a013cc7b48d0bf2757',1,'helix::nt::NetworkGraph']]],
   ['setvalue_30',['setValue',['../classhelix_1_1attr_1_1AttributeHandle.html#a4066d37d0b07088f901e2bdef38c54d6',1,'helix::attr::AttributeHandle']]],
   ['size_31',['size',['../classhelix_1_1async_1_1CookPlan.html#a3c99615653b731d78da3b123a8fc5804',1,'helix::async::CookPlan::size()'],['../classhelix_1_1sim_1_1KeyframeTrack.html#ace5e5858cdd9b753afe0527507c6521f',1,'helix::sim::KeyframeTrack::size()'],['../classhelix_1_1sim_1_1ParticleSolver.html#af679b380657e1369fb107c37ba522fa4',1,'helix::sim::ParticleSolver::size()'],['../classhelix_1_1sim_1_1SpringSolver.html#a62b06832131924bc823ee4b766749a6b',1,'helix::sim::SpringSolver::size()'],['../classhelix_1_1util_1_1UnionFind.html#af1411c3a20ef000329b53e61c734565f',1,'helix::util::UnionFind::size()']]],
-  ['split_32',['split',['../classhelix_1_1Path.html#a64dca9ff3d2c705eb27808d3a4ea0829',1,'helix::Path']]],
-  ['splitnames_33',['splitNames',['../StyleAccess_8h.html#ae730fbe0f44452de77034df60ad7ef71',1,'helix::prm::style']]],
-  ['step_34',['step',['../classhelix_1_1sim_1_1ParticleSolver.html#a0138df537c2acd3dcd66b0afde2d8b3d',1,'helix::sim::ParticleSolver::step()'],['../classhelix_1_1sim_1_1SpringSolver.html#a5a0918b5780082e759b0d3507dbd5434',1,'helix::sim::SpringSolver::step()']]],
-  ['strip_35',['strip',['../classhelix_1_1Path.html#a28c6fe070036a23aa388407159b9c5f5',1,'helix::Path']]],
-  ['submitexpressiondependencies_5f_36',['submitExpressionDependencies_',['../classhelix_1_1prm_1_1NodeParameter.html#a335f9a98f86dac282b77d50d8962d367',1,'helix::prm::NodeParameter::submitExpressionDependencies_()'],['../classhelix_1_1prm_1_1Parameter.html#a8a789beea4c4b9f53ebfcae6f586ce21',1,'helix::prm::Parameter::submitExpressionDependencies_()']]]
+  ['skeleton_32',['skeleton',['../classhelix_1_1geo_1_1Mesh.html#a065987ee08a9ac68c92c643a2e5fbb72',1,'helix::geo::Mesh']]],
+  ['skeletonreader_33',['SkeletonReader',['../classhelix_1_1import_1_1SkeletonReader.html#a2e7be013ee2716020a466dca1821112e',1,'helix::import::SkeletonReader']]],
+  ['split_34',['split',['../classhelix_1_1Path.html#a64dca9ff3d2c705eb27808d3a4ea0829',1,'helix::Path']]],
+  ['splitnames_35',['splitNames',['../StyleAccess_8h.html#ae730fbe0f44452de77034df60ad7ef71',1,'helix::prm::style']]],
+  ['step_36',['step',['../classhelix_1_1sim_1_1ParticleSolver.html#a0138df537c2acd3dcd66b0afde2d8b3d',1,'helix::sim::ParticleSolver::step()'],['../classhelix_1_1sim_1_1SpringSolver.html#a5a0918b5780082e759b0d3507dbd5434',1,'helix::sim::SpringSolver::step()']]],
+  ['strip_37',['strip',['../classhelix_1_1Path.html#a28c6fe070036a23aa388407159b9c5f5',1,'helix::Path']]],
+  ['submitexpressiondependencies_5f_38',['submitExpressionDependencies_',['../classhelix_1_1prm_1_1NodeParameter.html#a335f9a98f86dac282b77d50d8962d367',1,'helix::prm::NodeParameter::submitExpressionDependencies_()'],['../classhelix_1_1prm_1_1Parameter.html#a8a789beea4c4b9f53ebfcae6f586ce21',1,'helix::prm::Parameter::submitExpressionDependencies_()']]]
 ];

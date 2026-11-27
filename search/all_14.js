@@ -1,12 +1,17 @@
 var searchData=
 [
-  ['validateoption_0',['validateOption',['../StyleAccess_8h.html#a7e1854e6a5215fabf0b3048ab61389fa',1,'helix::prm::style']]],
-  ['validateoptions_1',['validateOptions',['../StyleAccess_8h.html#a844d95c2afdc59fd093a1874abc6dc9c',1,'helix::prm::style']]],
-  ['value_2',['value',['../structhelix_1_1sim_1_1Keyframe.html#a2599292f67d332f3456956236c61c92e',1,'helix::sim::Keyframe']]],
-  ['valuetype_3',['ValueType',['../Types_8h.html#a7d03fef7c2f5b7fbace4adc919bbe55b',1,'helix::prm']]],
-  ['valuetype_4',['valueType',['../structhelix_1_1async_1_1CookParameterValue.html#a133e068b919305c06b49ed442c58cf4c',1,'helix::async::CookParameterValue']]],
-  ['vectorat_5',['vectorAt',['../namespacehelix_1_1sim_1_1detail.html#ad7c8afcfca4d37e2416b5ec3a054d5a0',1,'helix::sim::detail']]],
-  ['vertexnormalhandle_6',['VertexNormalHandle',['../classhelix_1_1geo_1_1VertexNormalHandle.html',1,'helix::geo']]],
-  ['vertexpointspan_7',['vertexPointSpan',['../classhelix_1_1geo_1_1Mesh.html#a11c18e4751635695c2402f008000678b',1,'helix::geo::Mesh']]],
-  ['visittype_8',['visitType',['../Types_8h.html#ad5f1dc5159706def3fffc3cc2fa6de00',1,'helix::attr']]]
+  ['undocommand_0',['UndoCommand',['../classhelix_1_1nt_1_1UndoCommand.html',1,'helix::nt']]],
+  ['undodisabler_1',['UndoDisabler',['../classUndoDisabler.html',1,'UndoDisabler'],['../classUndoDisabler.html#a8ffd4d586089802f97707e7d39f23d1e',1,'UndoDisabler::UndoDisabler()'],['../classUndoDisabler.html#a90825f3eb09afa63d350187e8f7c3eea',1,'UndoDisabler::UndoDisabler(UndoCommandType command)']]],
+  ['undogroup_2',['UndoGroup',['../classhelix_1_1nt_1_1UndoGroup.html',1,'helix::nt']]],
+  ['undostack_3',['UndoStack',['../classhelix_1_1nt_1_1UndoStack.html',1,'helix::nt']]],
+  ['undotransaction_4',['UndoTransaction',['../classhelix_1_1nt_1_1UndoTransaction.html',1,'helix::nt']]],
+  ['unionfind_5',['UnionFind',['../classhelix_1_1util_1_1UnionFind.html',1,'helix::util::UnionFind'],['../classhelix_1_1util_1_1UnionFind.html#ac4664be1e5ce6f525b05eb5ddc7a2387',1,'helix::util::UnionFind::UnionFind()']]],
+  ['unit_6',['Unit',['../structhelix_1_1nt_1_1Unit.html',1,'helix::nt']]],
+  ['unite_7',['unite',['../classhelix_1_1util_1_1UnionFind.html#a239064105608efb8191206b715c4709e',1,'helix::util::UnionFind']]],
+  ['unmatchedtracks_8',['unmatchedTracks',['../structhelix_1_1import_1_1RawSkeleton.html#a440361b0369bf893a486b48036ad49c7',1,'helix::import::RawSkeleton']]],
+  ['up_9',['up',['../namespacehelix_1_1attr_1_1names.html#acc00204359da858674de9a28e79942d0',1,'helix::attr::names']]],
+  ['update_10',['update',['../classhelix_1_1nt_1_1NetworkManager.html#ac381d3c736ebaf02e9fd277e878a5e8c',1,'helix::nt::NetworkManager']]],
+  ['updatelock_11',['UpdateLock',['../classhelix_1_1nt_1_1UpdateLock.html',1,'helix::nt']]],
+  ['uv_12',['uv',['../namespacehelix_1_1attr_1_1names.html#aa0fd4209edd355b20e85748652ce3946',1,'helix::attr::names']]],
+  ['uvs_13',['uvs',['../structhelix_1_1import_1_1RawMesh.html#af87c1a9d811ec24f43c5d0dfdf12f82a',1,'helix::import::RawMesh']]]
 ];

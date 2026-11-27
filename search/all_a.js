@@ -1,9 +1,8 @@
 var searchData=
 [
-  ['kalltypes_0',['kAllTypes',['../Types_8h.html#a2ce4376727e966d8c8ac793ab2957e9d',1,'helix::prm']]],
-  ['key_1',['Key',['../structhelix_1_1prm_1_1Ramp_1_1Key.html',1,'helix::prm::Ramp']]],
-  ['keyframe_2',['Keyframe',['../structhelix_1_1sim_1_1Keyframe.html',1,'helix::sim']]],
-  ['keyframestore_3',['KeyframeStore',['../classhelix_1_1sim_1_1KeyframeStore.html',1,'helix::sim']]],
-  ['keyframetarget_4',['KeyframeTarget',['../structhelix_1_1sim_1_1KeyframeTarget.html',1,'helix::sim']]],
-  ['keyframetrack_5',['KeyframeTrack',['../classhelix_1_1sim_1_1KeyframeTrack.html',1,'helix::sim::KeyframeTrack'],['../classhelix_1_1sim_1_1KeyframeTrack.html#a78bd62e88d3e8f8210a44f498eca557a',1,'helix::sim::KeyframeTrack::KeyframeTrack()']]]
+  ['jointcount_0',['jointCount',['../structhelix_1_1import_1_1ImportSummary.html#ab05e4f9ea72aecf13b97120886b9035b',1,'helix::import::ImportSummary']]],
+  ['jointnames_1',['jointNames',['../structhelix_1_1geo_1_1Skeleton.html#aadf3e65655ccb3876f1cf71baab4267b',1,'helix::geo::Skeleton']]],
+  ['jointparent_2',['jointParent',['../namespacehelix_1_1attr_1_1names.html#a9b95010d260548f74f143d0f0de89ef0',1,'helix::attr::names']]],
+  ['joints_3',['joints',['../structhelix_1_1geo_1_1AnimationClip.html#acda22d5cc13242f749f5c0140a13cf73',1,'helix::geo::AnimationClip']]],
+  ['jointtracks_4',['JointTracks',['../structhelix_1_1geo_1_1JointTracks.html',1,'helix::geo']]]
 ];

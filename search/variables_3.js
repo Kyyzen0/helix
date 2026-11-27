@@ -5,5 +5,6 @@ var searchData=
   ['decodedtexturecount_2',['decodedTextureCount',['../structhelix_1_1import_1_1ImportSummary.html#af5c957e492b757f2516f77db76ea515b',1,'helix::import::ImportSummary']]],
   ['displaynodeindex_3',['displayNodeIndex',['../structNetworkSerializable.html#a2d6a206d9b255508b76026599f5b0640',1,'NetworkSerializable']]],
   ['docspath_4',['docsPath',['../structhelix_1_1nt_1_1NodeType.html#a810147d24ed3f96bfac7c82516ccc9e7',1,'helix::nt::NodeType']]],
-  ['drag_5',['drag',['../structhelix_1_1sim_1_1ParticleSettings.html#ad3aff0dde879ccc97eea32ef015eb15c',1,'helix::sim::ParticleSettings']]]
+  ['drag_5',['drag',['../structhelix_1_1sim_1_1ParticleSettings.html#ad3aff0dde879ccc97eea32ef015eb15c',1,'helix::sim::ParticleSettings']]],
+  ['duration_6',['duration',['../structhelix_1_1geo_1_1AnimationClip.html#a7475a6c988c838ff3f67e2f3692b01e3',1,'helix::geo::AnimationClip']]]
 ];

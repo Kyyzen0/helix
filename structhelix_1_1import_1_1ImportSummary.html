@@ -170,6 +170,7 @@ std::array&lt; float, 4 &gt;&#160;</td><td class="memItemRight" valign="bottom">
 <tr class="separator:a08ef7c996fa934b51b9dfd729eadec7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aecf55d7146014643b4b85789edc34adb" id="r_aecf55d7146014643b4b85789edc34adb"><td class="memItemLeft" align="right" valign="top"><a id="aecf55d7146014643b4b85789edc34adb" name="aecf55d7146014643b4b85789edc34adb"></a>
 std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>animationCount</b> = 0</td></tr>
+<tr class="memdesc:aecf55d7146014643b4b85789edc34adb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Animations the file holds (some formats are read without theirs: see jointCount). <br /></td></tr>
 <tr class="separator:aecf55d7146014643b4b85789edc34adb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b4c1189dc0d91b25d3e0cf9889cc22b" id="r_a5b4c1189dc0d91b25d3e0cf9889cc22b"><td class="memItemLeft" align="right" valign="top"><a id="a5b4c1189dc0d91b25d3e0cf9889cc22b" name="a5b4c1189dc0d91b25d3e0cf9889cc22b"></a>
 std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>skinnedMeshCount</b> = 0</td></tr>
@@ -177,6 +178,25 @@ std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>skinnedMeshCou
 <tr class="memitem:a631f2098706efca81df20470b411f99b" id="r_a631f2098706efca81df20470b411f99b"><td class="memItemLeft" align="right" valign="top"><a id="a631f2098706efca81df20470b411f99b" name="a631f2098706efca81df20470b411f99b"></a>
 std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>skippedPrimitiveCount</b> = 0</td></tr>
 <tr class="separator:a631f2098706efca81df20470b411f99b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab05e4f9ea72aecf13b97120886b9035b" id="r_ab05e4f9ea72aecf13b97120886b9035b"><td class="memItemLeft" align="right" valign="top"><a id="ab05e4f9ea72aecf13b97120886b9035b" name="ab05e4f9ea72aecf13b97120886b9035b"></a>
+std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>jointCount</b> = 0</td></tr>
+<tr class="memdesc:ab05e4f9ea72aecf13b97120886b9035b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The joints of the skeleton the import built, 0 when the file has none. <br /></td></tr>
+<tr class="separator:ab05e4f9ea72aecf13b97120886b9035b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9b3084e5051f87dd4819c45c8d63965" id="r_af9b3084e5051f87dd4819c45c8d63965"><td class="memItemLeft" align="right" valign="top"><a id="af9b3084e5051f87dd4819c45c8d63965" name="af9b3084e5051f87dd4819c45c8d63965"></a>
+std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>rootJointCount</b> = 0</td></tr>
+<tr class="separator:af9b3084e5051f87dd4819c45c8d63965"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5990415b816ff286a2bc3f10b1347502" id="r_a5990415b816ff286a2bc3f10b1347502"><td class="memItemLeft" align="right" valign="top"><a id="a5990415b816ff286a2bc3f10b1347502" name="a5990415b816ff286a2bc3f10b1347502"></a>
+std::vector&lt; std::pair&lt; std::string, float &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>clips</b></td></tr>
+<tr class="memdesc:a5990415b816ff286a2bc3f10b1347502"><td class="mdescLeft">&#160;</td><td class="mdescRight">The clips the import kept, with their length in seconds. <br /></td></tr>
+<tr class="separator:a5990415b816ff286a2bc3f10b1347502"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad23eae5fbef2cad356d039950ffd78d" id="r_aad23eae5fbef2cad356d039950ffd78d"><td class="memItemLeft" align="right" valign="top"><a id="aad23eae5fbef2cad356d039950ffd78d" name="aad23eae5fbef2cad356d039950ffd78d"></a>
+std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>overInfluencedVertices</b> = 0</td></tr>
+<tr class="memdesc:aad23eae5fbef2cad356d039950ffd78d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vertices that more than four joints pull on, which keep their four strongest. <br /></td></tr>
+<tr class="separator:aad23eae5fbef2cad356d039950ffd78d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbf28d469574b71a852a653f0ffe908f" id="r_acbf28d469574b71a852a653f0ffe908f"><td class="memItemLeft" align="right" valign="top"><a id="acbf28d469574b71a852a653f0ffe908f" name="acbf28d469574b71a852a653f0ffe908f"></a>
+std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>cubicTracks</b> = 0</td></tr>
+<tr class="memdesc:acbf28d469574b71a852a653f0ffe908f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tracks that are cubic splines in the file, played as straight lines between keys. <br /></td></tr>
+<tr class="separator:acbf28d469574b71a852a653f0ffe908f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5edd6803806c256267d28971336a5865" id="r_a5edd6803806c256267d28971336a5865"><td class="memItemLeft" align="right" valign="top"><a id="a5edd6803806c256267d28971336a5865" name="a5edd6803806c256267d28971336a5865"></a>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><b>reader</b></td></tr>
 <tr class="memdesc:a5edd6803806c256267d28971336a5865"><td class="mdescLeft">&#160;</td><td class="mdescRight">The reader that was used, such as "Assimp" or "Model I/O". <br /></td></tr>

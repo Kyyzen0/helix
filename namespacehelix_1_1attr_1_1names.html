@@ -131,10 +131,148 @@ constexpr const char *&#160;</td><td class="memItemRight" valign="bottom"><b>col
 constexpr const char *&#160;</td><td class="memItemRight" valign="bottom"><b>materialIndex</b> = &quot;material_index&quot;</td></tr>
 <tr class="memdesc:a5865e1c332a6086b320443890227f71b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The material of a face, as an index into the materials the import found (-1 for none). <br /></td></tr>
 <tr class="separator:a5865e1c332a6086b320443890227f71b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8ddf0bb0373716cefc3046488e23b04" id="r_ad8ddf0bb0373716cefc3046488e23b04"><td class="memItemLeft" align="right" valign="top"><a id="ad8ddf0bb0373716cefc3046488e23b04" name="ad8ddf0bb0373716cefc3046488e23b04"></a>
+constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>skinInfluenceCount</b> = 4</td></tr>
+<tr class="memdesc:ad8ddf0bb0373716cefc3046488e23b04"><td class="mdescLeft">&#160;</td><td class="mdescRight">How many joints influence a point of a skinned mesh. <br /></td></tr>
+<tr class="separator:ad8ddf0bb0373716cefc3046488e23b04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7770aa328802ab6d8760bc1f0f7c8858" id="r_a7770aa328802ab6d8760bc1f0f7c8858"><td class="memItemLeft" align="right" valign="top">constexpr const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7770aa328802ab6d8760bc1f0f7c8858">skinJoint</a> [<a class="el" href="#ad8ddf0bb0373716cefc3046488e23b04">skinInfluenceCount</a>]</td></tr>
+<tr class="separator:a7770aa328802ab6d8760bc1f0f7c8858"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17bc090ea4938f1a3ee59d7e268c4a4a" id="r_a17bc090ea4938f1a3ee59d7e268c4a4a"><td class="memItemLeft" align="right" valign="top">constexpr const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a17bc090ea4938f1a3ee59d7e268c4a4a">skinWeight</a> [<a class="el" href="#ad8ddf0bb0373716cefc3046488e23b04">skinInfluenceCount</a>]</td></tr>
+<tr class="separator:a17bc090ea4938f1a3ee59d7e268c4a4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b95010d260548f74f143d0f0de89ef0" id="r_a9b95010d260548f74f143d0f0de89ef0"><td class="memItemLeft" align="right" valign="top">constexpr const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9b95010d260548f74f143d0f0de89ef0">jointParent</a> = &quot;joint_parent&quot;</td></tr>
+<tr class="separator:a9b95010d260548f74f143d0f0de89ef0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d1907fc176f617f8c7aa878602d0824" id="r_a0d1907fc176f617f8c7aa878602d0824"><td class="memItemLeft" align="right" valign="top"><a id="a0d1907fc176f617f8c7aa878602d0824" name="a0d1907fc176f617f8c7aa878602d0824"></a>
+constexpr const char *&#160;</td><td class="memItemRight" valign="bottom"><b>restLocal</b> = &quot;rest_local&quot;</td></tr>
+<tr class="memdesc:a0d1907fc176f617f8c7aa878602d0824"><td class="mdescLeft">&#160;</td><td class="mdescRight">The transform of the joint at rest, relative to its parent (a matrix). <br /></td></tr>
+<tr class="separator:a0d1907fc176f617f8c7aa878602d0824"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade8ada8b271584f8363c7fc71ce744bf" id="r_ade8ada8b271584f8363c7fc71ce744bf"><td class="memItemLeft" align="right" valign="top">constexpr const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ade8ada8b271584f8363c7fc71ce744bf">inverseBind</a> = &quot;inverse_bind&quot;</td></tr>
+<tr class="separator:ade8ada8b271584f8363c7fc71ce744bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26c2f20f10ca39d79e66fcc7659d1d6f" id="r_a26c2f20f10ca39d79e66fcc7659d1d6f"><td class="memItemLeft" align="right" valign="top">constexpr const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a26c2f20f10ca39d79e66fcc7659d1d6f">pose</a> = &quot;pose&quot;</td></tr>
+<tr class="separator:a26c2f20f10ca39d79e66fcc7659d1d6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Names of the attributes the engine gives a meaning to. </p>
 </div><h2 class="groupheader">Variable Documentation</h2>
+<a id="ade8ada8b271584f8363c7fc71ce744bf" name="ade8ada8b271584f8363c7fc71ce744bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade8ada8b271584f8363c7fc71ce744bf">&#9670;&#160;</a></span>inverseBind</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* helix::attr::names::inverseBind = &quot;inverse_bind&quot;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>The transform that takes a point of the skinned mesh to the space of the joint at rest, so the skin matrix of a joint is pose * inverse_bind (a matrix). </p>
+
+</div>
+</div>
+<a id="a9b95010d260548f74f143d0f0de89ef0" name="a9b95010d260548f74f143d0f0de89ef0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b95010d260548f74f143d0f0de89ef0">&#9670;&#160;</a></span>jointParent</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* helix::attr::names::jointParent = &quot;joint_parent&quot;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><a class="el" href="classhelix_1_1Point.html">Point</a> attributes of a skeleton, a mesh whose points are the joints. The point of the parent joint, or -1 for a root. </p>
+
+</div>
+</div>
+<a id="a26c2f20f10ca39d79e66fcc7659d1d6f" name="a26c2f20f10ca39d79e66fcc7659d1d6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26c2f20f10ca39d79e66fcc7659d1d6f">&#9670;&#160;</a></span>pose</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* helix::attr::names::pose = &quot;pose&quot;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>The current transform of the joint in the space of the mesh: its rest world transform until a skeletonPose node poses it (a matrix). </p>
+
+</div>
+</div>
+<a id="a7770aa328802ab6d8760bc1f0f7c8858" name="a7770aa328802ab6d8760bc1f0f7c8858"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7770aa328802ab6d8760bc1f0f7c8858">&#9670;&#160;</a></span>skinJoint</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* helix::attr::names::skinJoint[<a class="el" href="#ad8ddf0bb0373716cefc3046488e23b04">skinInfluenceCount</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">= {</div>
+<div class="line">    <span class="stringliteral">&quot;skin_joint0&quot;</span>, <span class="stringliteral">&quot;skin_joint1&quot;</span>, <span class="stringliteral">&quot;skin_joint2&quot;</span>, <span class="stringliteral">&quot;skin_joint3&quot;</span></div>
+<div class="line">}</div>
+</div><!-- fragment --><p>The joint of each influence of a point (an int, the index of a point of the skeleton), and its weight (a float). The weights of a point sum to 1, and an unused influence is joint 0 with weight 0. A point whose weights are all 0 is not moved by a skin. </p>
+
+</div>
+</div>
+<a id="a17bc090ea4938f1a3ee59d7e268c4a4a" name="a17bc090ea4938f1a3ee59d7e268c4a4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17bc090ea4938f1a3ee59d7e268c4a4a">&#9670;&#160;</a></span>skinWeight</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* helix::attr::names::skinWeight[<a class="el" href="#ad8ddf0bb0373716cefc3046488e23b04">skinInfluenceCount</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">= {</div>
+<div class="line">    <span class="stringliteral">&quot;skin_weight0&quot;</span>, <span class="stringliteral">&quot;skin_weight1&quot;</span>, <span class="stringliteral">&quot;skin_weight2&quot;</span>, <span class="stringliteral">&quot;skin_weight3&quot;</span></div>
+<div class="line">}</div>
+</div><!-- fragment -->
+</div>
+</div>
 <a id="aa0fd4209edd355b20e85748652ce3946" name="aa0fd4209edd355b20e85748652ce3946"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa0fd4209edd355b20e85748652ce3946">&#9670;&#160;</a></span>uv</h2>
 

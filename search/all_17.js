@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['_7ecookscheduler_0',['~CookScheduler',['../classhelix_1_1async_1_1CookScheduler.html#a6ed5f2d5c42decc90c6fb14762c7c3f5',1,'helix::async::CookScheduler']]]
+  ['xyz_0',['Xyz',['../structhelix_1_1prm_1_1style_1_1Xyz.html',1,'helix::prm::style']]]
 ];
