@@ -143,7 +143,24 @@ std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>materialCount<
 <tr class="separator:a85b890a7084a3bf48bf6fd0202d3027c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45cb3270c5b45ac322c05f805c8c04f9" id="r_a45cb3270c5b45ac322c05f805c8c04f9"><td class="memItemLeft" align="right" valign="top"><a id="a45cb3270c5b45ac322c05f805c8c04f9" name="a45cb3270c5b45ac322c05f805c8c04f9"></a>
 std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>texturedMaterialCount</b> = 0</td></tr>
+<tr class="memdesc:a45cb3270c5b45ac322c05f805c8c04f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Materials the file gives a base colour texture to, loaded or not. <br /></td></tr>
 <tr class="separator:a45cb3270c5b45ac322c05f805c8c04f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5c957e492b757f2516f77db76ea515b" id="r_af5c957e492b757f2516f77db76ea515b"><td class="memItemLeft" align="right" valign="top"><a id="af5c957e492b757f2516f77db76ea515b" name="af5c957e492b757f2516f77db76ea515b"></a>
+std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>decodedTextureCount</b> = 0</td></tr>
+<tr class="memdesc:af5c957e492b757f2516f77db76ea515b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Distinct base colour pictures decoded (a picture several materials share counts once). <br /></td></tr>
+<tr class="separator:af5c957e492b757f2516f77db76ea515b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7564d3aa6162f75b18884d2c392bc71f" id="r_a7564d3aa6162f75b18884d2c392bc71f"><td class="memItemLeft" align="right" valign="top"><a id="a7564d3aa6162f75b18884d2c392bc71f" name="a7564d3aa6162f75b18884d2c392bc71f"></a>
+std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>textureBytes</b> = 0</td></tr>
+<tr class="memdesc:a7564d3aa6162f75b18884d2c392bc71f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The memory those pictures take, in bytes. <br /></td></tr>
+<tr class="separator:a7564d3aa6162f75b18884d2c392bc71f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1eca72cfbc5676ed97346aacc8f7606b" id="r_a1eca72cfbc5676ed97346aacc8f7606b"><td class="memItemLeft" align="right" valign="top"><a id="a1eca72cfbc5676ed97346aacc8f7606b" name="a1eca72cfbc5676ed97346aacc8f7606b"></a>
+std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>scaledTextureCount</b> = 0</td></tr>
+<tr class="memdesc:a1eca72cfbc5676ed97346aacc8f7606b"><td class="mdescLeft">&#160;</td><td class="mdescRight">How many of them were scaled down to the largest texture side. <br /></td></tr>
+<tr class="separator:a1eca72cfbc5676ed97346aacc8f7606b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2473e26a77362e147dc344e4f14cec70" id="r_a2473e26a77362e147dc344e4f14cec70"><td class="memItemLeft" align="right" valign="top"><a id="a2473e26a77362e147dc344e4f14cec70" name="a2473e26a77362e147dc344e4f14cec70"></a>
+std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>missingTextures</b></td></tr>
+<tr class="memdesc:a2473e26a77362e147dc344e4f14cec70"><td class="mdescLeft">&#160;</td><td class="mdescRight">One line per texture the file refers to and the import could not load. <br /></td></tr>
+<tr class="separator:a2473e26a77362e147dc344e4f14cec70"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f5bf48fdaf362bbb1b0994ff64b1c40" id="r_a2f5bf48fdaf362bbb1b0994ff64b1c40"><td class="memItemLeft" align="right" valign="top"><a id="a2f5bf48fdaf362bbb1b0994ff64b1c40" name="a2f5bf48fdaf362bbb1b0994ff64b1c40"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>hasBaseColor</b> = false</td></tr>
 <tr class="memdesc:a2f5bf48fdaf362bbb1b0994ff64b1c40"><td class="mdescLeft">&#160;</td><td class="mdescRight">The base colour of the first material, when there is one. <br /></td></tr>

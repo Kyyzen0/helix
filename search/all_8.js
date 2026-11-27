@@ -11,10 +11,11 @@ var searchData=
   ['hasmultiinputport_8',['hasMultiInputPort',['../structhelix_1_1nt_1_1NodeType.html#aa6721d83024387068ea36ab46a76035a',1,'helix::nt::NodeType']]],
   ['hasparameter_9',['hasParameter',['../classhelix_1_1NetworkPath.html#ac86d278323cafb4dadc3eb63fa8b24fb',1,'helix::NetworkPath']]],
   ['hasprefix_10',['hasPrefix',['../classhelix_1_1Path.html#acbfdef47baf662192344d2938dec3bd8',1,'helix::Path']]],
-  ['hastrack_11',['hasTrack',['../classhelix_1_1sim_1_1KeyframeStore.html#a46bb11535eafaa17fa39db47e4f088c7',1,'helix::sim::KeyframeStore']]],
-  ['helix_12',['Helix',['../index.html',1,'Helix'],['../index.html#autotoc_md0',1,'Helix']]],
-  ['helix_20adds_13',['What Helix adds',['../index.html#autotoc_md4',1,'']]],
-  ['helix_3a_3aattr_3a_3anames_14',['names',['../namespacehelix_1_1attr_1_1names.html',1,'helix::attr']]],
-  ['helix_3a_3asim_3a_3adetail_15',['detail',['../namespacehelix_1_1sim_1_1detail.html',1,'helix::sim']]],
-  ['holds_16',['holds',['../StyleAccess_8h.html#a1c4f07965668424bfe9807aeefe45f6d',1,'helix::prm::style']]]
+  ['hastexture_11',['hasTexture',['../structhelix_1_1import_1_1RawMaterial.html#af6b6c32156938ee8533773abfb313a91',1,'helix::import::RawMaterial']]],
+  ['hastrack_12',['hasTrack',['../classhelix_1_1sim_1_1KeyframeStore.html#a46bb11535eafaa17fa39db47e4f088c7',1,'helix::sim::KeyframeStore']]],
+  ['helix_13',['Helix',['../index.html',1,'Helix'],['../index.html#autotoc_md0',1,'Helix']]],
+  ['helix_20adds_14',['What Helix adds',['../index.html#autotoc_md4',1,'']]],
+  ['helix_3a_3aattr_3a_3anames_15',['names',['../namespacehelix_1_1attr_1_1names.html',1,'helix::attr']]],
+  ['helix_3a_3asim_3a_3adetail_16',['detail',['../namespacehelix_1_1sim_1_1detail.html',1,'helix::sim']]],
+  ['holds_17',['holds',['../StyleAccess_8h.html#a1c4f07965668424bfe9807aeefe45f6d',1,'helix::prm::style']]]
 ];

@@ -116,7 +116,16 @@ std::array&lt; float, 4 &gt;&#160;</td><td class="memItemRight" valign="bottom">
 <tr class="separator:a656af75444cbdf0f4a1f7ad658faaeb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6b6c32156938ee8533773abfb313a91" id="r_af6b6c32156938ee8533773abfb313a91"><td class="memItemLeft" align="right" valign="top"><a id="af6b6c32156938ee8533773abfb313a91" name="af6b6c32156938ee8533773abfb313a91"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>hasTexture</b> = false</td></tr>
+<tr class="memdesc:af6b6c32156938ee8533773abfb313a91"><td class="mdescLeft">&#160;</td><td class="mdescRight">The file refers to a base colour texture, loaded or not. <br /></td></tr>
 <tr class="separator:af6b6c32156938ee8533773abfb313a91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11cb928278bc27d6de4666ba8c1945b6" id="r_a11cb928278bc27d6de4666ba8c1945b6"><td class="memItemLeft" align="right" valign="top"><a id="a11cb928278bc27d6de4666ba8c1945b6" name="a11cb928278bc27d6de4666ba8c1945b6"></a>
+std::shared_ptr&lt; const <a class="el" href="structhelix_1_1geo_1_1Image.html">geo::Image</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>texture</b></td></tr>
+<tr class="memdesc:a11cb928278bc27d6de4666ba8c1945b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">The decoded base colour texture, shared by every material of the file that uses the same picture. Null when there is none or it could not be loaded. <br /></td></tr>
+<tr class="separator:a11cb928278bc27d6de4666ba8c1945b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0c919f3112c5b006c74e5d948b18e89" id="r_ae0c919f3112c5b006c74e5d948b18e89"><td class="memItemLeft" align="right" valign="top"><a id="ae0c919f3112c5b006c74e5d948b18e89" name="ae0c919f3112c5b006c74e5d948b18e89"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>missingTexture</b></td></tr>
+<tr class="memdesc:ae0c919f3112c5b006c74e5d948b18e89"><td class="mdescLeft">&#160;</td><td class="mdescRight">What went wrong with the texture the file refers to, empty when nothing did. <br /></td></tr>
+<tr class="separator:ae0c919f3112c5b006c74e5d948b18e89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>src/Engine/Import/<a class="el" href="RawScene_8h_source.html">RawScene.h</a></li>

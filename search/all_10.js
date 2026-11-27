@@ -20,8 +20,9 @@ var searchData=
   ['reset_17',['reset',['../classhelix_1_1sim_1_1ParticleSolver.html#a27e5eb64c7a60b995977d885e9ebde31',1,'helix::sim::ParticleSolver::reset()'],['../classhelix_1_1sim_1_1SpringSolver.html#acdde27a0d7373e0f3fadbc96d829e5c4',1,'helix::sim::SpringSolver::reset()']]],
   ['resize_18',['resize',['../classhelix_1_1attr_1_1Attribute.html#a8c4d235bb3b2599a869c5ff80c835cb5',1,'helix::attr::Attribute::resize()'],['../classhelix_1_1attr_1_1AttributeHandle.html#a42d9f4d1465270eaadbbb96ad6db7cac',1,'helix::attr::AttributeHandle::resize()']]],
   ['restore_19',['restore',['../classhelix_1_1nt_1_1NodeSnapshot.html#a002d8008937ad301f4991ccf8694a207',1,'helix::nt::NodeSnapshot']]],
-  ['rotateeuler_20',['rotateEuler',['../classhelix_1_1Transform.html#a84d11631819bcbe89c14fd0177cdeebf',1,'helix::Transform']]],
-  ['rows_21',['rows',['../structhelix_1_1sim_1_1SpringSettings.html#ad1e89877b08a76227d3e21a8b8eb87ba',1,'helix::sim::SpringSettings']]],
-  ['run_22',['run',['../classhelix_1_1daslang_1_1CompiledProgram.html#aa78cf4c983cc818032009eb5cf8e5522',1,'helix::daslang::CompiledProgram::run()'],['../classhelix_1_1script_1_1PointScript.html#ae2fd0f77dea8b09a708e8bbffbe6d8de',1,'helix::script::PointScript::run()']]],
-  ['runtime_23',['Runtime',['../classhelix_1_1daslang_1_1Runtime.html',1,'helix::daslang']]]
+  ['rgba_20',['rgba',['../structhelix_1_1geo_1_1Image.html#a994e8e21478b8497ede5264155416585',1,'helix::geo::Image']]],
+  ['rotateeuler_21',['rotateEuler',['../classhelix_1_1Transform.html#a84d11631819bcbe89c14fd0177cdeebf',1,'helix::Transform']]],
+  ['rows_22',['rows',['../structhelix_1_1sim_1_1SpringSettings.html#ad1e89877b08a76227d3e21a8b8eb87ba',1,'helix::sim::SpringSettings']]],
+  ['run_23',['run',['../classhelix_1_1daslang_1_1CompiledProgram.html#aa78cf4c983cc818032009eb5cf8e5522',1,'helix::daslang::CompiledProgram::run()'],['../classhelix_1_1script_1_1PointScript.html#ae2fd0f77dea8b09a708e8bbffbe6d8de',1,'helix::script::PointScript::run()']]],
+  ['runtime_24',['Runtime',['../classhelix_1_1daslang_1_1Runtime.html',1,'helix::daslang']]]
 ];

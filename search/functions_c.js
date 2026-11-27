@@ -7,5 +7,8 @@ var searchData=
   ['makerelativeto_4',['makeRelativeTo',['../classhelix_1_1Path.html#a9863ff9aa6dd36dcc2486337d165a724',1,'helix::Path']]],
   ['markcooked_5',['markCooked',['../classhelix_1_1async_1_1CookResult.html#af76bf14f59fd627cfcde3556b47295ac',1,'helix::async::CookResult']]],
   ['marktimedependent_6',['markTimeDependent',['../classhelix_1_1async_1_1CookResult.html#a3a032cdd23e54e3be246ad71dd4d72ba',1,'helix::async::CookResult']]],
-  ['movenode_7',['moveNode',['../classhelix_1_1nt_1_1NetworkManager.html#ab8e433bc4cc1bf74bdf082e69c15c319',1,'helix::nt::NetworkManager']]]
+  ['materialofface_7',['materialOfFace',['../classhelix_1_1geo_1_1Mesh.html#a16cfaee95a0cc5d2896bbd32655f9bac',1,'helix::geo::Mesh']]],
+  ['materials_8',['materials',['../classhelix_1_1geo_1_1Mesh.html#afade527ef5d6575d1b94804bc8c8e64c',1,'helix::geo::Mesh']]],
+  ['merge_9',['merge',['../classhelix_1_1geo_1_1Mesh.html#aa6aa11eb587011a016b2883f4eb3d1af',1,'helix::geo::Mesh']]],
+  ['movenode_10',['moveNode',['../classhelix_1_1nt_1_1NetworkManager.html#ab8e433bc4cc1bf74bdf082e69c15c319',1,'helix::nt::NetworkManager']]]
 ];

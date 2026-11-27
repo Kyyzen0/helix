@@ -203,9 +203,24 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>isValidVertex</b> (<a
 <tr class="memitem:af780f4ddcae36a68457ffbae31aca272" id="r_af780f4ddcae36a68457ffbae31aca272"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af780f4ddcae36a68457ffbae31aca272">defragment</a> () override</td></tr>
 <tr class="memdesc:af780f4ddcae36a68457ffbae31aca272"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compacts storage, removing entries marked invalid so offsets are contiguous again.  <br /></td></tr>
 <tr class="separator:af780f4ddcae36a68457ffbae31aca272"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa6aa11eb587011a016b2883f4eb3d1af" id="r_aa6aa11eb587011a016b2883f4eb3d1af"><td class="memItemLeft" align="right" valign="top"><a id="aa6aa11eb587011a016b2883f4eb3d1af" name="aa6aa11eb587011a016b2883f4eb3d1af"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>merge</b> (<a class="el" href="classhelix_1_1geo_1_1Mesh.html">Mesh</a> &amp;other)</td></tr>
+<tr class="memitem:aa6aa11eb587011a016b2883f4eb3d1af" id="r_aa6aa11eb587011a016b2883f4eb3d1af"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa6aa11eb587011a016b2883f4eb3d1af">merge</a> (<a class="el" href="classhelix_1_1geo_1_1Mesh.html">Mesh</a> &amp;other)</td></tr>
+<tr class="memdesc:aa6aa11eb587011a016b2883f4eb3d1af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Appends the faces, points and attributes of another mesh.  <br /></td></tr>
 <tr class="separator:aa6aa11eb587011a016b2883f4eb3d1af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afade527ef5d6575d1b94804bc8c8e64c" id="r_afade527ef5d6575d1b94804bc8c8e64c"><td class="memItemLeft" align="right" valign="top"><a id="afade527ef5d6575d1b94804bc8c8e64c" name="afade527ef5d6575d1b94804bc8c8e64c"></a>
+const std::vector&lt; std::shared_ptr&lt; const <a class="el" href="structhelix_1_1geo_1_1Material.html">Material</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>materials</b> () const</td></tr>
+<tr class="memdesc:afade527ef5d6575d1b94804bc8c8e64c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The materials the <code>material_index</code> face attribute points into. Empty for a mesh that has none. The materials are immutable and shared, so copying a mesh copies pointers. <br /></td></tr>
+<tr class="separator:afade527ef5d6575d1b94804bc8c8e64c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70f97383fb9ab1ca2016817f949e94c8" id="r_a70f97383fb9ab1ca2016817f949e94c8"><td class="memItemLeft" align="right" valign="top"><a id="a70f97383fb9ab1ca2016817f949e94c8" name="a70f97383fb9ab1ca2016817f949e94c8"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setMaterials</b> (std::vector&lt; std::shared_ptr&lt; const <a class="el" href="structhelix_1_1geo_1_1Material.html">Material</a> &gt; &gt; <a class="el" href="#afade527ef5d6575d1b94804bc8c8e64c">materials</a>)</td></tr>
+<tr class="memdesc:a70f97383fb9ab1ca2016817f949e94c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replaces the material table. The <code>material_index</code> values are left as they are. <br /></td></tr>
+<tr class="separator:a70f97383fb9ab1ca2016817f949e94c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16cfaee95a0cc5d2896bbd32655f9bac" id="r_a16cfaee95a0cc5d2896bbd32655f9bac"><td class="memItemLeft" align="right" valign="top"><a id="a16cfaee95a0cc5d2896bbd32655f9bac" name="a16cfaee95a0cc5d2896bbd32655f9bac"></a>
+std::shared_ptr&lt; const <a class="el" href="structhelix_1_1geo_1_1Material.html">Material</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>materialOfFace</b> (<a class="el" href="Types_8h.html#a090b4268abc5df3f3b223275ad7eae36">Offset</a> face) const</td></tr>
+<tr class="memdesc:a16cfaee95a0cc5d2896bbd32655f9bac"><td class="mdescLeft">&#160;</td><td class="mdescRight">The material of a face, or null when it has none (no table, no <code>material_index</code>, or an index outside the table). <br /></td></tr>
+<tr class="separator:a16cfaee95a0cc5d2896bbd32655f9bac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ce74a8226f583d8f64a18c4a74435c0" id="r_a4ce74a8226f583d8f64a18c4a74435c0"><td class="memItemLeft" align="right" valign="top">std::vector&lt; intT &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4ce74a8226f583d8f64a18c4a74435c0">appendMaterials</a> (const std::vector&lt; std::shared_ptr&lt; const <a class="el" href="structhelix_1_1geo_1_1Material.html">Material</a> &gt; &gt; &amp;other)</td></tr>
+<tr class="memdesc:a4ce74a8226f583d8f64a18c4a74435c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds the materials of another mesh to this table, without duplicates (by pointer).  <br /></td></tr>
+<tr class="separator:a4ce74a8226f583d8f64a18c4a74435c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0c841c53fd908501d83aa7f90c5d59d" id="r_af0c841c53fd908501d83aa7f90c5d59d"><td class="memItemLeft" align="right" valign="top"><a id="af0c841c53fd908501d83aa7f90c5d59d" name="af0c841c53fd908501d83aa7f90c5d59d"></a>
 std::unordered_set&lt; <a class="el" href="Types_8h.html#a090b4268abc5df3f3b223275ad7eae36">Offset</a> &gt;::const_iterator&#160;</td><td class="memItemRight" valign="bottom"><b>soloPointsBegin</b> () const</td></tr>
 <tr class="separator:af0c841c53fd908501d83aa7f90c5d59d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -523,6 +538,26 @@ attr::attribVector&#160;</td><td class="memItemRight" valign="bottom"><b>primiti
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Offsets of the newly created points in the order they were added. </dd></dl>
+
+</div>
+</div>
+<a id="a4ce74a8226f583d8f64a18c4a74435c0" name="a4ce74a8226f583d8f64a18c4a74435c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ce74a8226f583d8f64a18c4a74435c0">&#9670;&#160;</a></span>appendMaterials()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; intT &gt; helix::geo::Mesh::appendMaterials </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::shared_ptr&lt; const <a class="el" href="structhelix_1_1geo_1_1Material.html">Material</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>other</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Adds the materials of another mesh to this table, without duplicates (by pointer). </p>
+<dl class="section return"><dt>Returns</dt><dd>For each entry of the other table, its index in this one. </dd></dl>
 
 </div>
 </div>
@@ -1012,8 +1047,28 @@ attr::attribVector&#160;</td><td class="memItemRight" valign="bottom"><b>primiti
 
 </div>
 </div>
+<a id="aa6aa11eb587011a016b2883f4eb3d1af" name="aa6aa11eb587011a016b2883f4eb3d1af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6aa11eb587011a016b2883f4eb3d1af">&#9670;&#160;</a></span>merge() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void helix::geo::Mesh::merge </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classhelix_1_1geo_1_1Mesh.html">Mesh</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>other</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Appends the faces, points and attributes of another mesh. </p>
+<p>The materials of the other mesh join this one's table (a material already in it, by pointer, is not added twice) and the <code>material_index</code> of the appended faces is remapped to match. A face of the other mesh with no material, or an index outside its table, ends up with -1. </p>
+
+</div>
+</div>
 <a id="ad72e70bc5f2ce7696fe7940506024bfc" name="ad72e70bc5f2ce7696fe7940506024bfc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad72e70bc5f2ce7696fe7940506024bfc">&#9670;&#160;</a></span>merge()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad72e70bc5f2ce7696fe7940506024bfc">&#9670;&#160;</a></span>merge() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
