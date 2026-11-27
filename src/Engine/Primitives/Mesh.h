@@ -1,5 +1,7 @@
 #pragma once
+#include "Engine/Primitives/Material.h"
 #include "Engine/Primitives/Primitive.h"
+#include <algorithm>
 #include <atomic>
 #include <mutex>
 #include <span>
@@ -117,7 +119,34 @@ class Mesh : public Primitive
 
     void defragment() override;
 
+    /**
+     * @brief Appends the faces, points and attributes of another mesh.
+     *
+     * The materials of the other mesh join this one's table (a material already in it, by
+     * pointer, is not added twice) and the `material_index` of the appended faces is remapped to
+     * match. A face of the other mesh with no material, or an index outside its table, ends up
+     * with -1.
+     */
     void merge(Mesh& other);
+
+    /**
+     * @brief The materials the `material_index` face attribute points into. Empty for a mesh
+     * that has none. The materials are immutable and shared, so copying a mesh copies pointers.
+     */
+    const std::vector<std::shared_ptr<const Material>>& materials() const { return materials_; }
+    /// @brief Replaces the material table. The `material_index` values are left as they are.
+    void setMaterials(std::vector<std::shared_ptr<const Material>> materials)
+    {
+        materials_ = std::move(materials);
+    }
+    /// @brief The material of a face, or null when it has none (no table, no `material_index`,
+    /// or an index outside the table).
+    std::shared_ptr<const Material> materialOfFace(Offset face) const;
+    /**
+     * @brief Adds the materials of another mesh to this table, without duplicates (by pointer).
+     * @return For each entry of the other table, its index in this one.
+     */
+    std::vector<intT> appendMaterials(const std::vector<std::shared_ptr<const Material>>& other);
 
     std::unordered_set<Offset>::const_iterator soloPointsBegin() const;
     std::unordered_set<Offset>::const_iterator soloPointsEnd() const;
@@ -307,25 +336,38 @@ class Mesh : public Primitive
     }
     void ensurePositionWritableSlow_();
     void bindIntrinsicHandles_(bool detach);
-    void mergeAppend(std::shared_ptr<attr::Attribute> dst, std::shared_ptr<attr::Attribute> src);
+    // Writes the values of src into dst from firstDst on. dst already has the final element count.
+    void mergeAppend(
+        std::shared_ptr<attr::Attribute> dst,
+        std::shared_ptr<attr::Attribute> src,
+        Offset firstDst
+    );
+    // Creates on this mesh the custom attributes of the other mesh it lacks (same name and type).
+    void prepareMergedAttributes_(const Mesh& other, attr::AttributeOwner owner);
+    // Copies the custom attribute values of the other mesh into the range starting at firstDst.
+    void mergeAttributes_(const Mesh& other, attr::AttributeOwner owner, Offset firstDst);
     template <typename T>
-    void mergeAppendImpl(std::shared_ptr<attr::Attribute> dst, std::shared_ptr<attr::Attribute> src)
+    void mergeAppendImpl(
+        std::shared_ptr<attr::Attribute> dst,
+        std::shared_ptr<attr::Attribute> src,
+        Offset firstDst
+    )
     {
         auto dstHandle = attr::AttributeHandle<T>(dst);
         auto srcHandle = attr::AttributeHandleRO<T>(src);
 
+        // Never write past the destination, whatever size the source attribute has.
         const Offset srcCount = srcHandle.getSize();
         const Offset dstCount = dstHandle.getSize();
+        if (firstDst >= dstCount) return;
+        const Offset count = std::min(srcCount, dstCount - firstDst);
 
-        dstHandle.resize(dstCount + srcCount);
+        for (Offset i = 0; i < count; ++i)
+            dstHandle.setValue(firstDst + i, srcHandle.getValue(i));
+    }
 
-        for (Offset i = 0; i < srcCount; ++i)
-        {
-            const T value = srcHandle.getValue(i);
-            const Offset dstOffset = dstCount + i;
-            dstHandle.setValue(dstOffset, value);
-        }
-    };
+    // What the material_index face attribute points into. Immutable materials, shared by pointer.
+    std::vector<std::shared_ptr<const Material>> materials_;
 
     attr::attribVector vertexAttributes_;
     attr::attribVector faceAttributes_;

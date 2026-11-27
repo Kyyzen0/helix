@@ -50,9 +50,15 @@ Done in the tree:
   Z up file, and keeps the result in memory until the file or a setting changes. The app opens a
   3D file as a new untitled scene (File > Open, double click, the Dock) and imports one into the
   open scene (File > Import…, drag and drop). What comes through: points, faces, normals, `uv`,
-  vertex colours (`Cd`) and a `material_index` per face. **Left out for now**: skeletons and
-  animations (counted in the summary of the import, and next in track three), materials and
-  textures (the viewport shows none yet), cameras and lights. The geometry is the bind pose of a
+  vertex colours (`Cd`), the materials (name, base colour factor and base colour texture, decoded
+  with ImageIO to 8 bit sRGB pixels, shared by pointer between copies of a mesh) and a
+  `material_index` per face that points into the mesh's table of materials. The facade
+  (`GeometryReport::materials`) and the MCP `geometry_summary` report them. A texture that cannot
+  be loaded keeps the material's factor and is named in the summary. **Left out for now**:
+  skeletons and animations (counted in the summary of the import, and next in track three), the
+  other texture maps (normal, roughness, metallic, emissive, occlusion), cameras and lights. The
+  viewport draws the base colour factor and base colour texture of the materials (View > Materials,
+  `render_view.materials`). The geometry is the bind pose of a
   skinned mesh, and the current pose of a `.blend`. Model I/O hands USD quads over as triangles.
   See [build-macos.md](build-macos.md).
 
@@ -83,13 +89,28 @@ Known gaps found on the way, to fix as the work below touches them:
   exception without RTTI, which needs the daslang build files to say which.
 - The viewport frames the projected bounding box, not the shape: a diagonal model (the dragon)
   still leaves empty corners of its box unused. Framing the cooked points would fit it tighter.
-- The viewport shows one flat colour: no materials or textures yet. The mesh lights follow the
+- The viewport draws the base colour of a material (factor times texture) with the lighting it
+  had, and nothing else of it: no alpha or cut-out materials (alpha is ignored, a leaf or a fence
+  is solid), no normal, roughness, metallic, emissive or occlusion maps, no vertex colour (`Cd`),
+  no texture transform, no second uv set; a face with no material, or a mesh built by a node, is
+  grey. The adaptive wireframe leaves a mesh that has a texture alone. The mesh lights follow the
   camera, so a model seen from below is lit from below, as in a modelling tool.
 - The `bison` shipped by the toolchain script crashes on recent macOS; the
   build uses the parsers committed in daslang instead.
 - The import cache watches the files Assimp opens (a glTF's `.bin`, for example), not the files
   a USD layer references or a `.blend` links. Changing one of those without touching the main
-  file serves the old geometry until the cache is cleared.
+  file serves the old geometry until the cache is cleared. A texture file next to a glTF or an
+  FBX is watched; a texture of a USD file is not.
+- Materials are not saved in `.kut` files: the import node reads them again from its file. OBJ
+  ignores its `.mtl` (the engine's own reader), so an OBJ has no material.
+- Faces a node adds to a mesh that has a material table (the sides and caps of extrude and sweep,
+  the caps of the plane cut) take the default of the face attribute, `material_index` 0, so they
+  show the first material rather than none. Extrude and sweep work in place and keep the table;
+  the generators (sphere, grid...) make meshes with no table. The merge node, `Mesh::merge`, the
+  boolean (both inputs' tables, B renumbered), copy to points, cell fracture and the plane cut
+  keep or combine the tables. `triangulateMesh` (internal to the boolean) does not.
+- A texture is decoded at full size up to 8192 pixels a side (bigger ones are scaled down), whatever
+  the model needs: a file with many large pictures costs 4 bytes a pixel each.
 
 ---
 
@@ -143,10 +164,12 @@ The data model grows so that 3D, 2D, animation and simulation all live in the
 same graph.
 
 1. **Interchange**: ~~glTF import~~ and the other formats (meshes, normals, UVs, material
-   indices) are done. To do: skins and animation clips, materials with their textures, then
-   glTF and USD export. Helix is useful next to other tools before it replaces any of them.
-2. **UVs, textures and materials**: `uv` as a vertex attribute, a material
-   model on top of the attribute system, and textured shading in the viewport.
+   indices, materials with their base colour textures as data) are done. To do: skins and animation
+   clips, the other texture maps, then glTF and USD export. Helix is useful next to other tools before it replaces any of them.
+2. **UVs, textures and materials**: `uv` as a vertex attribute and the material model
+   (a table of immutable materials on the mesh, `material_index` per face) are done, and so is
+   the base colour in the viewport (factor and texture, one draw per material). To do: alpha and
+   cut-out materials, the other maps, then a material node.
 3. **Skeletal animation**: skeletons as geometry (joints are points, bones are
    lines, transforms are attributes), four skin influences per point as
    attributes, a deform node, and glTF clips sampled at the current frame as
@@ -198,7 +221,7 @@ The reference machine is a Mac mini M4. Everything above must run well on it.
 1. ~~M0, the engine without Qt and the facade~~ done
 2. ~~M1, the walking skeleton of the native app~~ done
 3. ~~M1.5, Helix MCP, so the AI track is exercised from the start~~ done
-4. ~~glTF import with UVs~~ done; textured viewport shading next
+4. ~~glTF import with UVs~~ and ~~textured viewport shading~~ done (base colour only)
 5. M2 to M4, the native interface, with cook caching and the scheduler work
    alongside
 6. Skeletal animation and keyframes, second version

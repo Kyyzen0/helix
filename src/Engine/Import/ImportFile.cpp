@@ -73,10 +73,13 @@ std::mutex cacheMutex;
 fs::path blendCacheFolder;
 std::atomic<std::size_t> readCount{0};
 
-// A file a read depended on besides the main one, as it was when it was read.
+// A file a read depended on besides the main one, as it was when it was read. A file that was
+// looked for and not there (a picture the model names) is a dependency too: it changes when it
+// appears.
 struct Dependency
 {
     fs::path path;
+    bool existed = true;
     std::uintmax_t size = 0;
     long long modified = 0;
 };
@@ -88,10 +91,12 @@ struct CacheEntry
     std::vector<Dependency> dependencies;
 };
 
-// Whether a dependency is still the file that was read: present, with the same size and date.
+// Whether a dependency is still as it was read: still absent when it was, otherwise present with
+// the same size and date.
 bool unchanged(const Dependency& dependency)
 {
     std::error_code error;
+    if (!dependency.existed) return !fs::is_regular_file(dependency.path, error);
     const std::uintmax_t size = fs::file_size(dependency.path, error);
     if (error || size != dependency.size) return false;
     const auto modified = fs::last_write_time(dependency.path, error).time_since_epoch().count();
@@ -208,10 +213,24 @@ std::string ImportSummary::text() const
     if (materialCount > 0)
     {
         out << " " << materialCount << (materialCount == 1 ? " material" : " materials");
-        if (texturedMaterialCount > 0) out << " (" << texturedMaterialCount << " with textures, not shown yet)";
+        if (texturedMaterialCount > 0)
+        {
+            out << " (" << texturedMaterialCount << " with textures: " << decodedTextureCount << " decoded, "
+                << std::fixed << std::setprecision(1) << double(textureBytes) / (1024.0 * 1024.0) << " MB";
+            if (scaledTextureCount > 0) out << ", " << scaledTextureCount << " scaled down";
+            if (!missingTextures.empty()) out << ", " << missingTextures.size() << " missing";
+            out << ")";
+        }
         if (hasBaseColor)
             out << ", first base color " << std::fixed << std::setprecision(2) << baseColor[0] << " "
                 << baseColor[1] << " " << baseColor[2];
+        out << ".";
+    }
+
+    if (!missingTextures.empty())
+    {
+        out << " Missing: " << missingTextures.front();
+        if (missingTextures.size() > 1) out << " (and " << missingTextures.size() - 1 << " more)";
         out << ".";
     }
 
@@ -354,10 +373,13 @@ std::shared_ptr<const ImportedFile> importFile(
         for (const fs::path& path : opened)
         {
             std::error_code stampError;
-            Dependency dependency{path, fs::file_size(path, stampError), 0};
-            dependency.modified = static_cast<long long>(fs::last_write_time(path, stampError).time_since_epoch().count());
-            // A file already gone counts as changed, so it cannot be a hit.
-            if (stampError) dependency.size = static_cast<std::uintmax_t>(-1);
+            Dependency dependency;
+            dependency.path = path;
+            dependency.size = fs::file_size(path, stampError);
+            dependency.modified =
+                static_cast<long long>(fs::last_write_time(path, stampError).time_since_epoch().count());
+            // A path that is not there is recorded as absent, and is unchanged until it appears.
+            dependency.existed = !stampError;
             dependencies.push_back(std::move(dependency));
         }
         cache.push_front({key, imported, std::move(dependencies)});

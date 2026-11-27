@@ -321,6 +321,23 @@
           }
         }
       }
+    },
+    "Materials": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Materials"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Matériaux"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

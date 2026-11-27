@@ -2,11 +2,13 @@
 // format. It is the one reader that needs Objective-C, so it is a file of its own.
 #import <Foundation/Foundation.h>
 #import <ModelIO/ModelIO.h>
+#include "Engine/Import/ImageDecode.h"
 #include "Engine/Import/ImportFile.h"
 #include "Engine/Import/Readers.h"
 #include <simd/simd.h>
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
 #include <functional>
 #include <map>
 #include <set>
@@ -128,6 +130,67 @@ RawScene readWithModelIO(const std::filesystem::path& file)
             const vector_float3 up = asset.upAxis;
             if (std::abs(up.z) > 0.5f && std::abs(up.z) > std::abs(up.y)) scene.declaredUp = UpAxis::Z;
 
+            // The pictures already decoded, by the object that holds them or by file.
+            std::map<const void*, DecodeResult> decodedByTexture;
+            std::map<std::string, DecodeResult> decodedByFile;
+            const std::filesystem::path folder = file.parent_path();
+
+            // Decodes the picture of a base colour property. A picture that cannot be loaded
+            // leaves the material with its factor and a note.
+            auto readTexture = [&](MDLMaterialProperty* base, RawMaterial& entry) {
+                const DecodeResult* result = nullptr;
+                std::string what = "texture";
+                if (base.type == MDLMaterialPropertyTypeTexture)
+                {
+                    MDLTexture* texture = base.textureSamplerValue.texture;
+                    if (texture && texture.name) what = std::string("texture \"") + [texture.name UTF8String] + "\"";
+                    if (!texture)
+                        entry.missingTexture = "the base colour texture has no picture";
+                    else
+                    {
+                        auto found = decodedByTexture.find((__bridge const void*)texture);
+                        if (found == decodedByTexture.end())
+                        {
+                            CGImageRef image = [texture imageFromTexture];
+                            const std::string source =
+                                file.string() + "#" + (texture.name ? std::string([texture.name UTF8String]) : "texture");
+                            DecodeResult decoded;
+                            if (image)
+                                decoded = decodeCGImage(image, source);
+                            else
+                                decoded.error = "Model I/O cannot give its pixels";
+                            found = decodedByTexture.emplace((__bridge const void*)texture, std::move(decoded)).first;
+                        }
+                        result = &found->second;
+                    }
+                }
+                else
+                {
+                    // A file the property names, next to the model unless the path is absolute.
+                    std::string written = base.type == MDLMaterialPropertyTypeURL
+                                              ? std::string([[base.URLValue path] UTF8String] ?: "")
+                                              : std::string([base.stringValue UTF8String] ?: "");
+                    what = "texture \"" + written.substr(0, 200) + "\"";
+                    std::filesystem::path path(written);
+                    if (path.is_relative()) path = folder / path;
+                    std::error_code error;
+                    if (!std::filesystem::is_regular_file(path, error))
+                        entry.missingTexture = what + " not found next to the model";
+                    else
+                    {
+                        auto found = decodedByFile.find(path.string());
+                        if (found == decodedByFile.end())
+                            found = decodedByFile.emplace(path.string(), decodeImageFile(path)).first;
+                        result = &found->second;
+                    }
+                }
+                if (!result) return;
+                if (result->image)
+                    entry.texture = result->image;
+                else
+                    entry.missingTexture = what + " could not be loaded: " + result->error;
+            };
+
             // One material entry per distinct material of the file, by name and base colour.
             std::map<std::string, int> materialIndex;
             auto materialOf = [&](MDLMaterial* material) -> int {
@@ -149,8 +212,12 @@ RawScene readWithModelIO(const std::filesystem::path& file)
                         if (color.x != 0.f || color.y != 0.f || color.z != 0.f)
                             entry.baseColor = {color.x, color.y, color.z, 1.f};
                     }
-                    else if (base.type == MDLMaterialPropertyTypeTexture || base.type == MDLMaterialPropertyTypeString)
+                    else if (base.type == MDLMaterialPropertyTypeTexture || base.type == MDLMaterialPropertyTypeString ||
+                             base.type == MDLMaterialPropertyTypeURL)
+                    {
                         entry.hasTexture = true;
+                        readTexture(base, entry);
+                    }
                 }
                 scene.materials.push_back(entry);
                 const int index = static_cast<int>(scene.materials.size()) - 1;

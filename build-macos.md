@@ -223,7 +223,8 @@ The tools:
   integer, a boolean, a string, or an array such as `[1, 2, 3]`), read back after the write.
 - `import_file`: imports a 3D file as a node (see Importing 3D files).
 - `set_frame`: moves the scene in time.
-- `geometry_summary`: counts, bounds and attributes of the output of any node.
+- `geometry_summary`: counts, bounds, attributes and materials (base colour, texture size and
+  source) of the output of any node.
 - `read_attribute`: the values of an attribute, up to 10 000 elements a call, with the total to page by.
 - `render_view`: a PNG of a node, framed like the viewport, optionally orbited (`azimuth`,
   `elevation`), up to 2048 pixels a side.
@@ -263,8 +264,39 @@ the app bundle holds no extra library. The tests read the small files in `tests/
 which `tests/data/import/make-test-files.sh` writes again (Python 3, and Blender for the Draco,
 FBX and BLEND files).
 
+### Materials and textures
+
+What comes through for each material: its name, its base colour factor (linear RGBA) and its base
+colour texture (glTF `baseColorTexture`, the diffuse texture of the other formats, a USD
+`UsdPreviewSurface` diffuse colour), decoded with ImageIO to 8 bit sRGB RGBA pixels, rows top to
+bottom. The picture is embedded in the file (GLB, FBX, USDZ) or next to it (found relative to the
+model, then by its file name). A picture over 8192 pixels on a side is scaled down. A picture that
+is missing or damaged does not fail the import: the material keeps its factor, and the summary and
+`geometry_summary` say which picture and why. The other maps (normal, roughness, metallic,
+emissive, occlusion) are not read yet.
+
+**In the viewport**: each face is shaded with its material's base colour factor times its base
+colour texture (sampled as an sRGB texture, so in linear light, with mip levels, trilinear
+filtering, anisotropy 8 and repeat wrapping), under the same lights as before. The faces are drawn
+one batch per material, and a texture is made on the GPU once per picture and kept while the
+geometry uses it. Toggle it in **View > Materials** (Shift+M, remembered between launches) or with
+`render_view`'s `materials` argument; hidden, every face is the default grey and no texture is
+made. The limits: base colour only, **opaque** (alpha is ignored), no normal, roughness or metallic
+maps, no vertex colour, no texture transform. In Auto mode the wireframe is left out on a mesh that
+has a texture, since the edges would cover the picture (On still draws them).
+
+The mesh holds its materials as a table of shared, immutable `geo::Material` (see
+`src/Engine/Primitives/Material.h`), and the face attribute `material_index` points into it, `-1`
+meaning none. The table follows the mesh through the nodes, and `Mesh::merge` joins the tables of
+two meshes and renumbers the faces it appends. The `uv` attribute has its origin at the bottom
+left (v up), whatever the format; the picture is read from its top row, so the texel of `(u, v)`
+is at row `(1 - v) * height`. `.kut` files do not store materials: the import node reads them again.
+`geometry_summary` (and `GeometryReport::materials` in the facade) lists the materials once each.
+
 `Helix --render-snapshot <file.glb> out.png` imports a 3D file into a new scene and prints how
-long that took and the peak memory of the process.
+long that took and the peak memory of the process. It reads the same settings as the window, and a
+launch argument overrides one: `Helix -materialsVisible NO --render-snapshot ...` draws without
+materials.
 
 ## The parser tools
 

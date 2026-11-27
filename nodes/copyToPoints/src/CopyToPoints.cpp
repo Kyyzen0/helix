@@ -107,6 +107,8 @@ copyMeshToTransforms(const geo::Mesh& prototype, const std::vector<Transform>& t
     const Offset copyCount = transforms.size();
     const Offset prototypePointCount = prototype.getNumPoints();
     auto copies = std::make_shared<geo::Mesh>(prototype.getPath());
+    // Every copy keeps the prototype's material_index, which points into the same table.
+    copies->setMaterials(prototype.materials());
 
     // Points
     const std::span<const Vector3> prototypePositions = prototype.pointPosSpan();

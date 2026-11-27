@@ -205,8 +205,10 @@ NodeId displayNode();
  * reader by extension: Assimp for glTF, GLB (Draco compression included), FBX, STL, PLY,
  * Collada, 3DS, 3MF, DXF, X3D and X, the engine's own reader for OBJ, Model I/O for USD, USDA,
  * USDC and USDZ, and Blender running in the background for BLEND. Only the geometry is imported:
- * points, faces, normals, UVs (`uv`), vertex colours (`Cd`) and a `material_index` per face.
- * Skeletons, animations, textures and materials are left out.
+ * points, faces, normals, UVs (`uv`), vertex colours (`Cd`), the materials (base colour factor and
+ * base colour texture, decoded to pixels) and a `material_index` per face that points into the
+ * mesh's table of materials (see MaterialInfo). Skeletons, animations and the other texture maps
+ * (normal, roughness, metallic, emissive, occlusion) are left out.
  */
 
 /// @brief The extensions the import reads, lower case and with the dot (".glb", ".usdz").
@@ -389,6 +391,25 @@ struct AttributeInfo
     bool mixedTypes = false;
 };
 
+/// @brief One material of the geometry a node produced, as the import read it.
+struct MaterialInfo
+{
+    std::string name;
+    /// @brief The base colour factor, linear, red green blue alpha from 0 to 1.
+    float baseColor[4] = {1.f, 1.f, 1.f, 1.f};
+    /// @brief True when the material has a decoded base colour texture.
+    bool hasTexture = false;
+    /// @brief The size of the texture in pixels, 0 when there is none.
+    std::uint32_t textureWidth = 0;
+    std::uint32_t textureHeight = 0;
+    /// @brief Where the texture came from: a file path, or "<file>#embedded:N" for a picture kept
+    /// inside the model file. Empty when there is no texture.
+    std::string textureSource;
+    /// @brief Empty, or what went wrong with a texture the file referred to and the import could
+    /// not load (the material keeps its base colour factor).
+    std::string missingTexture;
+};
+
 /// @brief What any node produced, in numbers: the counts, the bounds and the attribute list.
 struct GeometryReport
 {
@@ -402,6 +423,10 @@ struct GeometryReport
     Bounds bounds;
     /// @brief Every attribute (the position included), once per owner and name.
     std::vector<AttributeInfo> attributes;
+    /// @brief The materials of the meshes, each once even when several meshes share it, in the
+    /// order they are first met. A face's `material_index` points into the table of its own mesh,
+    /// not into this list.
+    std::vector<MaterialInfo> materials;
 };
 
 /// @brief The values of a run of elements of one attribute.
@@ -556,6 +581,9 @@ struct ViewportFrameOptions
     float geometryBlue = 0.68f;
     WireframeMode wireframe = WireframeMode::Auto;
     bool pointsVisible = false;
+    /// @brief Whether the faces are drawn with the base colour and texture of their material.
+    /// When false they take the geometry colour above.
+    bool materialsVisible = true;
 };
 
 /// @brief The texture one viewport frame was recorded into.

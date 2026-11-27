@@ -24,6 +24,9 @@ struct FrameState
     bool wireframeAdaptive = false;
     /// @brief Whether every mesh point is drawn, rather than only the points that belong to no face.
     bool pointsVisible = false;
+    /// @brief Whether the faces are shaded with the base colour and texture of their material.
+    /// When false every face takes `geometryColor`, and no texture is made.
+    bool materialsVisible = true;
     ViewportCamera camera;
     /// @brief The index of the camera primitive the view looks through, or empty to look through
     /// the orbit camera.

@@ -2,9 +2,14 @@
 #include "Engine/GeometryAlgorithms/MeshUtils.h"
 #include "Engine/Network/NodePacket.h"
 #include "Engine/Primitives/Camera.h"
+#include "Engine/Attribute/AttributeHandle.h"
+#include "Engine/Attribute/AttributeNames.h"
 #include "Engine/Primitives/Mesh.h"
+#include <optional>
+#include <span>
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
+#include <algorithm>
 
 namespace helix::gfx {
 
@@ -26,9 +31,21 @@ glm::mat4 toGlm(const Matrix4& matrix)
     return converted;
 }
 
-/// @brief Appends the index lists of one mesh, numbered from its first display vertex.
-void appendTopology(DisplayTopology& topology, const geo::Mesh& mesh, std::uint32_t firstVertex)
+/// @brief Returns where a material is in the table of the geometry, adding it when it is new.
+std::int32_t materialSlot(DisplayGeometry& geometry, const std::shared_ptr<const geo::Material>& material)
 {
+    if (!material) return -1;
+    const auto found = std::find(geometry.materials.begin(), geometry.materials.end(), material);
+    if (found != geometry.materials.end()) return std::int32_t(found - geometry.materials.begin());
+    geometry.materials.push_back(material);
+    return std::int32_t(geometry.materials.size() - 1);
+}
+
+/// @brief Appends the index lists of one mesh, numbered from its first display vertex, and the
+/// material of each triangle it adds.
+void appendTopology(DisplayGeometry& geometry, const geo::Mesh& mesh, std::uint32_t firstVertex)
+{
+    DisplayTopology& topology = geometry.topology;
     std::vector<Offset> closedFaceOffsets;
     closedFaceOffsets.reserve(mesh.getNumFaces());
     topology.edgeIndices.reserve(topology.edgeIndices.size() + 2 * mesh.getNumVerts());
@@ -65,6 +82,36 @@ void appendTopology(DisplayTopology& topology, const geo::Mesh& mesh, std::uint3
     const std::vector<std::array<Offset, 3>> triangles =
         utils::earClipTriangleIndices(mesh, closedFaceOffsets);
     const std::size_t firstTriangleIndex = topology.triangleIndices.size();
+
+    // The material of each face, as a position in the table of the geometry.
+    std::vector<std::int32_t>& triangleMaterials = geometry.triangleMaterialScratch;
+    const std::size_t firstTriangle = firstTriangleIndex / 3;
+    triangleMaterials.resize(firstTriangle + triangles.size(), -1);
+    const std::vector<std::shared_ptr<const geo::Material>>& meshMaterials = mesh.materials();
+    const std::shared_ptr<const attr::Attribute> materialIndices =
+        meshMaterials.empty() ? nullptr : mesh.getAttribByName(attr::AttrOwner::FACE, attr::names::materialIndex);
+    if (materialIndices && materialIndices->getType() == attr::AttributeType::intT)
+    {
+        const attr::AttributeHandleRO<intT> faceMaterials(materialIndices);
+        const std::size_t faceCount = faceMaterials.getSize();
+        std::vector<std::int32_t> slots(meshMaterials.size());
+        for (std::size_t material = 0; material < meshMaterials.size(); ++material)
+            slots[material] = materialSlot(geometry, meshMaterials[material]);
+
+        std::size_t triangle = firstTriangle;
+        for (const Offset faceOffset : closedFaceOffsets)
+        {
+            const std::uint32_t faceTriangles = mesh.getFaceVertCount(faceOffset) - 2;
+            std::int32_t slot = -1;
+            if (faceOffset < faceCount)
+            {
+                const intT index = faceMaterials[faceOffset];
+                if (index >= 0 && std::size_t(index) < slots.size()) slot = slots[std::size_t(index)];
+            }
+            for (std::uint32_t i = 0; i < faceTriangles; ++i)
+                triangleMaterials[triangle++] = slot;
+        }
+    }
     topology.triangleIndices.resize(firstTriangleIndex + 3 * triangles.size());
     tbb::parallel_for(
         tbb::blocked_range<std::size_t>(0, triangles.size()),
@@ -80,12 +127,17 @@ void appendTopology(DisplayTopology& topology, const geo::Mesh& mesh, std::uint3
     );
 }
 
-/// @brief Writes the position and normal of every vertex of one mesh, from its first display vertex on.
+/// @brief Writes the position, normal and texture coordinate of every vertex of one mesh, from its first display vertex on.
 void writeVertices(DisplayGeometry& geometry, const geo::Mesh& mesh, std::uint32_t firstVertex)
 {
     const std::span<const intT> vertexPoints = mesh.vertexPointSpan();
     const std::span<const Vector3> pointPositions = mesh.pointPosSpan();
     const geo::VertexNormalHandle vertexNormals = mesh.getVertexNormal();
+    const std::shared_ptr<const attr::Attribute> uvAttribute =
+        mesh.getAttribByName(attr::AttrOwner::VERTEX, attr::names::uv);
+    std::optional<attr::AttributeHandleRO<Vector3>> uvHandle;
+    if (uvAttribute && uvAttribute->getType() == attr::AttributeType::vectorT) uvHandle.emplace(uvAttribute);
+    const std::size_t uvCount = uvHandle ? uvHandle->getSize() : 0;
 
     tbb::parallel_for(
         tbb::blocked_range<Offset>(0, mesh.getNumVerts()),
@@ -95,6 +147,9 @@ void writeVertices(DisplayGeometry& geometry, const geo::Mesh& mesh, std::uint32
                 const std::uint32_t displayVertex = firstVertex + std::uint32_t(vertexOffset);
                 geometry.positions[displayVertex] = toGlm(pointPositions[vertexPoints[vertexOffset]]);
                 geometry.normals[displayVertex] = toGlm(vertexNormals[vertexOffset]);
+                geometry.uvs[displayVertex] =
+                    vertexOffset < uvCount ? glm::vec2(float((*uvHandle)[vertexOffset].x()), float((*uvHandle)[vertexOffset].y()))
+                                           : glm::vec2(0.f);
             }
         }
     );
@@ -119,6 +174,49 @@ void appendSoloPoints(std::vector<glm::vec3>& soloPointPositions, const geo::Mes
         soloPointPositions.push_back(toGlm(mesh.getPointPos(*pointIt)));
 }
 
+/// @brief Fills `batches` with one run per material, grouping the triangle indices to match.
+void groupByMaterial(DisplayGeometry& geometry)
+{
+    DisplayTopology& topology = geometry.topology;
+    const std::vector<std::int32_t>& triangleMaterials = geometry.triangleMaterialScratch;
+    geometry.batches.clear();
+    const std::size_t triangleCount = topology.triangleIndices.size() / 3;
+    if (triangleCount == 0) return;
+
+    const bool anyMaterial = !geometry.materials.empty();
+    if (!anyMaterial)
+    {
+        geometry.batches.push_back({0, std::uint32_t(topology.triangleIndices.size()), -1});
+        return;
+    }
+
+    // A stable counting sort by material; the triangles with none come first.
+    const std::size_t slotCount = geometry.materials.size() + 1;
+    std::vector<std::size_t> starts(slotCount + 1, 0);
+    for (std::size_t triangle = 0; triangle < triangleCount; ++triangle)
+        ++starts[std::size_t(triangleMaterials[triangle] + 1) + 1];
+    for (std::size_t slot = 0; slot < slotCount; ++slot)
+        starts[slot + 1] += starts[slot];
+
+    std::vector<std::uint32_t>& sorted = geometry.triangleIndexScratch;
+    sorted.resize(topology.triangleIndices.size());
+    std::vector<std::size_t> next(starts.begin(), starts.end() - 1);
+    for (std::size_t triangle = 0; triangle < triangleCount; ++triangle)
+    {
+        const std::size_t destination = next[std::size_t(triangleMaterials[triangle] + 1)]++;
+        std::copy_n(&topology.triangleIndices[3 * triangle], 3, &sorted[3 * destination]);
+    }
+    topology.triangleIndices.swap(sorted);
+
+    for (std::size_t slot = 0; slot < slotCount; ++slot)
+    {
+        if (starts[slot + 1] == starts[slot]) continue;
+        geometry.batches.push_back(
+            {std::uint32_t(3 * starts[slot]), std::uint32_t(3 * (starts[slot + 1] - starts[slot])), std::int32_t(slot) - 1}
+        );
+    }
+}
+
 } // namespace
 
 void buildDisplayGeometry(DisplayGeometry& geometry, const NodePacket& packet)
@@ -133,23 +231,29 @@ void buildDisplayGeometry(DisplayGeometry& geometry, const NodePacket& packet)
     geometry.topology.triangleIndices.clear();
     geometry.topology.edgeIndices.clear();
     geometry.topology.lineIndices.clear();
+    geometry.materials.clear();
+    geometry.batches.clear();
+    geometry.triangleMaterialScratch.clear();
     geometry.pointPositions.clear();
     geometry.soloPointPositions.clear();
     geometry.cameraTransforms.clear();
     geometry.cameraPaths.clear();
     geometry.positions.resize(vertexCount);
     geometry.normals.resize(vertexCount);
+    geometry.uvs.resize(vertexCount);
 
     std::uint32_t firstVertex = 0;
     for (const geo::PrimPtr& prim : meshPrims)
     {
         const auto mesh = std::static_pointer_cast<const geo::Mesh>(prim);
-        appendTopology(geometry.topology, *mesh, firstVertex);
+        appendTopology(geometry, *mesh, firstVertex);
         writeVertices(geometry, *mesh, firstVertex);
         appendPoints(geometry.pointPositions, *mesh);
         appendSoloPoints(geometry.soloPointPositions, *mesh);
         firstVertex += std::uint32_t(mesh->getNumVerts());
     }
+
+    groupByMaterial(geometry);
 
     for (const geo::PrimPtr& prim : packet.getPrimitives(geo::PrimType::CAMERA))
     {

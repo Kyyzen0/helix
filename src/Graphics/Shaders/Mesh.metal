@@ -16,6 +16,7 @@ struct MeshVertexInput
 {
     float3 position [[attribute(0)]];
     float3 normal [[attribute(1)]];
+    float2 uv [[attribute(2)]];
 };
 
 struct MeshVertexOutput
@@ -23,6 +24,7 @@ struct MeshVertexOutput
     float4 clipPosition [[position]];
     float3 worldPosition;
     float3 normal;
+    float2 uv;
 };
 
 // The lights, in the space of the camera: x to the right, y up, z toward the viewer.
@@ -58,13 +60,22 @@ vertex MeshVertexOutput meshVertex(
     output.clipPosition = frame.viewProjection * float4(input.position, 1.0);
     output.worldPosition = input.position;
     output.normal = input.normal;
+    output.uv = input.uv;
     return output;
 }
 
 // Lights the face with the key, fill, rim and hemisphere lights.
+//
+// The albedo is the base colour factor times the base colour texture when the draw has a material,
+// and the colour of the frame otherwise. The texture is an sRGB texture, so it is sampled as linear
+// light. The origin of the uv is the bottom left of the picture while the first row of a texture is
+// its top, hence the flip of v. The alpha of the material is ignored.
 fragment float4 meshShadedFragment(
     MeshVertexOutput input [[stage_in]],
-    constant FrameConstants& frame [[buffer(HELIX_FRAME_CONSTANTS_SLOT)]]
+    constant FrameConstants& frame [[buffer(HELIX_FRAME_CONSTANTS_SLOT)]],
+    constant MaterialConstants& material [[buffer(HELIX_MATERIAL_CONSTANTS_SLOT)]],
+    texture2d<float> baseColorTexture [[texture(HELIX_BASE_COLOR_TEXTURE_SLOT)]],
+    sampler baseColorSampler [[sampler(HELIX_BASE_COLOR_SAMPLER_SLOT)]]
 )
 {
     float3 normal = normalize(input.normal);
@@ -100,7 +111,13 @@ fragment float4 meshShadedFragment(
     const float facing = 1.0 - saturate(dot(normal, view));
     const float rim = pow(facing, 3.0) * (0.55 + 0.45 * saturate(1.0 - key));
 
-    const float3 albedo = srgbToLinear(frame.geometryColor.rgb);
+    float3 albedo = srgbToLinear(frame.geometryColor.rgb);
+    if (material.useMaterial != 0)
+    {
+        albedo = material.baseColor.rgb;
+        if (material.hasTexture != 0)
+            albedo *= baseColorTexture.sample(baseColorSampler, float2(input.uv.x, 1.0 - input.uv.y)).rgb;
+    }
     // Every light is tinted by the colour of the mesh, so the mesh keeps the colour the host
     // asked for: a pure red mesh stays pure red, and only its brightness changes.
     const float3 halfVector = normalize(keyDirection + view);

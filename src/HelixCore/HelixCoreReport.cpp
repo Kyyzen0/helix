@@ -167,6 +167,7 @@ GeometryReport cookNodeReport(NodeId node)
         std::shared_ptr<const NodePacket> packet;
         if (Status status = detail::cookNodePacket(node, packet); !status.ok) return status;
 
+        std::vector<const geo::Material*> seenMaterials;
         for (const auto& primitive : packet->getPrimitives())
         {
             if (!primitive) continue;
@@ -176,6 +177,24 @@ GeometryReport cookNodeReport(NodeId node)
             {
                 report.faceCount += mesh->getNumFaces();
                 report.vertexCount += mesh->getNumVerts();
+                for (const std::shared_ptr<const geo::Material>& material : mesh->materials())
+                {
+                    if (!material || std::find(seenMaterials.begin(), seenMaterials.end(), material.get()) != seenMaterials.end())
+                        continue;
+                    seenMaterials.push_back(material.get());
+                    MaterialInfo info;
+                    info.name = material->name;
+                    for (int channel = 0; channel < 4; ++channel) info.baseColor[channel] = material->baseColor[channel];
+                    if (material->baseColorTexture)
+                    {
+                        info.hasTexture = true;
+                        info.textureWidth = material->baseColorTexture->width;
+                        info.textureHeight = material->baseColorTexture->height;
+                        info.textureSource = material->baseColorTexture->source;
+                    }
+                    info.missingTexture = material->missingTexture;
+                    report.materials.push_back(std::move(info));
+                }
                 const auto positions = mesh->pointPosSpan();
                 for (std::size_t point = 0; point < positions.size(); ++point)
                 {

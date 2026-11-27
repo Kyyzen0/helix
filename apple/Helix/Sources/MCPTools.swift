@@ -121,7 +121,7 @@ enum MCPTools {
 
             // The results.
             tool("geometry_summary",
-                 "Cooks a node and reports its counts, its bounds and its attributes, as data. An attribute with \"mixed_types\": true has different types on different primitives: its type and components are the first primitive's, and read_attribute refuses it.",
+                 "Cooks a node and reports its counts, its bounds, its attributes and its materials, as data. materials lists each material once (name, linear base_color RGBA, and for a base colour texture its width, height and source; missing_texture says why a texture the file referred to could not be loaded). The viewport draws the base colour and picture of the materials (render_view's materials argument). An attribute with \"mixed_types\": true has different types on different primitives: its type and components are the first primitive's, and read_attribute refuses it.",
                  ["node": nodeReference("The node to cook. The display node when left out.")],
                  readOnly: true, MCPHandlers.geometrySummary),
             tool("read_attribute",
@@ -134,14 +134,15 @@ enum MCPTools {
                   "count": integer("How many elements, 100 by default and 10000 at most.")],
                  required: ["owner", "name"], readOnly: true, MCPHandlers.readAttribute),
             tool("render_view",
-                 "Draws the geometry of a node, framed like the viewport of the app, and returns a PNG image. azimuth and elevation orbit the camera.",
+                 "Draws the geometry of a node, framed like the viewport of the app, and returns a PNG image. azimuth and elevation orbit the camera. Faces are shaded with the base colour factor and base colour picture of their material (opaque only: no alpha, normal, roughness or metallic maps, no vertex colour); materials false draws them all in the default grey.",
                  ["node": nodeReference("The node to draw. The display node when left out."),
                   "width": integer("Width in pixels, 768 by default and 2048 at most."),
                   "height": integer("Height in pixels, 512 by default and 2048 at most."),
                   "azimuth": number("The angle around the vertical axis in degrees. The default view is at -135."),
                   "elevation": number("The angle above the horizontal plane in degrees, held between -89 and 89. The default view is at 20."),
                   "wireframe": ["type": "string", "enum": ["auto", "on", "off"],
-                                "description": "Whether the edges are drawn over the shading, auto by default."]],
+                                "description": "Whether the edges are drawn over the shading, auto by default. auto leaves out the edges of a mesh whose materials have a picture."],
+                  "materials": boolean("Whether the faces are drawn with their materials, true by default. false draws them in the default grey.")],
                  readOnly: true, MCPHandlers.renderView),
         ]
     }
