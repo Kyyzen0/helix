@@ -175,7 +175,7 @@ The engine holds one scene, so the app opens one document at a time and refuses 
 an alert. The scene file type is `com.kyyzen.helix.scene` (`.kut`, JSON text).
 
 The viewport draws the edges of the mesh over its shading according to the **View > Wireframe**
-setting (Auto, On, Off; Shift+W cycles them). Auto leaves the wireframe out above 50 000
+setting (Auto, On, Off; Shift+W cycles them while the viewport has the keys). Auto leaves the wireframe out above 50 000
 triangles and fades it out as the edges come within a few points of each other on screen, since a
 wireframe on a dense mesh covers the shading entirely. The lights follow the camera.
 
@@ -183,6 +183,61 @@ wireframe on a dense mesh covers the shading entirely. The lights follow the cam
 its geometry, draws it off screen and writes a PNG, with no window. It is the check of the whole
 chain without a screen. `apple/Helix/Samples` holds two scenes to try it on, written by
 `apple/Helix/Samples/make-samples.sh`.
+
+### The node editor
+
+The window of a document is split in two, the viewport over the node editor, with a bar
+between them to resize. Click the editor to give it the keys: the shortcuts below apply to the view
+that has them, and the viewport's `F`, `Shift+W` and `Shift+M` apply while the viewport has them. They
+are handled by the two views and not by menu items with a key, because a menu shortcut without the
+command key also fires while a text field has the keys, and an "M" typed in the search palette must
+not hide the materials. The menu items stay, without keys.
+
+- **Look.** A dotted grid, cards of 148 by 46 centred on the position of the node (the geometry of the
+  Qt editor, so a scene laid out there looks the same), the name and the type label on the card,
+  inputs on the top edge and outputs on the bottom edge (a bar for a multi input port), links as
+  vertical curves. The display node has a bar on its left edge and a flag; selected nodes and links
+  have the accent colour.
+- **Navigate.** Two-finger scroll pans, pinch zooms around the pointer, Command and scroll (or a
+  mouse wheel) zoom, the middle button pans. Zoom is held between 0.1 and 5. `H` frames the selected
+  nodes, or all of them when none is selected (Node > Frame Nodes does the same).
+- **Select.** Click a node; Shift or Command click toggles; drag on empty space for a marquee (a
+  node is taken when the box touches its card); click empty space clears; `Command A` selects all;
+  click a link to select it.
+- **Move.** Drag selected nodes; they follow the pointer, and the positions reach the engine when
+  the button goes up, as one step.
+- **Connect.** Drag from an output port to an input port. The link snaps to the nearest input within
+  a few points, or to the input of the card nearest in x when the pointer is over a card, and the
+  port's label shows. Dropping on an occupied single input rewires it; dropping on a multi input
+  bar adds the next input. Drag from a connected input to take its link off: dropped on nothing it
+  is disconnected, dropped on another input it is moved. A refusal of the engine (a link that would
+  close a loop, a bad port) shows as a message over the editor for a few seconds.
+- **Delete.** Backspace or Delete removes the selected nodes and links (with the links of the nodes).
+- **Display.** Double-click a node, or right-click it and choose Set Display Node.
+- **Add.** `Tab` in the editor, Node > Add Node… (`Command K`), the + button of the toolbar, or
+  right-click on empty space opens the search palette. Type to filter (a prefix, a part or the
+  letters in order of the label or the name, `attrn` for Attribute Noise; the tags count too),
+  Up and Down choose, Return makes the node, Escape closes. The node goes at the pointer. When
+  exactly one node is selected and the new type has an input, it goes 120 below that node (or to the
+  right when that spot is taken) and its first input is wired from the first output of the selected
+  node. The new node is selected. When the scene showed nothing, the first node made is displayed.
+- **Undo.** Every edit is one step on the undo manager of the window (Edit > Undo, Command Z): "Move
+  Nodes", "Connect", "Delete Nodes", "Add Cube", "Set Display Node", "Import" and so on. A drag is one
+  step, and none when nothing moved. Registering a step marks the document as edited. A step keeps
+  the whole scene as the engine writes it (`captureScene` and `restoreScene` of the facade, the
+  text of a `.kut` file), so everything a file keeps comes back. A restore gives the nodes new ids;
+  the editor keeps its selection by path.
+
+Selection, pan and zoom are not saved in the file.
+
+`Helix --render-node-editor <in.kut | --new-scene> <out.png> [width height] [--select <name>]...
+[--dark]` draws the editor of a scene, every node framed, to a PNG with no window (SwiftUI's
+`ImageRenderer`). The tests of the editor's logic (view transform, geometry, hit testing, search,
+placement, and the gestures through a model with no engine) are in a bundle that needs no host app:
+
+```sh
+xcodebuild test -project apple/Helix/Helix.xcodeproj -scheme HelixNodeEditorTests -destination 'platform=macOS'
+```
 
 ## Helix MCP
 

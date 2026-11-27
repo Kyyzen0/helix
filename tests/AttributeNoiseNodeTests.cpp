@@ -114,6 +114,23 @@ TEST_CASE_METHOD(NMReset, "Every point gets a noise value between minus one and 
     REQUIRE(values.front() != values.back());
 }
 
+TEST_CASE_METHOD(NMReset, "A mesh with no points goes through without a crash")
+{
+    auto& nm = nt::nm();
+    // A copy to points with nothing on its second input gives a mesh with no points. FastNoise
+    // read the first position even when asked for none, at a null address.
+    const nt::NodeId copyToPoints = nm.createNode("helix::copyToPoints");
+    nm.connectNodes(addGrid(), 0, copyToPoints, 0);
+
+    for (const char* type : {"float", "vector"})
+    {
+        const nt::NodeId attributeNoise = addAttributeNoiseAfter(copyToPoints);
+        nm.getNode(attributeNoise).getParameter("type").lock()->setString(type);
+        nm.cook(attributeNoise);
+        REQUIRE(getMesh(nm.getNode(attributeNoise))->getNumPoints() == 0);
+    }
+}
+
 TEST_CASE_METHOD(NMReset, "A different seed gives a different pattern")
 {
     auto& nm = nt::nm();

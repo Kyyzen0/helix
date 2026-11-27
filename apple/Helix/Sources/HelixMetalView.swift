@@ -100,12 +100,20 @@ final class HelixMetalView: MTKView {
 
     // MARK: Keyboard
 
-    // F frames the geometry, like the 3D tools it sits next to. The menu holds the same command;
-    // this one answers when the menu is not reached.
+    // F frames the geometry, like the 3D tools it sits next to, shift W cycles the wireframe and
+    // shift M shows or hides the materials. They are handled here and not as menu shortcuts: a
+    // menu item with a key and no command key would also fire while a text field, such as the
+    // search of the node palette, has the keys. The menu holds the same commands, without keys.
     override func keyDown(with event: NSEvent) {
-        if event.charactersIgnoringModifiers?.lowercased() == "f", event.modifierFlags.intersection(.deviceIndependentFlagsMask).isEmpty {
+        let modifiers = event.modifierFlags.intersection([.shift, .control, .option, .command])
+        switch (event.charactersIgnoringModifiers?.lowercased(), modifiers) {
+        case ("f", []):
             controller?.requestFrame()
-        } else {
+        case ("w", [.shift]):
+            controller?.cycleWireframe()
+        case ("m", [.shift]):
+            controller?.toggleMaterials()
+        default:
             super.keyDown(with: event)
         }
     }

@@ -44,6 +44,7 @@ Both projects are MIT licensed. See [LICENSE](LICENSE) for the terms, and
 | **Timeline** | Playback, scrubbing, looping and a frame range, driving frame dependent evaluation through the engine's existing time mechanism. |
 | **Simulation nodes** | A family of solver nodes — particles, springs, soft bodies — that integrate over time and can be keyframed from the timeline. |
 | **User node authoring** | Users can define their own node types at runtime from script or expression source, reuse the existing daslang and expression machinery, and save them with the project. |
+| **Native Mac interface** | A Swift and SwiftUI app over the `HelixCore` facade (`apple/Helix`): documents, a Metal viewport and a node editor with a search palette and undo, plus an MCP server for AI agents. It sits next to the Qt interface until the last native milestone removes it. See [build-macos.md](build-macos.md). |
 | **GUI rewrite** | The QML interface is redesigned around one spacing and type scale, a unified panel system, a node editor that reads like a professional tool, and a status bar that shows cook state and the current frame. |
 
 The engine stays decoupled from the interface, as in the original: it can be embedded in

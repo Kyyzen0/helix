@@ -43,3 +43,5 @@ DerivedData/
 
 # Folder settings the macOS Finder writes.
 .DS_Store
+# Bytecode Python writes next to a script it imports.
+__pycache__/

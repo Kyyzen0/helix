@@ -26,6 +26,26 @@
 		7D2E8F1A615A1C75D07154BA /* main.swift */ = {isa = PBXBuildFile; fileRef = 1897A9FB8B71C86CA11ECFA9 /* main.swift */; };
 		DA4ADC244272174D4FCF5BE5 /* Localizable.xcstrings */ = {isa = PBXBuildFile; fileRef = 23E63BC6190D9F3DD3106758 /* Localizable.xcstrings */; };
 		C2BEB0A13646DB198814C495 /* Assets.xcassets */ = {isa = PBXBuildFile; fileRef = 75046E84DAE53AA83B440071 /* Assets.xcassets */; };
+		8F271EAFDF68325A25DBF804 /* EditorGraph.swift */ = {isa = PBXBuildFile; fileRef = 5206C4173AFD546F4947E7EC /* EditorGraph.swift */; };
+		6701D4063E3787E26E986286 /* ViewTransform.swift */ = {isa = PBXBuildFile; fileRef = 6DCC00B62C0A9AF1E5E66342 /* ViewTransform.swift */; };
+		2BECC4E09E9D9CF250E70E3C /* EditorLayout.swift */ = {isa = PBXBuildFile; fileRef = 463D252985639658705EB25C /* EditorLayout.swift */; };
+		B2C8681B7A66E74D95E3C739 /* NodeSearch.swift */ = {isa = PBXBuildFile; fileRef = 1532547BA1E2B1813C3B8A48 /* NodeSearch.swift */; };
+		143E8C5976DF056DD013EFAF /* NodePlacement.swift */ = {isa = PBXBuildFile; fileRef = 36001A4884A5E17DBF28165C /* NodePlacement.swift */; };
+		1ACE913DBF64EAE753A1DD04 /* NodeEditorModel.swift */ = {isa = PBXBuildFile; fileRef = CA43F87F4F7E713C9A7AF226 /* NodeEditorModel.swift */; };
+		356EB13B91509DDD220EA9D8 /* NodeEditorCanvas.swift */ = {isa = PBXBuildFile; fileRef = BC085FED8BAEBD4136D90989 /* NodeEditorCanvas.swift */; };
+		2B98823D9FB7125919F4BA5F /* NodeEditorEvents.swift */ = {isa = PBXBuildFile; fileRef = 4E405D576E574DD909F43B7B /* NodeEditorEvents.swift */; };
+		2E5E01258522C67BF93D6F45 /* NodePalette.swift */ = {isa = PBXBuildFile; fileRef = 8A0EB785D4E5486E7AE52D98 /* NodePalette.swift */; };
+		21B5DE93D67EBF7A764384BF /* NodeEditorView.swift */ = {isa = PBXBuildFile; fileRef = D4805582EA5F7146EE3498F5 /* NodeEditorView.swift */; };
+		2280E7AF9010AABED6CD1C69 /* NodeEditorBridge.swift */ = {isa = PBXBuildFile; fileRef = 122AC6F01D03989AE7FE0E3A /* NodeEditorBridge.swift */; };
+		414A6AF013ECFEAC4C76F54B /* NodeEditorSnapshotCommand.swift */ = {isa = PBXBuildFile; fileRef = 7A3D298FBC64B6B06BD58AEC /* NodeEditorSnapshotCommand.swift */; };
+		E17CDFD78476195928FF8382 /* HelixDocument+NodeEditor.swift */ = {isa = PBXBuildFile; fileRef = CA78EAE0CFD1626154DB587E /* HelixDocument+NodeEditor.swift */; };
+		3D2B105261C495EB94860605 /* NodeEditorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F54926D9EBC58B30CE4961 /* NodeEditorTests.swift */; };
+		43A12E037E0D92C32261C450 /* EditorGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5206C4173AFD546F4947E7EC /* EditorGraph.swift */; };
+		F3D29EB4E0499810804B2111 /* ViewTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DCC00B62C0A9AF1E5E66342 /* ViewTransform.swift */; };
+		B1D54542E4A011BE27C1C6BC /* EditorLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463D252985639658705EB25C /* EditorLayout.swift */; };
+		A8D0BBAEF61B15BEC4C4C8F1 /* NodeSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1532547BA1E2B1813C3B8A48 /* NodeSearch.swift */; };
+		F84D6267025A7FF720EBBA5F /* NodePlacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36001A4884A5E17DBF28165C /* NodePlacement.swift */; };
+		63B2105D86411904207E519E /* NodeEditorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA43F87F4F7E713C9A7AF226 /* NodeEditorModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +73,21 @@
 		0401FFA12457675F0BB5F2ED /* build-engine.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = build-engine.sh; path = Scripts/build-engine.sh; sourceTree = "<group>"; };
 		43258E627B8EA2747E3196C6 /* embed-engine.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = embed-engine.sh; path = Scripts/embed-engine.sh; sourceTree = "<group>"; };
 		336FB461269DA3BA527AA869 /* make-icon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = make-icon.swift; path = Scripts/make-icon.swift; sourceTree = "<group>"; };
+		5206C4173AFD546F4947E7EC /* EditorGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EditorGraph.swift; path = Sources/NodeEditor/EditorGraph.swift; sourceTree = "<group>"; };
+		6DCC00B62C0A9AF1E5E66342 /* ViewTransform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewTransform.swift; path = Sources/NodeEditor/ViewTransform.swift; sourceTree = "<group>"; };
+		463D252985639658705EB25C /* EditorLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EditorLayout.swift; path = Sources/NodeEditor/EditorLayout.swift; sourceTree = "<group>"; };
+		1532547BA1E2B1813C3B8A48 /* NodeSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeSearch.swift; path = Sources/NodeEditor/NodeSearch.swift; sourceTree = "<group>"; };
+		36001A4884A5E17DBF28165C /* NodePlacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodePlacement.swift; path = Sources/NodeEditor/NodePlacement.swift; sourceTree = "<group>"; };
+		CA43F87F4F7E713C9A7AF226 /* NodeEditorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorModel.swift; path = Sources/NodeEditor/NodeEditorModel.swift; sourceTree = "<group>"; };
+		BC085FED8BAEBD4136D90989 /* NodeEditorCanvas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorCanvas.swift; path = Sources/NodeEditor/NodeEditorCanvas.swift; sourceTree = "<group>"; };
+		4E405D576E574DD909F43B7B /* NodeEditorEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorEvents.swift; path = Sources/NodeEditor/NodeEditorEvents.swift; sourceTree = "<group>"; };
+		8A0EB785D4E5486E7AE52D98 /* NodePalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodePalette.swift; path = Sources/NodeEditor/NodePalette.swift; sourceTree = "<group>"; };
+		D4805582EA5F7146EE3498F5 /* NodeEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorView.swift; path = Sources/NodeEditor/NodeEditorView.swift; sourceTree = "<group>"; };
+		122AC6F01D03989AE7FE0E3A /* NodeEditorBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorBridge.swift; path = Sources/NodeEditor/NodeEditorBridge.swift; sourceTree = "<group>"; };
+		7A3D298FBC64B6B06BD58AEC /* NodeEditorSnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorSnapshotCommand.swift; path = Sources/NodeEditor/NodeEditorSnapshotCommand.swift; sourceTree = "<group>"; };
+		CA78EAE0CFD1626154DB587E /* HelixDocument+NodeEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+NodeEditor.swift"; path = "Sources/HelixDocument+NodeEditor.swift"; sourceTree = "<group>"; };
+		D3F54926D9EBC58B30CE4961 /* NodeEditorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorTests.swift; path = Tests/NodeEditorTests.swift; sourceTree = "<group>"; };
+		DD6EACD4F105EF68A695B5CF /* HelixNodeEditorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HelixNodeEditorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,15 +98,52 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		917DF2A5DB043735DC8BA62D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4CD87A470DCB16C31E9BC98A /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				D3F54926D9EBC58B30CE4961 /* NodeEditorTests.swift */,
+			);
+			name = Tests;
+			sourceTree = "<group>";
+		};
+
+		91F4A5417179B7CC81BBCC04 /* NodeEditor */ = {
+			isa = PBXGroup;
+			children = (
+				5206C4173AFD546F4947E7EC /* EditorGraph.swift */,
+				6DCC00B62C0A9AF1E5E66342 /* ViewTransform.swift */,
+				463D252985639658705EB25C /* EditorLayout.swift */,
+				1532547BA1E2B1813C3B8A48 /* NodeSearch.swift */,
+				36001A4884A5E17DBF28165C /* NodePlacement.swift */,
+				CA43F87F4F7E713C9A7AF226 /* NodeEditorModel.swift */,
+				BC085FED8BAEBD4136D90989 /* NodeEditorCanvas.swift */,
+				4E405D576E574DD909F43B7B /* NodeEditorEvents.swift */,
+				8A0EB785D4E5486E7AE52D98 /* NodePalette.swift */,
+				D4805582EA5F7146EE3498F5 /* NodeEditorView.swift */,
+				122AC6F01D03989AE7FE0E3A /* NodeEditorBridge.swift */,
+				7A3D298FBC64B6B06BD58AEC /* NodeEditorSnapshotCommand.swift */,
+			);
+			name = NodeEditor;
+			sourceTree = "<group>";
+		};
+
 		EE79BB3A790BB6C76F854E89 /* Helix */ = {
 			isa = PBXGroup;
 			children = (
 				CA452AC6DB53E1C10D6D7F5F /* Sources */,
 				36DD8FEC2A722EA27EAAF5D5 /* Resources */,
 				E5FFFBC4627114A25F5B2CA0 /* Scripts */,
+				4CD87A470DCB16C31E9BC98A /* Tests */,
 				3936A56E033FE156B0D38F79 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -79,10 +151,12 @@
 		CA452AC6DB53E1C10D6D7F5F /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				91F4A5417179B7CC81BBCC04 /* NodeEditor */,
 				BA89128C69AD540AF5DB2885 /* DocumentView.swift */,
 				D3267E492841E7AB897616F8 /* EngineHost.swift */,
 				38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */,
 				22137D970CE01AF6540E6B07 /* HelixDocument.swift */,
+				CA78EAE0CFD1626154DB587E /* HelixDocument+NodeEditor.swift */,
 				9A1C4E7B2D5F8031A6B94C20 /* ImportFormats.swift */,
 				C487B92355DA31AAC19BB695 /* HelixMetalView.swift */,
 				8949648E5078146AEA910130 /* NavigationSettings.swift */,
@@ -121,12 +195,29 @@
 			isa = PBXGroup;
 			children = (
 				F5BF48AA40CAD7891EB709FC /* Helix.app */,
+				DD6EACD4F105EF68A695B5CF /* HelixNodeEditorTests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		644DE99C7A7BA5F6598AD15C /* HelixNodeEditorTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 999C76FC74BE5FDBD4048306 /* Build configuration list for PBXNativeTarget "HelixNodeEditorTests" */;
+			buildPhases = (
+				0DC7B0D0785FBDF8D5CB9145 /* Sources */,
+				917DF2A5DB043735DC8BA62D /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HelixNodeEditorTests;
+			productName = HelixNodeEditorTests;
+			productReference = DD6EACD4F105EF68A695B5CF /* HelixNodeEditorTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		42AEFBAE01D2DFD981F7DA7D /* Helix */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0C42E992F8137C5B02B02528 /* Build configuration list for PBXNativeTarget "Helix" */;
@@ -170,6 +261,7 @@
 			projectRoot = "";
 			targets = (
 				42AEFBAE01D2DFD981F7DA7D /* Helix */,
+				644DE99C7A7BA5F6598AD15C /* HelixNodeEditorTests */,
 			);
 		};
 /* End PBXProject section */
@@ -233,6 +325,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				18485CD047FA97EB2E642D0A /* DocumentView.swift */,
+				8F271EAFDF68325A25DBF804 /* EditorGraph.swift */,
+				6701D4063E3787E26E986286 /* ViewTransform.swift */,
+				2BECC4E09E9D9CF250E70E3C /* EditorLayout.swift */,
+				B2C8681B7A66E74D95E3C739 /* NodeSearch.swift */,
+				143E8C5976DF056DD013EFAF /* NodePlacement.swift */,
+				1ACE913DBF64EAE753A1DD04 /* NodeEditorModel.swift */,
+				356EB13B91509DDD220EA9D8 /* NodeEditorCanvas.swift */,
+				2B98823D9FB7125919F4BA5F /* NodeEditorEvents.swift */,
+				2E5E01258522C67BF93D6F45 /* NodePalette.swift */,
+				21B5DE93D67EBF7A764384BF /* NodeEditorView.swift */,
+				2280E7AF9010AABED6CD1C69 /* NodeEditorBridge.swift */,
+				414A6AF013ECFEAC4C76F54B /* NodeEditorSnapshotCommand.swift */,
+				E17CDFD78476195928FF8382 /* HelixDocument+NodeEditor.swift */,
 				778229516B283DD35DA34D13 /* EngineHost.swift */,
 				C78E938AA9B588158567FA3E /* HelixApp.swift */,
 				876DE517FD07C5B8353EF30F /* HelixDocument.swift */,
@@ -249,6 +354,20 @@
 				C213E1CE61AFC2D6C1AB70AA /* ViewportRenderer.swift */,
 				85D58ED727147DA0DC51A478 /* ViewportView.swift */,
 				7D2E8F1A615A1C75D07154BA /* main.swift */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0DC7B0D0785FBDF8D5CB9145 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3D2B105261C495EB94860605 /* NodeEditorTests.swift in Sources */,
+				43A12E037E0D92C32261C450 /* EditorGraph.swift in Sources */,
+				F3D29EB4E0499810804B2111 /* ViewTransform.swift in Sources */,
+				B1D54542E4A011BE27C1C6BC /* EditorLayout.swift in Sources */,
+				A8D0BBAEF61B15BEC4C4C8F1 /* NodeSearch.swift in Sources */,
+				F84D6267025A7FF720EBBA5F /* NodePlacement.swift in Sources */,
+				63B2105D86411904207E519E /* NodeEditorModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -395,6 +514,34 @@
 			};
 			name = Release;
 		};
+		C1BF99A8F79807CA7D67CE52 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = HelixNodeEditorTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kyyzen.helix.nodeeditortests;
+				GENERATE_INFOPLIST_FILE = YES;
+				SWIFT_VERSION = 6.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "-";
+				DEVELOPMENT_TEAM = "";
+			};
+			name = Debug;
+		};
+		C18D29CD85A1391B98150BB3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = HelixNodeEditorTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kyyzen.helix.nodeeditortests;
+				GENERATE_INFOPLIST_FILE = YES;
+				SWIFT_VERSION = 6.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "-";
+				DEVELOPMENT_TEAM = "";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -412,6 +559,15 @@
 			buildConfigurations = (
 				6A584EED5F7B7BC177986E1D /* Debug */,
 				FF782D319EAC4107CADA173C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		999C76FC74BE5FDBD4048306 /* Build configuration list for PBXNativeTarget "HelixNodeEditorTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1BF99A8F79807CA7D67CE52 /* Debug */,
+				C18D29CD85A1391B98150BB3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

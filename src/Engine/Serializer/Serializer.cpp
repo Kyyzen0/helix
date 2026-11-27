@@ -163,8 +163,16 @@ void Serializer::save(NetworkManager& networkManager, std::string filePath)
     std::ofstream file(filePath);
     if (!file) throw std::runtime_error("Couldn't open " + filePath + " for writing");
 
+    save(networkManager, file);
+
+    file.flush();
+    if (!file) throw std::runtime_error("Couldn't write " + filePath);
+}
+
+void Serializer::save(NetworkManager& networkManager, std::ostream& stream)
+{
     {
-        cereal::JSONOutputArchive save(file);
+        cereal::JSONOutputArchive save(stream);
 
         NetworkSerializable networkModel;
 
@@ -218,11 +226,17 @@ void Serializer::save(NetworkManager& networkManager, std::string filePath)
 
     // The archive writes its closing brackets as it goes out of scope, so the stream is only
     // checked once it has.
-    file.flush();
-    if (!file) throw std::runtime_error("Couldn't write " + filePath);
+    stream.flush();
+    if (!stream) throw std::runtime_error("Couldn't write the scene to the stream");
 }
 
 void Serializer::load(NetworkManager& networkManager, std::string filePath)
+{
+    std::ifstream file(filePath);
+    load(networkManager, file);
+}
+
+void Serializer::load(NetworkManager& networkManager, std::istream& stream)
 {
     // Holds one lock for the whole load, so the network updates once at the end
     // instead of after every parameter and link restored. The lock releases on an
@@ -232,8 +246,7 @@ void Serializer::load(NetworkManager& networkManager, std::string filePath)
     networkManager.clear();
     UndoDisabler blockAll;
 
-    std::ifstream file(filePath);
-    cereal::JSONInputArchive load(file);
+    cereal::JSONInputArchive load(stream);
 
     NetworkSerializable networkModel;
     load(networkModel);

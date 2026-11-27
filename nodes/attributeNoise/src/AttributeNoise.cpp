@@ -88,6 +88,9 @@ std::vector<float> sampleNoise(
 
     const std::span<const Vector3> positions = mesh.pointPosSpan();
     const size_t pointCount = positions.size();
+    // FastNoise reads the first position even when asked for none, and the arrays of an empty
+    // mesh have no storage, so a mesh with no points would read at a null address.
+    if (pointCount == 0) return {};
 
     std::vector<float> xPositions(pointCount);
     std::vector<float> yPositions(pointCount);

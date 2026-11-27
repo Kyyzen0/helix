@@ -6,6 +6,7 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <sstream>
 #include <string>
 #include <unistd.h>
@@ -687,4 +688,183 @@ TEST_CASE_METHOD(CoreFixture, "The display node can be cleared, and clearing non
     REQUIRE(core::displayNode() == 0);
     REQUIRE_FALSE(core::cookDisplaySummary().status.ok);
     REQUIRE(core::listNodes().size() == 1);
+}
+
+TEST_CASE_METHOD(CoreFixture, "A node type tells its label, tags, input ports and output count")
+{
+    const core::NodeTypeInfoResult cube = core::nodeTypeInfo("helix::cube");
+    REQUIRE(cube.status.ok);
+    REQUIRE(cube.info.name == "helix::cube");
+    REQUIRE(cube.info.label == "Cube");
+    REQUIRE(cube.info.inputs.empty());
+    REQUIRE(cube.info.outputCount == 1);
+
+    // Two single ports, in the order their inputs run.
+    const core::NodeTypeInfoResult boolean = core::nodeTypeInfo("helix::boolean");
+    REQUIRE(boolean.status.ok);
+    REQUIRE(boolean.info.inputs.size() == 2);
+    REQUIRE(boolean.info.inputs[0].label == "A");
+    REQUIRE(boolean.info.inputs[1].label == "B");
+    REQUIRE_FALSE(boolean.info.inputs[1].multiInput);
+    REQUIRE(std::find(boolean.info.tags.begin(), boolean.info.tags.end(), "combine") != boolean.info.tags.end());
+
+    // One port that takes any number of inputs.
+    const core::NodeTypeInfoResult merge = core::nodeTypeInfo("helix::merge");
+    REQUIRE(merge.status.ok);
+    REQUIRE(merge.info.inputs.size() == 1);
+    REQUIRE(merge.info.inputs[0].multiInput);
+
+    // An optional port is told apart from a required one.
+    bool foundOptional = false;
+    for (const core::NodeTypeInfo& info : core::listNodeTypeInfos())
+        for (const core::PortInfo& port : info.inputs)
+            foundOptional = foundOptional || port.optional;
+    REQUIRE(foundOptional);
+
+    // An alias answers with its own label and the ports of the type it creates.
+    const core::NodeTypeInfoResult mountain = core::nodeTypeInfo("helix::mountain");
+    REQUIRE(mountain.status.ok);
+    REQUIRE(mountain.info.name == "helix::mountain");
+    REQUIRE(mountain.info.inputs.size() == core::nodeTypeInfo("helix::attributeNoise").info.inputs.size());
+
+    const core::NodeTypeInfoResult unknown = core::nodeTypeInfo("helix::nothing");
+    REQUIRE_FALSE(unknown.status.ok);
+    REQUIRE_FALSE(unknown.status.error.empty());
+    REQUIRE(unknown.info.name.empty());
+}
+
+TEST_CASE_METHOD(CoreFixture, "Every listed node type has its info, in the same order")
+{
+    const std::vector<std::string> names = core::listNodeTypes();
+    const std::vector<core::NodeTypeInfo> infos = core::listNodeTypeInfos();
+    REQUIRE(infos.size() == names.size());
+    for (std::size_t index = 0; index < names.size(); ++index)
+    {
+        REQUIRE(infos[index].name == names[index]);
+        REQUIRE_FALSE(infos[index].label.empty());
+    }
+}
+
+namespace {
+
+// Everything a scene keeps that the editor shows, by path, since the ids do not survive.
+struct SceneShape
+{
+    std::vector<std::string> nodes; // "path type x y"
+    std::vector<std::string> links; // "source.output -> target.input"
+    std::string display;
+};
+
+SceneShape shapeOfScene()
+{
+    SceneShape shape;
+    std::map<core::NodeId, std::string> paths;
+    for (const core::NodeInfo& node : core::listNodes())
+    {
+        paths[node.id] = node.path;
+        shape.nodes.push_back(
+            node.path + " " + node.type + " " + std::to_string(node.x) + " " + std::to_string(node.y)
+        );
+    }
+    for (const core::LinkInfo& link : core::listLinks())
+        shape.links.push_back(
+            paths[link.sourceNode] + "." + std::to_string(link.sourceOutput) + " -> " +
+            paths[link.targetNode] + "." + std::to_string(link.targetInput)
+        );
+    std::sort(shape.nodes.begin(), shape.nodes.end());
+    std::sort(shape.links.begin(), shape.links.end());
+    shape.display = core::displayNode() == 0 ? "" : paths[core::displayNode()];
+    return shape;
+}
+
+core::NodeId idOfPath(const std::string& path)
+{
+    for (const core::NodeInfo& node : core::listNodes())
+        if (node.path == path) return node.id;
+    return 0;
+}
+
+} // namespace
+
+TEST_CASE_METHOD(CoreFixture, "A restored scene is the captured one, after deleting, connecting and moving")
+{
+    const core::NodeId cube = core::createNode("helix::cube", "box", 10.f, 20.f).id;
+    const core::NodeId mover = core::createNode("helix::transform", "mover", 30.f, 150.f).id;
+    const core::NodeId merge = core::createNode("helix::merge", "joined", 60.f, 300.f).id;
+    REQUIRE(core::connectNodes(cube, 0, mover, 0).ok);
+    REQUIRE(core::connectNodes(mover, 0, merge, 0).ok);
+    REQUIRE(core::connectNodes(cube, 0, merge, 1).ok);
+    REQUIRE(core::setVector3(cube, "size", 2.f, 3.f, 4.f).ok);
+    REQUIRE(core::setDisplayNode(merge).ok);
+    core::setFrame(5.f);
+
+    const SceneShape before = shapeOfScene();
+    const core::SceneSnapshot snapshot = core::captureScene();
+    REQUIRE(snapshot.status.ok);
+    REQUIRE_FALSE(snapshot.data.empty());
+    // Capturing changes nothing, and it is the text a saved file holds.
+    REQUIRE(shapeOfScene().nodes == before.nodes);
+
+    REQUIRE(core::deleteNode(mover).ok);
+    REQUIRE(core::connectNodes(cube, 0, merge, 0).ok);
+    REQUIRE(core::moveNode(cube, -500.f, -500.f).ok);
+    REQUIRE(core::setVector3(cube, "size", 9.f, 9.f, 9.f).ok);
+    core::setFrame(8.f);
+    REQUIRE(shapeOfScene().nodes != before.nodes);
+
+    REQUIRE(core::restoreScene(snapshot.data).ok);
+    const SceneShape after = shapeOfScene();
+    REQUIRE(after.nodes == before.nodes);
+    REQUIRE(after.links == before.links);
+    REQUIRE(after.display == before.display);
+    REQUIRE(after.display == "/joined");
+
+    // The parameters and the time come back too, and the node is found by its path.
+    const core::Vector3Value size = core::getVector3(idOfPath("/box"), "size");
+    REQUIRE(size.status.ok);
+    REQUIRE(size.x == 2.f);
+    REQUIRE(size.y == 3.f);
+    REQUIRE(size.z == 4.f);
+    REQUIRE(core::timeInfo().frame == 5.f);
+
+    // The restored scene cooks: the display node is wired again.
+    REQUIRE(core::cookDisplaySummary().status.ok);
+
+    // A second restore of the same text gives the same scene.
+    REQUIRE(core::restoreScene(snapshot.data).ok);
+    REQUIRE(shapeOfScene().links == before.links);
+}
+
+TEST_CASE_METHOD(CoreFixture, "Restoring leaves the modified state as it was")
+{
+    TempFolder folder;
+    createDisplayedCube();
+    const fs::path file = folder.file("scene.kut");
+    REQUIRE(core::saveScene(file.string()).ok);
+    REQUIRE_FALSE(core::isSceneModified());
+
+    const core::SceneSnapshot saved = core::captureScene();
+    REQUIRE(saved.status.ok);
+    REQUIRE_FALSE(core::isSceneModified());
+    REQUIRE(core::restoreScene(saved.data).ok);
+    REQUIRE_FALSE(core::isSceneModified());
+
+    REQUIRE(core::moveNode(core::listNodes().front().id, 5.f, 5.f).ok);
+    REQUIRE(core::isSceneModified());
+    REQUIRE(core::restoreScene(saved.data).ok);
+    REQUIRE(core::isSceneModified());
+}
+
+TEST_CASE_METHOD(CoreFixture, "A scene that cannot be restored is reported, and a restore does not keep the engine's undo")
+{
+    createDisplayedCube();
+    const core::Status broken = core::restoreScene("this is not a scene");
+    REQUIRE_FALSE(broken.ok);
+    REQUIRE_FALSE(broken.error.empty());
+    REQUIRE(core::listNodes().empty());
+
+    // The facade leaves nothing on the engine's own stack, which only the old editor reads.
+    const core::NodeId cube = core::createNode("helix::cube", "", 0.f, 0.f).id;
+    REQUIRE(core::moveNode(cube, 3.f, 4.f).ok);
+    REQUIRE_FALSE(helix::nt::nm().undoStack().canUndo());
 }

@@ -112,6 +112,28 @@ Status saveScene(const std::string& path);
 /// @brief Returns whether the scene changed since it was created, opened or saved.
 bool isSceneModified();
 
+/// @brief The result of capturing the scene.
+struct SceneSnapshot
+{
+    Status status;
+    /// @brief The scene as the text of a .kut file.
+    std::string data;
+};
+
+/// @brief Captures the scene in memory, as the text saveScene would write.
+///
+/// The text holds what a saved file holds: the nodes with their names, positions and parameters,
+/// the links, the display node, the keyframes and the time. The modified state is left alone.
+SceneSnapshot captureScene();
+
+/// @brief Replaces the scene with one captured by captureScene.
+/// @note The node ids are handed out again, in an order that is not the order they had, so
+/// a caller that holds ids matches the nodes by path across a restore. Names, paths and
+/// positions come back as they were. The modified state is left as it was before the call,
+/// since going back to a capture says nothing about whether the file on disk matches it. Text
+/// that cannot be read leaves an empty scene, like openScene.
+Status restoreScene(const std::string& data);
+
 /** @} */
 
 /** @name Graph
@@ -157,6 +179,50 @@ std::vector<LinkInfo> listLinks();
 
 /// @brief Returns the full type name of every node that can be created.
 std::vector<std::string> listNodeTypes();
+
+/// @brief One input port of a node type.
+struct PortInfo
+{
+    /// @brief What the port is for, such as "Geometry" or "Mask".
+    std::string label;
+    /// @brief Whether the port takes any number of inputs. Only the last port can.
+    bool multiInput = false;
+    /// @brief Whether the node cooks with nothing wired into the port.
+    bool optional = false;
+};
+
+/// @brief What a person or an agent needs to know about a node type to create it and wire it.
+///
+/// Inputs are numbered from zero in the order listed, and a multi input port takes every input
+/// from its own position onward. Outputs have no names: they are numbered from zero.
+struct NodeTypeInfo
+{
+    /// @brief The full type name createNode takes, such as "helix::cube".
+    std::string name;
+    /// @brief The name shown to a person, such as "Cube".
+    std::string label;
+    /// @brief The words a search matches, such as "primitive".
+    std::vector<std::string> tags;
+    /// @brief The input ports, in the order their inputs run.
+    std::vector<PortInfo> inputs;
+    /// @brief The number of outputs the node has.
+    std::uint32_t outputCount = 1;
+};
+
+/// @brief The result of looking up a node type.
+struct NodeTypeInfoResult
+{
+    Status status;
+    NodeTypeInfo info;
+};
+
+/// @brief Returns what is known about one node type, or a failed status when there is none.
+/// @note A tab menu alias, such as "helix::mountain", answers with its own label and tags and
+/// the ports of the type it creates.
+NodeTypeInfoResult nodeTypeInfo(const std::string& type);
+
+/// @brief Returns nodeTypeInfo for every type listNodeTypes lists, in the same order.
+std::vector<NodeTypeInfo> listNodeTypeInfos();
 
 /// @brief Creates a node at the root of the scene.
 /// @param type The full type name, such as "helix::cube".
