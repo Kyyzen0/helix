@@ -3,7 +3,7 @@ var searchData=
   ['sameset_0',['sameSet',['../classhelix_1_1util_1_1UnionFind.html#a231c96e382157dc916d3f7fd51022799',1,'helix::util::UnionFind']]],
   ['sample_1',['sample',['../classhelix_1_1prm_1_1Ramp.html#a9023d7a7683d789da8d0323dfab095f1',1,'helix::prm::Ramp']]],
   ['samplenearest_2',['sampleNearest',['../structhelix_1_1geo_1_1Image.html#a7fb9e12042fb03400dc859687141fbcd',1,'helix::geo::Image']]],
-  ['save_3',['save',['../classhelix_1_1nt_1_1Serializer.html#a0e548f704d53c2e878094b2c404c6a07',1,'helix::nt::Serializer']]],
+  ['save_3',['save',['../classhelix_1_1nt_1_1Serializer.html#a0e548f704d53c2e878094b2c404c6a07',1,'helix::nt::Serializer::save(NetworkManager &amp;networkManager, std::string filePath)'],['../classhelix_1_1nt_1_1Serializer.html#a35c6b0ae7f592463e0db1007943816b8',1,'helix::nt::Serializer::save(NetworkManager &amp;networkManager, std::ostream &amp;stream)']]],
   ['scale_4',['scale',['../classhelix_1_1Transform.html#ad996e4abfe42afe45b925bd163b0e9e0',1,'helix::Transform::scale(const Vector3 &amp;factors)'],['../classhelix_1_1Transform.html#ac33d67084b7d0af784c51a4defed27ff',1,'helix::Transform::scale(floatT uniform)']]],
   ['serialize_5',['serialize',['../structhelix_1_1sim_1_1Keyframe.html#ad53019ff3c35c82bd31b905e83de254d',1,'helix::sim::Keyframe::serialize()'],['../classhelix_1_1sim_1_1KeyframeStore.html#a5c57d8d9ff89e090f1176a34c3477107',1,'helix::sim::KeyframeStore::serialize()']]],
   ['setasynccookingenabled_6',['setAsyncCookingEnabled',['../classhelix_1_1nt_1_1NetworkManager.html#a09e5cb3db0284ac41c892440906da7ba',1,'helix::nt::NetworkManager']]],

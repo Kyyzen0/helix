@@ -114,10 +114,40 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>save</b> (<a class="e
 <tr class="memitem:a0b1e83c09c24461ed9abfee6792aa022" id="r_a0b1e83c09c24461ed9abfee6792aa022"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0b1e83c09c24461ed9abfee6792aa022">load</a> (<a class="el" href="classhelix_1_1nt_1_1NetworkManager.html">NetworkManager</a> &amp;networkManager, std::string filePath)</td></tr>
 <tr class="memdesc:a0b1e83c09c24461ed9abfee6792aa022"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a file into the network, replacing whatever was there.  <br /></td></tr>
 <tr class="separator:a0b1e83c09c24461ed9abfee6792aa022"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35c6b0ae7f592463e0db1007943816b8" id="r_a35c6b0ae7f592463e0db1007943816b8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a35c6b0ae7f592463e0db1007943816b8">save</a> (<a class="el" href="classhelix_1_1nt_1_1NetworkManager.html">NetworkManager</a> &amp;networkManager, std::ostream &amp;stream)</td></tr>
+<tr class="memdesc:a35c6b0ae7f592463e0db1007943816b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a network out to a stream, in the format of a file.  <br /></td></tr>
+<tr class="separator:a35c6b0ae7f592463e0db1007943816b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade62a81e0ddaacdfc4e35ac55991700e" id="r_ade62a81e0ddaacdfc4e35ac55991700e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ade62a81e0ddaacdfc4e35ac55991700e">load</a> (<a class="el" href="classhelix_1_1nt_1_1NetworkManager.html">NetworkManager</a> &amp;networkManager, std::istream &amp;stream)</td></tr>
+<tr class="memdesc:ade62a81e0ddaacdfc4e35ac55991700e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a stream into the network, replacing whatever was there.  <br /></td></tr>
+<tr class="separator:ade62a81e0ddaacdfc4e35ac55991700e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="ade62a81e0ddaacdfc4e35ac55991700e" name="ade62a81e0ddaacdfc4e35ac55991700e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade62a81e0ddaacdfc4e35ac55991700e">&#9670;&#160;</a></span>load() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void helix::nt::Serializer::load </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classhelix_1_1nt_1_1NetworkManager.html">NetworkManager</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>networkManager</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::istream &amp;</td>          <td class="paramname"><span class="paramname"><em>stream</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reads a stream into the network, replacing whatever was there. </p>
+<dl class="section note"><dt>Note</dt><dd>The network is cleared before the stream is read, so one that cannot be read leaves the scene empty. Throws on text that is not a scene. </dd></dl>
+
+</div>
+</div>
 <a id="a0b1e83c09c24461ed9abfee6792aa022" name="a0b1e83c09c24461ed9abfee6792aa022"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0b1e83c09c24461ed9abfee6792aa022">&#9670;&#160;</a></span>load()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b1e83c09c24461ed9abfee6792aa022">&#9670;&#160;</a></span>load() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -137,6 +167,30 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>save</b> (<a class="e
 
 <p>Reads a file into the network, replacing whatever was there. </p>
 <dl class="section note"><dt>Note</dt><dd>Loading creates nodes, which runs through undo, cooking, and the signals the interface listens to, so it goes through the manager rather than the network alone. </dd></dl>
+
+</div>
+</div>
+<a id="a35c6b0ae7f592463e0db1007943816b8" name="a35c6b0ae7f592463e0db1007943816b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35c6b0ae7f592463e0db1007943816b8">&#9670;&#160;</a></span>save()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void helix::nt::Serializer::save </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classhelix_1_1nt_1_1NetworkManager.html">NetworkManager</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>networkManager</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::ostream &amp;</td>          <td class="paramname"><span class="paramname"><em>stream</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Writes a network out to a stream, in the format of a file. </p>
+<dl class="section note"><dt>Note</dt><dd>The archive closes its brackets when it is done, so the stream holds a whole scene when this returns. Throws when the stream refuses the text. </dd></dl>
 
 </div>
 </div>

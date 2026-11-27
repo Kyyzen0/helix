@@ -1,7 +1,7 @@
 var searchData=
 [
   ['levels_0',['levels',['../classhelix_1_1async_1_1CookPlan.html#a95318a33ef5d22929025c129e9d12be1',1,'helix::async::CookPlan']]],
-  ['load_1',['load',['../classhelix_1_1nt_1_1Serializer.html#a0b1e83c09c24461ed9abfee6792aa022',1,'helix::nt::Serializer']]],
+  ['load_1',['load',['../classhelix_1_1nt_1_1Serializer.html#a0b1e83c09c24461ed9abfee6792aa022',1,'helix::nt::Serializer::load(NetworkManager &amp;networkManager, std::string filePath)'],['../classhelix_1_1nt_1_1Serializer.html#ade62a81e0ddaacdfc4e35ac55991700e',1,'helix::nt::Serializer::load(NetworkManager &amp;networkManager, std::istream &amp;stream)']]],
   ['loadfromfile_2',['loadFromFile',['../classhelix_1_1nt_1_1NodeManifest.html#ae20613495692da0b7fe349db37be6e6c',1,'helix::nt::NodeManifest']]],
   ['loadfromstring_3',['loadFromString',['../classhelix_1_1nt_1_1NodeManifest.html#ad42fb3ff04396eaf0a60751e05f2605e',1,'helix::nt::NodeManifest']]],
   ['loadnodes_4',['loadNodes',['../classhelix_1_1nt_1_1NodeLoader.html#a44f017c51fe6f1b5d3164f734124bd24',1,'helix::nt::NodeLoader']]],

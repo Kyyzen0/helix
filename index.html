@@ -134,6 +134,8 @@ What Helix adds</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>User node authoring</b>   </td><td class="markdownTableBodyNone">Users can define their own node types at runtime from script or expression source, reuse the existing daslang and expression machinery, and save them with the project.    </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>Native Mac interface</b>   </td><td class="markdownTableBodyNone">A Swift and SwiftUI app over the <code>HelixCore</code> facade (<code>apple/Helix</code>): documents, a Metal viewport and a node editor with a search palette and undo, plus an MCP server for AI agents. It sits next to the Qt interface until the last native milestone removes it. See build-macos.md.    </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>GUI rewrite</b>   </td><td class="markdownTableBodyNone">The QML interface is redesigned around one spacing and type scale, a unified panel system, a node editor that reads like a professional tool, and a status bar that shows cook state and the current frame.   </td></tr>
 </table>
 <p>The engine stays decoupled from the interface, as in the original: it can be embedded in another project, driven headlessly, or given a different interface entirely.</p>
