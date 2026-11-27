@@ -603,3 +603,55 @@ final class ExpressionErrorTextTests: XCTestCase {
         XCTAssertLessThanOrEqual(ExpressionErrorText.short(String(repeating: "x", count: 500)).count, 161)
     }
 }
+
+final class FieldDraftTests: XCTestCase {
+    func testReturnKeepsTheSubmittedValueUntilTheNodeAnswers() {
+        var draft = FieldDraft()
+        draft.appear(showing: "1")
+        draft.edit("5")
+        XCTAssertEqual(draft.submit(current: "1", losingFocus: false), "5")
+        // The view still holds the old value right after Return: the field keeps what was typed
+        // instead of putting "1" back, which focus loss would then have sent, undoing the edit.
+        XCTAssertEqual(draft.text, "5")
+        XCTAssertNil(draft.submit(current: "1", losingFocus: false))
+        // The node's value arrives on the next draw, while the field still has focus.
+        draft.valueChanged(to: "5", focused: true)
+        XCTAssertEqual(draft.text, "5")
+        // Leaving the field now sends nothing: the edit stays.
+        XCTAssertNil(draft.submit(current: "5", losingFocus: true))
+        XCTAssertEqual(draft.text, "5")
+    }
+
+    func testTheFieldFollowsTheNodeOnceItAnswers() {
+        var draft = FieldDraft()
+        draft.appear(showing: "1")
+        draft.edit("500")
+        XCTAssertEqual(draft.submit(current: "1", losingFocus: false), "500")
+        // The node clamps to its locked range end, and the field shows what it holds, even focused.
+        draft.valueChanged(to: "100", focused: true)
+        XCTAssertEqual(draft.text, "100")
+        XCTAssertNil(draft.submit(current: "100", losingFocus: true))
+    }
+
+    func testARefusedValueGoesBackToTheNodeValueOnFocusLoss() {
+        var draft = FieldDraft()
+        draft.appear(showing: "1")
+        draft.edit("abc")
+        XCTAssertEqual(draft.submit(current: "1", losingFocus: false), "abc")
+        // Refused: the node's value never changes, so nothing comes back. Return again sends nothing.
+        XCTAssertNil(draft.submit(current: "1", losingFocus: false))
+        XCTAssertNil(draft.submit(current: "1", losingFocus: true))
+        XCTAssertEqual(draft.text, "1")
+    }
+
+    func testTypingIsNotOverwrittenByAnUnrelatedChange() {
+        var draft = FieldDraft()
+        draft.appear(showing: "1")
+        draft.edit("2")
+        // Another edit (an undo, a keyframe) changes the value while the person types here.
+        draft.valueChanged(to: "3", focused: true)
+        XCTAssertEqual(draft.text, "2")
+        draft.valueChanged(to: "4", focused: false)
+        XCTAssertEqual(draft.text, "4")
+    }
+}

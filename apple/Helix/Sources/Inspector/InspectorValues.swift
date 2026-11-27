@@ -275,3 +275,55 @@ enum RampPoints {
         return points + [new]
     }
 }
+
+/// What a text field of the inspector holds while a person types, and when it follows the value
+/// the node holds.
+///
+/// A field shows the node's value and sends what was typed on Return or when it loses focus. The
+/// value the field is given is the one of the view as it was drawn, so right after a submission
+/// it is still the old one: the field keeps what was submitted until the node's value comes back,
+/// rather than putting the old value back and sending it again when focus leaves.
+struct FieldDraft: Equatable {
+    /// What the field shows.
+    private(set) var text = ""
+    /// What was submitted and not answered yet: the node's value has not changed since.
+    private(set) var submitted: String?
+
+    /// The field appears with the node's value.
+    mutating func appear(showing value: String) {
+        text = value
+        submitted = nil
+    }
+
+    /// The person typed.
+    mutating func edit(_ typed: String) {
+        text = typed
+    }
+
+    /// Return or loss of focus: returns what to send to the node, or nil when there is nothing.
+    /// A submission still unanswered is not sent twice; on loss of focus it is given up, and the
+    /// field goes back to the value the node holds (a refused value leaves it unchanged).
+    mutating func submit(current value: String, losingFocus: Bool) -> String? {
+        if let pending = submitted, pending == text {
+            if losingFocus {
+                text = value
+                submitted = nil
+            }
+            return nil
+        }
+        guard text != value else {
+            submitted = nil
+            return nil
+        }
+        submitted = text
+        return text
+    }
+
+    /// The node's value changed: the field follows it unless the person is typing something else.
+    mutating func valueChanged(to value: String, focused: Bool) {
+        if !focused || submitted != nil {
+            text = value
+            submitted = nil
+        }
+    }
+}

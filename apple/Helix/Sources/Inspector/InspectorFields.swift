@@ -13,32 +13,29 @@ struct NumberField: View {
     /// Called with what was typed, when it differs from the value.
     var onCommit: (String) -> Void
 
-    @State private var draft = ""
+    @State private var draft = FieldDraft()
     @FocusState private var focused: Bool
 
     var body: some View {
-        TextField("", text: $draft)
+        TextField("", text: Binding(get: { draft.text }, set: { draft.edit($0) }))
             .textFieldStyle(.roundedBorder)
             .multilineTextAlignment(alignment)
             .monospacedDigit()
             .focused($focused)
             .disabled(!isEnabled)
             .accessibilityLabel(Text(accessibilityName))
-            .onAppear { draft = text }
-            .onSubmit(commit)
+            .onAppear { draft.appear(showing: text) }
+            .onSubmit { commit(losingFocus: false) }
             .onChange(of: focused) { _, isFocused in
-                if !isFocused { commit() }
+                if !isFocused { commit(losingFocus: true) }
             }
             .onChange(of: text) { _, shown in
-                if !focused { draft = shown }
+                draft.valueChanged(to: shown, focused: focused)
             }
     }
 
-    private func commit() {
-        guard draft != text else { return }
-        onCommit(draft)
-        // A refused or clamped value comes back as the value the node holds.
-        draft = text
+    private func commit(losingFocus: Bool) {
+        if let value = draft.submit(current: text, losingFocus: losingFocus) { onCommit(value) }
     }
 }
 
