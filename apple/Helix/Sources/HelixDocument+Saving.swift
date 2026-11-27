@@ -15,7 +15,7 @@ extension HelixDocument {
     /// Starts keeping `savedScene` up to date. Once the scene is loaded.
     func startKeepingSavedScene() {
         savedScene.reopen()
-        let keeper = SceneSnapshotKeeper(cache: savedScene) { [weak self] in
+        let keeper = SceneSnapshotKeeper(cache: savedScene, revision: { helix.core.sceneRevision() }) { [weak self] in
             self?.captureSceneForSaving()
         }
         snapshotKeeper = keeper
@@ -40,18 +40,27 @@ extension HelixDocument {
     nonisolated func snapshot(contentType: UTType) throws -> Data {
         if Thread.isMainThread {
             return try MainActor.assumeIsolated {
+                // The revision first, as the keeper does: a change after it reads as behind.
+                let seen = helix.core.sceneRevision()
                 guard isActive, let data = captureSceneForSaving() else { throw HelixError.sceneClosed }
-                savedScene.store(data)
+                savedScene.store(data, revision: seen)
                 return data
             }
         }
-        // Off the main thread: what the main thread last kept. It waits a moment when that may be
-        // behind, and does not wait for the main thread longer than that (see `SceneSnapshotCache`).
-        guard let data = savedScene.read(timeout: Self.saveWaitSeconds) else { throw HelixError.sceneClosed }
-        if ProcessInfo.processInfo.environment["HELIX_DEBUG_LAUNCH"] == "1" {
-            Self.debugLog("snapshot off the main thread bytes=\(data.count)")
+        // Off the main thread: the text the main thread kept, when it is the scene as it is now,
+        // and otherwise a short wait for the main thread to bring it up to date. Never stale text
+        // (see `SceneSnapshotCache`).
+        switch savedScene.read(timeout: Self.saveWaitSeconds) {
+        case .scene(let data):
+            if ProcessInfo.processInfo.environment["HELIX_DEBUG_LAUNCH"] == "1" {
+                Self.debugLog("snapshot off the main thread bytes=\(data.count)")
+            }
+            return data
+        case .closed:
+            throw HelixError.sceneClosed
+        case .behind:
+            throw HelixError.saveBehind
         }
-        return data
     }
 
     nonisolated static var saveWaitSeconds: TimeInterval { 3 }

@@ -112,6 +112,18 @@ Status saveScene(const std::string& path);
 /// @brief Returns whether the scene changed since it was created, opened or saved.
 bool isSceneModified();
 
+/// @brief A number that changes whenever what captureScene writes may have changed.
+///
+/// It grows by at least one on every change of the nodes, their names, positions, parameters,
+/// expressions, ramps, links, keyframes, the display node, the frame, the frame range and the
+/// rate, and whenever a scene is created, opened or restored. It can grow without a change (a
+/// call that sets what was already set), never the other way. Unlike every other function of
+/// the facade it is safe to call from any thread: it reads an atomic and touches nothing else,
+/// so a thread that must not call the engine (a save, which AppKit runs off the main thread)
+/// can tell whether a capture it holds is still the scene. Unlike isSceneModified, saving does
+/// not reset it.
+std::uint64_t sceneRevision();
+
 /// @brief The result of capturing the scene.
 struct SceneSnapshot
 {

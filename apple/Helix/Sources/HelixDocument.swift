@@ -66,7 +66,7 @@ final class HelixDocument: ReferenceFileDocument {
 
     /// The scene as a file holds it, for a save that is asked for off the main thread (see
     /// `HelixDocument+Saving`).
-    nonisolated let savedScene = SceneSnapshotCache()
+    nonisolated let savedScene = SceneSnapshotCache(currentRevision: { helix.core.sceneRevision() })
     var snapshotKeeper: SceneSnapshotKeeper?
 
     /// The file the scene is read from, or nil for a new scene. Set once, before the document is

@@ -6,44 +6,60 @@ import Foundation
 /// an explicit save: AppKit writes off the main thread). The engine is driven from the main
 /// thread only, and the main thread may be waiting for that very save (closing the window,
 /// quitting), so the save can neither call the engine nor hop to the main thread and wait. It
-/// reads this cache instead, which the main thread keeps up to date (see `HelixDocument+Saving`).
+/// reads this cache instead, which the main thread keeps up to date (see `SceneSnapshotKeeper`).
 ///
-/// The main thread says when the cache may be behind (`markStale`, when it wakes up to handle
-/// something) and gives the text when it is done (`store`, when it is idle again). A reader that
-/// finds the cache possibly behind waits for `store`, a short while at most, so that what is
-/// saved is what the person last saw. If the main thread cannot answer in that time, because it
-/// is itself blocked waiting for this save, the reader gets the text of the last idle moment: no
-/// deadlock, and nothing older than the work the blocked main thread had just started.
+/// Whether the cache is up to date is exact, not a guess: the engine counts its changes
+/// (`sceneRevision`, an atomic any thread can read), and the main thread stores the text with
+/// the revision it read before it captured the text. The text is the scene when that revision is
+/// still the engine's. A save that finds the text current returns at once, and so cannot wait for
+/// a main thread that waits for it. One that finds it behind waits, up to a limit, for the main
+/// thread to store a newer capture, and fails (rather than saving old text) when it does not.
 final class SceneSnapshotCache: @unchecked Sendable {
+    /// What a read comes to.
+    enum Outcome: Equatable {
+        /// The scene, as of a revision no older than the one the read started with.
+        case scene(Data)
+        /// The scene is gone (the window closed): there is nothing to save any more.
+        case closed
+        /// The main thread did not bring the text up to date in time.
+        case behind
+    }
+
     private let condition = NSCondition()
+    private let currentRevision: @Sendable () -> UInt64
     private var text: Data?
-    private var stale = false
+    private var storedRevision: UInt64 = 0
     private var closed = false
 
-    /// Records the scene as it is now. Wakes the readers that wait for it.
-    func store(_ data: Data) {
+    /// `currentRevision` is the engine's `sceneRevision`, which may be called from any thread.
+    init(currentRevision: @escaping @Sendable () -> UInt64) {
+        self.currentRevision = currentRevision
+    }
+
+    /// Records a capture of the scene. `revision` is what the engine said just *before* the
+    /// capture was made, so a change after it makes the capture count as behind.
+    func store(_ data: Data, revision: UInt64) {
         condition.lock()
-        if !closed {
+        if !closed, text == nil || revision >= storedRevision {
             text = data
-            stale = false
+            storedRevision = revision
         }
         condition.broadcast()
         condition.unlock()
     }
 
-    /// Notes that the scene may have changed since the last `store`.
-    func markStale() {
+    /// Whether what is stored is the scene as it is now.
+    var isFresh: Bool {
         condition.lock()
-        if text != nil { stale = true }
-        condition.unlock()
+        defer { condition.unlock() }
+        return text != nil && storedRevision == currentRevision()
     }
 
-    /// The scene is gone (the window closed): there is nothing to save any more.
+    /// The scene is gone (the window closed).
     func close() {
         condition.lock()
         closed = true
         text = nil
-        stale = false
         condition.broadcast()
         condition.unlock()
     }
@@ -55,13 +71,17 @@ final class SceneSnapshotCache: @unchecked Sendable {
         condition.unlock()
     }
 
-    /// The text of the scene, or nil when it is closed or was never stored. Waits up to
-    /// `timeout` seconds for the main thread to bring it up to date when it may be behind.
-    func read(timeout: TimeInterval) -> Data? {
+    /// The scene as it was when the read started or later. Returns at once when the stored text
+    /// is current; otherwise waits up to `timeout` seconds for a capture that is.
+    func read(timeout: TimeInterval) -> Outcome {
         let deadline = Date(timeIntervalSinceNow: timeout)
         condition.lock()
         defer { condition.unlock() }
-        while stale, !closed, condition.wait(until: deadline) {}
-        return text
+        let wanted = currentRevision()
+        while true {
+            if closed { return .closed }
+            if let text, storedRevision >= wanted { return .scene(text) }
+            if !condition.wait(until: deadline) { return .behind }
+        }
     }
 }
