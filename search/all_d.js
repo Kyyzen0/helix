@@ -26,5 +26,6 @@ var searchData=
   ['nodetype_23',['NodeType',['../structhelix_1_1nt_1_1NodeType.html',1,'helix::nt']]],
   ['nodetypetable_24',['NodeTypeTable',['../classhelix_1_1nt_1_1NodeTypeTable.html',1,'helix::nt']]],
   ['normal_25',['normal',['../namespacehelix_1_1attr_1_1names.html#a16fbe637bb090ef67d9671c468217ab9',1,'helix::attr::names']]],
-  ['nullnode_26',['nullNode',['../Types_8h.html#adaa65c58f313fd908dbabc971ef722d6',1,'helix::nt']]]
+  ['normals_26',['normals',['../structhelix_1_1import_1_1RawMesh.html#a5b666d2efb9a11d51b6cdf34ef7b5c40',1,'helix::import::RawMesh']]],
+  ['nullnode_27',['nullNode',['../Types_8h.html#adaa65c58f313fd908dbabc971ef722d6',1,'helix::nt']]]
 ];

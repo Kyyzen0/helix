@@ -104,23 +104,48 @@ $(function(){ initResizable(false); });
 <div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#include &quot;Engine/Network/NodeSnapshot.h&quot;</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &quot;Engine/Serializer/NodeLinkSerializable.h&quot;</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;Engine/Serializer/TimelineSerializable.h&quot;</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;cereal/types/vector.hpp&gt;</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
-<div class="foldopen" id="foldopen00007" data-start="{" data-end="};">
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno"><a class="line" href="structNetworkSerializable.html">    7</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structNetworkSerializable.html">NetworkSerializable</a></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>{</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    std::vector&lt;helix::nt::NodeSnapshot&gt; nodes;</div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    std::vector&lt;NodeLinkSerializable&gt; nodeLinks;</div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    <a class="code hl_struct" href="structTimelineSerializable.html">TimelineSerializable</a> timeline;</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> Archive&gt; <span class="keywordtype">void</span> serialize(Archive&amp; ar)</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    {</div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>        ar(CEREAL_NVP(nodes), CEREAL_NVP(nodeLinks), CEREAL_NVP(timeline));</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    }</div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>};</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;cereal/cereal.hpp&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;cereal/types/vector.hpp&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="foldopen" id="foldopen00008" data-start="{" data-end="};">
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno"><a class="line" href="structNetworkSerializable.html">    8</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structNetworkSerializable.html">NetworkSerializable</a></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>{</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    std::vector&lt;helix::nt::NodeSnapshot&gt; nodes;</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    std::vector&lt;NodeLinkSerializable&gt; nodeLinks;</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    <a class="code hl_struct" href="structTimelineSerializable.html">TimelineSerializable</a> timeline;</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="structNetworkSerializable.html#a2d6a206d9b255508b76026599f5b0640">   15</a></span>    <span class="keywordtype">int</span> <a class="code hl_variable" href="structNetworkSerializable.html#a2d6a206d9b255508b76026599f5b0640">displayNodeIndex</a> = -1;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="structNetworkSerializable.html#a01972ad418de0fc4d1391a3db9f40e14">   18</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="structNetworkSerializable.html#a01972ad418de0fc4d1391a3db9f40e14">hasDisplayNodeIndex</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> Archive&gt; <span class="keywordtype">void</span> save(Archive&amp; ar)<span class="keyword"> const</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        ar(CEREAL_NVP(nodes), CEREAL_NVP(nodeLinks), CEREAL_NVP(timeline));</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        ar(CEREAL_NVP(<a class="code hl_variable" href="structNetworkSerializable.html#a2d6a206d9b255508b76026599f5b0640">displayNodeIndex</a>));</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    }</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> Archive&gt; <span class="keywordtype">void</span> load(Archive&amp; ar)</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    {</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        ar(CEREAL_NVP(nodes), CEREAL_NVP(nodeLinks), CEREAL_NVP(timeline));</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        <span class="comment">// Scenes saved before the display node was stored have no such field, and still open.</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <span class="comment">// The field comes last, so a missing one leaves the archive where it was.</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="keywordflow">try</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        {</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>            ar(CEREAL_NVP(<a class="code hl_variable" href="structNetworkSerializable.html#a2d6a206d9b255508b76026599f5b0640">displayNodeIndex</a>));</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>            <a class="code hl_variable" href="structNetworkSerializable.html#a01972ad418de0fc4d1391a3db9f40e14">hasDisplayNodeIndex</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        }</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <span class="keywordflow">catch</span> (<span class="keyword">const</span> cereal::Exception&amp;)</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        {</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>            <a class="code hl_variable" href="structNetworkSerializable.html#a2d6a206d9b255508b76026599f5b0640">displayNodeIndex</a> = -1;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>            <a class="code hl_variable" href="structNetworkSerializable.html#a01972ad418de0fc4d1391a3db9f40e14">hasDisplayNodeIndex</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        }</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    }</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>};</div>
 </div>
-<div class="ttc" id="astructNetworkSerializable_html"><div class="ttname"><a href="structNetworkSerializable.html">NetworkSerializable</a></div><div class="ttdef"><b>Definition</b> NetworkSerializable.h:8</div></div>
+<div class="ttc" id="astructNetworkSerializable_html"><div class="ttname"><a href="structNetworkSerializable.html">NetworkSerializable</a></div><div class="ttdef"><b>Definition</b> NetworkSerializable.h:9</div></div>
+<div class="ttc" id="astructNetworkSerializable_html_a01972ad418de0fc4d1391a3db9f40e14"><div class="ttname"><a href="structNetworkSerializable.html#a01972ad418de0fc4d1391a3db9f40e14">NetworkSerializable::hasDisplayNodeIndex</a></div><div class="ttdeci">bool hasDisplayNodeIndex</div><div class="ttdoc">Whether the file stored a display node at all. A file written before the display node was saved does ...</div><div class="ttdef"><b>Definition</b> NetworkSerializable.h:18</div></div>
+<div class="ttc" id="astructNetworkSerializable_html_a2d6a206d9b255508b76026599f5b0640"><div class="ttname"><a href="structNetworkSerializable.html#a2d6a206d9b255508b76026599f5b0640">NetworkSerializable::displayNodeIndex</a></div><div class="ttdeci">int displayNodeIndex</div><div class="ttdoc">The index in nodes of the node the viewport shows, or -1 when none is shown.</div><div class="ttdef"><b>Definition</b> NetworkSerializable.h:15</div></div>
 <div class="ttc" id="astructTimelineSerializable_html"><div class="ttname"><a href="structTimelineSerializable.html">TimelineSerializable</a></div><div class="ttdef"><b>Definition</b> TimelineSerializable.h:5</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

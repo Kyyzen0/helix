@@ -118,6 +118,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:adf479dd60128fd0991fcaf8cc49b3328" id="r_adf479dd60128fd0991fcaf8cc49b3328"><td class="memItemLeft" align="right" valign="top">static std::filesystem::path&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adf479dd60128fd0991fcaf8cc49b3328">getNodesDirectory</a> ()</td></tr>
 <tr class="memdesc:adf479dd60128fd0991fcaf8cc49b3328"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the directory the node folders live in.  <br /></td></tr>
 <tr class="separator:adf479dd60128fd0991fcaf8cc49b3328"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf33f8da5da09e87b90b9317f5f62861" id="r_aaf33f8da5da09e87b90b9317f5f62861"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaf33f8da5da09e87b90b9317f5f62861">setDirectories</a> (const std::filesystem::path &amp;nodesDirectory, const std::filesystem::path &amp;libraryDirectory)</td></tr>
+<tr class="memdesc:aaf33f8da5da09e87b90b9317f5f62861"><td class="mdescLeft">&#160;</td><td class="mdescRight">Names the folders the nodes are read from, for a host that is not laid out like the application bundle.  <br /></td></tr>
+<tr class="separator:aaf33f8da5da09e87b90b9317f5f62861"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58354256b9489e8a4fd7be3a6ad65a92" id="r_a58354256b9489e8a4fd7be3a6ad65a92"><td class="memItemLeft" align="right" valign="top">static std::filesystem::path&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a58354256b9489e8a4fd7be3a6ad65a92">getUserNodesDirectory</a> ()</td></tr>
 <tr class="memdesc:a58354256b9489e8a4fd7be3a6ad65a92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the directory the user's own node folders live in.  <br /></td></tr>
 <tr class="separator:a58354256b9489e8a4fd7be3a6ad65a92"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -296,6 +299,46 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True when the node was registered. </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>A node whose name is already taken has its source replaced instead of adding a second node of that name. The parameters of a node are fixed when it is first registered, so a changed manifest needs a new name. </dd></dl>
+
+</div>
+</div>
+<a id="aaf33f8da5da09e87b90b9317f5f62861" name="aaf33f8da5da09e87b90b9317f5f62861"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf33f8da5da09e87b90b9317f5f62861">&#9670;&#160;</a></span>setDirectories()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void helix::nt::NodeLoader::setDirectories </td>
+          <td>(</td>
+          <td class="paramtype">const std::filesystem::path &amp;</td>          <td class="paramname"><span class="paramname"><em>nodesDirectory</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::filesystem::path &amp;</td>          <td class="paramname"><span class="paramname"><em>libraryDirectory</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Names the folders the nodes are read from, for a host that is not laid out like the application bundle. </p>
+<p>A host such as a native application, or a command line tool outside the bundle, finds neither the nodes nor the node library next to its own executable. Naming the two folders makes the loader look there first.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nodesDirectory</td><td>The folder holding one folder per node. Empty keeps the default. </td></tr>
+    <tr><td class="paramname">libraryDirectory</td><td>The folder holding the node library. Empty keeps the default. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Has to be called before loadNodes, which reads the folders once. </dd></dl>
 
 </div>
 </div>

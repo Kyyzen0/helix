@@ -20,12 +20,14 @@ var searchData=
   ['pointposspan_17',['pointPosSpan',['../classhelix_1_1geo_1_1Mesh.html#af25ade5b632cd666938861aa50582581',1,'helix::geo::Mesh']]],
   ['pointscript_18',['PointScript',['../classhelix_1_1script_1_1PointScript.html',1,'helix::script']]],
   ['position_19',['position',['../namespacehelix_1_1attr_1_1names.html#ae9dbabd9dba1c718b92bba0c7bc22102',1,'helix::attr::names']]],
-  ['previewfloat_20',['previewFloat',['../classhelix_1_1prm_1_1Parameter.html#a8b6989d5c556a09bb87ddbef51fb7760',1,'helix::prm::Parameter']]],
-  ['previewint_21',['previewInt',['../classhelix_1_1prm_1_1Parameter.html#afb0a818ce94f890496856b13a0c671d6',1,'helix::prm::Parameter']]],
-  ['previewstring_22',['previewString',['../classhelix_1_1prm_1_1Parameter.html#af164552f105057a52eda745b0976bf2d',1,'helix::prm::Parameter']]],
-  ['primitive_23',['Primitive',['../classhelix_1_1geo_1_1Primitive.html',1,'helix::geo']]],
-  ['primitiveindex_24',['primitiveIndex',['../structhelix_1_1daslang_1_1ThreadState.html#a214401897cc49ee2acdf5211fbc30607',1,'helix::daslang::ThreadState']]],
-  ['primpath_25',['PrimPath',['../classhelix_1_1PrimPath.html',1,'helix']]],
-  ['processpendingcooks_26',['processPendingCooks',['../classhelix_1_1nt_1_1NetworkManager.html#adda1a2bf0e66f86770fd839d26853bcc',1,'helix::nt::NetworkManager']]],
-  ['push_27',['push',['../classhelix_1_1nt_1_1UndoStack.html#ad348ec416f651dbeb36867bdc925d717',1,'helix::nt::UndoStack']]]
+  ['positions_20',['positions',['../structhelix_1_1import_1_1RawMesh.html#a30405074ba3f9d6229a875970a671f68',1,'helix::import::RawMesh']]],
+  ['previewfloat_21',['previewFloat',['../classhelix_1_1prm_1_1Parameter.html#a8b6989d5c556a09bb87ddbef51fb7760',1,'helix::prm::Parameter']]],
+  ['previewint_22',['previewInt',['../classhelix_1_1prm_1_1Parameter.html#afb0a818ce94f890496856b13a0c671d6',1,'helix::prm::Parameter']]],
+  ['previewstring_23',['previewString',['../classhelix_1_1prm_1_1Parameter.html#af164552f105057a52eda745b0976bf2d',1,'helix::prm::Parameter']]],
+  ['primitive_24',['Primitive',['../classhelix_1_1geo_1_1Primitive.html',1,'helix::geo']]],
+  ['primitiveindex_25',['primitiveIndex',['../structhelix_1_1daslang_1_1ThreadState.html#a214401897cc49ee2acdf5211fbc30607',1,'helix::daslang::ThreadState']]],
+  ['primpath_26',['PrimPath',['../classhelix_1_1PrimPath.html',1,'helix']]],
+  ['processpendingcooks_27',['processPendingCooks',['../classhelix_1_1nt_1_1NetworkManager.html#adda1a2bf0e66f86770fd839d26853bcc',1,'helix::nt::NetworkManager']]],
+  ['processresult_28',['ProcessResult',['../structhelix_1_1import_1_1ProcessResult.html',1,'helix::import']]],
+  ['push_29',['push',['../classhelix_1_1nt_1_1UndoStack.html#ad348ec416f651dbeb36867bdc925d717',1,'helix::nt::UndoStack']]]
 ];

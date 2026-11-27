@@ -163,7 +163,7 @@ Status</h2>
 <p>Helix is a work in progress, and so is the application it is based on. The macOS port builds and installs, the CI job runs the superbuild on a <code>macos-15</code> runner, and the features listed above are implemented in the tree. Expect rough edges, and expect the interface to still be moving.</p>
 <p>The 3D view draws with Metal into a texture that the Qt Quick scene graph samples. It was written without a Mac that could run Qt, so the Qt side of it has not been run yet: docs/METAL-RENDERER.md lists what to check on a real machine. build-macos.md says what else the port still needs.</p>
 <p>Scenes are saved with the <code>.kut</code> extension. The content format is the one of the upstream project. A scene saved by enzo, including its <code>enzo::&lt;name&gt;</code> node type names, opens directly in Helix once its extension is renamed to <code>.kut</code> (the loader does not check the extension, so the "All files" choice of the open dialog also opens it unrenamed). Helix saves <code>helix::&lt;name&gt;</code> type names, which enzo does not know, so the reverse direction is not supported.</p>
-<p><b>ROADMAP.md</b> states where the work goes next, and why in that order. Helix is a procedural modeling tool <em>and</em> an animation tool, so the roadmap has a shared foundation and two tracks that build on it.</p>
+<p><b>VISION.md</b> states what Helix is for: a native Apple application where a person and an AI create 3D, 2D, animation and simulation with the same tools, on an ordinary Mac. <b>ROADMAP.md</b> states where the work goes next, and why in that order.</p>
 <hr  />
 <h2><a class="anchor" id="autotoc_md11"></a>
 License</h2>

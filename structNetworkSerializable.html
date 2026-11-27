@@ -104,10 +104,14 @@ $(function(){ initResizable(false); });
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:af09f204219d74e73afea29c0abf0b583" id="r_af09f204219d74e73afea29c0abf0b583"><td class="memTemplParams" colspan="2"><a id="af09f204219d74e73afea29c0abf0b583" name="af09f204219d74e73afea29c0abf0b583"></a>
+<tr class="memitem:ae881f1797a807036fd4c1d72ccf4580e" id="r_ae881f1797a807036fd4c1d72ccf4580e"><td class="memTemplParams" colspan="2"><a id="ae881f1797a807036fd4c1d72ccf4580e" name="ae881f1797a807036fd4c1d72ccf4580e"></a>
 template&lt;class Archive &gt; </td></tr>
-<tr class="memitem:af09f204219d74e73afea29c0abf0b583"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>serialize</b> (Archive &amp;ar)</td></tr>
-<tr class="separator:af09f204219d74e73afea29c0abf0b583"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae881f1797a807036fd4c1d72ccf4580e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>save</b> (Archive &amp;ar) const</td></tr>
+<tr class="separator:ae881f1797a807036fd4c1d72ccf4580e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acafd3746b9ffb0b85f039600001a1103" id="r_acafd3746b9ffb0b85f039600001a1103"><td class="memTemplParams" colspan="2"><a id="acafd3746b9ffb0b85f039600001a1103" name="acafd3746b9ffb0b85f039600001a1103"></a>
+template&lt;class Archive &gt; </td></tr>
+<tr class="memitem:acafd3746b9ffb0b85f039600001a1103"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>load</b> (Archive &amp;ar)</td></tr>
+<tr class="separator:acafd3746b9ffb0b85f039600001a1103"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -120,6 +124,14 @@ std::vector&lt; <a class="el" href="structNodeLinkSerializable.html">NodeLinkSer
 <tr class="memitem:ad9914cbaeea37808fbbe82f0b41303d7" id="r_ad9914cbaeea37808fbbe82f0b41303d7"><td class="memItemLeft" align="right" valign="top"><a id="ad9914cbaeea37808fbbe82f0b41303d7" name="ad9914cbaeea37808fbbe82f0b41303d7"></a>
 <a class="el" href="structTimelineSerializable.html">TimelineSerializable</a>&#160;</td><td class="memItemRight" valign="bottom"><b>timeline</b></td></tr>
 <tr class="separator:ad9914cbaeea37808fbbe82f0b41303d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d6a206d9b255508b76026599f5b0640" id="r_a2d6a206d9b255508b76026599f5b0640"><td class="memItemLeft" align="right" valign="top"><a id="a2d6a206d9b255508b76026599f5b0640" name="a2d6a206d9b255508b76026599f5b0640"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>displayNodeIndex</b> = -1</td></tr>
+<tr class="memdesc:a2d6a206d9b255508b76026599f5b0640"><td class="mdescLeft">&#160;</td><td class="mdescRight">The index in <code>nodes</code> of the node the viewport shows, or -1 when none is shown. <br /></td></tr>
+<tr class="separator:a2d6a206d9b255508b76026599f5b0640"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01972ad418de0fc4d1391a3db9f40e14" id="r_a01972ad418de0fc4d1391a3db9f40e14"><td class="memItemLeft" align="right" valign="top"><a id="a01972ad418de0fc4d1391a3db9f40e14" name="a01972ad418de0fc4d1391a3db9f40e14"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>hasDisplayNodeIndex</b> = false</td></tr>
+<tr class="memdesc:a01972ad418de0fc4d1391a3db9f40e14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the file stored a display node at all. A file written before the display node was saved does not, which is different from a file that stores "none". <br /></td></tr>
+<tr class="separator:a01972ad418de0fc4d1391a3db9f40e14"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>src/Engine/Serializer/<a class="el" href="NetworkSerializable_8h_source.html">NetworkSerializable.h</a></li>

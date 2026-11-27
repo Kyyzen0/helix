@@ -13,5 +13,6 @@ var searchData=
   ['pointoffsets_10',['PointOffsets',['../structhelix_1_1geo_1_1Primitive_1_1PointOffsets.html',1,'helix::geo::Primitive']]],
   ['pointscript_11',['PointScript',['../classhelix_1_1script_1_1PointScript.html',1,'helix::script']]],
   ['primitive_12',['Primitive',['../classhelix_1_1geo_1_1Primitive.html',1,'helix::geo']]],
-  ['primpath_13',['PrimPath',['../classhelix_1_1PrimPath.html',1,'helix']]]
+  ['primpath_13',['PrimPath',['../classhelix_1_1PrimPath.html',1,'helix']]],
+  ['processresult_14',['ProcessResult',['../structhelix_1_1import_1_1ProcessResult.html',1,'helix::import']]]
 ];

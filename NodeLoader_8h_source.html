@@ -121,16 +121,21 @@ $(function(){ initResizable(false); });
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keyword">static</span> std::filesystem::path getNodesDirectory();</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keyword">static</span> std::filesystem::path getUserNodesDirectory();</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keyword">static</span> <span class="keywordtype">bool</span> registerUserNode(<span class="keyword">const</span> std::filesystem::path&amp; folder, std::string&amp; error);</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keyword">static</span> std::shared_ptr&lt;const script::PointScript&gt;</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    getUserScript(<span class="keyword">const</span> std::filesystem::path&amp; folder);</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>};</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> setDirectories(</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        <span class="keyword">const</span> std::filesystem::path&amp; nodesDirectory,</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        <span class="keyword">const</span> std::filesystem::path&amp; libraryDirectory</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    );</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keyword">static</span> std::filesystem::path getUserNodesDirectory();</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keyword">static</span> <span class="keywordtype">bool</span> registerUserNode(<span class="keyword">const</span> std::filesystem::path&amp; folder, std::string&amp; error);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keyword">static</span> std::shared_ptr&lt;const script::PointScript&gt;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    getUserScript(<span class="keyword">const</span> std::filesystem::path&amp; folder);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>};</div>
 </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>} <span class="comment">// namespace helix::nt</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>} <span class="comment">// namespace helix::nt</span></div>
 <div class="ttc" id="aclasshelix_1_1nt_1_1NodeLoader_html"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeLoader.html">helix::nt::NodeLoader</a></div><div class="ttdoc">The startup pass that fills the node type table from the node folders on disk.</div><div class="ttdef"><b>Definition</b> NodeLoader.h:29</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
