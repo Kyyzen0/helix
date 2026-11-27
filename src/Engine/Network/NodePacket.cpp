@@ -2,6 +2,7 @@
 #include "Engine/Attribute/AttributeHandle.h"
 #include "Engine/Attribute/AttributeNames.h"
 #include "Engine/Primitives/Mesh.h"
+#include <atomic>
 #include <cstddef>
 #include <span>
 #include <stdexcept>
@@ -260,6 +261,58 @@ NodePacket NodePacket::deepCopy() const
     for (const auto& prim : primitives_)
         copy.addPrimitive(prim->clone());
     return copy;
+}
+
+void NodePacket::stamp()
+{
+    // One counter for every packet of the process, so no two published results share a number.
+    static std::atomic<std::uint64_t> lastIdentity{0};
+    identity_ = ++lastIdentity;
+}
+
+std::size_t NodePacket::estimateBytes() const
+{
+    // The bytes one value of each type takes in a store.
+    const auto bytesPerValue = [](attr::AttributeType type) -> std::size_t {
+        switch (type)
+        {
+        case attr::AttributeType::intT:
+            return sizeof(intT);
+        case attr::AttributeType::floatT:
+            return sizeof(floatT);
+        case attr::AttributeType::vectorT:
+            return sizeof(Vector3);
+        case attr::AttributeType::boolT:
+            return sizeof(boolT);
+        case attr::AttributeType::matrixT:
+            return sizeof(Matrix4);
+        case attr::AttributeType::listT:
+            return sizeof(intT);
+        }
+        return sizeof(floatT);
+    };
+
+    std::size_t bytes = sizeof(NodePacket);
+    for (const auto& prim : primitives_)
+    {
+        if (!prim) continue;
+        bytes += 256;
+        for (const attr::AttributeOwner owner : attr::getAllOwners())
+        {
+            // A primitive that has no such owner (a camera has no faces) says so by throwing.
+            try
+            {
+                for (const auto& attribute : prim->getAttributes(owner, true))
+                    bytes += attribute->getSize() * bytesPerValue(attribute->getType()) + 64;
+                for (const auto& group : prim->getGroups(owner))
+                    if (group) bytes += group->getSize() * bytesPerValue(group->getType()) + 64;
+            }
+            catch (const std::exception&)
+            {
+            }
+        }
+    }
+    return bytes;
 }
 
 // TODO: remplace with PrimPath

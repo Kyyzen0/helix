@@ -52,6 +52,10 @@ class NetworkGraph
     /// time it cooks.
     void setTimeDependent(const Unit& dependent, bool dependsOnTime);
 
+    /// @brief Whether any parameter of the node reads the scene time.
+    /// @note Only the parameters themselves, not the node cooking or what feeds it.
+    bool hasTimeDependentParameter(NodeId nodeId) const;
+
     /// @brief Returns every unit the scene time reaches, in no particular order.
     /// @note Covers the units that read the time and everything downstream of them.
     std::vector<Unit> getTimeDependents() const;
@@ -120,6 +124,9 @@ class NetworkGraph
     // The units that read the scene time, at the same mixed granularity as the
     // captured maps.
     std::unordered_set<Unit> timeDependents_;
+
+    // How many parameters of each node are in timeDependents_, so asking is a lookup.
+    std::unordered_map<NodeId, unsigned int> timeParameterCounts_;
 };
 
 } // namespace helix::nt

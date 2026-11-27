@@ -4,12 +4,23 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct HelixApp: App {
+    init() {
+        // The appearance of the theme chosen last time, before the first window opens.
+        ThemeAppearance.applyStored()
+    }
+
     var body: some Scene {
         DocumentGroup(newDocument: { HelixDocument() }) { file in
             DocumentView(document: file.document)
                 .focusedSceneObject(file.document)
+                .themed()
         }
         .commands { HelixCommands() }
+        // ⌘, opens it.
+        Settings {
+            SettingsView()
+                .themed()
+        }
     }
 }
 
@@ -48,13 +59,13 @@ struct HelixCommands: Commands {
             Toggle("Materials", isOn: materialsBinding)
             // Command and option keep the shortcut out of the way of text fields, which take
             // the plain keys.
-            Button(inspectorShown ? "Hide Inspector" : "Show Inspector") { inspectorShown.toggle() }
+            Button(inspectorShown ? LocalizedStringKey("Hide Inspector") : LocalizedStringKey("Show Inspector")) { inspectorShown.toggle() }
                 .keyboardShortcut("i", modifiers: [.command, .option])
                 .disabled(document == nil)
-            Button(timelineShown ? "Hide Timeline" : "Show Timeline") { timelineShown.toggle() }
+            Button(timelineShown ? LocalizedStringKey("Hide Timeline") : LocalizedStringKey("Show Timeline")) { timelineShown.toggle() }
                 .keyboardShortcut("t", modifiers: [.command, .option])
                 .disabled(document == nil)
-            Button(spreadsheetShown ? "Show Node Editor" : "Show Spreadsheet") {
+            Button(spreadsheetShown ? LocalizedStringKey("Show Node Editor") : LocalizedStringKey("Show Spreadsheet")) {
                 lowerPane = (spreadsheetShown ? TimelineSetting.LowerPane.network : .spreadsheet).rawValue
             }
             .keyboardShortcut("s", modifiers: [.command, .option])
@@ -76,6 +87,9 @@ struct HelixCommands: Commands {
             Divider()
             Toggle("Loop", isOn: $loop)
             Toggle("Play Every Frame", isOn: $everyFrame)
+            Divider()
+            Button("Clear Cook Cache") { document?.clearCookCache() }
+                .disabled(document == nil || document?.isActive != true)
         }
         CommandMenu("Node") {
             Button("Add Node…") { document?.editor.openPalette() }

@@ -9,6 +9,11 @@ tags: [import, file, primitive]
 # skeleton of the file (a mesh whose points are the joints), empty when the file has none.
 outputs: 2
 
+# Not in the cook cache: what it produces depends on files on disk, which the cache key does not
+# see. The import cache (src/Engine/Import/ImportFile.cpp) checks the file and its dependencies on
+# every cook instead, so a keyed import parameter cannot serve a frame of an older version.
+cache: false
+
 implementation:
   kind: cpp
   library: helixOps

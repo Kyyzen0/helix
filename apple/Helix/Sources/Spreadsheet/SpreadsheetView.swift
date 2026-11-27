@@ -45,7 +45,7 @@ struct SpreadsheetView: View {
 
     private func title(of owner: SpreadsheetOwner) -> String {
         guard model.state == .table else { return owner.title }
-        return "\(owner.title) \(model.report.count(of: owner).formatted())"
+        return String(localized: "\(owner.title) \(model.report.count(of: owner).formatted())")
     }
 }
 

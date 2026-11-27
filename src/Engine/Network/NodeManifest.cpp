@@ -346,6 +346,7 @@ void validateKeysForKind(
         "childScopeType",
         "inputs",
         "outputs",
+        "cache",
         "parameters",
     };
     const std::set<std::string> aliasKeys = {
@@ -431,6 +432,7 @@ NodeManifest NodeManifest::loadFromString(const std::string& yaml)
 
     nodeType.inputPorts = readInputPorts(document["inputs"], nodeType.internalName);
     if (document["outputs"]) nodeType.maxOutputs = document["outputs"].as<unsigned int>();
+    if (document["cache"]) nodeType.cacheable = document["cache"].as<bool>();
 
     manifest.parameterValues_ = readParameterValues(document["parameterValues"]);
 

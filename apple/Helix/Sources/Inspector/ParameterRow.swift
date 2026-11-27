@@ -90,8 +90,14 @@ struct ParameterMenu: View {
             Button("Clear Expression") { model.clearExpression(parameter.name, component: component) }
         } else if component == nil, parameter.hasAnyExpression {
             ForEach(Array(parameter.expressions.enumerated()).filter { !$0.element.isEmpty }, id: \.offset) { entry in
-                Button(parameter.componentCount > 1 ? "Clear Expression \(Self.axisName(entry.offset))" : "Clear Expression") {
+                Button {
                     model.clearExpression(parameter.name, component: entry.offset)
+                } label: {
+                    if parameter.componentCount > 1 {
+                        Text("Clear Expression \(Self.axisName(entry.offset))")
+                    } else {
+                        Text("Clear Expression")
+                    }
                 }
             }
         }
@@ -279,7 +285,7 @@ struct VectorControl: View {
                         }
                         NumberField(
                             text: text(component),
-                            accessibilityName: parameter.label + " " + ParameterMenu.axisName(component)
+                            accessibilityName: String(localized: "\(parameter.label) \(ParameterMenu.axisName(component))")
                         ) { typed in commit(typed, component: component) }
                     }
                 }
@@ -352,6 +358,7 @@ struct RangeCircleControl: View {
 
 /// An arc on a circle, from one angle to another, measured in degrees from the top, clockwise.
 struct ArcDial: View {
+    @Environment(\.theme) private var theme
     let start: Double
     let end: Double
 
@@ -366,7 +373,7 @@ struct ArcDial: View {
                 center: centre, radius: rect.width / 2,
                 startAngle: .degrees(start - 90), endAngle: .degrees(end - 90), clockwise: false
             )
-            context.stroke(arc, with: .color(.accentColor), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+            context.stroke(arc, with: .color(theme.accent), style: StrokeStyle(lineWidth: 3, lineCap: .round))
         }
     }
 }

@@ -544,9 +544,12 @@ TEST_CASE_METHOD(Fixture, "The cost of a frame of playback", "[.bench]")
         double total = 0.0;
         for (int repeat = 0; repeat < repeats; ++repeat)
         {
-            // Away and back, so that each timed step is a move to a frame that has to cook.
+            // Away and back, so that each timed step is a move to a frame that has to cook: the cook
+            // cache is emptied, since a frame it holds costs a lookup (see CookCacheTests.cpp, which
+            // measures that).
             core::setFrame(frame - 1.f);
             core::cookDisplayBuffers();
+            core::clearCookCache();
             const auto start = std::chrono::steady_clock::now();
             core::setFrame(frame);
             const core::DisplayBuffers buffers = core::cookDisplayBuffers();

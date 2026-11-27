@@ -5,6 +5,7 @@
 
 namespace helix::nt {
 class NetworkManager;
+class Node;
 }
 
 namespace helix::prm {
@@ -75,6 +76,23 @@ class CookContext
     /// @brief Returns whether the cook has been abandoned and should stop.
     bool isCancelled() const;
 
+    /// @brief Returns whether the context reads the live network, as opposed to a snapshot.
+    bool readsLiveNetwork() const { return snapshot_ == nullptr; }
+
+    /// @brief Returns the network the cook belongs to.
+    helix::nt::NetworkManager& manager() const { return networkManager_; }
+
+    /// @brief Returns the node wired into an input, or null when nothing is.
+    /// @note Only for a context that reads the live network, and null for any other.
+    helix::nt::Node* inputSourceNode(unsigned int inputIndex);
+
+    /// @brief Tells the context which node it cooks, so a read of the scene time is noted on it.
+    void attachNode(helix::nt::Node* node) { node_ = node; }
+
+    /// @brief Notes that the cooking node reads the scene time, as reading the frame does.
+    /// @note Used when the cook cache answers a cook that would have read it.
+    void noteTimeDependency() const { recordTimeDependency_(); }
+
     /// @brief Returns the frame the scene sits on.
     /// @note The frame can be fractional.
     floatT getFrame() const;
@@ -120,6 +138,9 @@ class CookContext
 
     helix::nt::NodeId nodeId_;
     helix::nt::NetworkManager& networkManager_;
+
+    // The node being cooked, when the cook told the context (see attachNode).
+    helix::nt::Node* node_ = nullptr;
 
     // Set when the context reads a snapshot rather than the live network. The
     // pointers are null for the ordinary kind.

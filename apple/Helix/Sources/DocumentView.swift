@@ -101,7 +101,7 @@ struct DocumentView: View {
                 Button {
                     document.requestFrame()
                 } label: {
-                    Label("Frame", systemImage: "viewfinder")
+                    Label("Frame Geometry", systemImage: "viewfinder")
                 }
                 .help("Frame the geometry (F)")
             }

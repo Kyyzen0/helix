@@ -2,6 +2,7 @@ import SwiftUI
 
 /// A yes or no: a checkbox, a switch or an icon button, by the style of the parameter.
 struct ToggleControl: View {
+    @Environment(\.theme) private var theme
     let parameter: InspectorParameter
     @ObservedObject var model: InspectorModel
     let availability: RowAvailability
@@ -16,13 +17,13 @@ struct ToggleControl: View {
                     Button { set(!isOn) } label: {
                         Image(systemName: InspectorIcons.symbol(forNodeIcon: parameter.styleOptions["icon"] ?? ""))
                             .frame(width: 22, height: 18)
-                            .foregroundStyle(isOn ? Color.white : Color.primary)
-                            .background(RoundedRectangle(cornerRadius: 5).fill(isOn ? Color.accentColor : Color.primary.opacity(0.08)))
+                            .foregroundStyle(isOn ? theme.onAccent : Color.primary)
+                            .background(RoundedRectangle(cornerRadius: 5).fill(isOn ? theme.accent : Color.primary.opacity(0.08)))
                     }
                     .buttonStyle(.plain)
                     .help(Text(parameter.tooltip.isEmpty ? parameter.label : parameter.tooltip))
                     .accessibilityLabel(Text(parameter.label))
-                    .accessibilityValue(Text(isOn ? "On" : "Off"))
+                    .accessibilityValue(isOn ? Text("On") : Text("Off"))
                 case .boolSwitch:
                     Toggle(parameter.label, isOn: binding)
                         .labelsHidden()

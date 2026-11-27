@@ -1,4 +1,5 @@
 #include "Engine/Network/NetworkManager.h"
+#include "Engine/Network/CookCache.h"
 #include "Engine/Async/CookPlan.h"
 #include "Engine/Async/CookResult.h"
 #include "Engine/Async/CookSnapshot.h"
@@ -101,6 +102,7 @@ void nt::NetworkManager::deleteNode(NodeId nodeId)
     nodeRemoved(nodeId);
 
     network_.deleteNode(nodeId);
+    cookCache().purgeNode(nodeId);
 }
 
 void nt::NetworkManager::createNodeWithId(
@@ -215,6 +217,16 @@ void nt::NetworkManager::setFrame(floatT frame)
     if (clamped == frame_) return;
 
     frame_ = clamped;
+
+    // What follows the frame is dirtied below, and none of it is an edit of the scene.
+    struct TimeChangeScope
+    {
+        explicit TimeChangeScope(std::atomic<bool>& flag) : flag_{flag}, wasSet_{flag.exchange(true)} {}
+        ~TimeChangeScope() { flag_ = wasSet_; }
+        std::atomic<bool>& flag_;
+        bool wasSet_;
+    } timeChange(timeChangeInProgress_);
+
     frameChanged(frame_);
     dirtyTimeDependents_();
 }
@@ -245,6 +257,9 @@ void nt::NetworkManager::setFps(floatT fps)
 
     fps_ = fps;
     fpsChanged(fps_);
+
+    // What was cooked at the old rate is not what the new one gives.
+    cookCache().clear();
 
     // A simulation steps one frame at a time, a frame lasting one over the rate, so a new rate
     // gives a different result at the same frame. Those nodes read the frame, which makes them
@@ -370,6 +385,7 @@ void nt::NetworkManager::setSelectedNodes(std::vector<nt::NodeId> nodeIds)
 void nt::NetworkManager::clear()
 {
     network_.clear();
+    cookCache().clear();
     selectedNodes_.clear();
     undoStack_.clear();
     resetTime_();
@@ -844,6 +860,10 @@ void nt::NetworkManager::dirtyTimeDependents_()
 
 void nt::NetworkManager::onNodeDirtied(nt::NodeId nodeId, bool dirtyDependents)
 {
+    // An edit makes what the cache holds for the node out of date. The dependents are dirtied
+    // one by one below, which comes back here for each of them.
+    if (!timeChangeInProgress_) cookCache().purgeNode(nodeId);
+
     if (!dirtyDependents) return;
 
     dirtyUnits_(graph().getDependents(nt::Unit{nodeId}));
@@ -877,6 +897,7 @@ void nt::NetworkManager::_reset()
     }
 
     network_.clear();
+    cookCache().clear();
     displayNode_.reset();
     resetTime_();
 }

@@ -1,9 +1,13 @@
 #pragma once
 #include "Engine/Core/Types.h"
+#include "Engine/Network/CookCache.h"
 #include "Engine/Network/CookContext.h"
 #include "Engine/Network/NodePacket.h"
 #include <boost/config.hpp>
+#include <cstdint>
 #include <filesystem>
+#include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -106,6 +110,31 @@ class BOOST_SYMBOL_EXPORT NodeImpl
 
     /// @brief Snapshots a ramp parameter into a sampler for use during the cook.
     helix::prm::Ramp evalParmRamp(std::string_view parmName) const;
+
+    /**
+     * @brief Returns the state a solver of this node saved, at the highest whole frame not above
+     * `maxIndex`, or nothing.
+     *
+     * A solver that is always worked out from its first frame can resume from the state an earlier
+     * cook left behind instead. The states are filed in the cook cache (see nt::CookCache) under
+     * everything this cook depends on except the frame, so a state is only found by a cook that
+     * would have reached it itself: any change to a parameter, an input or a keyframe of the
+     * node loses the states. Nothing is found when the cache is off, and for a cook on a worker
+     * thread, which does not use the cache.
+     *
+     * @param slot Tells the solvers of one node apart, when it has several.
+     * @param maxIndex The most whole frames after the first frame the caller wants a state at.
+     */
+    std::optional<CachedState> findSolverState(unsigned int slot, std::int64_t maxIndex) const;
+
+    /// @brief Saves the state of a solver after `index` whole frames, see findSolverState.
+    /// @param bytes The estimated size of the state, which the cache budget counts.
+    void saveSolverState(
+        unsigned int slot,
+        std::int64_t index,
+        std::shared_ptr<const void> state,
+        std::size_t bytes
+    ) const;
 
   private:
     Node& node_;

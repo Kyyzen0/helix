@@ -90,6 +90,22 @@ enum MCPHandlers {
         ]
     }
 
+    /// What the cook cache holds and how it has been used.
+    static func cookCacheJSON() -> JSONValue {
+        let info = helix.core.cookCacheInfo()
+        func count(_ value: UInt64) -> JSONValue { .int(Int64(clamping: value)) }
+        return [
+            "bytes_used": count(info.bytesUsed),
+            "budget": count(info.budget),
+            "entries": count(info.entries),
+            "frame_entries": count(info.frameEntries),
+            "state_entries": count(info.stateEntries),
+            "hits": count(info.hits),
+            "misses": count(info.misses),
+            "state_hits": count(info.stateHits),
+        ]
+    }
+
     private static func sceneJSON() -> JSONValue {
         let nodes = nodeList()
         let names = Dictionary(uniqueKeysWithValues: nodes.map { ($0.id, String(engine: $0.name)) })
@@ -126,6 +142,7 @@ enum MCPHandlers {
             "display_node": display == 0 ? .null : describe(display),
             "animated_nodes": .array(Array(helix.core.animatedNodes()).sorted().map { describe($0) }),
             "time": timeJSON(),
+            "cook_cache": cookCacheJSON(),
             "modified": .bool(helix.core.isSceneModified()),
         ]
     }
@@ -138,6 +155,11 @@ enum MCPHandlers {
 
     static func sceneInfo(_ arguments: Arguments) throws -> MCPToolOutput {
         .data(sceneJSON())
+    }
+
+    static func clearCookCache(_ arguments: Arguments) throws -> MCPToolOutput {
+        helix.core.clearCookCache()
+        return .data(["cook_cache": cookCacheJSON()])
     }
 
     /// Refuses to throw away work the agent did not mean to lose.
@@ -739,9 +761,9 @@ enum MCPHandlers {
         var options = helix.core.ViewportFrameOptions()
         options.pixelWidth = pixelWidth
         options.pixelHeight = pixelHeight
-        options.backgroundRed = ViewportRenderer.background.red
-        options.backgroundGreen = ViewportRenderer.background.green
-        options.backgroundBlue = ViewportRenderer.background.blue
+        // No window here, so no appearance to ask: the system theme draws as its dark side, the
+        // viewport's colours in every appearance.
+        Theme.stored().palette(systemIsDark: true).apply(to: &options)
         options.wireframe = wireframe
         options.materialsVisible = materialsVisible
 

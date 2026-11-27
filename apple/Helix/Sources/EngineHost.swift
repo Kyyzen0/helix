@@ -99,7 +99,7 @@ final class EngineHost {
     func useCacheFolder() throws {
         let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
-        let identifier = Bundle.main.bundleIdentifier ?? "Helix"
+        let identifier = Bundle.main.bundleIdentifier ?? "Helix" // l10n-ok: a folder name
         let folder = caches.appending(path: identifier).appending(path: "blend")
         try HelixError.check(helix.core.setCacheDirectory(std.string(folder.path)))
     }

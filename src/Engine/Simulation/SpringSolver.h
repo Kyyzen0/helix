@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/Core/Types.h"
+#include "Engine/Simulation/SolverCheckpoints.h"
 #include <functional>
 #include <vector>
 
@@ -62,6 +63,17 @@ class SpringSolver
     /// @brief The points of the lattice as they stand now.
     const std::vector<Vector3>& getPositions() const { return positions_; }
 
+    /// @brief Where the points were before the last step.
+    const std::vector<Vector3>& getPreviousPositions() const { return previousPositions_; }
+
+    /// @brief Moves the points to a state read from getPositions and getPreviousPositions.
+    /// @note The lattice has to be built with reset first, from the same settings.
+    void restore(const std::vector<Vector3>& positions, const std::vector<Vector3>& previous)
+    {
+        positions_ = positions;
+        previousPositions_ = previous;
+    }
+
     /// @brief How many points the lattice holds.
     std::size_t size() const { return positions_.size(); }
 
@@ -91,6 +103,13 @@ class SpringSolver
     SpringSettings settings_;
 };
 
+/// @brief What a spring lattice keeps between two steps: where the points are, and where they were.
+struct SpringState
+{
+    std::vector<Vector3> positions;
+    std::vector<Vector3> previousPositions;
+};
+
 /**
  * @brief Runs a spring lattice from one frame to another.
  *
@@ -105,6 +124,8 @@ class SpringSolver
  * @param endFrame The frame the lattice ends on.
  * @param fps How many frames make up a second.
  * @param subSteps How many steps each frame is broken into.
+ * @param checkpoints Where to start from and where to leave states, or null to run from the
+ * first frame and leave nothing. The points are the same either way.
  * @return The points of the lattice as they stand at the end frame.
  */
 std::vector<Vector3> simulateSprings(
@@ -113,7 +134,8 @@ std::vector<Vector3> simulateSprings(
     floatT startFrame,
     floatT endFrame,
     floatT fps,
-    intT subSteps = 1
+    intT subSteps = 1,
+    const SolverCheckpoints<SpringState>* checkpoints = nullptr
 );
 
 } // namespace helix::sim

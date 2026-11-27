@@ -34,9 +34,10 @@ enum NodeSearch {
     /// The score of a type for a query that is already normalised, or nil when it does not match.
     static func score(_ needle: String, for type: EditorNodeType) -> Int? {
         let shortName = Self.shortName(of: type.name)
-        let labelScore = fieldScore(needle, in: normalized(type.label), words: words(of: type.label))
+        let labelScore = ([type.label] + type.searchLabels)
+            .compactMap { fieldScore(needle, in: normalized($0), words: words(of: $0)) }.max()
         let nameScore = fieldScore(needle, in: normalized(shortName), words: words(of: shortName))
-        let tagScore = type.tags.compactMap { fieldScore(needle, in: normalized($0), words: []) }.max()
+        let tagScore = (type.tags + type.searchTags).compactMap { fieldScore(needle, in: normalized($0), words: []) }.max()
 
         let fieldBest = [labelScore, nameScore].compactMap { $0 }.max()
         switch (fieldBest, tagScore) {
@@ -83,16 +84,18 @@ enum NodeSearch {
         return max(200 - gaps * 25 - min(start, 50), 20)
     }
 
-    /// Lower case, without spaces, underscores and dots, so "Copy To" matches "copyTo".
+    /// Lower case, without accents, spaces, underscores and dots, so "Copy To" matches "copyTo"
+    /// and "camera" finds "Caméra".
     private static func normalized(_ text: String) -> String {
-        text.lowercased().filter { !$0.isWhitespace && $0 != "_" && $0 != "." }
+        text.folding(options: .diacriticInsensitive, locale: nil).lowercased()
+            .filter { !$0.isWhitespace && $0 != "_" && $0 != "." }
     }
 
     /// The words of a label or a name: "Attribute Noise" and "attributeNoise" give two.
     private static func words(of text: String) -> [String] {
         var words: [String] = []
         var current = ""
-        for character in text {
+        for character in text.folding(options: .diacriticInsensitive, locale: nil) {
             if character.isWhitespace || character == "_" {
                 if !current.isEmpty { words.append(current.lowercased()); current = "" }
             } else if character.isUppercase, current.last?.isLowercase == true {

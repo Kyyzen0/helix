@@ -87,6 +87,36 @@ struct TimelineRuler: Equatable {
     }
 }
 
+/// The frames the cook cache holds a cook for, as the bar under the ruler shows them.
+enum TimelineCache {
+    /// The frames as runs of consecutive frames, in order. A frame given twice counts once.
+    static func runs(of frames: [Int]) -> [ClosedRange<Int>] {
+        var runs: [ClosedRange<Int>] = []
+        for frame in Set(frames).sorted() {
+            if let last = runs.last, last.upperBound + 1 == frame {
+                runs[runs.count - 1] = last.lowerBound...frame
+            } else {
+                runs.append(frame...frame)
+            }
+        }
+        return runs
+    }
+}
+
+extension TimelineRuler {
+    /// Where a run of frames sits on the ruler: from the start of its first frame to the end of
+    /// its last, since a frame is a stretch of the ruler and not a point on it. Held to the
+    /// ruler, and nil for a run entirely off it.
+    func span(of run: ClosedRange<Int>) -> (x: CGFloat, width: CGFloat)? {
+        let lower = max(run.lowerBound, first)
+        let upper = min(run.upperBound, last)
+        guard lower <= upper else { return nil }
+        let start = x(of: Double(lower) - 0.5)
+        let end = x(of: Double(upper) + 0.5)
+        return (max(start, inset), max(min(end, width - inset) - max(start, inset), 0))
+    }
+}
+
 /// How the playhead advances with the clock.
 struct PlaybackClock: Equatable {
     enum Mode: String, Equatable, Sendable {

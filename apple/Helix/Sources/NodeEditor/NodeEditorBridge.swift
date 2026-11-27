@@ -18,12 +18,22 @@ enum NodeTypeCatalog {
     static var all: [EditorNodeType] {
         if let loaded { return loaded }
         let types = helix.core.listNodeTypeInfos().map { info in
-            EditorNodeType(
-                name: String(engine: info.name),
-                label: String(engine: info.label),
-                tags: info.tags.map { String(engine: $0) },
-                inputs: info.inputs.map {
-                    EditorPortInfo(label: String(engine: $0.label), multiInput: $0.multiInput, optional: $0.optional)
+            let name = String(engine: info.name)
+            let english = String(engine: info.label)
+            let englishTags = info.tags.map { String(engine: $0) }
+            let label = NodeText.typeLabel(name, fallback: english)
+            let tags = englishTags.map { NodeText.tag($0) }
+            return EditorNodeType(
+                name: name,
+                label: label,
+                tags: tags,
+                searchLabels: label == english ? [] : [english],
+                searchTags: tags == englishTags ? [] : englishTags,
+                inputs: info.inputs.enumerated().map { index, port in
+                    EditorPortInfo(
+                        label: NodeText.inputLabel(name, index: index, fallback: String(engine: port.label)),
+                        multiInput: port.multiInput, optional: port.optional
+                    )
                 },
                 outputCount: Int(info.outputCount)
             )

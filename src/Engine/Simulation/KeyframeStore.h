@@ -2,6 +2,7 @@
 #include "Engine/Core/Types.h"
 #include "Engine/Simulation/Keyframe.h"
 #include <boost/signals2.hpp>
+#include <cstdint>
 #include <cereal/types/map.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/vector.hpp>
@@ -118,6 +119,16 @@ class KeyframeStore
 
     /// @brief Every value of one node that holds keyframes, in a stable order.
     std::vector<KeyframeTarget> getTargets(nt::NodeId nodeId) const;
+
+    /**
+     * @brief Returns a key that stands for every key of one node: which values are animated, the
+     * value each holds without keys, and each keyframe's frame, value and interpolation.
+     *
+     * The cook cache files what a simulation made under it, since a simulation reads the track of
+     * an animated setting at the frames before the current one and not only the value the setting
+     * holds now. A node with no keyframes always gives the same key.
+     */
+    std::uint64_t keyOf(nt::NodeId nodeId) const;
 
     /// @brief The value a parameter held before its track was made.
     std::optional<floatT> getBaseValue(const KeyframeTarget& target) const;

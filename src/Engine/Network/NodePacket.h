@@ -1,5 +1,7 @@
 #pragma once
 #include "Engine/Primitives/Primitive.h"
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -81,8 +83,35 @@ class NodePacket
     size_t size() const;
     NodePacket deepCopy() const;
 
+    /**
+     * @brief Returns a number that tells this packet from every other one a node published.
+     *
+     * A node stamps the packet it hands to an output (nt::Node::setOutputPacket), drawing from one
+     * counter shared by every node, so two different results never carry the same number. A
+     * packet nothing stamped, such as the empty one an output holds before a cook, reads zero.
+     * The cook cache files a node's output under the numbers of the packets that came in, so
+     * the output is only reused when its inputs are the very packets it was made from.
+     *
+     * @note A copy keeps the number of the packet it was copied from, until it is stamped itself.
+     */
+    std::uint64_t identity() const { return identity_; }
+
+    /// @brief Gives the packet a number of its own, see identity.
+    void stamp();
+
+    /**
+     * @brief Estimates how much memory the packet holds, in bytes.
+     *
+     * Adds up every attribute and group of every primitive, the intrinsic ones included. A store
+     * that two attributes share (copy on write, see attr::Attribute) is counted once for each of
+     * them, so the estimate errs on the high side. A texture of a material is not counted, since
+     * every copy of a mesh shares it.
+     */
+    std::size_t estimateBytes() const;
+
   private:
     std::vector<geo::PrimPtr> primitives_;
+    std::uint64_t identity_ = 0;
 };
 
 } // namespace helix

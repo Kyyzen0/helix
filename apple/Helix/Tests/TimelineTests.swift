@@ -66,6 +66,38 @@ final class TimelineRulerTests: XCTestCase {
     }
 }
 
+final class TimelineCacheTests: XCTestCase {
+    func testConsecutiveFramesMakeOneRun() {
+        XCTAssertEqual(TimelineCache.runs(of: [3, 4, 5, 9, 10, 20]), [3...5, 9...10, 20...20])
+    }
+
+    func testTheOrderAndTheRepeatsOfTheFramesDoNotMatter() {
+        XCTAssertEqual(TimelineCache.runs(of: [10, 4, 3, 5, 4, 9]), [3...5, 9...10])
+        XCTAssertEqual(TimelineCache.runs(of: []), [])
+        XCTAssertEqual(TimelineCache.runs(of: [-2, -1, 0, 1]), [-2...1])
+    }
+
+    func testARunSpansWholeFramesOnTheRuler() {
+        let ruler = TimelineRuler(first: 0, last: 100, width: 1024, inset: 12)
+        // Ten points a frame: frames 10 to 12 take from the start of frame 10 to the end of 12.
+        let span = ruler.span(of: 10...12)
+        XCTAssertEqual(span?.x ?? 0, 12 + 9.5 * 10, accuracy: 1e-9)
+        XCTAssertEqual(span?.width ?? 0, 30, accuracy: 1e-9)
+    }
+
+    func testARunIsHeldToTheRulerAndAnyRunOffItIsLeftOut() {
+        let ruler = TimelineRuler(first: 10, last: 20, width: 500, inset: 12)
+        let wide = ruler.span(of: 0...100)
+        XCTAssertEqual(wide?.x ?? 0, 12, accuracy: 1e-9)
+        XCTAssertEqual(wide?.width ?? 0, 500 - 24, accuracy: 1e-9)
+        XCTAssertNil(ruler.span(of: 30...40))
+        XCTAssertNil(ruler.span(of: 0...5))
+        // One frame at the edge keeps its half frame on the inside.
+        let edge = ruler.span(of: 20...25)
+        XCTAssertEqual(edge?.width ?? 0, ruler.pointsPerFrame / 2, accuracy: 1e-9)
+    }
+}
+
 final class PlaybackClockTests: XCTestCase {
     private func clock(fps: Double = 24, first: Int = 1, last: Int = 10, loop: Bool = true,
                        mode: PlaybackClock.Mode = .realTime) -> PlaybackClock {
@@ -243,9 +275,12 @@ final class FakeTimeline: TimelineEditing {
     var moves: [Double] = []
     var calls: [String] = []
     var refuse: String?
+    var cachedFrames: [Int] = []
+    var cacheReads = 0
 
     func readTime() -> TimelineTime { time }
     func loadKeys(node: UInt64?) -> [TimelineKey] { node == nil ? [] : keys }
+    func loadCachedFrames() -> [Int] { cacheReads += 1; return cachedFrames }
     func moveToFrame(_ frame: Double) { moves.append(frame); time.frame = frame }
     func setRange(start: Int, end: Int) -> EditOutcome {
         calls.append("range \(start) \(end)")
@@ -427,6 +462,50 @@ final class TimelineModelTests: XCTestCase {
         XCTAssertNotNil(model.message)
         model.move(model.diamonds[0], by: 1)
         XCTAssertEqual(editing.calls, ["move 1 1.0"])
+    }
+
+    func testTheBarOfCachedFramesFollowsTheEngine() {
+        XCTAssertEqual(model.cachedRuns, [])
+        editing.cachedFrames = [2, 3, 4, 8]
+        model.reload()
+        XCTAssertEqual(model.cachedRuns, [2...4, 8...8])
+        // A cache that was cleared, or an edit that dropped what it held, empties the bar.
+        editing.cachedFrames = []
+        model.reload()
+        XCTAssertEqual(model.cachedRuns, [])
+    }
+
+    func testAScrubReadsTheCachedFramesOnce() {
+        let before = editing.cacheReads
+        editing.cachedFrames = [5]
+        model.scrub(to: 5)
+        XCTAssertEqual(editing.cacheReads, before + 1)
+        XCTAssertEqual(model.cachedRuns, [5...5])
+    }
+
+    func testPlaybackReadsTheCachedFramesEveryFewFramesAndWhenItStops() {
+        editing.time.end = 100
+        model.reload()
+        model.play()
+        let afterPlay = editing.cacheReads
+
+        // A few frames do not make a lookup.
+        clock = 3.0 / 24
+        model.tick()
+        XCTAssertEqual(editing.cacheReads, afterPlay)
+
+        // Enough of them do.
+        editing.cachedFrames = [1, 2, 3, 4]
+        clock = Double(TimelineModel.cacheReadInterval + 3) / 24
+        model.tick()
+        XCTAssertEqual(editing.cacheReads, afterPlay + 1)
+        XCTAssertEqual(model.cachedRuns, [1...4])
+
+        // Pausing catches the bar up with the frames that were cooked since.
+        editing.cachedFrames = [1, 2, 3, 4, 5, 6]
+        model.pause()
+        XCTAssertEqual(editing.cacheReads, afterPlay + 2)
+        XCTAssertEqual(model.cachedRuns, [1...6])
     }
 
     func testAKeyEditStopsPlayback() {

@@ -20,6 +20,10 @@ struct EditorNodeType: Hashable, Sendable {
     /// The name a person reads, such as "Cube".
     var label: String
     var tags: [String] = []
+    /// What the palette also searches: the English label and tags the engine gives, when `label`
+    /// and `tags` are in another language, so a search works in both.
+    var searchLabels: [String] = []
+    var searchTags: [String] = []
     var inputs: [EditorPortInfo] = []
     var outputCount = 1
 

@@ -121,7 +121,7 @@ final class SpreadsheetModel: ObservableObject {
         case .primitive:
             return SpreadsheetColumns.primitive(ofRow: row, owner: owner, in: report).map(String.init) ?? ""
         case .component(let attribute, let component):
-            if column.mixed { return "mixed" }
+            if column.mixed { return String(localized: "mixed") }
             if column.partial { return "–" }
             let (pageNumber, inPage) = cache.locate(row: row)
             if cache.page(owner: owner, attribute: attribute, page: pageNumber) == nil { loadPage(attribute: attribute, page: pageNumber) }

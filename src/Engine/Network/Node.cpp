@@ -1,4 +1,5 @@
 #include "Engine/Network/Node.h"
+#include "Engine/Network/CookCacheAttempt.h"
 #include "Engine/Network/CookContext.h"
 #include "Engine/Network/NodeImpl.h"
 #include "Engine/Parameter/NodeParameter.h"
@@ -102,6 +103,22 @@ void nt::Node::cook(nt::CookContext& context)
     if (!dirty_) return;
 
     clearDiagnostics();
+    context.attachNode(this);
+    cookStateKey_.store(0, std::memory_order_relaxed);
+
+    // A node that moves with the time may already have been cooked at this frame, with these
+    // parameters and these inputs. The cache then gives that cook back.
+    std::optional<CookCacheAttempt> cacheAttempt = CookCacheAttempt::begin(*this, context);
+    if (cacheAttempt && cacheAttempt->tryRestore(*this, context))
+    {
+        finishCook();
+        return;
+    }
+    if (cacheAttempt) cookStateKey_.store(cacheAttempt->stateKey(), std::memory_order_relaxed);
+
+    // Collected again by this cook, which tells whether the node still reads the time.
+    readsTime_.store(false, std::memory_order_relaxed);
+
     // An output the implementation does not set stays an empty packet (see NodeImpl::cook), so
     // it must not keep what an older cook put there.
     resetOutputPackets();
@@ -125,11 +142,30 @@ void nt::Node::cook(nt::CookContext& context)
         recordError("The node failed without a message.");
         resetOutputPackets();
     }
+
+    if (cacheAttempt) cacheAttempt->finish(*this, context);
+    else setCacheState(CacheState{readsTime(), nodeType_.cacheable});
+    cookStateKey_.store(0, std::memory_order_relaxed);
+
+    finishCook();
+}
+
+void nt::Node::finishCook()
+{
     dirty_ = false;
 
     // One counter for every node, so no two cooks anywhere in the process share a mark.
     static std::atomic<std::uint64_t> lastGeneration{0};
     cookGeneration_.store(++lastGeneration, std::memory_order_relaxed);
+}
+
+void nt::Node::restoreCachedCook(const CachedCook& cook)
+{
+    for (unsigned int outputIndex = 0; outputIndex < outputPackets_.size(); ++outputIndex)
+        outputPackets_[outputIndex] = cook.outputs[outputIndex];
+    for (const std::string& warning : cook.warnings)
+        recordWarning(warning);
+    readsTime_.store(cook.readsTime, std::memory_order_relaxed);
 }
 
 std::string nt::Node::getError() const
@@ -191,6 +227,9 @@ void nt::Node::setOutputPacket(unsigned int outputIndex, NodePacket packet)
     {
         if (prim) prim->defragment();
     }
+
+    // The cook cache tells results apart by this number.
+    packet.stamp();
 
     outputPackets_[outputIndex] = std::make_shared<const NodePacket>(std::move(packet));
 }

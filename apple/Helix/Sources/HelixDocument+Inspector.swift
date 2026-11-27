@@ -29,6 +29,8 @@ extension HelixDocument: InspectorEditing {
             cookGeometry()
             // The table follows a drag too, when it is on screen.
             spreadsheet.refresh()
+            // An edit drops what the cook cache held, which the ruler shows.
+            timeline.refreshCache()
         }
         return outcome
     }

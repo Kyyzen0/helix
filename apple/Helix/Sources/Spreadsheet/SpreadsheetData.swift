@@ -115,7 +115,7 @@ enum SpreadsheetColumns {
     /// The short name a header uses. The position of a point is "P", as in the tools the table
     /// looks like, and the tooltip carries the full name.
     static func shortName(_ name: String) -> String {
-        name == "Position" ? "P" : name
+        name == "Position" ? "P" : name // l10n-ok: the name the engine gives the attribute
     }
 
     /// The suffix of one component: x, y, z for a vector, a number for a matrix, none for a scalar.
@@ -145,8 +145,9 @@ enum SpreadsheetColumns {
             let partial = attribute.elementCount != total
             for component in 0..<max(attribute.componentCount, 1) {
                 let title = shortName(attribute.name) + suffix(component: component, of: attribute)
-                var tooltip = "\(attribute.name): \(attribute.type.name)"
-                if attribute.componentCount > 1 { tooltip += ", \(attribute.componentCount) components" }
+                var tooltip = attribute.componentCount > 1
+                    ? String(localized: "\(attribute.name): \(attribute.type.name), \(attribute.componentCount) components")
+                    : String(localized: "\(attribute.name): \(attribute.type.name)")
                 if partial {
                     tooltip += "\n" + String(localized: "On some primitives only, so its values are not shown against the rows.")
                 }

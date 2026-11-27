@@ -5,6 +5,7 @@ import SwiftUI
 struct TimelineBar: View {
     @ObservedObject var model: TimelineModel
     @AppStorage(TimelineSetting.loopKey) private var loop = true
+    @Environment(\.theme) private var theme
 
     var body: some View {
         VStack(spacing: 0) {
@@ -17,7 +18,7 @@ struct TimelineBar: View {
                 .padding(.horizontal, 6)
                 .padding(.bottom, 3)
         }
-        .background(.bar)
+        .background(theme.bar)
     }
 
     private var controls: some View {
@@ -104,11 +105,15 @@ struct TimelineBar: View {
 /// The ruler of the timeline: frame numbers, the range, the playhead and the diamonds. A click or
 /// a drag over it moves the playhead and stops the playback, and a diamond drags along it.
 struct TimelineRulerView: View {
+    @Environment(\.theme) private var theme
     @ObservedObject var model: TimelineModel
     @FocusState private var focused: Bool
 
     /// The height of the row the numbers are in, above the row of diamonds.
     private static let numberRow: CGFloat = 13
+
+    /// The height of the bar of cached frames, along the bottom of the ruler.
+    private static let cacheBar: CGFloat = 3
 
     var body: some View {
         GeometryReader { proxy in
@@ -163,10 +168,10 @@ struct TimelineRulerView: View {
             width: CGFloat(model.time.end - model.time.start) * ruler.pointsPerFrame, height: size.height
         )
         // The range is lighter than the room around it.
-        context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(.primary.opacity(0.05)))
-        context.fill(Path(range), with: .color(.primary.opacity(0.07)))
+        context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(theme.rulerRoom))
+        context.fill(Path(range), with: .color(theme.rulerRange))
 
-        let line = Color.primary.opacity(0.35)
+        let line = theme.rulerLine
         for frame in ruler.minorFrames() {
             let x = ruler.x(of: Double(frame))
             context.stroke(Path { $0.move(to: CGPoint(x: x, y: Self.numberRow - 2)); $0.addLine(to: CGPoint(x: x, y: Self.numberRow + 2)) }, with: .color(line.opacity(0.6)), lineWidth: 1)
@@ -174,7 +179,7 @@ struct TimelineRulerView: View {
         for frame in ruler.labelledFrames(from: model.time.start) where frame >= ruler.first && frame <= ruler.last {
             let x = ruler.x(of: Double(frame))
             context.stroke(Path { $0.move(to: CGPoint(x: x, y: Self.numberRow - 4)); $0.addLine(to: CGPoint(x: x, y: size.height)) }, with: .color(line.opacity(0.35)), lineWidth: 1)
-            let label = Text(String(frame)).font(.system(size: 9).monospacedDigit()).foregroundColor(.secondary)
+            let label = Text(String(frame)).font(.system(size: 9).monospacedDigit()).foregroundColor(theme.textSecondary)
             context.draw(label, at: CGPoint(x: x + 3, y: 6), anchor: .leading)
         }
         // The end of the range, which a step of ten does not always reach.
@@ -183,9 +188,18 @@ struct TimelineRulerView: View {
         let startX = ruler.x(of: Double(model.time.start))
         context.stroke(Path { $0.move(to: CGPoint(x: startX, y: 0)); $0.addLine(to: CGPoint(x: startX, y: size.height)) }, with: .color(line), lineWidth: 1)
 
+        // The frames that are cached, as a thin bar under the ticks and the diamonds.
+        for run in model.cachedRuns {
+            guard let span = ruler.span(of: run), span.width > 0 else { continue }
+            context.fill(
+                Path(CGRect(x: span.x, y: size.height - Self.cacheBar, width: span.width, height: Self.cacheBar)),
+                with: .color(theme.cachedBar)
+            )
+        }
+
         // The playhead.
         let x = ruler.x(of: model.time.frame)
-        let head = Color.accentColor
+        let head = theme.playhead
         context.stroke(Path { $0.move(to: CGPoint(x: x, y: 0)); $0.addLine(to: CGPoint(x: x, y: size.height)) }, with: .color(head), lineWidth: 1.5)
         context.fill(
             Path { path in
@@ -202,6 +216,7 @@ struct TimelineRulerView: View {
 /// One diamond of the ruler: the keys of a frame. It drags along the ruler by whole frames, and a
 /// right click gives the way the value leaves it and the removal.
 struct DiamondView: View {
+    @Environment(\.theme) private var theme
     @ObservedObject var model: TimelineModel
     let diamond: TimelineDiamond
     let ruler: TimelineRuler
@@ -212,8 +227,8 @@ struct DiamondView: View {
 
     var body: some View {
         Diamond()
-            .fill(atPlayhead ? Color.orange : Color.orange.opacity(0.75))
-            .overlay(Diamond().stroke(Color.black.opacity(0.35), lineWidth: 0.5))
+            .fill(atPlayhead ? theme.keyframe : theme.keyframe.opacity(0.75))
+            .overlay(Diamond().stroke(theme.keyframeEdge, lineWidth: 0.5))
             .frame(width: 10, height: 10)
             .offset(x: dragging ? snapped : 0)
             .frame(width: 18, height: 18)

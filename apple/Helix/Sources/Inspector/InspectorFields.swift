@@ -85,6 +85,7 @@ struct ScrubLabel: View {
 /// The expression of a component, shown in place of its value: monospaced and tinted, so it
 /// cannot be mistaken for a number.
 struct ExpressionField: View {
+    @Environment(\.theme) private var theme
     let text: String
     var hasError = false
     var isEnabled = true
@@ -94,7 +95,7 @@ struct ExpressionField: View {
         Button(action: onEdit) {
             Text(text)
                 .font(.system(size: 11, design: .monospaced))
-                .foregroundStyle(hasError ? Color.red : Color.accentColor)
+                .foregroundStyle(hasError ? Color.red : theme.accent)
                 .lineLimit(1)
                 .truncationMode(.middle)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -102,11 +103,11 @@ struct ExpressionField: View {
                 .padding(.vertical, 3)
                 .background(
                     RoundedRectangle(cornerRadius: 5)
-                        .fill((hasError ? Color.red : Color.accentColor).opacity(0.12))
+                        .fill((hasError ? Color.red : theme.accent).opacity(0.12))
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 5)
-                        .stroke((hasError ? Color.red : Color.accentColor).opacity(0.5), lineWidth: 1)
+                        .stroke((hasError ? Color.red : theme.accent).opacity(0.5), lineWidth: 1)
                 )
         }
         .buttonStyle(.plain)

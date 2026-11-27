@@ -18,8 +18,10 @@ enum TimelineLoader {
         let tracks = Array(helix.core.listKeyframes(node))
         guard !tracks.isEmpty else { return [] }
         var labels: [String: (label: String, count: Int)] = [:]
+        let type = helix.core.listNodes().first { $0.id == node }.map { String(engine: $0.type) } ?? ""
         for info in helix.core.listParameters(node) {
-            labels[String(engine: info.name)] = (String(engine: info.label), Int(info.componentCount))
+            let name = String(engine: info.name)
+            labels[name] = (NodeText.label(type, parameter: name, fallback: String(engine: info.label)), Int(info.componentCount))
         }
         var keys: [TimelineKey] = []
         for track in tracks {
@@ -34,6 +36,13 @@ enum TimelineLoader {
             }
         }
         return keys
+    }
+
+    /// The whole frames the cook cache holds a cook of the displayed node for.
+    static func loadCachedFrames() -> [Int] {
+        let node = helix.core.displayNode()
+        guard node != 0 else { return [] }
+        return helix.core.cachedFrames(node).map { Int($0) }
     }
 
     static func interpolation(_ value: helix.core.Interpolation) -> KeyInterpolation {
@@ -60,6 +69,7 @@ enum TimelineLoader {
 final class ReadOnlyTimelineSource: TimelineEditing {
     func readTime() -> TimelineTime { TimelineLoader.readTime() }
     func loadKeys(node: UInt64?) -> [TimelineKey] { TimelineLoader.loadKeys(node: node) }
+    func loadCachedFrames() -> [Int] { TimelineLoader.loadCachedFrames() }
     func moveToFrame(_ frame: Double) {}
     func setRange(start: Int, end: Int) -> EditOutcome { .done }
     func setFps(_ fps: Double) -> EditOutcome { .done }

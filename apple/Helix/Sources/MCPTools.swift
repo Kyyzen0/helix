@@ -46,8 +46,11 @@ enum MCPTools {
         [
             // The scene.
             tool("scene_info",
-                 "Lists the nodes, the links, the display node, the nodes that hold keyframes (animated_nodes), the time and whether the scene has unsaved changes. A node whose last cook failed carries 'error', and one that was warned carries 'warnings'; a node nothing has cooked has neither, so call geometry_summary on it to find out. geometry_summary and render_view fail with the message of the node that is the root cause.",
+                 "Lists the nodes, the links, the display node, the nodes that hold keyframes (animated_nodes), the time, the cook_cache and whether the scene has unsaved changes. cook_cache says what the cache of cooked frames holds: a node that moves with the time (a simulation, a keyed or animated value, what is wired after them) keeps what it produced at every frame it cooked, so going back to a frame costs no cook, and a simulation resumes from a saved state instead of its first frame. It gives bytes_used and the budget, how many entries (frame_entries and state_entries), and hits, misses and state_hits. A node whose last cook failed carries 'error', and one that was warned carries 'warnings'; a node nothing has cooked has neither, so call geometry_summary on it to find out. geometry_summary and render_view fail with the message of the node that is the root cause.",
                  [:], readOnly: true, MCPHandlers.sceneInfo),
+            tool("clear_cook_cache",
+                 "Drops everything the cook cache holds, so the next visit to a frame cooks it again. The scene is not changed: this only forgets what it had computed, and what comes back is the same as what was dropped. Returns the cook_cache of scene_info.",
+                 [:], idempotent: true, MCPHandlers.clearCookCache),
             tool("new_scene",
                  "Replaces the scene with an empty one. Refuses when there are unsaved changes unless discard_changes is true.",
                  ["discard_changes": boolean("Set to true to throw away unsaved changes.")],
