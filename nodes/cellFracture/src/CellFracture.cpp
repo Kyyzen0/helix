@@ -201,6 +201,7 @@ std::shared_ptr<geo::Mesh> fractureMesh(
 )
 {
     auto fractured = std::make_shared<geo::Mesh>(mesh.getPath());
+    fractured->setMaterials(mesh.materials());
     for (const attr::AttributeOwner owner :
          {attr::AttributeOwner::POINT, attr::AttributeOwner::VERTEX, attr::AttributeOwner::FACE})
         fractured->addAttributesFrom(mesh, owner);

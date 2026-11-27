@@ -208,10 +208,24 @@ std::string ImportSummary::text() const
     if (materialCount > 0)
     {
         out << " " << materialCount << (materialCount == 1 ? " material" : " materials");
-        if (texturedMaterialCount > 0) out << " (" << texturedMaterialCount << " with textures, not shown yet)";
+        if (texturedMaterialCount > 0)
+        {
+            out << " (" << texturedMaterialCount << " with textures: " << decodedTextureCount << " decoded, "
+                << std::fixed << std::setprecision(1) << double(textureBytes) / (1024.0 * 1024.0) << " MB";
+            if (scaledTextureCount > 0) out << ", " << scaledTextureCount << " scaled down";
+            if (!missingTextures.empty()) out << ", " << missingTextures.size() << " missing";
+            out << ")";
+        }
         if (hasBaseColor)
             out << ", first base color " << std::fixed << std::setprecision(2) << baseColor[0] << " "
                 << baseColor[1] << " " << baseColor[2];
+        out << ".";
+    }
+
+    if (!missingTextures.empty())
+    {
+        out << " Missing: " << missingTextures.front();
+        if (missingTextures.size() > 1) out << " (and " << missingTextures.size() - 1 << " more)";
         out << ".";
     }
 

@@ -1,6 +1,7 @@
 #include "Engine/Network/NetworkManager.h"
 #include "HelixCore/HelixCore.h"
 #include <algorithm>
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <cmath>
 #include <filesystem>
@@ -554,6 +555,45 @@ core::NodeId mergedTaggedCubes(const char* firstType, const char* secondType)
 }
 
 } // namespace
+
+TEST_CASE_METHOD(CoreFixture, "A report lists the materials of an import once each, with their texture")
+{
+    const std::filesystem::path data = std::filesystem::path(HELIX_TEST_DATA_DIR) / "import";
+
+    const core::CreateNodeResult textured = core::importFile((data / "textured-quad.glb").string());
+    REQUIRE(textured.status.ok);
+    REQUIRE(core::lastImportSummary().find("1 decoded") != std::string::npos);
+    const core::GeometryReport report = core::cookNodeReport(textured.id);
+    REQUIRE(report.status.ok);
+    REQUIRE(report.materials.size() == 1);
+    const core::MaterialInfo& material = report.materials.front();
+    REQUIRE(material.name == "Painted");
+    REQUIRE(material.baseColor[0] == Catch::Approx(0.9f));
+    REQUIRE(material.baseColor[1] == Catch::Approx(0.8f));
+    REQUIRE(material.baseColor[2] == Catch::Approx(0.7f));
+    REQUIRE(material.baseColor[3] == Catch::Approx(1.f));
+    REQUIRE(material.hasTexture);
+    REQUIRE(material.textureWidth == 4);
+    REQUIRE(material.textureHeight == 4);
+    REQUIRE(material.textureSource.find("textured-quad.glb#embedded:") != std::string::npos);
+    REQUIRE(material.missingTexture.empty());
+
+    // Two meshes with a material each, kept apart: both are listed, once.
+    const core::CreateNodeResult two = core::importFile((data / "two-materials.glb").string());
+    REQUIRE(two.status.ok);
+    REQUIRE(core::setInt(two.id, "mergeMeshes", 0, 0).ok);
+    const core::GeometryReport apart = core::cookNodeReport(two.id);
+    REQUIRE(apart.status.ok);
+    REQUIRE(apart.primitiveCount == 2);
+    REQUIRE(apart.materials.size() == 2);
+    REQUIRE(apart.materials[0].name == "Red");
+    REQUIRE(apart.materials[1].name == "Blue");
+    REQUIRE_FALSE(apart.materials[0].hasTexture);
+    REQUIRE(apart.materials[0].textureSource.empty());
+
+    // A node with no material reports none.
+    REQUIRE(core::cookNodeReport(createDisplayedCube()).materials.empty());
+}
 
 TEST_CASE_METHOD(CoreFixture, "A report flags an attribute whose type differs between primitives")
 {

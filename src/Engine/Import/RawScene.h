@@ -1,7 +1,9 @@
 #pragma once
 #include "Engine/Core/Types.h"
+#include "Engine/Primitives/Material.h"
 #include <array>
 #include <cstdint>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -66,7 +68,13 @@ struct RawMaterial
     std::string name;
     /// @brief The base colour, each channel from 0 to 1.
     std::array<float, 4> baseColor{1.f, 1.f, 1.f, 1.f};
+    /// @brief The file refers to a base colour texture, loaded or not.
     bool hasTexture = false;
+    /// @brief The decoded base colour texture, shared by every material of the file that uses
+    /// the same picture. Null when there is none or it could not be loaded.
+    std::shared_ptr<const geo::Image> texture;
+    /// @brief What went wrong with the texture the file refers to, empty when nothing did.
+    std::string missingTexture;
 };
 
 /// @brief What a reader hands the engine: meshes, where they sit, and what was left behind.

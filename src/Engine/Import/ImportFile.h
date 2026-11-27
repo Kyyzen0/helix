@@ -31,7 +31,16 @@ struct ImportSummary
     bool hasUvs = false;
     bool hasColors = false;
     std::size_t materialCount = 0;
+    /// @brief Materials the file gives a base colour texture to, loaded or not.
     std::size_t texturedMaterialCount = 0;
+    /// @brief Distinct base colour pictures decoded (a picture several materials share counts once).
+    std::size_t decodedTextureCount = 0;
+    /// @brief The memory those pictures take, in bytes.
+    std::size_t textureBytes = 0;
+    /// @brief How many of them were scaled down to the largest texture side.
+    std::size_t scaledTextureCount = 0;
+    /// @brief One line per texture the file refers to and the import could not load.
+    std::vector<std::string> missingTextures;
     /// @brief The base colour of the first material, when there is one.
     bool hasBaseColor = false;
     std::array<float, 4> baseColor{1.f, 1.f, 1.f, 1.f};

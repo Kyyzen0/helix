@@ -1,3 +1,4 @@
+#include "Engine/Import/ImageDecode.h"
 #include "Engine/Import/ImportFile.h"
 #include "Engine/Import/Readers.h"
 #include <assimp/DefaultIOSystem.h>
@@ -11,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <exception>
+#include <map>
 #include <vector>
 
 namespace helix::import {
@@ -49,7 +51,140 @@ UpAxis declaredUpAxis(const aiScene& scene)
     return UpAxis::Auto;
 }
 
-RawMaterial readMaterial(const aiMaterial& source)
+// What reading the textures of one file needs, and what it has decoded so far, so a picture
+// several materials share is decoded once.
+struct TextureContext
+{
+    const aiScene& scene;
+    std::filesystem::path modelFile;
+    std::filesystem::path folder;
+    // Where the files a texture needs are added, for the import cache. Null when not wanted.
+    std::vector<std::filesystem::path>* opened = nullptr;
+    std::map<std::string, DecodeResult> decoded;
+};
+
+// The percent escapes of a path written as a URI ("my%20picture.png").
+std::string decodePercent(const std::string& text)
+{
+    std::string out;
+    for (std::size_t i = 0; i < text.size(); ++i)
+    {
+        if (text[i] == '%' && i + 2 < text.size() && std::isxdigit(static_cast<unsigned char>(text[i + 1])) &&
+            std::isxdigit(static_cast<unsigned char>(text[i + 2])))
+        {
+            out += static_cast<char>(std::stoi(text.substr(i + 1, 2), nullptr, 16));
+            i += 2;
+        }
+        else
+            out += text[i];
+    }
+    return out;
+}
+
+// The file a texture path names, looked for next to the model, then under its own (absolute)
+// path, then by its file name next to the model. Empty when none exists.
+std::filesystem::path locateTexture(const TextureContext& context, const std::string& written)
+{
+    std::string path = written;
+    std::replace(path.begin(), path.end(), '\\', '/');
+    std::vector<std::string> spellings{path};
+    const std::string plain = decodePercent(path);
+    if (plain != path) spellings.push_back(plain);
+
+    std::error_code error;
+    for (const std::string& spelling : spellings)
+    {
+        const std::filesystem::path candidate(spelling);
+        if (candidate.is_relative() && std::filesystem::is_regular_file(context.folder / candidate, error))
+            return context.folder / candidate;
+        if (candidate.is_absolute() && std::filesystem::is_regular_file(candidate, error)) return candidate;
+    }
+    for (const std::string& spelling : spellings)
+    {
+        const std::filesystem::path name = std::filesystem::path(spelling).filename();
+        if (!name.empty() && std::filesystem::is_regular_file(context.folder / name, error))
+            return context.folder / name;
+    }
+    return {};
+}
+
+DecodeResult decodeEmbedded(const aiTexture& texture, const std::string& source)
+{
+    if (texture.mHeight == 0)
+        return decodeImage(texture.pcData, texture.mWidth, source);
+
+    // Raw texels, blue first.
+    const std::size_t count = std::size_t(texture.mWidth) * texture.mHeight;
+    auto image = std::make_shared<geo::Image>();
+    image->width = texture.mWidth;
+    image->height = texture.mHeight;
+    image->source = source;
+    image->rgba.resize(count * 4);
+    for (std::size_t i = 0; i < count; ++i)
+    {
+        const aiTexel& texel = texture.pcData[i];
+        image->rgba[4 * i] = texel.r;
+        image->rgba[4 * i + 1] = texel.g;
+        image->rgba[4 * i + 2] = texel.b;
+        image->rgba[4 * i + 3] = texel.a;
+    }
+    DecodeResult result;
+    result.image = std::move(image);
+    return result;
+}
+
+// Loads the base colour texture of a material into it. A texture that cannot be loaded leaves
+// the material with its factor and a note, and never fails the import.
+void readTexture(const aiMaterial& source, TextureContext& context, RawMaterial& material)
+{
+    aiString path;
+    aiTextureType type = aiTextureType_BASE_COLOR;
+    if (source.GetTexture(type, 0, &path) != aiReturn_SUCCESS)
+    {
+        type = aiTextureType_DIFFUSE;
+        if (source.GetTexture(type, 0, &path) != aiReturn_SUCCESS) return;
+    }
+    const std::string written = path.C_Str();
+    material.hasTexture = true;
+
+    std::string key;
+    DecodeResult* result = nullptr;
+    auto remember = [&](const std::string& id, auto&& decode) {
+        key = id;
+        auto found = context.decoded.find(key);
+        if (found == context.decoded.end()) found = context.decoded.emplace(key, decode()).first;
+        result = &found->second;
+    };
+
+    const aiTexture* embedded = written.empty() ? nullptr : context.scene.GetEmbeddedTexture(written.c_str());
+    if (embedded)
+    {
+        const std::string id = written.front() == '*' ? written.substr(1) : written;
+        remember("embedded:" + id, [&] {
+            return decodeEmbedded(*embedded, context.modelFile.string() + "#embedded:" + id);
+        });
+    }
+    else
+    {
+        const std::filesystem::path file = locateTexture(context, written);
+        if (file.empty())
+        {
+            material.missingTexture = "texture \"" + written.substr(0, 200) + "\" not found next to the model";
+            return;
+        }
+        remember("file:" + file.string(), [&] { return decodeImageFile(file); });
+        if (context.opened &&
+            std::find(context.opened->begin(), context.opened->end(), file) == context.opened->end())
+            context.opened->push_back(file);
+    }
+
+    if (result->image)
+        material.texture = result->image;
+    else
+        material.missingTexture = "texture \"" + written.substr(0, 200) + "\" could not be loaded: " + result->error;
+}
+
+RawMaterial readMaterial(const aiMaterial& source, TextureContext& context)
 {
     RawMaterial material;
     aiString name;
@@ -62,6 +197,7 @@ RawMaterial readMaterial(const aiMaterial& source)
 
     material.hasTexture = source.GetTextureCount(aiTextureType_BASE_COLOR) > 0 ||
                           source.GetTextureCount(aiTextureType_DIFFUSE) > 0;
+    if (material.hasTexture) readTexture(source, context, material);
     return material;
 }
 
@@ -146,12 +282,11 @@ RawScene readWithAssimp(const std::filesystem::path& file, std::vector<std::file
     unsigned flags = aiProcess_SortByPType | aiProcess_ValidateDataStructure |
                      aiProcess_RemoveComponent;
     if (needsWelding(extension)) flags |= aiProcess_JoinIdenticalVertices;
-    // Skins, animations, cameras, lights and embedded pictures are not used, so they are dropped
-    // before they cost memory.
+    // Skins, animations, cameras and lights are not used, so they are dropped before they cost
+    // memory. The embedded pictures stay: the base colour textures are decoded from them below.
     importer.SetPropertyInteger(
         AI_CONFIG_PP_RVC_FLAGS,
-        aiComponent_ANIMATIONS | aiComponent_CAMERAS | aiComponent_LIGHTS | aiComponent_TEXTURES |
-            aiComponent_BONEWEIGHTS
+        aiComponent_ANIMATIONS | aiComponent_CAMERAS | aiComponent_LIGHTS | aiComponent_BONEWEIGHTS
     );
     try
     {
@@ -168,6 +303,8 @@ RawScene readWithAssimp(const std::filesystem::path& file, std::vector<std::file
         throw ImportError("The file is damaged" + (reason.empty() ? "." : ": " + reason));
     }
 
+    TextureContext textures{*scene, file, file.parent_path(), openedFiles, {}};
+
     // Assimp adds a default material to most scenes. Only the materials a kept mesh uses are
     // listed, and the meshes are renumbered to match.
     std::vector<int> materialOf(scene->mNumMaterials, -1);
@@ -176,7 +313,7 @@ RawScene readWithAssimp(const std::filesystem::path& file, std::vector<std::file
         if (materialOf[sourceIndex] < 0)
         {
             materialOf[sourceIndex] = static_cast<int>(result.materials.size());
-            result.materials.push_back(readMaterial(*scene->mMaterials[sourceIndex]));
+            result.materials.push_back(readMaterial(*scene->mMaterials[sourceIndex], textures));
         }
         return materialOf[sourceIndex];
     };

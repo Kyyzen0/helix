@@ -416,6 +416,27 @@ enum MCPHandlers {
             if attribute.mixedTypes { entry["mixed_types"] = true }
             return .object(entry)
         }
+        // One entry per material, shared ones once. A face's material_index points into the table
+        // of its own mesh, so this is the list of what the geometry is made of, not that table.
+        let materials: [JSONValue] = Array(report.materials).map { material in
+            let color = material.baseColor
+            var entry: [String: JSONValue] = [
+                "name": .string(String(engine: material.name)),
+                "base_color": [.init(color.0), .init(color.1), .init(color.2), .init(color.3)],
+                "has_texture": .bool(material.hasTexture),
+            ]
+            if material.hasTexture {
+                entry["texture"] = [
+                    "width": .int(Int64(material.textureWidth)),
+                    "height": .int(Int64(material.textureHeight)),
+                    "source": .string(String(engine: material.textureSource)),
+                ]
+            }
+            if !material.missingTexture.isEmpty {
+                entry["missing_texture"] = .string(String(engine: material.missingTexture))
+            }
+            return .object(entry)
+        }
         return .data([
             "node": identity(node),
             "point_count": .init(count: report.pointCount),
@@ -425,6 +446,7 @@ enum MCPHandlers {
             "triangle_count": .init(count: report.triangleCount),
             "bounds": bounds,
             "attributes": .array(attributes),
+            "materials": .array(materials),
         ])
     }
 

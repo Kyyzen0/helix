@@ -1,4 +1,5 @@
 #include "Engine/GeometryAlgorithms/BooleanUtils.h"
+#include "Engine/Attribute/AttributeNames.h"
 #include "Engine/GeometryAlgorithms/AttributeTransfer.h"
 #include "Engine/GeometryAlgorithms/MeshUtils.h"
 #include "Engine/Primitives/Mesh.h"
@@ -753,6 +754,33 @@ std::shared_ptr<geo::Mesh> assembleMesh(
     };
     copyFaceAndVertexAttributes(meshA, copiesA);
     copyFaceAndVertexAttributes(meshB, copiesB);
+
+    // The materials of both inputs go into one table. The faces of A keep their indices, the
+    // faces of B are moved to where their materials landed, and a face with no material or an
+    // index outside its table gets -1.
+    if (!meshA.materials().empty() || !meshB.materials().empty())
+    {
+        outputMesh->setMaterials(meshA.materials());
+        const std::vector<intT> remapB = outputMesh->appendMaterials(meshB.materials());
+        const std::shared_ptr<attr::Attribute> indices =
+            outputMesh->getAttribByName(attr::AttributeOwner::FACE, attr::names::materialIndex);
+        if (indices && indices->getType() == attr::AttributeType::intT)
+        {
+            attr::AttributeHandle<intT> handle(indices);
+            auto remapFaces = [&](const SourceCopies& copies, const std::vector<intT>* remap, std::size_t tableSize) {
+                for (const Offset face : copies.destFaces)
+                {
+                    const intT value = handle.getValue(face);
+                    intT mapped = -1;
+                    if (value >= 0 && static_cast<std::size_t>(value) < tableSize)
+                        mapped = remap ? (*remap)[static_cast<std::size_t>(value)] : value;
+                    handle.setValue(face, mapped);
+                }
+            };
+            remapFaces(copiesA, nullptr, meshA.materials().size());
+            remapFaces(copiesB, &remapB, meshB.materials().size());
+        }
+    }
 
     return outputMesh;
 }

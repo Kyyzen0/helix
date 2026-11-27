@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine/Primitives/Material.h"
 #include "Engine/Primitives/Primitive.h"
 #include <atomic>
 #include <mutex>
@@ -117,7 +118,34 @@ class Mesh : public Primitive
 
     void defragment() override;
 
+    /**
+     * @brief Appends the faces, points and attributes of another mesh.
+     *
+     * The materials of the other mesh join this one's table (a material already in it, by
+     * pointer, is not added twice) and the `material_index` of the appended faces is remapped to
+     * match. A face of the other mesh with no material, or an index outside its table, ends up
+     * with -1.
+     */
     void merge(Mesh& other);
+
+    /**
+     * @brief The materials the `material_index` face attribute points into. Empty for a mesh
+     * that has none. The materials are immutable and shared, so copying a mesh copies pointers.
+     */
+    const std::vector<std::shared_ptr<const Material>>& materials() const { return materials_; }
+    /// @brief Replaces the material table. The `material_index` values are left as they are.
+    void setMaterials(std::vector<std::shared_ptr<const Material>> materials)
+    {
+        materials_ = std::move(materials);
+    }
+    /// @brief The material of a face, or null when it has none (no table, no `material_index`,
+    /// or an index outside the table).
+    std::shared_ptr<const Material> materialOfFace(Offset face) const;
+    /**
+     * @brief Adds the materials of another mesh to this table, without duplicates (by pointer).
+     * @return For each entry of the other table, its index in this one.
+     */
+    std::vector<intT> appendMaterials(const std::vector<std::shared_ptr<const Material>>& other);
 
     std::unordered_set<Offset>::const_iterator soloPointsBegin() const;
     std::unordered_set<Offset>::const_iterator soloPointsEnd() const;
@@ -326,6 +354,9 @@ class Mesh : public Primitive
             dstHandle.setValue(dstOffset, value);
         }
     };
+
+    // What the material_index face attribute points into. Immutable materials, shared by pointer.
+    std::vector<std::shared_ptr<const Material>> materials_;
 
     attr::attribVector vertexAttributes_;
     attr::attribVector faceAttributes_;

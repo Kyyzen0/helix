@@ -152,7 +152,11 @@ void fillMissingNormals(Gathered& data)
     }
 }
 
-std::shared_ptr<geo::Mesh> toMesh(Gathered& data, const std::string& path)
+std::shared_ptr<geo::Mesh> toMesh(
+    Gathered& data,
+    const std::string& path,
+    const std::vector<std::shared_ptr<const geo::Material>>& sceneMaterials
+)
 {
     fillMissingNormals(data);
     auto mesh = std::make_shared<geo::Mesh>(path);
@@ -179,9 +183,28 @@ std::shared_ptr<geo::Mesh> toMesh(Gathered& data, const std::string& path)
             colors.setValue(corner, data.colors[data.indices[corner]]);
     }
 
+    // The mesh carries the materials its faces use, in the order they first appear, and the
+    // index of a face points into that table.
+    std::vector<intT> remap(sceneMaterials.size(), -1);
+    std::vector<std::shared_ptr<const geo::Material>> table;
     auto materials = mesh->addAttribute<intT>(attr::AttributeOwner::FACE, attr::names::materialIndex);
     for (Offset face = 0; face < data.faceMaterials.size(); ++face)
-        materials.setValue(face, data.faceMaterials[face]);
+    {
+        intT index = data.faceMaterials[face];
+        if (index >= 0 && static_cast<std::size_t>(index) < sceneMaterials.size())
+        {
+            if (remap[static_cast<std::size_t>(index)] < 0)
+            {
+                remap[static_cast<std::size_t>(index)] = static_cast<intT>(table.size());
+                table.push_back(sceneMaterials[static_cast<std::size_t>(index)]);
+            }
+            index = remap[static_cast<std::size_t>(index)];
+        }
+        else
+            index = -1;
+        materials.setValue(face, index);
+    }
+    mesh->setMaterials(std::move(table));
     return mesh;
 }
 
@@ -216,6 +239,18 @@ ImportedFile buildMeshes(
     summary.skinnedMeshCount = scene.skinnedMeshCount;
     summary.skippedPrimitiveCount = scene.skippedPrimitiveCount;
 
+    // The materials of the file, built once: every mesh that uses one shares it.
+    std::vector<std::shared_ptr<const geo::Material>> sceneMaterials;
+    for (const RawMaterial& raw : scene.materials)
+    {
+        auto material = std::make_shared<geo::Material>();
+        material->name = raw.name;
+        material->baseColor = Vector4(raw.baseColor[0], raw.baseColor[1], raw.baseColor[2], raw.baseColor[3]);
+        material->baseColorTexture = raw.texture;
+        material->missingTexture = raw.missingTexture;
+        sceneMaterials.push_back(std::move(material));
+    }
+
     // The mesh of a single file is named like the node of the obj reader, so a scene that holds
     // one mesh keeps the path an obj import has always had.
     std::set<std::string> usedPaths;
@@ -229,7 +264,7 @@ ImportedFile buildMeshes(
         for (int suffix = 2; !usedPaths.insert(path).second; ++suffix)
             path = stem + std::to_string(suffix);
 
-        const std::shared_ptr<geo::Mesh> mesh = toMesh(group, path);
+        const std::shared_ptr<geo::Mesh> mesh = toMesh(group, path, sceneMaterials);
         summary.pointCount += mesh->getNumPoints();
         summary.faceCount += mesh->getNumFaces();
         summary.hasNormals = summary.hasNormals || group.hasNormals;
@@ -240,8 +275,20 @@ ImportedFile buildMeshes(
     summary.meshCount = result.meshes.size();
 
     summary.materialCount = scene.materials.size();
+    std::set<const geo::Image*> distinctImages;
     for (const RawMaterial& material : scene.materials)
+    {
         if (material.hasTexture) ++summary.texturedMaterialCount;
+        if (material.texture && distinctImages.insert(material.texture.get()).second)
+        {
+            ++summary.decodedTextureCount;
+            summary.textureBytes += material.texture->byteSize();
+            if (material.texture->source.find("(scaled down") != std::string::npos)
+                ++summary.scaledTextureCount;
+        }
+        if (!material.missingTexture.empty())
+            summary.missingTextures.push_back((material.name.empty() ? "material" : material.name) + ": " + material.missingTexture);
+    }
     if (!scene.materials.empty())
     {
         summary.hasBaseColor = true;

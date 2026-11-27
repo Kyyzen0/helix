@@ -12,6 +12,7 @@ import os
 import struct
 import sys
 import zipfile
+import zlib
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.abspath(__file__))
 
@@ -106,6 +107,85 @@ def mesh_gltf(positions, normals, texcoords, indices, nodes, scene_nodes, with_m
     return gltf, binary
 
 
+def png(width, height, pixel):
+    """An 8 bit RGBA PNG made with zlib, `pixel(x, y)` giving the (r, g, b, a) of the column x and the row y from the top."""
+    def chunk(kind, body):
+        crc = zlib.crc32(kind + body) & 0xFFFFFFFF
+        return struct.pack(">I", len(body)) + kind + body + struct.pack(">I", crc)
+
+    rows = b"".join(b"\x00" + bytes(c for x in range(width) for c in pixel(x, y)) for y in range(height))
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0))
+        + chunk(b"IDAT", zlib.compress(rows, 9))
+        + chunk(b"IEND", b"")
+    )
+
+
+# Four 2 x 2 quadrants: red at the top left, green at the top right, blue at the bottom left, white
+# at the bottom right. Row 0 is the top of the picture.
+def quadrants_png():
+    colours = {(0, 0): (255, 0, 0, 255), (1, 0): (0, 255, 0, 255), (0, 1): (0, 0, 255, 255), (1, 1): (255, 255, 255, 255)}
+    return png(4, 4, lambda x, y: colours[(x // 2, y // 2)])
+
+
+# A quad of side 2 on the z = 0 plane, its UVs at the corners as glTF writes them: the origin is the
+# top left of the picture, so the corner at the bottom left of the quad has v = 1.
+QUAD_POSITIONS = [(-1, -1, 0), (1, -1, 0), (1, 1, 0), (-1, 1, 0)]
+QUAD_NORMALS = [(0, 0, 1)] * 4
+QUAD_UVS = [(0, 1), (1, 1), (1, 0), (0, 0)]
+QUAD_INDICES = [0, 1, 2, 0, 2, 3]
+
+
+def quad_gltf(quads, materials, image=None, image_uri=None):
+    """A glTF with one mesh per entry of `quads` (a name, a material index and a translation each).
+
+    With `image` (PNG bytes) the picture goes into the binary buffer, and with `image_uri` the glTF
+    points at a file of that name. Returns the document and the binary buffer.
+    """
+    binary = b""
+    views, accessors, meshes, nodes = [], [], [], []
+
+    def add(data, target, component, count, kind, extra=None):
+        nonlocal binary
+        views.append({"buffer": 0, "byteOffset": len(binary), "byteLength": len(data), **({"target": target} if target else {})})
+        accessors.append({"bufferView": len(views) - 1, "componentType": component, "count": count, "type": kind, **(extra or {})})
+        binary += pad4(data)
+        return len(accessors) - 1
+
+    lo, hi = bounds(QUAD_POSITIONS)
+    for index, (name, material, translation) in enumerate(quads):
+        attributes = {
+            "POSITION": add(pack_floats(QUAD_POSITIONS), 34962, 5126, 4, "VEC3", {"min": lo, "max": hi}),
+            "NORMAL": add(pack_floats(QUAD_NORMALS), 34962, 5126, 4, "VEC3"),
+            "TEXCOORD_0": add(pack_floats(QUAD_UVS), 34962, 5126, 4, "VEC2"),
+        }
+        indices = add(struct.pack("<6H", *QUAD_INDICES), 34963, 5123, 6, "SCALAR")
+        meshes.append({"name": name, "primitives": [{"attributes": attributes, "indices": indices, "mode": 4, "material": material}]})
+        nodes.append({"name": name, "mesh": index, "translation": translation})
+
+    gltf = {
+        "asset": {"version": "2.0", "generator": "helix test files"},
+        "scene": 0,
+        "scenes": [{"nodes": list(range(len(nodes)))}],
+        "nodes": nodes,
+        "meshes": meshes,
+        "materials": materials,
+        "accessors": accessors,
+    }
+    if image is not None:
+        views.append({"buffer": 0, "byteOffset": len(binary), "byteLength": len(image)})
+        gltf["images"] = [{"bufferView": len(views) - 1, "mimeType": "image/png"}]
+        binary += pad4(image)
+    elif image_uri is not None:
+        gltf["images"] = [{"uri": image_uri}]
+    if image is not None or image_uri is not None:
+        gltf["textures"] = [{"source": 0}]
+    gltf["bufferViews"] = views
+    gltf["buffers"] = [{"byteLength": len(binary)}]
+    return gltf, binary
+
+
 def write(name, data):
     mode = "wb" if isinstance(data, bytes) else "w"
     with open(os.path.join(OUT, name), mode) as f:
@@ -135,6 +215,57 @@ def main():
     ]
     gltf, binary = mesh_gltf(positions, normals, texcoords, indices, nodes, [0])
     write("hierarchy.glb", glb(gltf, binary))
+
+    # A quad with a base colour factor and a 4 x 4 picture of four coloured quadrants, embedded in
+    # the glb, and the same quad as a gltf whose picture and buffer are files next to it.
+    textured = [{"name": "Painted", "pbrMetallicRoughness": {"baseColorFactor": [0.9, 0.8, 0.7, 1.0], "baseColorTexture": {"index": 0}}}]
+    gltf, binary = quad_gltf([("Quad", 0, [0, 0, 0])], textured, image=quadrants_png())
+    write("textured-quad.glb", glb(gltf, binary))
+    gltf, binary = quad_gltf([("Quad", 0, [0, 0, 0])], textured, image_uri="quadrants.png")
+    gltf["buffers"][0]["uri"] = "textured-quad.bin"
+    write("textured-quad.gltf", json.dumps(gltf, indent=1))
+    write("textured-quad.bin", binary)
+    write("quadrants.png", quadrants_png())
+
+    # The same picture on a usd quad, through a UsdPreviewSurface whose diffuse colour is a texture.
+    # USD's texture coordinates start at the bottom left, so the corners read (0, 0) to (0, 1).
+    write(
+        "textured-quad.usda",
+        '#usda 1.0\n(\n    defaultPrim = "Root"\n    upAxis = "Y"\n)\n\n'
+        'def Xform "Root"\n{\n'
+        '    def Mesh "Quad" (prepend apiSchemas = ["MaterialBindingAPI"])\n    {\n'
+        "        int[] faceVertexCounts = [4]\n"
+        "        int[] faceVertexIndices = [0, 1, 2, 3]\n"
+        "        point3f[] points = [(-1, -1, 0), (1, -1, 0), (1, 1, 0), (-1, 1, 0)]\n"
+        '        texCoord2f[] primvars:st = [(0, 0), (1, 0), (1, 1), (0, 1)] (interpolation = "vertex")\n'
+        "        rel material:binding = </Root/Paint>\n    }\n"
+        '    def Material "Paint"\n    {\n'
+        "        token outputs:surface.connect = </Root/Paint/Surface.outputs:surface>\n"
+        '        def Shader "Surface"\n        {\n'
+        '            uniform token info:id = "UsdPreviewSurface"\n'
+        "            color3f inputs:diffuseColor.connect = </Root/Paint/Picture.outputs:rgb>\n"
+        "            token outputs:surface\n        }\n"
+        '        def Shader "Picture"\n        {\n'
+        '            uniform token info:id = "UsdUVTexture"\n'
+        "            asset inputs:file = @./quadrants.png@\n"
+        "            float2 inputs:st.connect = </Root/Paint/Coordinates.outputs:result>\n"
+        "            float3 outputs:rgb\n        }\n"
+        '        def Shader "Coordinates"\n        {\n'
+        '            uniform token info:id = "UsdPrimvarReader_float2"\n'
+        '            string inputs:varname = "st"\n'
+        "            float2 outputs:result\n        }\n    }\n}\n",
+    )
+
+    # Two meshes with two materials of their own, so a merge has to renumber the second one.
+    plain = [
+        {"name": "Red", "pbrMetallicRoughness": {"baseColorFactor": [1.0, 0.0, 0.0, 1.0]}},
+        {"name": "Blue", "pbrMetallicRoughness": {"baseColorFactor": [0.0, 0.0, 1.0, 1.0]}},
+    ]
+    gltf, binary = quad_gltf([("First", 0, [0, 0, 0]), ("Second", 1, [3, 0, 0])], plain)
+    write("two-materials.glb", glb(gltf, binary))
+
+    # A picture wider than the largest texture side (8192), which a solid colour keeps tiny.
+    write("wide-9000x2.png", png(9000, 2, lambda x, y: (200, 100, 50, 255)))
 
     # A box 2 x 2 x 4 as an ascii stl. The long side runs along z, which is how stl files are
     # written, so a Z up import stands it on its end.

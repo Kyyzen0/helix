@@ -194,6 +194,19 @@ def main(binary):
               "the imported node cooks into its three points")
         server.data("delete_node", {"node": imported["node"]["id"]})
 
+        # A file with a material and a picture: the material and the size of the texture come back.
+        fixtures = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "tests", "data", "import")
+        textured = server.data("import_file", {"path": os.path.join(fixtures, "textured-quad.glb")})
+        check("1 decoded" in textured["summary"], "import_file says the picture was decoded")
+        materials = server.data("geometry_summary", {"node": textured["node"]["name"]})["materials"]
+        check(len(materials) == 1 and materials[0]["name"] == "Painted", "geometry_summary lists the material")
+        check(materials[0]["has_texture"] and materials[0]["texture"]["width"] == 4 and materials[0]["texture"]["height"] == 4,
+              "and the size of its texture")
+        check(abs(materials[0]["base_color"][0] - 0.9) < 1e-6 and "missing_texture" not in materials[0],
+              "and its base colour, with nothing missing")
+        check(server.data("geometry_summary", {"node": "box"})["materials"] == [], "a node with no material lists none")
+        server.data("delete_node", {"node": textured["node"]["id"]})
+
         path = os.path.join(folder, "smoke.kut")
         before = sorted(n["name"] for n in server.data("scene_info")["nodes"])
         server.data("save_scene", {"path": path})

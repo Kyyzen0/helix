@@ -408,6 +408,7 @@ cutMeshByPlane(const geo::Mesh& mesh, const Vector3& planePoint, const Vector3& 
 
     // Build the cut mesh's points.
     auto cutMesh = std::make_shared<geo::Mesh>(mesh.getPath());
+    cutMesh->setMaterials(mesh.materials());
     std::vector<Vector3> cutPositions;
     cutPositions.reserve(pointSources.size());
     for (const BlendSource& pointSource : pointSources)

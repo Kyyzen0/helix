@@ -127,6 +127,7 @@ set(ENGINE_SOURCES
     src/Engine/GeometryAlgorithms/ObjReader.cpp
     src/Engine/Import/AssimpReader.cpp
     src/Engine/Import/BlenderConverter.cpp
+    src/Engine/Import/ImageDecode.mm
     src/Engine/Import/ImportFile.cpp
     src/Engine/Import/MeshBuilder.cpp
     src/Engine/Import/ModelIOReader.mm
@@ -134,7 +135,7 @@ set(ENGINE_SOURCES
 )
 
 # Model I/O is Objective-C and is built with automatic reference counting.
-set_source_files_properties(src/Engine/Import/ModelIOReader.mm PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
+set_source_files_properties(src/Engine/Import/ModelIOReader.mm src/Engine/Import/ImageDecode.mm PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
 
 set(ENGINE_INCLUDE_DIRECTORIES
     src
@@ -315,7 +316,12 @@ target_link_libraries(helixEngine PUBLIC glm::glm Eigen3::Eigen TBB::tbb Boost::
 # The importers are private to the engine: assimp is linked in, and Model I/O is the system's.
 find_library(HELIX_MODELIO_FRAMEWORK ModelIO REQUIRED)
 find_library(HELIX_FOUNDATION_ENGINE_FRAMEWORK Foundation REQUIRED)
-target_link_libraries(helixEngine PRIVATE assimp::assimp ${HELIX_MODELIO_FRAMEWORK} ${HELIX_FOUNDATION_ENGINE_FRAMEWORK})
+# ImageIO decodes the pictures of materials (CoreGraphics draws them to pixels).
+find_library(HELIX_IMAGEIO_FRAMEWORK ImageIO REQUIRED)
+find_library(HELIX_COREGRAPHICS_FRAMEWORK CoreGraphics REQUIRED)
+find_library(HELIX_COREFOUNDATION_FRAMEWORK CoreFoundation REQUIRED)
+target_link_libraries(helixEngine PRIVATE assimp::assimp ${HELIX_MODELIO_FRAMEWORK} ${HELIX_FOUNDATION_ENGINE_FRAMEWORK}
+    ${HELIX_IMAGEIO_FRAMEWORK} ${HELIX_COREGRAPHICS_FRAMEWORK} ${HELIX_COREFOUNDATION_FRAMEWORK})
 target_include_directories(helixEngine PUBLIC ${ENGINE_INCLUDE_DIRECTORIES})
 target_compile_definitions(helixEngine PRIVATE
     HELIX_DEV_LIB_DIR="${HELIX_DEV_LIB_DIR}"
@@ -724,6 +730,7 @@ if(HELIX_BUILD_TESTS)
         tests/NodeLoaderTests.cpp
         tests/GeometryImportTests.cpp
         tests/ImportFormatTests.cpp
+        tests/ImportMaterialTests.cpp
         tests/ModelRatNodeTests.cpp
         tests/TransformNodeTests.cpp
         tests/AttributeCreateNodeTests.cpp

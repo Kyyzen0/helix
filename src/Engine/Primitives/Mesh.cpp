@@ -8,7 +8,9 @@
 #include "Engine/Primitives/Primitive.h"
 #include "icecream.hpp"
 #include <cassert>
+#include <algorithm>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <tbb/blocked_range.h>
@@ -33,7 +35,7 @@ geo::Mesh::Mesh(std::string_view path)
 geo::Mesh::Mesh(const Mesh& other)
     : Primitive(other),
       // attributes: the copy shares their stores until one side writes
-      vertexAttributes_{deepCopyAttributes(other.vertexAttributes_)},
+      materials_{other.materials_}, vertexAttributes_{deepCopyAttributes(other.vertexAttributes_)},
       faceAttributes_{deepCopyAttributes(other.faceAttributes_)},
       // groups
       vertexGroups_{deepCopyAttributes(other.vertexGroups_)},
@@ -77,6 +79,8 @@ geo::Mesh& geo::Mesh::operator=(const geo::Mesh& rhs)
     if (this == &rhs) return *this;
 
     Primitive::operator=(rhs);
+
+    materials_ = rhs.materials_;
 
     // attributes
     vertexAttributes_ = deepCopyAttributes(rhs.vertexAttributes_);
@@ -211,9 +215,39 @@ void geo::Mesh::merge(std::shared_ptr<Primitive> other)
     merge(*otherMesh);
 }
 
+std::vector<intT> geo::Mesh::appendMaterials(const std::vector<std::shared_ptr<const Material>>& other)
+{
+    std::vector<intT> remap;
+    remap.reserve(other.size());
+    for (const std::shared_ptr<const Material>& material : other)
+    {
+        const auto found = std::find(materials_.begin(), materials_.end(), material);
+        if (found != materials_.end())
+        {
+            remap.push_back(static_cast<intT>(found - materials_.begin()));
+            continue;
+        }
+        materials_.push_back(material);
+        remap.push_back(static_cast<intT>(materials_.size()) - 1);
+    }
+    return remap;
+}
+
+std::shared_ptr<const geo::Material> geo::Mesh::materialOfFace(Offset face) const
+{
+    if (materials_.empty()) return nullptr;
+    const auto attribute = getAttribByName(attr::AttrOwner::FACE, attr::names::materialIndex);
+    if (!attribute || attribute->getType() != attr::AttributeType::intT || face >= attribute->getSize())
+        return nullptr;
+    const intT index = attr::AttributeHandleRO<intT>(attribute).getValue(face);
+    if (index < 0 || static_cast<std::size_t>(index) >= materials_.size()) return nullptr;
+    return materials_[static_cast<std::size_t>(index)];
+}
+
 void geo::Mesh::merge(Mesh& other)
 {
     ensureWritable_();
+    const Offset firstNewFace = getNumFaces();
     // Copy points from other to self.
     const std::vector<Offset> newPoints = addPoints(other.posPointHandle_.getSpan());
 
@@ -278,6 +312,41 @@ void geo::Mesh::merge(Mesh& other)
         if (alreadyExists)
         {
             mergeAppend(attribute, otherAttribute);
+        }
+    }
+
+    // The appended faces point into the other mesh's table: bring them into this one.
+    if (!materials_.empty() || !other.materials_.empty())
+    {
+        const std::shared_ptr<attr::Attribute> own =
+            getAttribByName(attr::AttrOwner::FACE, attr::names::materialIndex);
+        // Another type under that name is not an index: leave it alone.
+        if (!own || own->getType() == attr::AttributeType::intT)
+        {
+            const std::vector<intT> remap = appendMaterials(other.materials_);
+            auto indices = addAttribute<intT>(attr::AttrOwner::FACE, attr::names::materialIndex);
+            // Faces that had no index before have no material.
+            if (!own)
+                for (Offset face = 0; face < firstNewFace; ++face)
+                    indices.setValue(face, -1);
+
+            const std::shared_ptr<const attr::Attribute> otherIndices =
+                std::as_const(other).getAttribByName(attr::AttrOwner::FACE, attr::names::materialIndex);
+            const bool otherUsable = otherIndices && otherIndices->getType() == attr::AttributeType::intT;
+            std::optional<attr::AttributeHandleRO<intT>> otherHandle;
+            if (otherUsable) otherHandle.emplace(otherIndices);
+            const Offset faceCount = getNumFaces();
+            for (Offset face = firstNewFace; face < faceCount; ++face)
+            {
+                intT mapped = -1;
+                if (otherHandle)
+                {
+                    const intT value = otherHandle->getValue(face - firstNewFace);
+                    if (value >= 0 && static_cast<std::size_t>(value) < remap.size())
+                        mapped = remap[static_cast<std::size_t>(value)];
+                }
+                indices.setValue(face, mapped);
+            }
         }
     }
 }
