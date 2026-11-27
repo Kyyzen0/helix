@@ -1,3 +1,4 @@
+import Combine
 import CxxStdlib
 import Foundation
 import HelixCore
@@ -14,12 +15,21 @@ extension HelixDocument: NodeEditorEditing {
     /// Reads the graph again, for the editor to show.
     func refreshEditor(frame: Bool = false) {
         editor.reload(EditorGraphLoader.current(), frame: frame)
+        // What the inspector shows (the values, what a condition hides, the errors a cook just
+        // found) can have changed with the graph.
+        inspector.reload()
     }
 
-    /// Makes the editor ready, once the scene is loaded.
+    /// Makes the editor and the inspector ready, once the scene is loaded.
     func prepareEditor() {
         editor.editing = self
         editor.paletteTypes = NodeTypeCatalog.all
+        inspector.editing = self
+        // The inspector shows the node the editor has selected. The publisher fires before the
+        // selection is set, so the new selection comes with it.
+        inspectorSubscription = editor.$selectedNodes.sink { [weak self] selection in
+            self?.inspector.select(nodes: selection)
+        }
         refreshEditor(frame: true)
     }
 
@@ -30,6 +40,14 @@ extension HelixDocument: NodeEditorEditing {
     @discardableResult
     func performEdit(named name: String, recook: Bool = true, _ body: () -> EditOutcome) -> EditOutcome {
         guard isActive else { return .failed(String(localized: "This scene is closed.")) }
+        // An edit made while a drag goes on is part of the drag's step, which captures the
+        // scene itself when it ends.
+        if continuousEdit.isActive {
+            let outcome = body()
+            if recook { cookGeometry() }
+            refreshEditor()
+            return outcome
+        }
         let before = helix.core.captureScene()
         // An edit that cannot be undone is not made.
         guard before.status.ok else { return .failed(String(engine: before.status.error)) }
@@ -50,7 +68,7 @@ extension HelixDocument: NodeEditorEditing {
 
     /// Puts a step on the undo manager that restores `snapshot`. The step, in turn, registers
     /// the way back to `otherwise`, which is how redo comes about.
-    private func registerUndo(named name: String, restoring snapshot: String, otherwise: String) {
+    func registerUndo(named name: String, restoring snapshot: String, otherwise: String) {
         guard let undoManager else { return }
         undoManager.registerUndo(withTarget: self) { document in
             MainActor.assumeIsolated {
@@ -61,14 +79,25 @@ extension HelixDocument: NodeEditorEditing {
     }
 
     private func restore(_ snapshot: String, otherwise: String, named name: String) {
-        // The restore gives the nodes new ids, so the selection is kept by path.
-        let selectedPaths = Set(editor.graph.nodes.filter { editor.selectedNodes.contains($0.id) }.map(\.path))
+        let selectedPaths = selectedPathsBeforeRestore()
         let status = helix.core.restoreScene(std.string(snapshot))
         if !status.ok { presentedError = String(engine: status.error) }
         registerUndo(named: name, restoring: otherwise, otherwise: snapshot)
         cookGeometry()
+        reselectAfterRestore(paths: selectedPaths)
+    }
+
+    /// The paths of the selected nodes. A restore gives the nodes new ids, so the selection is
+    /// kept by path.
+    func selectedPathsBeforeRestore() -> Set<String> {
+        Set(editor.graph.nodes.filter { editor.selectedNodes.contains($0.id) }.map(\.path))
+    }
+
+    /// Reads the graph again after a restore and selects what was selected before it.
+    func reselectAfterRestore(paths: Set<String>? = nil) {
+        let selected = paths ?? selectedPathsBeforeRestore()
         refreshEditor()
-        editor.select(nodes: Set(editor.graph.nodes.filter { selectedPaths.contains($0.path) }.map(\.id)))
+        editor.select(nodes: Set(editor.graph.nodes.filter { selected.contains($0.path) }.map(\.id)))
     }
 
     private func failure(_ status: helix.core.Status) -> EditOutcome {

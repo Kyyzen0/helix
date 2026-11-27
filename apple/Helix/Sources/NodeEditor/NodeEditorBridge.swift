@@ -47,7 +47,9 @@ enum EditorGraphLoader {
                 type: String(engine: node.type),
                 name: String(engine: node.name),
                 path: String(engine: node.path),
-                position: CGPoint(x: CGFloat(node.x), y: CGFloat(node.y))
+                position: CGPoint(x: CGFloat(node.x), y: CGFloat(node.y)),
+                error: node.error.empty() ? nil : String(engine: node.error),
+                warnings: node.warnings.map { String(engine: $0) }
             )
         }
         let links = helix.core.listLinks().map { link in

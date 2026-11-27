@@ -45,6 +45,17 @@ struct EditorNode: Hashable, Identifiable, Sendable {
     var path: String
     /// The centre of the card, in canvas units, y growing downward.
     var position: CGPoint
+    /// Why the last cook of the node failed, or nil. A card with one is outlined in red.
+    var error: String? = nil
+    /// What the last cook warned about. A card with some wears a yellow badge.
+    var warnings: [String] = []
+
+    /// What the tooltip of the card says: the error, then the warnings, one to a line. Nil when
+    /// the node has nothing to say.
+    var diagnosticText: String? {
+        let lines = (error.map { [$0] } ?? []) + warnings
+        return lines.isEmpty ? nil : lines.joined(separator: "\n")
+    }
 }
 
 /// A link from the output of a node into an input of another.

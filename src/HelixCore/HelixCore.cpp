@@ -15,6 +15,7 @@
 #include <atomic>
 #include <cctype>
 #include <chrono>
+#include <cmath>
 #include <exception>
 #include <filesystem>
 #include <functional>
@@ -75,28 +76,28 @@ Status checkComponent(const prm::Parameter& parameter, std::uint32_t component)
     return success();
 }
 
-ParameterType toParameterType(prm::Type type)
+// Pulls a value back to the locked ends of the range its component declares. An unlocked end is
+// only where a slider stops, so it never limits a value. The engine applies a range to what an
+// expression gives; a literal is stored as it is written, so the facade holds it to the range,
+// as its header says, rather than leaving a count of columns of 1 to a node that needs 3.
+float holdToRange(prm::Parameter& parameter, std::uint32_t component, float value)
 {
-    switch (type)
-    {
-    case prm::Type::FLOAT:
-        return ParameterType::Float;
-    case prm::Type::INT:
-        return ParameterType::Int;
-    case prm::Type::STRING:
-        return ParameterType::String;
-    case prm::Type::BOOL:
-    case prm::Type::TOGGLE:
-        return ParameterType::Toggle;
-    case prm::Type::DROPDOWN:
-        return ParameterType::Dropdown;
-    case prm::Type::RAMP:
-        return ParameterType::Ramp;
-    case prm::Type::GROUP:
-    case prm::Type::DIVIDER:
-        return ParameterType::Other;
-    }
-    return ParameterType::Other;
+    if (!std::isfinite(value)) return value;
+    const prm::Range& range = parameter.getTemplate().getRange(component);
+    if (range.getMinFlag() == prm::RangeFlag::LOCKED && value < range.getMin()) return range.getMin();
+    if (range.getMaxFlag() == prm::RangeFlag::LOCKED && value > range.getMax()) return range.getMax();
+    return value;
+}
+
+std::int64_t holdToRange(prm::Parameter& parameter, std::uint32_t component, std::int64_t value)
+{
+    const prm::Range& range = parameter.getTemplate().getRange(component);
+    // The locked ends are rounded inward so the result is inside the range.
+    if (range.getMinFlag() == prm::RangeFlag::LOCKED && value < range.getMin())
+        return static_cast<std::int64_t>(std::ceil(range.getMin()));
+    if (range.getMaxFlag() == prm::RangeFlag::LOCKED && value > range.getMax())
+        return static_cast<std::int64_t>(std::floor(range.getMax()));
+    return value;
 }
 
 bool isIntegerType(prm::Type type)
@@ -123,6 +124,8 @@ NodeInfo describe(nt::NodeId id, nt::Node& node)
     info.path = node.getPath().getString();
     info.x = node.getPosition().x();
     info.y = node.getPosition().y();
+    info.error = node.getError();
+    info.warnings = node.getWarnings();
     return info;
 }
 
@@ -179,7 +182,24 @@ void ensureSynchronousCooking()
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
-// Cooks a node and returns what its first output produced.
+// Returns the node that is the root cause of a failed cook of `node`: the first node with an
+// error that nothing upstream of it explains, found by following the inputs back. A node that
+// fails leaves its outputs empty, so what is wired after it often fails too (or silently
+// produces nothing), and the error worth showing is the one furthest upstream. Zero when
+// nothing on the way failed.
+nt::NodeId rootCauseOf(nt::NodeId node, std::unordered_set<nt::NodeId>& visited)
+{
+    if (!visited.insert(node).second) return 0;
+    for (const nt::NodeLink& link : nt::nm().graph().getInputs(node))
+    {
+        if (!nt::nm().isValidNode(link.sourceNode)) continue;
+        if (const nt::NodeId cause = rootCauseOf(link.sourceNode, visited)) return cause;
+    }
+    return nt::nm().getNode(node).getError().empty() ? 0 : node;
+}
+
+// Cooks a node and returns what its first output produced. A node that failed, or that has one
+// that failed upstream of it, is a failed status that names the node and says why.
 Status cookNode(NodeId node, std::shared_ptr<const NodePacket>& packet)
 {
     if (Status status = requireInitialized(); !status.ok) return status;
@@ -188,6 +208,13 @@ Status cookNode(NodeId node, std::shared_ptr<const NodePacket>& packet)
 
     nt::nm().cook(node);
     packet = nt::nm().getNode(node).getOutputPacket(0);
+
+    std::unordered_set<nt::NodeId> visited;
+    if (const nt::NodeId cause = rootCauseOf(node, visited))
+    {
+        const nt::Node& failed = nt::nm().getNode(cause);
+        return failure(failed.getPath().getString() + ": " + failed.getError());
+    }
     if (!packet) return failure("The node produced no geometry.");
     return success();
 }
@@ -297,6 +324,19 @@ Status cookNodePacket(NodeId node, std::shared_ptr<const NodePacket>& packet)
 {
     return cookNode(node, packet);
 }
+
+Status findNodeParameter(NodeId node, const std::string& name, std::shared_ptr<prm::NodeParameter>& out)
+{
+    return findParameter(node, name, out);
+}
+
+Status requireNodeInScene(NodeId node)
+{
+    if (Status status = requireInitialized(); !status.ok) return status;
+    return requireNode(node);
+}
+
+void noteSceneModified() { markModified(); }
 
 } // namespace detail
 
@@ -659,25 +699,6 @@ CreateNodeResult importFile(const std::string& path)
 
 std::string lastImportSummary() { return importSummary; }
 
-std::vector<ParameterInfo> listParameters(NodeId node)
-{
-    std::vector<ParameterInfo> parameters;
-    if (!initialized || !nt::nm().isValidNode(node)) return parameters;
-
-    for (const std::weak_ptr<prm::NodeParameter>& weak : nt::nm().getNode(node).getParameters())
-    {
-        const std::shared_ptr<prm::NodeParameter> parameter = weak.lock();
-        if (!parameter) continue;
-        parameters.push_back(
-            {parameter->getName(),
-             parameter->getLabel(),
-             toParameterType(parameter->getType()),
-             parameter->getVectorSize()}
-        );
-    }
-    return parameters;
-}
-
 FloatValue getFloat(NodeId node, const std::string& parameter, std::uint32_t component)
 {
     FloatValue result;
@@ -743,7 +764,7 @@ Status setFloat(NodeId node, const std::string& parameter, std::uint32_t compone
         if (Status status = findParameter(node, parameter, found); !status.ok) return status;
         if (found->getType() != prm::Type::FLOAT) return wrongType(parameter, "a float");
         if (Status status = checkComponent(*found, component); !status.ok) return status;
-        found->setFloat(value, component);
+        found->setFloat(holdToRange(*found, component, value), component);
         markModified();
         return success();
     });
@@ -756,6 +777,8 @@ Status setInt(NodeId node, const std::string& parameter, std::uint32_t component
         if (Status status = findParameter(node, parameter, found); !status.ok) return status;
         if (!isIntegerType(found->getType())) return wrongType(parameter, "an integer or a toggle");
         if (Status status = checkComponent(*found, component); !status.ok) return status;
+        // A toggle has no range of its own, and takes its 0 and 1 as they come.
+        if (found->getType() == prm::Type::INT) value = holdToRange(*found, component, value);
         found->setInt(static_cast<intT>(value), component);
         markModified();
         return success();
@@ -783,9 +806,9 @@ Status setVector3(NodeId node, const std::string& parameter, float x, float y, f
         if (Status status = findParameter(node, parameter, found); !status.ok) return status;
         if (found->getType() != prm::Type::FLOAT || found->getVectorSize() != 3)
             return wrongType(parameter, "a vector of three floats");
-        found->setFloat(x, 0);
-        found->setFloat(y, 1);
-        found->setFloat(z, 2);
+        found->setFloat(holdToRange(*found, 0, x), 0);
+        found->setFloat(holdToRange(*found, 1, y), 1);
+        found->setFloat(holdToRange(*found, 2, z), 2);
         markModified();
         return success();
     });

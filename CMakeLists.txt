@@ -432,6 +432,7 @@ endif()
 # the engine and the renderer, with no Qt and none of the engine's third party types in it.
 add_library(helixCore STATIC
     src/HelixCore/HelixCore.cpp
+    src/HelixCore/HelixCoreParameters.cpp
     src/HelixCore/HelixCoreReport.cpp
     src/HelixCore/HelixCoreViewport.cpp
     src/HelixCore/ImageFile.cpp
@@ -754,6 +755,8 @@ if(HELIX_BUILD_TESTS)
         tests/CopyOnWriteTests.cpp
         tests/SimulationTests.cpp
         tests/HelixCoreTests.cpp
+        tests/NodeErrorTests.cpp
+        tests/InspectorFacadeTests.cpp
         tests/ExceptionBoundaryTests.cpp
         tests/ViewportLightingTests.cpp
         tests/HelixCoreViewportTests.cpp

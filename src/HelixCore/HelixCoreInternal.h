@@ -15,7 +15,10 @@
 
 namespace helix {
 class NodePacket;
+namespace prm {
+class NodeParameter;
 }
+} // namespace helix
 
 namespace helix::core::detail {
 
@@ -45,5 +48,15 @@ Status cookNodePacket(NodeId node, std::shared_ptr<const NodePacket>& packet);
 
 /// @brief Cooks the display node on the calling thread and returns what it produced.
 Status cookDisplayPacket(std::shared_ptr<const NodePacket>& packet);
+
+/// @brief Finds a parameter of a node, or says why there is none (the engine is not started,
+/// the node does not exist, the node has no such parameter).
+Status findNodeParameter(NodeId node, const std::string& name, std::shared_ptr<prm::NodeParameter>& out);
+
+/// @brief Fails when the engine is not started or the node does not exist.
+Status requireNodeInScene(NodeId node);
+
+/// @brief Notes that the scene has changed since it was saved.
+void noteSceneModified();
 
 } // namespace helix::core::detail

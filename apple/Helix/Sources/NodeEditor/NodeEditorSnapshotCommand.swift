@@ -48,6 +48,9 @@ enum NodeEditorSnapshotCommand {
                 try HelixError.check(helix.core.openScene(std.string(positional[0])))
             }
 
+            // The window cooks the scene when it opens, which is when a node learns that it failed.
+            _ = helix.core.updateViewportGeometry()
+
             let model = NodeEditorModel()
             model.reload(EditorGraphLoader.current(), frame: true)
             model.setViewSize(CGSize(width: width, height: height))

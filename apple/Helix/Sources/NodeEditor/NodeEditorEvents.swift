@@ -21,12 +21,17 @@ struct NodeEditorEvents: NSViewRepresentable {
     }
 }
 
-final class NodeEditorEventView: NSView {
+final class NodeEditorEventView: NSView, NSViewToolTipOwner {
     weak var model: NodeEditorModel? {
-        didSet { observePalette() }
+        didSet {
+            observePalette()
+            observeDiagnostics()
+        }
     }
 
     private var paletteObserver: AnyCancellable?
+    private var diagnosticsObserver: AnyCancellable?
+    private var toolTipsPending = false
 
     // The view is flipped so a point of the view is a point of the canvas drawing: y grows down.
     override var isFlipped: Bool { true }
@@ -58,6 +63,41 @@ final class NodeEditorEventView: NSView {
                 }
             }
         }
+    }
+
+    // MARK: Tooltips
+
+    /// The message of a failed or warned node shows when the pointer rests on its card. The
+    /// cards move with the view and with the graph, so the areas are made again after a change.
+    private func observeDiagnostics() {
+        diagnosticsObserver = model?.objectWillChange.sink { [weak self] _ in
+            guard let self, !self.toolTipsPending else { return }
+            self.toolTipsPending = true
+            // After the change has landed, since the publisher fires before it.
+            DispatchQueue.main.async {
+                self.toolTipsPending = false
+                self.updateToolTips()
+            }
+        }
+    }
+
+    override func layout() {
+        super.layout()
+        updateToolTips()
+    }
+
+    private func updateToolTips() {
+        removeAllToolTips()
+        guard let model else { return }
+        for area in model.diagnosticAreas() {
+            addToolTip(area.rect, owner: self, userData: nil)
+        }
+    }
+
+    // NSViewToolTipOwner
+    func view(_ view: NSView, stringForToolTip tag: NSView.ToolTipTag, point: NSPoint, userData data: UnsafeMutableRawPointer?) -> String {
+        guard let model else { return "" }
+        return model.diagnosticAreas().first { $0.rect.contains(point) }?.text ?? ""
     }
 
     private func point(of event: NSEvent) -> CGPoint {

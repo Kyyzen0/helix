@@ -11,6 +11,11 @@ if let flag = arguments.firstIndex(of: NodeEditorSnapshotCommand.flag) {
     exit(NodeEditorSnapshotCommand.run(Array(arguments[(flag + 1)...])))
 }
 
+// And a picture of the inspector.
+if let flag = arguments.firstIndex(of: InspectorSnapshotCommand.flag) {
+    exit(InspectorSnapshotCommand.run(Array(arguments[(flag + 1)...])))
+}
+
 // An AI agent starts the app with this flag and talks to it over standard input and output.
 if arguments.contains(MCPServer.flag) {
     exit(MCPServer.run())

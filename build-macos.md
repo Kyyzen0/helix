@@ -233,11 +233,67 @@ Selection, pan and zoom are not saved in the file.
 `Helix --render-node-editor <in.kut | --new-scene> <out.png> [width height] [--select <name>]...
 [--dark]` draws the editor of a scene, every node framed, to a PNG with no window (SwiftUI's
 `ImageRenderer`). The tests of the editor's logic (view transform, geometry, hit testing, search,
-placement, and the gestures through a model with no engine) are in a bundle that needs no host app:
+placement, and the gestures through a model with no engine; and the inspector's number text, slider
+mapping, scrub, tree, drag-as-one-step state machine and model) are in a bundle that needs no host app:
 
 ```sh
 xcodebuild test -project apple/Helix/Helix.xcodeproj -scheme HelixNodeEditorTests -destination 'platform=macOS'
 ```
+
+### The inspector
+
+The window shows a column on its right, the inspector (View > Show Inspector, `⌥⌘I`, or the
+toolbar button; shown by default, and remembered). It shows the parameters of the node selected in
+the node editor: one node at a time ("N nodes selected" and "No node selected" otherwise). The
+header gives the node name and type, a button for the display flag, and the error or warnings of
+the node's last cook.
+
+**Layout.** The rows come in the order the node declares them, through `listParameterLayout`:
+dividers are headings, a horizontal group is one row (its label, then its members side by side),
+a vertical group opens and closes. A parameter hidden by its hide condition is not drawn, and a
+disabled one is dimmed and cannot be edited; both follow the values of the other parameters as
+they change. A tooltip is the row's help text.
+
+**Widgets.** A float is a slider over the range of the node and a field; an unlocked end of the
+range is only where the slider stops (type past it), a locked end is a limit. An integer adds a
+stepper. A vector is X, Y and Z fields, and dragging over the letter scrubs the value (Option for
+fine control). `rangeCircle` is a small arc dial with two fields. A toggle is a checkbox, a switch
+(`boolSwitch`) or an icon button (`boolIcon`). A dropdown is a menu of the option labels. A string
+is a field, committed on Return or when it loses focus; the `attribute` style adds a button that
+lists the attributes of the geometry wired into the first input; the `code` style is a monospaced
+editor with an Apply button (`⌘Return`). A ramp shows its curve and a list of points (position,
+value, interpolation, remove) with Add Point; the curve of a b spline segment is a drawing aid.
+
+**Expressions and reset.** The context menu of a row (or of one component of a vector) has Edit
+Expression…, Clear Expression and Reset to Default. A component with an expression shows its text
+in monospaced accent colour instead of its value. An expression that does not compile is kept, as
+the person is still typing it, shown in red with its first line of error under the row, and reads
+as zero. A component that holds keyframes shows a diamond and is read only here (keyframes are
+edited from the timeline, later).
+
+**Undo.** Every edit is one step of the window's undo manager, named "Change <label>", "Edit
+Expression", "Clear Expression" or "Reset <label>", through the same scene snapshots as the node
+editor. A drag (a slider, a scrub) updates the scene live and registers one step when it ends, and
+nothing when it comes back to where it started. While a drag goes on, a scene whose cook costs
+more than 30 ms per change gets only the newest value (at most one change per cost). Text fields
+and steppers commit one step each. Typing in a field never reaches the single-key shortcuts of
+the viewport or the node editor, which only act while they have the keys.
+
+`Helix --render-inspector <in.kut | --new-scene> <node name or path> <out.png> [width [height]]
+[--dark]` draws the inspector of one node to a PNG with no window (the panel is laid out in an
+off screen window and its pixels read back), as `--render-node-editor` does for the editor.
+
+### Node errors
+
+A node that fails to cook says why. `throwError` records the message on the node, and so does an
+exception an implementation throws (nothing escapes the cook: the node's outputs stay empty and the
+rest of the graph cooks with an empty input where it was). The facade gives it as `NodeInfo.error`
+and `warnings`; cooking a node whose upstream failed is a failed status naming the root cause,
+`"/noise: The attribute needs a name."`, which the viewport shows in its message label and
+`geometry_summary` and `render_view` return as `isError`. In the node editor a failed card has a red
+outline and a red badge, a warned one a yellow badge, and the message is the tooltip. A node
+nothing has cooked yet (not in the chain of the display node) has no verdict. A change to a node
+clears its verdict until it cooks again.
 
 ## Helix MCP
 

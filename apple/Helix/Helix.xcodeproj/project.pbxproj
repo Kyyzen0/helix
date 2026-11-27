@@ -46,6 +46,23 @@
 		A8D0BBAEF61B15BEC4C4C8F1 /* NodeSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1532547BA1E2B1813C3B8A48 /* NodeSearch.swift */; };
 		F84D6267025A7FF720EBBA5F /* NodePlacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36001A4884A5E17DBF28165C /* NodePlacement.swift */; };
 		63B2105D86411904207E519E /* NodeEditorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA43F87F4F7E713C9A7AF226 /* NodeEditorModel.swift */; };
+		903C6F7EEA615A17EE9C33AD /* InspectorValues.swift */ = {isa = PBXBuildFile; fileRef = 47811F10EBF32460D9AF3F42 /* InspectorValues.swift */; };
+		EA372CF0ACAF88C0F4625E94 /* InspectorValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47811F10EBF32460D9AF3F42 /* InspectorValues.swift */; };
+		BD86E35DB7E8CC84B46CCD74 /* InspectorFormatting.swift */ = {isa = PBXBuildFile; fileRef = B8686E19A796CE0DAB071246 /* InspectorFormatting.swift */; };
+		EC8BB6598DB99ED501D3527B /* InspectorFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8686E19A796CE0DAB071246 /* InspectorFormatting.swift */; };
+		0027E41216B7CB90A17488F9 /* ContinuousEdit.swift */ = {isa = PBXBuildFile; fileRef = 9FF9886AAE6C8EB87B27B4DC /* ContinuousEdit.swift */; };
+		7FB7BB2D8E05410154BC01C1 /* ContinuousEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF9886AAE6C8EB87B27B4DC /* ContinuousEdit.swift */; };
+		B32DAA915CD56AC9442DC573 /* InspectorModel.swift */ = {isa = PBXBuildFile; fileRef = 5CD6B52CC05040329A7A8AA2 /* InspectorModel.swift */; };
+		018BE1EAF6E4F90757E5B1A5 /* InspectorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CD6B52CC05040329A7A8AA2 /* InspectorModel.swift */; };
+		6A1369C9260429C81641729B /* InspectorBridge.swift */ = {isa = PBXBuildFile; fileRef = 16D566720B6CADE89D758D2F /* InspectorBridge.swift */; };
+		0BF7E44FEE8E658DE19E9A5C /* InspectorFields.swift */ = {isa = PBXBuildFile; fileRef = 02253291DAD30F1FB7BE1548 /* InspectorFields.swift */; };
+		282637E52A96A7AC1075CE74 /* ParameterRow.swift */ = {isa = PBXBuildFile; fileRef = DF75B79B29C0312B18FC3053 /* ParameterRow.swift */; };
+		A87C58E947EADA2A0EE5A70C /* ParameterControls.swift */ = {isa = PBXBuildFile; fileRef = 6BE36FCF4DF7DFFEF529926E /* ParameterControls.swift */; };
+		8DF3D5658E7960B417CFB7BC /* RampEditor.swift */ = {isa = PBXBuildFile; fileRef = 94CCA186F953EED0ECCF39E8 /* RampEditor.swift */; };
+		8ABC5E4FE38A7476E8A8BCDB /* InspectorView.swift */ = {isa = PBXBuildFile; fileRef = F36F68F0B59595647A31DAFA /* InspectorView.swift */; };
+		F739EA8BF6DFA06B70586198 /* InspectorSnapshotCommand.swift */ = {isa = PBXBuildFile; fileRef = 1FBFD9A3F44A6807C826589F /* InspectorSnapshotCommand.swift */; };
+		776B6D7CD1DEE5A3D8C1A72B /* HelixDocument+Inspector.swift */ = {isa = PBXBuildFile; fileRef = DF2882B61690998E4E7E4F6D /* HelixDocument+Inspector.swift */; };
+		EAC964D7B3DB9036687C6BC3 /* InspectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDAF0510D8421E7D0F36AC8 /* InspectorTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -88,6 +105,19 @@
 		CA78EAE0CFD1626154DB587E /* HelixDocument+NodeEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+NodeEditor.swift"; path = "Sources/HelixDocument+NodeEditor.swift"; sourceTree = "<group>"; };
 		D3F54926D9EBC58B30CE4961 /* NodeEditorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorTests.swift; path = Tests/NodeEditorTests.swift; sourceTree = "<group>"; };
 		DD6EACD4F105EF68A695B5CF /* HelixNodeEditorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HelixNodeEditorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		47811F10EBF32460D9AF3F42 /* InspectorValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InspectorValues.swift; path = Sources/Inspector/InspectorValues.swift; sourceTree = "<group>"; };
+		B8686E19A796CE0DAB071246 /* InspectorFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InspectorFormatting.swift; path = Sources/Inspector/InspectorFormatting.swift; sourceTree = "<group>"; };
+		9FF9886AAE6C8EB87B27B4DC /* ContinuousEdit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContinuousEdit.swift; path = Sources/Inspector/ContinuousEdit.swift; sourceTree = "<group>"; };
+		5CD6B52CC05040329A7A8AA2 /* InspectorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InspectorModel.swift; path = Sources/Inspector/InspectorModel.swift; sourceTree = "<group>"; };
+		16D566720B6CADE89D758D2F /* InspectorBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InspectorBridge.swift; path = Sources/Inspector/InspectorBridge.swift; sourceTree = "<group>"; };
+		02253291DAD30F1FB7BE1548 /* InspectorFields.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InspectorFields.swift; path = Sources/Inspector/InspectorFields.swift; sourceTree = "<group>"; };
+		DF75B79B29C0312B18FC3053 /* ParameterRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ParameterRow.swift; path = Sources/Inspector/ParameterRow.swift; sourceTree = "<group>"; };
+		6BE36FCF4DF7DFFEF529926E /* ParameterControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ParameterControls.swift; path = Sources/Inspector/ParameterControls.swift; sourceTree = "<group>"; };
+		94CCA186F953EED0ECCF39E8 /* RampEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RampEditor.swift; path = Sources/Inspector/RampEditor.swift; sourceTree = "<group>"; };
+		F36F68F0B59595647A31DAFA /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InspectorView.swift; path = Sources/Inspector/InspectorView.swift; sourceTree = "<group>"; };
+		1FBFD9A3F44A6807C826589F /* InspectorSnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InspectorSnapshotCommand.swift; path = Sources/Inspector/InspectorSnapshotCommand.swift; sourceTree = "<group>"; };
+		DF2882B61690998E4E7E4F6D /* HelixDocument+Inspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Inspector.swift"; path = "Sources/HelixDocument+Inspector.swift"; sourceTree = "<group>"; };
+		DFDAF0510D8421E7D0F36AC8 /* InspectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InspectorTests.swift; path = Tests/InspectorTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,10 +138,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		03011B942D714D79F3FBB0DB /* Inspector */ = {
+			isa = PBXGroup;
+			children = (
+				47811F10EBF32460D9AF3F42 /* InspectorValues.swift */,
+				B8686E19A796CE0DAB071246 /* InspectorFormatting.swift */,
+				9FF9886AAE6C8EB87B27B4DC /* ContinuousEdit.swift */,
+				5CD6B52CC05040329A7A8AA2 /* InspectorModel.swift */,
+				16D566720B6CADE89D758D2F /* InspectorBridge.swift */,
+				02253291DAD30F1FB7BE1548 /* InspectorFields.swift */,
+				DF75B79B29C0312B18FC3053 /* ParameterRow.swift */,
+				6BE36FCF4DF7DFFEF529926E /* ParameterControls.swift */,
+				94CCA186F953EED0ECCF39E8 /* RampEditor.swift */,
+				F36F68F0B59595647A31DAFA /* InspectorView.swift */,
+				1FBFD9A3F44A6807C826589F /* InspectorSnapshotCommand.swift */,
+			);
+			name = Inspector;
+			sourceTree = "<group>";
+		};
+
 		4CD87A470DCB16C31E9BC98A /* Tests */ = {
 			isa = PBXGroup;
 			children = (
 				D3F54926D9EBC58B30CE4961 /* NodeEditorTests.swift */,
+				DFDAF0510D8421E7D0F36AC8 /* InspectorTests.swift */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -152,6 +202,8 @@
 			isa = PBXGroup;
 			children = (
 				91F4A5417179B7CC81BBCC04 /* NodeEditor */,
+				03011B942D714D79F3FBB0DB /* Inspector */,
+				DF2882B61690998E4E7E4F6D /* HelixDocument+Inspector.swift */,
 				BA89128C69AD540AF5DB2885 /* DocumentView.swift */,
 				D3267E492841E7AB897616F8 /* EngineHost.swift */,
 				38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */,
@@ -325,6 +377,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				18485CD047FA97EB2E642D0A /* DocumentView.swift */,
+				903C6F7EEA615A17EE9C33AD /* InspectorValues.swift */,
+				BD86E35DB7E8CC84B46CCD74 /* InspectorFormatting.swift */,
+				0027E41216B7CB90A17488F9 /* ContinuousEdit.swift */,
+				B32DAA915CD56AC9442DC573 /* InspectorModel.swift */,
+				6A1369C9260429C81641729B /* InspectorBridge.swift */,
+				0BF7E44FEE8E658DE19E9A5C /* InspectorFields.swift */,
+				282637E52A96A7AC1075CE74 /* ParameterRow.swift */,
+				A87C58E947EADA2A0EE5A70C /* ParameterControls.swift */,
+				8DF3D5658E7960B417CFB7BC /* RampEditor.swift */,
+				8ABC5E4FE38A7476E8A8BCDB /* InspectorView.swift */,
+				F739EA8BF6DFA06B70586198 /* InspectorSnapshotCommand.swift */,
+				776B6D7CD1DEE5A3D8C1A72B /* HelixDocument+Inspector.swift */,
 				8F271EAFDF68325A25DBF804 /* EditorGraph.swift */,
 				6701D4063E3787E26E986286 /* ViewTransform.swift */,
 				2BECC4E09E9D9CF250E70E3C /* EditorLayout.swift */,
@@ -362,6 +426,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D2B105261C495EB94860605 /* NodeEditorTests.swift in Sources */,
+				EAC964D7B3DB9036687C6BC3 /* InspectorTests.swift in Sources */,
+				EA372CF0ACAF88C0F4625E94 /* InspectorValues.swift in Sources */,
+				EC8BB6598DB99ED501D3527B /* InspectorFormatting.swift in Sources */,
+				7FB7BB2D8E05410154BC01C1 /* ContinuousEdit.swift in Sources */,
+				018BE1EAF6E4F90757E5B1A5 /* InspectorModel.swift in Sources */,
 				43A12E037E0D92C32261C450 /* EditorGraph.swift in Sources */,
 				F3D29EB4E0499810804B2111 /* ViewTransform.swift in Sources */,
 				B1D54542E4A011BE27C1C6BC /* EditorLayout.swift in Sources */,

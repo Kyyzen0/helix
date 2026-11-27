@@ -305,6 +305,28 @@ std::optional<String> prm::Parameter::getExpression(unsigned int index) const
     return expressions_[index];
 }
 
+std::optional<String> prm::Parameter::getExpressionError(unsigned int index) const
+{
+    if (!hasExpression(index)) return std::nullopt;
+
+    // The expression is run the way the cook reads it, so what fails here fails there.
+    String error;
+    switch (getValueType())
+    {
+    case prm::ValueType::Float:
+        evalFloat(index, error);
+        break;
+    case prm::ValueType::Int:
+        evalInt(index, error);
+        break;
+    case prm::ValueType::String:
+        evalString(index, error);
+        break;
+    }
+    if (error.empty()) return std::nullopt;
+    return error;
+}
+
 prm::PrmValues prm::Parameter::getValues() const { return values_; }
 
 void prm::Parameter::setValues(const PrmValues& values)
