@@ -16,10 +16,13 @@ import SwiftUI
 enum RenderWindowSnapshotCommand {
     static let flag = "--render-window"
 
-    static let usage = "usage: Helix \(flag) <in.kut | 3D file | \(SnapshotCommand.newSceneArgument)> <out.png> [width height] [--pane network|spreadsheet] [--select <node>] [--size small|medium|large] [--show-inspector yes|no] [--example cube|waves|terrain] [--add <node type>]... \(ThemeOptions.usage)"
+    static let usage = "usage: Helix \(flag) <in.kut | 3D file | \(SnapshotCommand.newSceneArgument)> <out.png> [width height] [--pane network|spreadsheet] [--select <node>] [--size small|medium|large] [--show-inspector yes|no] [--example cube|waves|terrain] [--add <node type>]... [--layout viewing|building|animating] \(ViewportOptions.usage) \(ThemeOptions.usage)"
 
     static func run(_ all: [String]) -> Int32 {
-        guard let (themeOptions, arguments) = ThemeOptions.extract(from: all) else { return OffscreenRender.fail(usage) }
+        guard let (themeOptions, themed) = ThemeOptions.extract(from: all),
+              let (look, arguments) = ViewportOptions.extract(from: themed)
+        else { return OffscreenRender.fail(usage) }
+        var layout: WindowLayout?
         var positional: [String] = []
         var pane = TimelineSetting.LowerPane.network
         var selected: [String] = []
@@ -55,6 +58,12 @@ enum RenderWindowSnapshotCommand {
                 guard index + 1 < arguments.count else { return OffscreenRender.fail(usage) }
                 added.append(arguments[index + 1])
                 index += 1
+            case "--layout":
+                guard index + 1 < arguments.count, let parsed = WindowLayout(rawValue: arguments[index + 1]) else {
+                    return OffscreenRender.fail(usage)
+                }
+                layout = parsed
+                index += 1
             case "--show-inspector":
                 guard index + 1 < arguments.count else { return OffscreenRender.fail(usage) }
                 inspector = arguments[index + 1] != "no"
@@ -77,6 +86,10 @@ enum RenderWindowSnapshotCommand {
         overrides[InterfaceSize.defaultsKey] = size.rawValue
         overrides[InspectorSetting.defaultsKey] = inspector
         overrides[TimelineSetting.shownKey] = true
+        if let background = look.background { overrides[ViewportBackground.defaultsKey] = background.rawValue }
+        if let navigation = look.navigation { overrides[NavigationPreset.defaultsKey] = navigation.rawValue }
+        // A layout rides in the same domain, over the choices above.
+        for (key, value) in layout?.settings ?? [:] { overrides[key] = value }
         UserDefaults.standard.setVolatileDomain(overrides, forName: UserDefaults.argumentDomain)
 
         do {
@@ -109,7 +122,7 @@ enum RenderWindowSnapshotCommand {
             }
 
             let dark = themeOptions.appearanceDark ?? false
-            guard let image = render(document, title: title, width: width, height: height, themeOptions: themeOptions, dark: dark)
+            guard let image = render(document, title: title, width: width, height: height, themeOptions: themeOptions, dark: dark, view: look.view)
             else { return OffscreenRender.fail("the window could not be drawn") }
             try OffscreenRender.write(image, to: positional[1])
             print("wrote \(positional[1]) (\(Int(width)) x \(Int(height)) points, \(image.width) x \(image.height) pixels)")
@@ -120,7 +133,8 @@ enum RenderWindowSnapshotCommand {
     }
 
     private static func render(
-        _ document: HelixDocument, title: String, width: Double, height: Double, themeOptions: ThemeOptions, dark: Bool
+        _ document: HelixDocument, title: String, width: Double, height: Double, themeOptions: ThemeOptions, dark: Bool,
+        view: CameraView
     ) -> CGImage? {
         let application = NSApplication.shared
         application.setActivationPolicy(.accessory)
@@ -153,7 +167,9 @@ enum RenderWindowSnapshotCommand {
 
         // The viewport: what the engine draws, at the size the layout gave it.
         if still.size.width > 1, still.size.height > 1 {
-            still.image = viewportPicture(width: still.size.width, height: still.size.height, theme: themeOptions.theme, dark: forced)
+            still.image = viewportPicture(width: still.size.width, height: still.size.height, theme: themeOptions.theme, dark: forced, view: view)
+            // The cube and the grid label follow the camera the picture was made from.
+            document.viewport.refreshCamera()
         }
         settle(0.8)
         // What a column drew before the appearance settled is drawn again.
@@ -171,10 +187,9 @@ enum RenderWindowSnapshotCommand {
     }
 
     /// The geometry drawn by the engine, framed as the viewport frames it.
-    private static func viewportPicture(width: Double, height: Double, theme: Theme, dark: Bool) -> NSImage? {
+    private static func viewportPicture(width: Double, height: Double, theme: Theme, dark: Bool, view: CameraView) -> NSImage? {
         let pixelsWide = UInt32(max(width * 2, 2)), pixelsHigh = UInt32(max(height * 2, 2))
-        helix.core.resetViewport()
-        _ = helix.core.frameViewport(Float(width / height))
+        ViewportController.place(view, aspect: Float(width / height))
         var options = helix.core.ViewportFrameOptions()
         options.pixelWidth = pixelsWide
         options.pixelHeight = pixelsHigh

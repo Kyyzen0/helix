@@ -754,7 +754,7 @@ enum MCPHandlers {
         // first, since the frame fits the box as seen from them.
         helix.core.resetViewport()
         if azimuth != nil || elevation != nil {
-            helix.core.orbitViewportTo(Float(azimuth ?? -135), Float(elevation ?? 20))
+            helix.core.orbitViewportTo(Float(azimuth ?? 45), Float(elevation ?? 25))
         }
         _ = helix.core.frameViewport(Float(pixelWidth) / Float(pixelHeight))
 

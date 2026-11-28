@@ -407,6 +407,7 @@ add_library(helixGraphics STATIC
     src/Graphics/GraphicsDevice.cpp
     # Holds the implementation of metal-cpp, which exactly one file of the program may define.
     src/Graphics/MetalImplementation.cpp
+    src/Graphics/GridScale.cpp
     src/Graphics/ViewportCamera.cpp
     src/Graphics/ViewportRenderer.cpp
     src/Graphics/Passes/CameraPrimPass.cpp
@@ -755,6 +756,7 @@ if(HELIX_BUILD_TESTS)
         tests/MountainNodeTests.cpp
         tests/GraphicsDeviceTests.cpp
         tests/ViewportCameraTests.cpp
+        tests/GridScaleTests.cpp
         tests/DisplayGeometryTests.cpp
         tests/ViewportRendererTests.cpp
         tests/AsyncCookTests.cpp

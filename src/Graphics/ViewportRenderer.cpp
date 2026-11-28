@@ -1,8 +1,10 @@
 #include "Graphics/ViewportRenderer.h"
+#include "Graphics/GridScale.h"
 #include "Graphics/RenderTargetFormats.h"
 #include "Graphics/Shaders/ShaderTypes.h"
 
 #include <algorithm>
+#include <cmath>
 #include <glm/geometric.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/matrix.hpp>
@@ -35,6 +37,15 @@ FrameConstants getFrameConstants(const FrameState& frame)
     // The rows of the rotation of the view matrix are the axes of the camera in world space.
     const glm::vec4 cameraRight{view[0][0], view[1][0], view[2][0], 0.f};
     const glm::vec4 cameraUp{view[0][1], view[1][1], view[2][1], 0.f};
+
+    // The grid has the cells its distance asks for, centred on the nearest major line to what the
+    // camera looks at, so it follows a pan without its lines sliding.
+    const float cell = chooseGridCellSize(frame.camera.getDistance());
+    const float major = cell * float(gridMajorEvery);
+    const glm::vec3 target = frame.camera.getCenter();
+    const glm::vec4 gridParams{
+        cell, std::round(target.x / major) * major, std::round(target.z / major) * major, float(gridHalfCells)
+    };
     return FrameConstants{
         viewProjection,
         cameraPosition,
@@ -44,7 +55,8 @@ FrameConstants getFrameConstants(const FrameState& frame)
         cameraUp,
         viewportPixelSize,
         frame.pixelRatio,
-        1.f
+        1.f,
+        gridParams
     };
 }
 

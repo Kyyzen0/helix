@@ -6,6 +6,7 @@
 #include <CoreGraphics/CoreGraphics.h>
 #include <ImageIO/ImageIO.h>
 #include <algorithm>
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <cmath>
 #include <cstdint>
@@ -132,6 +133,33 @@ TEST_CASE_METHOD(
     REQUIRE(info.bounds.maxY == 0.5f);
     REQUIRE(info.bounds.minZ == -0.5f);
     REQUIRE(info.bounds.maxZ == 0.5f);
+}
+
+TEST_CASE_METHOD(ViewportFixture, "The viewport reports its camera angles, distance and grid cell")
+{
+    core::resetViewport();
+    core::ViewportCameraInfo info = core::viewportCameraInfo();
+    // The home view is the front-right three-quarter view, which shows the front, the right and the
+    // top of a model. It was -135, which looks at it from behind.
+    REQUIRE(info.azimuthDegrees == Catch::Approx(45.f));
+    REQUIRE(info.elevationDegrees == Catch::Approx(25.f));
+    REQUIRE(info.distance == Catch::Approx(15.f));
+    REQUIRE(info.gridCellSize == Catch::Approx(2.f));
+
+    core::orbitViewportTo(90.f, 0.f);
+    info = core::viewportCameraInfo();
+    REQUIRE(info.azimuthDegrees == Catch::Approx(90.f));
+    REQUIRE(info.elevationDegrees == Catch::Approx(0.f).margin(1e-4));
+
+    // The top is held at 89 degrees, which the report says as it is.
+    core::orbitViewportTo(0.f, 90.f);
+    REQUIRE(core::viewportCameraInfo().elevationDegrees == Catch::Approx(89.f));
+
+    core::dollyViewport(60.f);
+    info = core::viewportCameraInfo();
+    REQUIRE(info.distance > 15.f);
+    REQUIRE(info.gridCellSize > 2.f);
+    core::resetViewport();
 }
 
 TEST_CASE_METHOD(

@@ -42,75 +42,52 @@ final class HelixMetalView: MTKView {
         needsDisplay = true
     }
 
-    // MARK: Trackpad
+    // MARK: Trackpad and mouse
+
+    // What each gesture does depends on the preset of Settings > Navigation, which is read at every
+    // event so a change applies at once, in every window. The mapping itself is `NavigationMapper`;
+    // this only describes the event to it and applies what it answers.
 
     // A pinch zooms.
     override func magnify(with event: NSEvent) {
-        move { helix.core.dollyViewport(Float(event.magnification) * NavigationSettings.pinchZoom) }
+        apply(NavigationMapper.pinch(magnification: Float(event.magnification), options: NavigationOptions.stored()))
     }
 
     // A two finger rotation turns the scene around the vertical axis.
     override func rotate(with event: NSEvent) {
-        move { helix.core.orbitViewport(Float(event.rotation) * NavigationSettings.rotationPerDegree, 0) }
+        apply(NavigationMapper.rotation(degrees: Float(event.rotation), options: NavigationOptions.stored()))
     }
 
-    // A two finger scroll orbits, with shift it pans and with command it zooms. A wheel without
-    // precise deltas, which is a mouse wheel, zooms.
+    // A scroll orbits, pans or zooms according to the preset. A Magic Mouse scrolls with precise
+    // deltas like a trackpad, so the device cannot be told from the event: the preset says what the
+    // person holds.
     override func scrollWheel(with event: NSEvent) {
-        let deltaX = Float(event.scrollingDeltaX)
-        let deltaY = Float(event.scrollingDeltaY)
-
-        guard event.hasPreciseScrollingDeltas else {
-            move { helix.core.dollyViewport(deltaY * NavigationSettings.wheelZoomPerLine) }
-            return
-        }
-
-        let modifiers = event.modifierFlags
-        if modifiers.contains(.command) {
-            move { helix.core.dollyViewport(deltaY * NavigationSettings.scrollZoomPerPoint) }
-        } else if modifiers.contains(.shift) {
-            move { helix.core.panViewport(deltaX * NavigationSettings.panPerPoint, deltaY * NavigationSettings.panPerPoint) }
-        } else {
-            move { helix.core.orbitViewport(deltaX * NavigationSettings.orbitPerPoint, deltaY * NavigationSettings.orbitPerPoint) }
-        }
+        let scroll = NavigationScroll(
+            deltaX: Float(event.scrollingDeltaX), deltaY: Float(event.scrollingDeltaY),
+            precise: event.hasPreciseScrollingDeltas,
+            momentum: !event.momentumPhase.isEmpty,
+            modifiers: NavigationModifiers(event.modifierFlags)
+        )
+        apply(NavigationMapper.scroll(scroll, preset: NavigationPreset.stored(), options: NavigationOptions.stored()))
     }
-
-    // MARK: Mouse
 
     override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
     }
 
-    override func mouseDragged(with event: NSEvent) {
-        let modifiers = event.modifierFlags
-        if modifiers.contains(.control) {
-            dragZoom(event)
-        } else if modifiers.contains(.option) {
-            dragPan(event)
-        } else {
-            move {
-                helix.core.orbitViewport(
-                    Float(event.deltaX) * NavigationSettings.orbitPerPoint,
-                    Float(event.deltaY) * NavigationSettings.orbitPerPoint
-                )
-            }
-        }
-    }
+    override func mouseDragged(with event: NSEvent) { drag(event, button: .left) }
 
-    override func rightMouseDragged(with event: NSEvent) {
-        dragZoom(event)
-    }
+    override func rightMouseDragged(with event: NSEvent) { drag(event, button: .right) }
 
-    override func otherMouseDragged(with event: NSEvent) {
-        dragPan(event)
-    }
+    override func otherMouseDragged(with event: NSEvent) { drag(event, button: .middle) }
 
     // MARK: Keyboard
 
-    // F frames the geometry, like the 3D tools it sits next to, shift W cycles the wireframe and
-    // shift M shows or hides the materials. They are handled here and not as menu shortcuts: a
-    // menu item with a key and no command key would also fire while a text field, such as the
-    // search of the node palette, has the keys. The menu holds the same commands, without keys.
+    // F frames the geometry, shift W cycles the wireframe and shift M shows or hides the materials.
+    // The View menu holds the same commands with the same keys, and handles them wherever the focus
+    // is: AppKit leaves a key equivalent that has no command key to the text field when one is being
+    // edited, so typing an "f" in the palette search does not frame. These cases stay for the moment
+    // the menu does not take the key (no document in front).
     override func keyDown(with event: NSEvent) {
         let modifiers = event.modifierFlags.intersection([.shift, .control, .option, .command])
         // Space plays, the arrows step, and option with an arrow goes to an end.
@@ -135,16 +112,22 @@ final class HelixMetalView: MTKView {
 
     // MARK: Helpers
 
-    private func dragZoom(_ event: NSEvent) {
-        move { helix.core.dollyViewport(Float(event.deltaY) * NavigationSettings.dragZoomPerPoint) }
+    private func drag(_ event: NSEvent, button: NavigationButton) {
+        let drag = NavigationDrag(
+            deltaX: Float(event.deltaX), deltaY: Float(event.deltaY),
+            button: button, modifiers: NavigationModifiers(event.modifierFlags)
+        )
+        apply(NavigationMapper.drag(drag, preset: NavigationPreset.stored(), options: NavigationOptions.stored()))
     }
 
-    private func dragPan(_ event: NSEvent) {
+    private func apply(_ navigation: NavigationMove?) {
+        guard let navigation else { return }
         move {
-            helix.core.panViewport(
-                Float(event.deltaX) * NavigationSettings.panPerPoint,
-                Float(event.deltaY) * NavigationSettings.panPerPoint
-            )
+            switch navigation {
+            case .orbit(let x, let y): helix.core.orbitViewport(x, y)
+            case .pan(let x, let y): helix.core.panViewport(x, y)
+            case .dolly(let amount): helix.core.dollyViewport(amount)
+            }
         }
     }
 
@@ -152,5 +135,15 @@ final class HelixMetalView: MTKView {
     private func move(_ change: () -> Void) {
         change()
         needsDisplay = true
+    }
+}
+
+extension NavigationModifiers {
+    init(_ flags: NSEvent.ModifierFlags) {
+        self = []
+        if flags.contains(.shift) { insert(.shift) }
+        if flags.contains(.control) { insert(.control) }
+        if flags.contains(.option) { insert(.option) }
+        if flags.contains(.command) { insert(.command) }
     }
 }

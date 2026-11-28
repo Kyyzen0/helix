@@ -142,6 +142,22 @@
 		FBD256D667F0D28E6253AA69 /* GettingStartedSnapshotCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB7FB90636366C385220250 /* GettingStartedSnapshotCommand.swift */; };
 		2FA8026957AF72298BBEC70E /* UsabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96270FEF5B14C78C43DAB097 /* UsabilityTests.swift */; };
 		F476AC1EB07B22B81C4AFC38 /* Errors.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F14FDC5C1DA23DD13868587C /* Errors.xcstrings */; };
+		AB63F7D3A4B0A1B6E124264D /* ViewCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = D449C352604A8570262DB3B3 /* ViewCamera.swift */; };
+		3672B91BE10E9702E4F7FEB2 /* ViewCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = D449C352604A8570262DB3B3 /* ViewCamera.swift */; };
+		7E265D7D7DF495FA7A98E1F0 /* ViewportBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF741378877FE804A43C4CC5 /* ViewportBackground.swift */; };
+		8D4784C0CD96B94687F9EED9 /* ViewportBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF741378877FE804A43C4CC5 /* ViewportBackground.swift */; };
+		3E77FFE8112C030E7342285A /* WindowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12D3FB19B7BF7C3717395C2 /* WindowLayout.swift */; };
+		A6CBB6E19AF748957808EE7D /* WindowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12D3FB19B7BF7C3717395C2 /* WindowLayout.swift */; };
+		DE377001B005E5657B88CDE3 /* ViewportOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D488CFC022842D4341F35B0F /* ViewportOptions.swift */; };
+		82EA60E117F71EB753BA000B /* ViewportOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D488CFC022842D4341F35B0F /* ViewportOptions.swift */; };
+		5A11C0DE00000000000000A2 /* NavigationPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11C0DE00000000000000A1 /* NavigationPreset.swift */; };
+		5A11C0DE00000000000000A3 /* NavigationPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11C0DE00000000000000A1 /* NavigationPreset.swift */; };
+		5A11C0DE00000000000000B2 /* NavigationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11C0DE00000000000000B1 /* NavigationSettingsView.swift */; };
+		5A11C0DE00000000000000C2 /* NavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A11C0DE00000000000000C1 /* NavigationTests.swift */; };
+		5A11C0DE00000000000000D1 /* NavigationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8949648E5078146AEA910130 /* NavigationSettings.swift */; };
+		AFCD1617782B829C57D5562F /* ViewCubeOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1557980CD2E34F236662CA3 /* ViewCubeOverlay.swift */; };
+		3636F7F43756D662BC4D2D97 /* ViewMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8CFBABDCE8A9BA43B326F7A /* ViewMenu.swift */; };
+		19E3389BB17016D1D42ABF06 /* ViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC8B3BF9C27809D9863EEA2D /* ViewTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -258,6 +274,16 @@
 		BCB7FB90636366C385220250 /* GettingStartedSnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GettingStartedSnapshotCommand.swift; path = Sources/Help/GettingStartedSnapshotCommand.swift; sourceTree = "<group>"; };
 		96270FEF5B14C78C43DAB097 /* UsabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UsabilityTests.swift; path = Tests/UsabilityTests.swift; sourceTree = "<group>"; };
 		F14FDC5C1DA23DD13868587C /* Errors.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Errors.xcstrings; path = Resources/Errors.xcstrings; sourceTree = "<group>"; };
+		D449C352604A8570262DB3B3 /* ViewCamera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewCamera.swift; path = Sources/Viewport/ViewCamera.swift; sourceTree = "<group>"; };
+		CF741378877FE804A43C4CC5 /* ViewportBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewportBackground.swift; path = Sources/Viewport/ViewportBackground.swift; sourceTree = "<group>"; };
+		A12D3FB19B7BF7C3717395C2 /* WindowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WindowLayout.swift; path = Sources/Viewport/WindowLayout.swift; sourceTree = "<group>"; };
+		D488CFC022842D4341F35B0F /* ViewportOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewportOptions.swift; path = Sources/Viewport/ViewportOptions.swift; sourceTree = "<group>"; };
+		D1557980CD2E34F236662CA3 /* ViewCubeOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewCubeOverlay.swift; path = Sources/Viewport/ViewCubeOverlay.swift; sourceTree = "<group>"; };
+		B8CFBABDCE8A9BA43B326F7A /* ViewMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewMenu.swift; path = Sources/Viewport/ViewMenu.swift; sourceTree = "<group>"; };
+		AC8B3BF9C27809D9863EEA2D /* ViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewTests.swift; path = Tests/ViewTests.swift; sourceTree = "<group>"; };
+		5A11C0DE00000000000000A1 /* NavigationPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NavigationPreset.swift; path = Sources/Viewport/NavigationPreset.swift; sourceTree = "<group>"; };
+		5A11C0DE00000000000000B1 /* NavigationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NavigationSettingsView.swift; path = Sources/Settings/NavigationSettingsView.swift; sourceTree = "<group>"; };
+		5A11C0DE00000000000000C1 /* NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NavigationTests.swift; path = Tests/NavigationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -301,6 +327,8 @@
 			isa = PBXGroup;
 			children = (
 				96270FEF5B14C78C43DAB097 /* UsabilityTests.swift */,
+				AC8B3BF9C27809D9863EEA2D /* ViewTests.swift */,
+				5A11C0DE00000000000000C1 /* NavigationTests.swift */,
 				4296C9AEB8D4A12CA3A7B577 /* TimelineTests.swift */,
 				7551655AA18560B454477678 /* ThemeTests.swift */,
 				4591E300901EF8E054A1693A /* WindowUXTests.swift */,
@@ -351,6 +379,7 @@
 			isa = PBXGroup;
 			children = (
 				FA3FE7B31C7B09BADBFA0AD8 /* ViewportFraming.swift */,
+				93EC748BE29A94689840CA2F /* Viewport */,
 				E7BE3571F6E8F1B0A4E5E6A1 /* GeometryLimits.swift */,
 				7F1BD6C3AD041982A2F44538 /* SceneNames.swift */,
 				066FE1136491D33B7ED66020 /* HelixDocument+Import.swift */,
@@ -475,6 +504,7 @@
 			children = (
 				8470AFA9E195FBC15283EF56 /* SettingsView.swift */,
 				691C494210FE0CE24FC100EF /* SettingsSnapshotCommand.swift */,
+				5A11C0DE00000000000000B1 /* NavigationSettingsView.swift */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -498,6 +528,20 @@
 				BCB7FB90636366C385220250 /* GettingStartedSnapshotCommand.swift */,
 			);
 			name = Help;
+			sourceTree = "<group>";
+		};
+		93EC748BE29A94689840CA2F /* Viewport */ = {
+			isa = PBXGroup;
+			children = (
+				D449C352604A8570262DB3B3 /* ViewCamera.swift */,
+				CF741378877FE804A43C4CC5 /* ViewportBackground.swift */,
+				A12D3FB19B7BF7C3717395C2 /* WindowLayout.swift */,
+				D488CFC022842D4341F35B0F /* ViewportOptions.swift */,
+				5A11C0DE00000000000000A1 /* NavigationPreset.swift */,
+				D1557980CD2E34F236662CA3 /* ViewCubeOverlay.swift */,
+				B8CFBABDCE8A9BA43B326F7A /* ViewMenu.swift */,
+			);
+			name = Viewport;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -648,6 +692,7 @@
 				A9721A9E03047CDAF081CFAB /* ThemeColors.swift in Sources */,
 				28E6D1C7879952DFAAC7CE86 /* ThemeOptions.swift in Sources */,
 				14C080478B06D2D6C86D42FD /* SettingsView.swift in Sources */,
+				5A11C0DE00000000000000B2 /* NavigationSettingsView.swift in Sources */,
 				BB0BCC9746A2CA96B228D42F /* SettingsSnapshotCommand.swift in Sources */,
 				BC7821A1D8B775F10724538C /* TimelineMath.swift */,
 				B8E56733E8837520E25319D6 /* TimelineKeys.swift */,
@@ -719,6 +764,13 @@
 				3BDC5F0A53A616BA554A0FFC /* SceneSnapshotCache.swift in Sources */,
 				FF5782EDAFEB01057698C423 /* SceneSnapshotKeeper.swift in Sources */,
 				7A0A9DE4BC3175A4A272ED7B /* HelixDocument+Saving.swift in Sources */,
+				AB63F7D3A4B0A1B6E124264D /* ViewCamera.swift in Sources */,
+				7E265D7D7DF495FA7A98E1F0 /* ViewportBackground.swift in Sources */,
+				5A11C0DE00000000000000A2 /* NavigationPreset.swift in Sources */,
+				3E77FFE8112C030E7342285A /* WindowLayout.swift in Sources */,
+				DE377001B005E5657B88CDE3 /* ViewportOptions.swift in Sources */,
+				AFCD1617782B829C57D5562F /* ViewCubeOverlay.swift in Sources */,
+				3636F7F43756D662BC4D2D97 /* ViewMenu.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -763,6 +815,14 @@
 				34C235F25B2010954D97674C /* WindowPlacement.swift in Sources */,
 				5455E99840304A5B1F7ABE23 /* SceneSnapshotCache.swift in Sources */,
 				C5219815311138267CDA895F /* SceneSnapshotCacheTests.swift in Sources */,
+				3672B91BE10E9702E4F7FEB2 /* ViewCamera.swift in Sources */,
+				8D4784C0CD96B94687F9EED9 /* ViewportBackground.swift in Sources */,
+				A6CBB6E19AF748957808EE7D /* WindowLayout.swift in Sources */,
+				82EA60E117F71EB753BA000B /* ViewportOptions.swift in Sources */,
+				19E3389BB17016D1D42ABF06 /* ViewTests.swift in Sources */,
+				5A11C0DE00000000000000A3 /* NavigationPreset.swift in Sources */,
+				5A11C0DE00000000000000C2 /* NavigationTests.swift in Sources */,
+				5A11C0DE00000000000000D1 /* NavigationSettings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

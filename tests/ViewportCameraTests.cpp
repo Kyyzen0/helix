@@ -266,7 +266,7 @@ TEST_CASE("A viewport camera set to angles lands where orbiting to them would, w
 {
     ViewportCamera camera;
     camera.orbit({73.f, -21.f});
-    camera.setAngles(glm::radians(-135.f), glm::radians(20.f));
+    camera.setAngles(glm::radians(45.f), glm::radians(25.f));
     REQUIRE(camera == ViewportCamera());
 
     // Looking down negative z from the front: the camera sits on the positive z side.
@@ -280,4 +280,73 @@ TEST_CASE("A viewport camera set to angles lands where orbiting to them would, w
     camera.setAngles(0.f, glm::radians(90.f));
     const glm::vec3 position = camera.getPosition();
     REQUIRE(glm::length(glm::vec2(position.x, position.z)) > 0.01f);
+}
+
+TEST_CASE("A new viewport camera looks from the front-right and above, not from behind")
+{
+    // Front is +z and right is +x (see the standard views below), so the home view must sit on the
+    // positive side of both. It sat at (-x, -z) before, which showed a model's back and left.
+    const ViewportCamera camera;
+    const glm::vec3 position = camera.getPosition();
+    REQUIRE(position.x > 0.f);
+    REQUIRE(position.y > 0.f);
+    REQUIRE(position.z > 0.f);
+    REQUIRE(camera.getYaw() == Approx(glm::radians(45.f)));
+    REQUIRE(camera.getPitch() == Approx(glm::radians(25.f)));
+}
+
+TEST_CASE("The standard views put the camera on the side they are named for")
+{
+    // The convention the interface relies on: azimuth is the yaw, elevation the pitch.
+    struct View
+    {
+        float azimuth;
+        float elevation;
+        glm::vec3 side;
+    };
+    const View views[] = {
+        {0.f, 0.f, {0.f, 0.f, 1.f}},    // front: on +z, looking toward -z
+        {180.f, 0.f, {0.f, 0.f, -1.f}}, // back
+        {90.f, 0.f, {1.f, 0.f, 0.f}},   // right: on +x
+        {-90.f, 0.f, {-1.f, 0.f, 0.f}}, // left
+        {0.f, 89.f, {0.f, 1.f, 0.f}},   // top, held at 89 degrees by the pole stop
+        {0.f, -89.f, {0.f, -1.f, 0.f}}, // bottom
+    };
+    for (const View& view : views)
+    {
+        ViewportCamera camera;
+        camera.setAngles(glm::radians(view.azimuth), glm::radians(view.elevation));
+        const glm::vec3 direction = glm::normalize(camera.getPosition());
+        REQUIRE(glm::dot(direction, view.side) > 0.999f);
+        REQUIRE(camera.getYaw() == Approx(glm::radians(view.azimuth)));
+        REQUIRE(camera.getPitch() == Approx(glm::radians(view.elevation)));
+    }
+}
+
+TEST_CASE("Framing a box centres it in the view, whatever it is and wherever the camera looks from")
+{
+    // A tall box standing on the ground, off the origin, seen from the home angles and from the front.
+    for (const float azimuth : {45.f, 0.f, 90.f})
+    {
+        ViewportCamera camera;
+        camera.setAngles(glm::radians(azimuth), glm::radians(20.f));
+        const glm::vec3 low{4.f, 0.f, -2.f};
+        const glm::vec3 high{5.f, 3.f, -1.f};
+        camera.frameBounds(low, high, 1.8f);
+
+        const glm::mat4 viewProjection = camera.getProjectionMatrix(1.8f) * camera.getViewMatrix();
+        float lowest = 10.f, highest = -10.f, leftmost = 10.f, rightmost = -10.f;
+        for (int corner = 0; corner < 8; ++corner)
+        {
+            const glm::vec3 point{(corner & 1) ? high.x : low.x, (corner & 2) ? high.y : low.y, (corner & 4) ? high.z : low.z};
+            const glm::vec4 clip = viewProjection * glm::vec4(point, 1.f);
+            lowest = std::min(lowest, clip.y / clip.w);
+            highest = std::max(highest, clip.y / clip.w);
+            leftmost = std::min(leftmost, clip.x / clip.w);
+            rightmost = std::max(rightmost, clip.x / clip.w);
+        }
+        // The middle of what the box covers is the middle of the view, vertically and across.
+        REQUIRE((lowest + highest) * 0.5f == Approx(0.f).margin(0.02));
+        REQUIRE((leftmost + rightmost) * 0.5f == Approx(0.f).margin(0.02));
+    }
 }

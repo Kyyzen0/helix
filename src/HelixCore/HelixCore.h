@@ -1135,15 +1135,33 @@ void dollyViewport(float amount);
 
 /// @brief Turns the camera to an absolute direction, keeping its centre and distance.
 /// @param azimuthDegrees the angle around the vertical axis. The camera of a new viewport sits at
-/// -135, and 0 looks down the negative z axis.
+/// 45 (front-right of the model), and 0 looks down the negative z axis.
 /// @param elevationDegrees the angle above the horizontal plane, held between -89 and 89 so the
-/// view does not flip. The camera of a new viewport sits at 20.
+/// view does not flip. The camera of a new viewport sits at 25.
 /// @note Call it before frameViewport, which frames the geometry at the angles of the moment:
 /// framing first and orbiting after can turn a corner of the box out of the view.
 void orbitViewportTo(float azimuthDegrees, float elevationDegrees);
 
 /// @brief Puts the camera back where a new viewport starts.
 void resetViewport();
+
+/// @brief Where the viewport camera is, in what an interface shows: a view cube follows the angles
+/// and a label says the size of a grid cell.
+struct ViewportCameraInfo
+{
+    /// @brief The angle around the vertical axis, in the convention of @ref orbitViewportTo: 0 looks
+    /// from +z toward the origin (the front), 90 from +x (the right), 180 from -z, -90 from -x.
+    float azimuthDegrees = 0.f;
+    /// @brief The angle above the horizontal plane, in the convention of @ref orbitViewportTo.
+    float elevationDegrees = 0.f;
+    /// @brief The distance from the camera to the point it looks at.
+    float distance = 0.f;
+    /// @brief The side of a cell of the ground grid at that distance, in scene units (metres).
+    float gridCellSize = 1.f;
+};
+
+/// @brief Returns where the viewport camera is. Cheap: it reads the camera and does no drawing.
+ViewportCameraInfo viewportCameraInfo();
 
 /// @brief Moves the camera so the geometry cached by the last updateViewportGeometry fills the
 /// view, keeping the angles. Does nothing when the viewport holds no geometry.

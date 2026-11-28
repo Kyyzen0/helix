@@ -2,22 +2,24 @@ import AppKit
 import Foundation
 import SwiftUI
 
-/// `Helix --render-settings <out.png> [width] [--tab <appearance|general>] [--choice <system|en|fr>] [--dark] [--theme …] [--appearance …]`
+/// `Helix --render-settings <out.png> [width] [--tab <appearance|general|navigation>] [--preset <trackpad|mouse|blender>] [--choice <system|en|fr>] [--dark] [--theme …] [--appearance …]`
 ///
 /// Draws a tab of the Settings window in an off screen window, so the pickers can be checked
-/// without a screen: the Appearance tab with the theme given as the one chosen, or the General
-/// tab with the language given as the one chosen (the language the run is in, when none is).
+/// without a screen: the Appearance tab with the theme given as the one chosen, the General
+/// tab with the language given as the one chosen (the language the run is in, when none is), or the
+/// Navigation tab with the preset given as the one chosen (the stored one, when none is).
 @MainActor
 enum SettingsSnapshotCommand {
     static let flag = "--render-settings"
 
-    static let usage = "usage: Helix \(flag) <out.png> [width] [--tab <appearance|general>] [--choice <system|en|fr>] [--dark] \(ThemeOptions.usage)"
+    static let usage = "usage: Helix \(flag) <out.png> [width] [--tab <appearance|general|navigation>] [--preset <trackpad|mouse|blender>] [--choice <system|en|fr>] [--dark] \(ThemeOptions.usage)"
 
     static func run(_ all: [String]) -> Int32 {
         guard let (themeOptions, arguments) = ThemeOptions.extract(from: all) else { return OffscreenRender.fail(usage) }
         var positional: [String] = []
         var dark = false
         var tab = "appearance"
+        var preset = NavigationPreset.stored()
         var choice = Bundle.main.preferredLocalizations.first.flatMap(AppLanguage.init(rawValue:)) ?? .system
         var index = 0
         while index < arguments.count {
@@ -25,8 +27,12 @@ enum SettingsSnapshotCommand {
             case "--dark":
                 dark = true
             case "--tab":
-                guard index + 1 < arguments.count, ["appearance", "general"].contains(arguments[index + 1]) else { return OffscreenRender.fail(usage) }
+                guard index + 1 < arguments.count, ["appearance", "general", "navigation"].contains(arguments[index + 1]) else { return OffscreenRender.fail(usage) }
                 tab = arguments[index + 1]
+                index += 1
+            case "--preset":
+                guard index + 1 < arguments.count, let parsed = NavigationPreset(rawValue: arguments[index + 1]) else { return OffscreenRender.fail(usage) }
+                preset = parsed
                 index += 1
             case "--choice":
                 guard index + 1 < arguments.count, let parsed = AppLanguage(rawValue: arguments[index + 1]) else { return OffscreenRender.fail(usage) }
@@ -44,16 +50,17 @@ enum SettingsSnapshotCommand {
         let palette = themeOptions.palette(dark: dark)
         _ = NSApplication.shared
         let image: CGImage?
-        if tab == "general" {
-            // The language menu is an AppKit control, which only a real window draws.
-            let content = SettingsSnapshotCommand.pane(tab: tab, theme: themeOptions.theme, language: choice)
+        if tab != "appearance" {
+            // The language menu, the segmented picker and the sliders are AppKit controls, which only
+            // a real window draws.
+            let content = SettingsSnapshotCommand.pane(tab: tab, theme: themeOptions.theme, language: choice, preset: preset)
                 .frame(width: width, alignment: .top)
                 .background(ThemeColors(palette).window)
                 .themeEnvironment(palette)
             image = OffscreenRender.image(of: content, width: width, height: nil, dark: palette.isDark)
         } else {
             // The pane holds no AppKit control, so ImageRenderer draws it without a window.
-            let content = SettingsSnapshotCommand.pane(tab: tab, theme: themeOptions.theme, language: choice)
+            let content = SettingsSnapshotCommand.pane(tab: tab, theme: themeOptions.theme, language: choice, preset: preset)
                 .frame(width: width, height: 215, alignment: .top)
                 .background(ThemeColors(palette).window)
                 .themeEnvironment(palette)
@@ -73,15 +80,26 @@ enum SettingsSnapshotCommand {
     }
 
     @ViewBuilder
-    private static func pane(tab: String, theme: Theme, language: AppLanguage) -> some View {
-        if tab == "general" {
+    private static func pane(tab: String, theme: Theme, language: AppLanguage, preset: NavigationPreset) -> some View {
+        if tab == "navigation" {
+            let options = NavigationOptions.stored()
+            NavigationPane(
+                preset: .constant(preset), invertZoom: .constant(options.invertZoom),
+                orbitSpeed: .constant(Double(options.orbitSpeed)), zoomSpeed: .constant(Double(options.zoomSpeed)),
+                ignoreInertia: .constant(options.ignoreScrollInertia)
+            )
+        } else if tab == "general" {
             LanguagePane(
                 selection: .constant(language),
                 needsRelaunch: AppLanguage.needsRelaunch(choice: language),
                 relaunch: {}
             )
         } else {
-            AppearancePane(selection: .constant(theme))
+            VStack(alignment: .leading, spacing: 0) {
+                AppearancePane(selection: .constant(theme))
+                Divider().padding(.horizontal, 20)
+                ViewportBackgroundPane(selection: .constant(ViewportBackground.stored()))
+            }
         }
     }
 }

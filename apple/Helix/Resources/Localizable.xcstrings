@@ -222,6 +222,23 @@
         }
       }
     },
+    "Animating": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animating"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animer"
+          }
+        }
+      }
+    },
     "Appearance": {
       "extractionState": "manual",
       "localizations": {
@@ -290,6 +307,23 @@
         }
       }
     },
+    "Back": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrière"
+          }
+        }
+      }
+    },
     "Back one frame (←)": {
       "extractionState": "manual",
       "localizations": {
@@ -303,6 +337,91 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reculer d’une image (←)"
+          }
+        }
+      }
+    },
+    "Back to the starting view": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back to the starting view"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revenir à la vue de départ"
+          }
+        }
+      }
+    },
+    "Bottom": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bottom"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dessous"
+          }
+        }
+      }
+    },
+    "Building": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Building"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Construire"
+          }
+        }
+      }
+    },
+    "Camera": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camera"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caméra"
+          }
+        }
+      }
+    },
+    "Camera, wireframe, materials, background and layout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camera, wireframe, materials, background and layout"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caméra, fil de fer, matériaux, fond et disposition"
           }
         }
       }
@@ -1055,6 +1174,23 @@
         }
       }
     },
+    "Front": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Front"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Face"
+          }
+        }
+      }
+    },
     "General": {
       "extractionState": "manual",
       "localizations": {
@@ -1136,6 +1272,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aller à la dernière image (⌥→)"
+          }
+        }
+      }
+    },
+    "Grid: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grid: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grille : %@"
           }
         }
       }
@@ -1276,6 +1429,40 @@
         }
       }
     },
+    "Home": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vue initiale"
+          }
+        }
+      }
+    },
+    "Home view": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home view"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vue de départ"
+          }
+        }
+      }
+    },
     "Import": {
       "extractionState": "manual",
       "localizations": {
@@ -1374,6 +1561,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Langue"
+          }
+        }
+      }
+    },
+    "Layout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layout"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disposition"
+          }
+        }
+      }
+    },
+    "Left": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Left"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gauche"
           }
         }
       }
@@ -2058,6 +2279,23 @@
         }
       }
     },
+    "Right": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Right"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Droite"
+          }
+        }
+      }
+    },
     "Search nodes": {
       "extractionState": "manual",
       "localizations": {
@@ -2500,6 +2738,23 @@
         }
       }
     },
+    "Theme uses the colours of the theme. A light background suits a dark model.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theme uses the colours of the theme. A light background suits a dark model."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thème reprend les couleurs du thème. Un fond clair convient à un modèle sombre."
+          }
+        }
+      }
+    },
     "There is a keyframe on frame %@ already.": {
       "extractionState": "manual",
       "localizations": {
@@ -2619,6 +2874,23 @@
         }
       }
     },
+    "Top": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dessus"
+          }
+        }
+      }
+    },
     "Value": {
       "extractionState": "manual",
       "localizations": {
@@ -2666,6 +2938,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vue"
+          }
+        }
+      }
+    },
+    "View cube": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View cube"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cube de navigation"
+          }
+        }
+      }
+    },
+    "Viewing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viewing"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visionner"
+          }
+        }
+      }
+    },
+    "Viewport Background": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viewport Background"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fond de la vue 3D"
           }
         }
       }
@@ -4051,23 +4374,6 @@
         }
       }
     },
-    "Drag to orbit, hold ⌥ to pan, scroll with ⌘ or pinch to zoom, and press F to frame what you made. The card at the bottom left of the view says it again; Help ▸ Show Navigation Help brings it back.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drag to orbit, hold ⌥ to pan, scroll with ⌘ or pinch to zoom, and press F to frame what you made. The card at the bottom left of the view says it again; Help ▸ Show Navigation Help brings it back."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Glissez pour tourner autour de l’objet, gardez ⌥ pour déplacer la vue, faites défiler avec ⌘ ou pincez pour zoomer, et appuyez sur F pour cadrer ce que vous avez fait. La carte en bas à gauche de la vue le rappelle ; Aide ▸ Afficher l’aide à la navigation la fait revenir."
-          }
-        }
-      }
-    },
     "Nodes": {
       "extractionState": "manual",
       "localizations": {
@@ -4200,6 +4506,431 @@
           "stringUnit": {
             "state": "translated",
             "value": "⌘S enregistre la scène dans un fichier .kut. Un fichier 3D que vous ouvrez devient une nouvelle scène qui contient le modèle, et l’enregistrement demande où la ranger : le modèle lui-même n’est jamais modifié."
+          }
+        }
+      }
+    },
+    "Trackpad": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trackpad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trackpad"
+          }
+        }
+      }
+    },
+    "Mouse or Magic Mouse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mouse or Magic Mouse"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Souris ou Magic Mouse"
+          }
+        }
+      }
+    },
+    "Blender": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blender"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blender"
+          }
+        }
+      }
+    },
+    "Two-finger scroll orbits and pinch zooms. The way Helix has always worked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Two-finger scroll orbits and pinch zooms. The way Helix has always worked."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le défilement à deux doigts fait tourner, le pincement zoome. Comme Helix a toujours fonctionné."
+          }
+        }
+      }
+    },
+    "Scrolling zooms, with a wheel or the surface of a Magic Mouse. Drag to orbit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scrolling zooms, with a wheel or the surface of a Magic Mouse. Drag to orbit."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le défilement zoome, avec une molette ou la surface d’une Magic Mouse. Glissez pour tourner."
+          }
+        }
+      }
+    },
+    "The middle button orbits, as in Blender. The left button orbits too, so no middle button is needed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The middle button orbits, as in Blender. The left button orbits too, so no middle button is needed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le bouton du milieu fait tourner, comme dans Blender. Le bouton gauche fait tourner aussi : aucun bouton du milieu n’est nécessaire."
+          }
+        }
+      }
+    },
+    "⌥ or ⇧ drag, or middle button": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌥ or ⇧ drag, or middle button"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌥ ou ⇧ glisser, ou bouton du milieu"
+          }
+        }
+      }
+    },
+    "⌃ drag, or right button": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌃ drag, or right button"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌃ glisser, ou bouton droit"
+          }
+        }
+      }
+    },
+    "Scroll, or pinch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scroll, or pinch"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Défilement, ou pincement"
+          }
+        }
+      }
+    },
+    "⇧ scroll": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⇧ scroll"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⇧ défilement"
+          }
+        }
+      }
+    },
+    "⌥ scroll": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌥ scroll"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌥ défilement"
+          }
+        }
+      }
+    },
+    "Middle button drag, or drag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Middle button drag, or drag"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glisser avec le bouton du milieu, ou glisser"
+          }
+        }
+      }
+    },
+    "⇧ middle button drag, or ⌥ drag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⇧ middle button drag, or ⌥ drag"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⇧ glisser avec le bouton du milieu, ou ⌥ glisser"
+          }
+        }
+      }
+    },
+    "⌃ middle button drag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌃ middle button drag"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌃ glisser avec le bouton du milieu"
+          }
+        }
+      }
+    },
+    "Wheel, or pinch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wheel, or pinch"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Molette, ou pincement"
+          }
+        }
+      }
+    },
+    "⇧ wheel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⇧ wheel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⇧ molette"
+          }
+        }
+      }
+    },
+    "⌥ wheel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌥ wheel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌥ molette"
+          }
+        }
+      }
+    },
+    "Change…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifier…"
+          }
+        }
+      }
+    },
+    "Open Settings > Navigation to choose the preset, the speed and the direction of the zoom.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings > Navigation to choose the preset, the speed and the direction of the zoom."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre Réglages > Navigation pour choisir le préréglage, la vitesse et le sens du zoom."
+          }
+        }
+      }
+    },
+    "Invert zoom direction": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invert zoom direction"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inverser le sens du zoom"
+          }
+        }
+      }
+    },
+    "Orbit speed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orbit speed"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vitesse de rotation"
+          }
+        }
+      }
+    },
+    "Zoom speed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoom speed"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vitesse du zoom"
+          }
+        }
+      }
+    },
+    "Ignore scroll inertia for orbit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignore scroll inertia for orbit"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignorer l’inertie du défilement pour tourner"
+          }
+        }
+      }
+    },
+    "Stops the scene from turning on after your fingers leave the trackpad or the mouse. Zooming and panning stay smooth.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stops the scene from turning on after your fingers leave the trackpad or the mouse. Zooming and panning stay smooth."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empêche la scène de continuer à tourner une fois les doigts levés du trackpad ou de la souris. Le zoom et le déplacement restent fluides."
+          }
+        }
+      }
+    },
+    "On a trackpad, scroll with two fingers to orbit, hold ⇧ to pan, and pinch or hold ⌘ to zoom. With a mouse or a Magic Mouse, scrolling should zoom: choose the Mouse or Magic Mouse preset in Settings ▸ Navigation. Press F to frame what you made. The card at the bottom left of the view lists the gestures of the preset; Help ▸ Show Navigation Help brings it back.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On a trackpad, scroll with two fingers to orbit, hold ⇧ to pan, and pinch or hold ⌘ to zoom. With a mouse or a Magic Mouse, scrolling should zoom: choose the Mouse or Magic Mouse preset in Settings ▸ Navigation. Press F to frame what you made. The card at the bottom left of the view lists the gestures of the preset; Help ▸ Show Navigation Help brings it back."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sur un trackpad, faites défiler à deux doigts pour tourner, gardez ⇧ pour déplacer la vue, et pincez ou gardez ⌘ pour zoomer. Avec une souris ou une Magic Mouse, le défilement doit zoomer : choisissez le préréglage Souris ou Magic Mouse dans Réglages ▸ Navigation. Appuyez sur F pour cadrer ce que vous avez fait. La carte en bas à gauche de la vue liste les gestes du préréglage ; Aide ▸ Afficher l’aide à la navigation la fait revenir."
           }
         }
       }

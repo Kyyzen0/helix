@@ -60,8 +60,6 @@ struct HelixCommands: Commands {
     @FocusedObject private var document: HelixDocument?
     @Environment(\.openWindow) private var openWindow
     @AppStorage(NavigationLegendSetting.hiddenKey) private var navigationLegendHidden = false
-    @AppStorage(WireframeSetting.defaultsKey) private var wireframe = WireframeSetting.auto
-    @AppStorage(MaterialsSetting.defaultsKey) private var materialsVisible = true
     @AppStorage(InspectorSetting.defaultsKey) private var inspectorShown = true
     @AppStorage(TimelineSetting.shownKey) private var timelineShown = true
     @AppStorage(TimelineSetting.loopKey) private var loop = true
@@ -77,19 +75,12 @@ struct HelixCommands: Commands {
             Button("Getting Started") { openWindow(id: GettingStartedWindow.id) }
             Button("Show Navigation Help") { navigationLegendHidden = false }
         }
-        // The keys F, shift W and shift M belong to the viewport, which handles them itself
-        // while it has the keys. A menu shortcut without the command key would also fire while a
-        // text field has them, and typing an "M" in the palette must not hide the materials.
+        // The camera, the frame, the wireframe, the materials, the background and the layouts. F, shift
+        // W and shift M are on the items: AppKit keeps a key without a command key from the menu
+        // while a text field is being edited, so typing in the palette or the inspector is safe.
         CommandGroup(before: .toolbar) {
-            Button("Frame Geometry") { document?.requestFrame() }
-                .disabled(document == nil)
-            Picker("Wireframe", selection: wireframeBinding) {
-                ForEach(WireframeSetting.allCases) { setting in
-                    Text(setting.title).tag(setting)
-                }
-            }
-            Button("Cycle Wireframe") { wireframeBinding.wrappedValue = wireframe.next }
-            Toggle("Materials", isOn: materialsBinding)
+            ViewMenuContent(document: document, shortcuts: true)
+            Divider()
             // Command and option keep the shortcut out of the way of text fields, which take
             // the plain keys.
             Button(inspectorShown ? LocalizedStringKey("Hide Inspector") : LocalizedStringKey("Show Inspector")) { inspectorShown.toggle() }
@@ -145,32 +136,6 @@ struct HelixCommands: Commands {
 
 extension HelixCommands {
     private var spreadsheetShown: Bool { lowerPane == TimelineSetting.LowerPane.spreadsheet.rawValue }
-}
-
-extension HelixCommands {
-    /// Sets the wireframe mode and asks the viewport of the window in front to draw again.
-    private var wireframeBinding: Binding<WireframeSetting> {
-        Binding(
-            get: { wireframe },
-            set: { setting in
-                wireframe = setting
-                document?.viewport.redraw()
-            }
-        )
-    }
-}
-
-extension HelixCommands {
-    /// Shows or hides the materials and asks the viewport of the window in front to draw again.
-    private var materialsBinding: Binding<Bool> {
-        Binding(
-            get: { materialsVisible },
-            set: { visible in
-                materialsVisible = visible
-                document?.viewport.redraw()
-            }
-        )
-    }
 }
 
 /// The standard About panel, with the version of the engine and the credits.

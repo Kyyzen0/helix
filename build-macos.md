@@ -177,7 +177,19 @@ an alert. The scene file type is `com.kyyzen.helix.scene` (`.kut`, JSON text).
 The viewport draws the edges of the mesh over its shading according to the **View > Wireframe**
 setting (Auto, On, Off; Shift+W cycles them while the viewport has the keys). Auto leaves the wireframe out above 50 000
 triangles and fades it out as the edges come within a few points of each other on screen, since a
-wireframe on a dense mesh covers the shading entirely. The lights follow the camera.
+wireframe on a dense mesh covers the shading entirely. The lights follow the camera, and a soft sky and ground
+ambient (also mirrored faintly in the surface) keeps dark materials readable.
+
+**View.** The View menu (and the cube button of the toolbar) holds Camera (Home `Cmd 0`, Front `Cmd 1`, Right
+`Cmd 2`, Top `Cmd 3`, Back, Left, Bottom), Frame Geometry (`F`), Wireframe (`Shift+W` cycles), Materials
+(`Shift+M`), Viewport Background (Theme, Dark, Medium, Light; also in Settings > Appearance) and Layout
+(Viewing: viewport 80 % and no inspector; Building: 60/40 with the inspector; Animating: timeline shown, viewport
+70 %). Opening a 3D file starts in Viewing. A cube with an axis tripod and a Home button at the top right of the
+viewport follows the camera, and a click on a face goes to that view. Top and Bottom are held at 89 degrees by the
+camera, so the view does not flip. The grid has minor and major (every 10th) lines, a cell of 1, 2 or 5 times a
+power of ten metres chosen from the camera distance, tinted X and Z axes, and its cell size is shown at the bottom
+right. `--view home|front|back|right|left|top|bottom` and `--background theme|dark|medium|light` apply to
+`--render-window` and `--render-snapshot` (`--layout viewing|building|animating` to `--render-window`).
 
 `Helix --render-snapshot <in.kut | --new-scene> <out.png> [width height]` opens a scene, frames
 its geometry, draws it off screen and writes a PNG, with no window. It is the check of the whole
@@ -188,10 +200,9 @@ chain without a screen. `apple/Helix/Samples` holds two scenes to try it on, wri
 
 The window of a document is split in two, the viewport over the node editor, with a bar
 between them to resize. Click the editor to give it the keys: the shortcuts below apply to the view
-that has them, and the viewport's `F`, `Shift+W` and `Shift+M` apply while the viewport has them. They
-are handled by the two views and not by menu items with a key, because a menu shortcut without the
-command key also fires while a text field has the keys, and an "M" typed in the search palette must
-not hide the materials. The menu items stay, without keys.
+that has them. The viewport's `F`, `Shift+W` and `Shift+M` are key equivalents of the View menu, so they work
+wherever the focus is; AppKit does not hand a key equivalent without a command key to the menu while a
+text field is being edited, so typing an "f" in the palette search or the inspector is typed and does not frame.
 
 - **Look.** A dotted grid, cards of 148 by 46 centred on the position of the node (the geometry of the
   Qt editor, so a scene laid out there looks the same), the name and the type label on the card,

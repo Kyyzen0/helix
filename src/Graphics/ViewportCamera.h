@@ -50,6 +50,18 @@ class ViewportCamera
     /// @note The camera stays level, so any roll in the transform is dropped.
     void placeAt(const glm::mat4& transform);
 
+    /// @brief Returns the angle around the vertical axis, in radians (see @ref setAngles).
+    float getYaw() const { return yaw_; }
+
+    /// @brief Returns the angle above the horizontal plane, in radians.
+    float getPitch() const { return pitch_; }
+
+    /// @brief Returns the distance from the camera to its centre.
+    float getDistance() const { return distance_; }
+
+    /// @brief Returns the point the camera looks at.
+    glm::vec3 getCenter() const { return center_; }
+
     /// @brief Returns the camera position in world space.
     glm::vec3 getPosition() const;
 
@@ -69,10 +81,12 @@ class ViewportCamera
 
     glm::vec3 center_{0.f, 0.f, 0.f};
     float distance_ = 15.f;
-    /// @brief The angle around the vertical axis, 0 looking down negative z.
-    float yaw_ = glm::radians(-135.f);
+    /// @brief The angle around the vertical axis, 0 looking down negative z. A new camera sits at
+    /// +45: on the front-right of the model, so the home view shows its front (+z), its right (+x)
+    /// and its top. It used to sit at -135, which looks at the model from behind.
+    float yaw_ = glm::radians(45.f);
     /// @brief The angle above the horizontal plane.
-    float pitch_ = glm::radians(20.f);
+    float pitch_ = glm::radians(25.f);
 };
 
 } // namespace helix::gfx

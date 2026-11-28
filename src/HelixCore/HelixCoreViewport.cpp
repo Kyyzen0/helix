@@ -4,6 +4,7 @@
 #include "Engine/Network/NodePacket.h"
 #include "Graphics/DisplayGeometry.h"
 #include "Graphics/GraphicsDevice.h"
+#include "Graphics/GridScale.h"
 #include "Graphics/ViewportCamera.h"
 #include "Graphics/ViewportRenderer.h"
 #include "HelixCore/HelixCore.h"
@@ -12,6 +13,7 @@
 #include <algorithm>
 #include <cmath>
 #include <glm/common.hpp>
+#include <glm/trigonometric.hpp>
 #include <glm/vec3.hpp>
 #include <limits>
 #include <memory>
@@ -179,6 +181,17 @@ void orbitViewportTo(float azimuthDegrees, float elevationDegrees)
 }
 
 void resetViewport() { viewport().camera.reset(); }
+
+ViewportCameraInfo viewportCameraInfo()
+{
+    const gfx::ViewportCamera& camera = viewport().camera;
+    ViewportCameraInfo info;
+    info.azimuthDegrees = glm::degrees(camera.getYaw());
+    info.elevationDegrees = glm::degrees(camera.getPitch());
+    info.distance = camera.getDistance();
+    info.gridCellSize = gfx::chooseGridCellSize(camera.getDistance());
+    return info;
+}
 
 bool frameViewport(float aspect)
 {

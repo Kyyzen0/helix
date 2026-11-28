@@ -23,10 +23,12 @@ extension EnvironmentValues {
 
 struct StillViewport: View {
     @ObservedObject var still: ViewportStill
+    @Environment(\.theme) private var theme
+    @AppStorage(ViewportBackground.defaultsKey) private var background = ViewportBackground.default.rawValue
 
     var body: some View {
         ZStack {
-            Color(red: 0.13, green: 0.14, blue: 0.16)
+            Color((ViewportBackground(rawValue: background) ?? .default).colors(for: theme.palette).background)
             if let image = still.image {
                 Image(nsImage: image).resizable().scaledToFill()
             }

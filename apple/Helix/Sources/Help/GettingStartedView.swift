@@ -31,7 +31,7 @@ struct GettingStartedView: View {
             Part(
                 icon: "cube.transparent",
                 title: String(localized: "Move around the 3D view"),
-                text: String(localized: "Drag to orbit, hold ⌥ to pan, scroll with ⌘ or pinch to zoom, and press F to frame what you made. The card at the bottom left of the view says it again; Help ▸ Show Navigation Help brings it back.")
+                text: String(localized: "On a trackpad, scroll with two fingers to orbit, hold ⇧ to pan, and pinch or hold ⌘ to zoom. With a mouse or a Magic Mouse, scrolling should zoom: choose the Mouse or Magic Mouse preset in Settings ▸ Navigation. Press F to frame what you made. The card at the bottom left of the view lists the gestures of the preset; Help ▸ Show Navigation Help brings it back.")
             ),
             Part(
                 icon: "point.3.connected.trianglepath.dotted",
