@@ -106,7 +106,7 @@ enum MCPHandlers {
         ]
     }
 
-    private static func sceneJSON() -> JSONValue {
+    static func sceneJSON() -> JSONValue {
         let nodes = nodeList()
         let names = Dictionary(uniqueKeysWithValues: nodes.map { ($0.id, String(engine: $0.name)) })
 
@@ -749,6 +749,11 @@ enum MCPHandlers {
 
         let geometry = helix.core.updateViewportGeometry()
         try check(geometry.status)
+
+        // The picture moves the camera to frame the geometry, and the camera is given back after
+        // it: in the app it is the person's, in the window.
+        let camera = helix.core.viewportCameraState()
+        defer { helix.core.restoreViewportCamera(camera) }
 
         // The framing of the first frame of the window, at the angles asked for: the angles come
         // first, since the frame fits the box as seen from them.

@@ -87,7 +87,12 @@ extension HelixDocument {
     /// Reads the file on a thread of the pool. The answer is the message of the engine, in words
     /// for a person, or nil.
     private nonisolated static func readOffMain(_ url: URL) async -> String? {
-        await Task.detached(priority: .userInitiated) {
+        // With `HELIX_DEBUG_IMPORT_READ_DELAY_MS`, the read takes that much longer, so that
+        // `Scripts/live-smoke.py` can disconnect an agent while its import is being read.
+        if let text = ProcessInfo.processInfo.environment["HELIX_DEBUG_IMPORT_READ_DELAY_MS"], let milliseconds = Int(text) {
+            try? await Task.sleep(for: .milliseconds(milliseconds))
+        }
+        return await Task.detached(priority: .userInitiated) {
             let status = helix.core.warmImportCache(std.string(url.path))
             return status.ok ? nil : String(engineMessage: status.error)
         }.value

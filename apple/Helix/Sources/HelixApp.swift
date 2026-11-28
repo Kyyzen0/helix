@@ -21,6 +21,19 @@ struct HelixApp: App {
         ) { _ in
             MainActor.assumeIsolated { ThemeAppearance.applyStored() }
         }
+        // AI agents reach the open scene over a socket, from the moment the app is up until it quits.
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.didFinishLaunchingNotification, object: nil, queue: .main
+        ) { _ in
+            MainActor.assumeIsolated {
+                AgentLink.shared.start()
+            }
+        }
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.willTerminateNotification, object: nil, queue: .main
+        ) { _ in
+            MainActor.assumeIsolated { AgentLink.shared.stop() }
+        }
     }
 
     var body: some Scene {

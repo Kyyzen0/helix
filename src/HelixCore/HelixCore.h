@@ -1294,6 +1294,28 @@ struct ViewportCameraInfo
 /// @brief Returns where the viewport camera is. Cheap: it reads the camera and does no drawing.
 ViewportCameraInfo viewportCameraInfo();
 
+/// @brief The whole viewport camera: what a caller saves before it moves the camera for a picture
+/// and puts back after, so the person looking at the viewport sees it where they left it.
+struct ViewportCameraState
+{
+    /// @brief The point the camera looks at.
+    float centerX = 0.f;
+    float centerY = 0.f;
+    float centerZ = 0.f;
+    /// @brief The distance from the camera to its centre.
+    float distance = 15.f;
+    /// @brief The angles in radians, as the camera keeps them (not the degrees of
+    /// @ref ViewportCameraInfo).
+    float yaw = 0.f;
+    float pitch = 0.f;
+};
+
+/// @brief Returns the whole camera, to give back to @ref restoreViewportCamera. Cheap.
+ViewportCameraState viewportCameraState();
+
+/// @brief Puts the camera back exactly where @ref viewportCameraState read it.
+void restoreViewportCamera(const ViewportCameraState& state);
+
 /// @brief Moves the camera so the geometry cached by the last updateViewportGeometry fills the
 /// view, keeping the angles. Does nothing when the viewport holds no geometry.
 /// @param aspect the width of the view divided by its height.

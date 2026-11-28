@@ -6,11 +6,12 @@ enum SettingsTab: String {
     case general
     case appearance
     case navigation
+    case agents
 
     static let defaultsKey = "settingsTab"
 }
 
-/// The Settings window (⌘,): the language, the theme and the navigation of the viewport.
+/// The Settings window (⌘,): the language, the theme, the navigation of the viewport and the AI agents.
 struct SettingsView: View {
     @AppStorage(SettingsTab.defaultsKey) private var tab = SettingsTab.general.rawValue
 
@@ -25,6 +26,9 @@ struct SettingsView: View {
             NavigationSettingsTab()
                 .tabItem { Label("Navigation", systemImage: "computermouse") }
                 .tag(SettingsTab.navigation.rawValue)
+            AgentSettings()
+                .tabItem { Label("AI Agents", systemImage: "sparkles") }
+                .tag(SettingsTab.agents.rawValue)
         }
         .frame(width: 540)
         .scenePadding()

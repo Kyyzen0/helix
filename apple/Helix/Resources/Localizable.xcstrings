@@ -222,6 +222,329 @@
         }
       }
     },
+    "AI": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA"
+          }
+        }
+      }
+    },
+    "AI agents": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI agents"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agents IA"
+          }
+        }
+      }
+    },
+    "AI Agents": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Agents"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agents IA"
+          }
+        }
+      }
+    },
+    "AI agents are connected. Click to see what they did.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI agents are connected. Click to see what they did."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Des agents IA sont connectés. Cliquez pour voir ce qu’ils ont fait."
+          }
+        }
+      }
+    },
+    "AI: Animate Skeleton": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: Animate Skeleton"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA : Animer un squelette"
+          }
+        }
+      }
+    },
+    "AI: Clear Keyframes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: Clear Keyframes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA : Effacer les images clés"
+          }
+        }
+      }
+    },
+    "AI: Connect Nodes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: Connect Nodes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA : Relier des nœuds"
+          }
+        }
+      }
+    },
+    "AI: Create Node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: Create Node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA : Créer un nœud"
+          }
+        }
+      }
+    },
+    "AI: Delete Node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: Delete Node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA : Supprimer un nœud"
+          }
+        }
+      }
+    },
+    "AI: Disconnect Nodes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: Disconnect Nodes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA : Délier des nœuds"
+          }
+        }
+      }
+    },
+    "AI: Import File": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: Import File"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA : Importer un fichier"
+          }
+        }
+      }
+    },
+    "AI: Remove Keyframe": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: Remove Keyframe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA : Retirer une image clé"
+          }
+        }
+      }
+    },
+    "AI: Reset Parameter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: Reset Parameter"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA : Réinitialiser un paramètre"
+          }
+        }
+      }
+    },
+    "AI: Set Display Node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: Set Display Node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA : Choisir le nœud affiché"
+          }
+        }
+      }
+    },
+    "AI: Set Keyframe": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: Set Keyframe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA : Poser une image clé"
+          }
+        }
+      }
+    },
+    "AI: Set Parameter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: Set Parameter"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA : Régler un paramètre"
+          }
+        }
+      }
+    },
+    "AI: Set Time Range": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: Set Time Range"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA : Régler la plage de temps"
+          }
+        }
+      }
+    },
+    "An AI agent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An AI agent"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un agent IA"
+          }
+        }
+      }
+    },
+    "An AI app on this Mac can work in the scene you have open. You see each step as it happens, and Undo (⌘Z) takes it back. Nothing leaves your Mac except what your AI app itself sends to its provider.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An AI app on this Mac can work in the scene you have open. You see each step as it happens, and Undo (⌘Z) takes it back. Nothing leaves your Mac except what your AI app itself sends to its provider."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une application d’IA de ce Mac peut travailler dans la scène que vous avez ouverte. Vous voyez chaque étape au moment où elle a lieu, et Annuler (⌘Z) la défait. Rien ne quitte votre Mac, sauf ce que votre application d’IA envoie elle-même à son fournisseur."
+          }
+        }
+      }
+    },
     "Animated": {
       "extractionState": "manual",
       "localizations": {
@@ -239,6 +562,23 @@
         }
       }
     },
+    "Animated a skeleton": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animated a skeleton"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A animé un squelette"
+          }
+        }
+      }
+    },
     "Animating": {
       "extractionState": "manual",
       "localizations": {
@@ -252,6 +592,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Animer"
+          }
+        }
+      }
+    },
+    "Another Helix is already open and holds the connection.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Another Helix is already open and holds the connection."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un autre Helix est déjà ouvert et tient la connexion."
           }
         }
       }
@@ -286,6 +643,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Appliquer"
+          }
+        }
+      }
+    },
+    "Asked for a new scene": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asked for a new scene"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A demandé une nouvelle scène"
+          }
+        }
+      }
+    },
+    "Asked to open a scene": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asked to open a scene"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A demandé d’ouvrir une scène"
           }
         }
       }
@@ -613,6 +1004,23 @@
         }
       }
     },
+    "Choose your AI app to copy its setup.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose your AI app to copy its setup."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez votre application d’IA pour copier sa configuration."
+          }
+        }
+      }
+    },
     "Choose…": {
       "extractionState": "manual",
       "localizations": {
@@ -626,6 +1034,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choisir…"
+          }
+        }
+      }
+    },
+    "Chose the node to show": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chose the node to show"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A choisi le nœud à afficher"
           }
         }
       }
@@ -698,6 +1123,40 @@
         }
       }
     },
+    "Cleared the cook cache": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cleared the cook cache"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A vidé le cache de calcul"
+          }
+        }
+      }
+    },
+    "Cleared the keyframes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cleared the keyframes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A effacé les images clés"
+          }
+        }
+      }
+    },
     "Click to edit the expression": {
       "extractionState": "manual",
       "localizations": {
@@ -749,6 +1208,23 @@
         }
       }
     },
+    "Connected two nodes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected two nodes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A relié deux nœuds"
+          }
+        }
+      }
+    },
     "Constant": {
       "extractionState": "manual",
       "localizations": {
@@ -762,6 +1238,142 @@
           "stringUnit": {
             "state": "translated",
             "value": "Constante"
+          }
+        }
+      }
+    },
+    "Copied. Add it to claude_desktop_config.json, then restart Claude.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied. Add it to claude_desktop_config.json, then restart Claude."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copié. Ajoutez-le à claude_desktop_config.json, puis relancez Claude."
+          }
+        }
+      }
+    },
+    "Copied. Add it to ~/.codex/config.toml, then restart Codex.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied. Add it to ~/.codex/config.toml, then restart Codex."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copié. Ajoutez-le à ~/.codex/config.toml, puis relancez Codex."
+          }
+        }
+      }
+    },
+    "Copied. Add it to ~/.gemini/settings.json, then restart Gemini.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied. Add it to ~/.gemini/settings.json, then restart Gemini."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copié. Ajoutez-le à ~/.gemini/settings.json, puis relancez Gemini."
+          }
+        }
+      }
+    },
+    "Copied. Paste it in a terminal.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied. Paste it in a terminal."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copié. Collez-le dans un terminal."
+          }
+        }
+      }
+    },
+    "Copied. Paste it in the settings of your AI app.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied. Paste it in the settings of your AI app."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copié. Collez-le dans les réglages de votre application d’IA."
+          }
+        }
+      }
+    },
+    "Copy setup for": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy setup for"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copier la configuration pour"
+          }
+        }
+      }
+    },
+    "Copy the setup for your AI app, paste it where the app says, and restart the app. You do this once.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy the setup for your AI app, paste it where the app says, and restart the app. You do this once."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiez la configuration de votre application d’IA, collez-la là où l’application l’indique, puis relancez l’application. Vous ne le faites qu’une fois."
+          }
+        }
+      }
+    },
+    "Created a node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Created a node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A créé un nœud"
           }
         }
       }
@@ -919,6 +1531,23 @@
         }
       }
     },
+    "Deleted a node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deleted a node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A supprimé un nœud"
+          }
+        }
+      }
+    },
     "Disconnect": {
       "extractionState": "manual",
       "localizations": {
@@ -932,6 +1561,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Déconnecter"
+          }
+        }
+      }
+    },
+    "Disconnected two nodes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disconnected two nodes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A délié deux nœuds"
           }
         }
       }
@@ -966,6 +1612,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Faites glisser pour modifier la valeur. Maintenez Option pour un réglage fin."
+          }
+        }
+      }
+    },
+    "Each change is one step of Edit ▸ Undo.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each change is one step of Edit ▸ Undo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque modification est une étape de Édition ▸ Annuler."
           }
         }
       }
@@ -1119,6 +1782,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erreur : %@"
+          }
+        }
+      }
+    },
+    "Exported the geometry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exported the geometry"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A exporté la géométrie"
           }
         }
       }
@@ -1463,6 +2143,23 @@
         }
       }
     },
+    "Helix could not open the connection for AI apps.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helix could not open the connection for AI apps."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helix n’a pas pu ouvrir la connexion pour les applications d’IA."
+          }
+        }
+      }
+    },
     "Helix could not save the latest changes. Try again.": {
       "extractionState": "manual",
       "localizations": {
@@ -1599,6 +2296,23 @@
         }
       }
     },
+    "Imported a file": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported a file"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A importé un fichier"
+          }
+        }
+      }
+    },
     "Inspector": {
       "extractionState": "manual",
       "localizations": {
@@ -1684,6 +2398,23 @@
         }
       }
     },
+    "Last actions": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last actions"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernières actions"
+          }
+        }
+      }
+    },
     "Layout": {
       "extractionState": "manual",
       "localizations": {
@@ -1714,6 +2445,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gauche"
+          }
+        }
+      }
+    },
+    "Let AI agents edit the open scene": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let AI agents edit the open scene"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laisser les agents IA modifier la scène ouverte"
           }
         }
       }
@@ -1803,6 +2551,23 @@
         }
       }
     },
+    "Looked at the scene": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Looked at the scene"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A regardé la scène"
+          }
+        }
+      }
+    },
     "Looked for in %@": {
       "extractionState": "manual",
       "localizations": {
@@ -1816,6 +2581,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cherchée dans %@"
+          }
+        }
+      }
+    },
+    "Looked up the node types": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Looked up the node types"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A consulté les types de nœuds"
           }
         }
       }
@@ -1867,6 +2649,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Matériaux"
+          }
+        }
+      }
+    },
+    "Measured the geometry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Measured the geometry"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A mesuré la géométrie"
           }
         }
       }
@@ -1956,6 +2755,23 @@
         }
       }
     },
+    "Moved to a frame": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moved to a frame"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "S’est placé sur une image"
+          }
+        }
+      }
+    },
     "Network": {
       "extractionState": "manual",
       "localizations": {
@@ -1969,6 +2785,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Réseau"
+          }
+        }
+      }
+    },
+    "No agent is connected.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No agent is connected."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun agent n’est connecté."
           }
         }
       }
@@ -2143,6 +2976,23 @@
         }
       }
     },
+    "Nothing yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing yet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien pour l’instant."
+          }
+        }
+      }
+    },
     "Off": {
       "extractionState": "manual",
       "localizations": {
@@ -2156,6 +3006,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Désactivé"
+          }
+        }
+      }
+    },
+    "Off. AI apps get a Helix of their own that nobody sees.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off. AI apps get a Helix of their own that nobody sees."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Désactivé. Les applications d’IA obtiennent un Helix à elles, que personne ne voit."
           }
         }
       }
@@ -2207,6 +3074,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Présent sur certaines primitives seulement : ses valeurs ne sont donc pas affichées en face des lignes."
+          }
+        }
+      }
+    },
+    "Open Helix, then set up your AI app once: Settings ▸ AI Agents ▸ Copy setup, and paste it where the app says. After that, ask it in its own chat to build or change something in the scene you have open. You see each step as it happens, and ⌘Z takes it back. Nothing leaves your Mac except what your AI app itself sends to its provider.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Helix, then set up your AI app once: Settings ▸ AI Agents ▸ Copy setup, and paste it where the app says. After that, ask it in its own chat to build or change something in the scene you have open. You see each step as it happens, and ⌘Z takes it back. Nothing leaves your Mac except what your AI app itself sends to its provider."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrez Helix, puis configurez une fois votre application d’IA : Réglages ▸ Agents IA ▸ Copier la configuration, et collez-la là où l’application l’indique. Ensuite, demandez-lui, dans son propre chat, de construire ou de modifier quelque chose dans la scène que vous avez ouverte. Vous voyez chaque étape au moment où elle a lieu, et ⌘Z la défait. Rien ne quitte votre Mac, sauf ce que votre application d’IA envoie elle-même à son fournisseur."
           }
         }
       }
@@ -2398,6 +3282,23 @@
         }
       }
     },
+    "Read an attribute": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read an attribute"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A lu un attribut"
+          }
+        }
+      }
+    },
     "Read the file again, after it was changed outside Helix": {
       "extractionState": "manual",
       "localizations": {
@@ -2411,6 +3312,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "Relire le fichier, après l’avoir modifié en dehors de Helix"
+          }
+        }
+      }
+    },
+    "Read the keyframes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read the keyframes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A lu les images clés"
+          }
+        }
+      }
+    },
+    "Read the parameters of a node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read the parameters of a node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A lu les paramètres d’un nœud"
+          }
+        }
+      }
+    },
+    "Ready. AI apps connect to the Helix that is open.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready. AI apps connect to the Helix that is open."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prêt. Les applications d’IA se connectent au Helix qui est ouvert."
           }
         }
       }
@@ -2483,6 +3435,23 @@
         }
       }
     },
+    "Removed a keyframe": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removed a keyframe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A retiré une image clé"
+          }
+        }
+      }
+    },
     "Reset %@": {
       "extractionState": "manual",
       "localizations": {
@@ -2496,6 +3465,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Réinitialiser %@"
+          }
+        }
+      }
+    },
+    "Reset a parameter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset a parameter"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A réinitialisé un paramètre"
           }
         }
       }
@@ -2534,6 +3520,23 @@
         }
       }
     },
+    "Saved the scene": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved the scene"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A enregistré la scène"
+          }
+        }
+      }
+    },
     "Search nodes": {
       "extractionState": "manual",
       "localizations": {
@@ -2551,6 +3554,23 @@
         }
       }
     },
+    "Set a keyframe": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set a keyframe"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A posé une image clé"
+          }
+        }
+      }
+    },
     "Set a keyframe on this frame, so that the value can change over time.": {
       "extractionState": "manual",
       "localizations": {
@@ -2564,6 +3584,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Poser une image clé sur cette image, pour que la valeur puisse changer au fil du temps."
+          }
+        }
+      }
+    },
+    "Set a parameter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set a parameter"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A réglé un paramètre"
           }
         }
       }
@@ -2598,6 +3635,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Définir une image clé"
+          }
+        }
+      }
+    },
+    "Set the time range": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set the time range"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A réglé la plage de temps"
+          }
+        }
+      }
+    },
+    "Set up your AI app": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set up your AI app"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurer votre application d’IA"
           }
         }
       }
@@ -3282,6 +4353,23 @@
         }
       }
     },
+    "Took a picture of the view": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Took a picture of the view"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A pris une image de la vue"
+          }
+        }
+      }
+    },
     "Top": {
       "extractionState": "manual",
       "localizations": {
@@ -3329,6 +4417,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Utiliser cet exemple"
+          }
+        }
+      }
+    },
+    "Used a tool": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Used a tool"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A utilisé un outil"
           }
         }
       }
@@ -4574,6 +5679,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tourner"
+          }
+        }
+      }
+    },
+    "Work with an AI agent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work with an AI agent"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Travailler avec un agent IA"
           }
         }
       }

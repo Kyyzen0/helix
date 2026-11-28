@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""End to end check of `Helix --mcp`.
+"""End to end check of `Helix --mcp --headless`: the server with an engine of its own, which never meets a Helix that is open.
 
     python3 -I apple/Helix/Scripts/mcp-smoke.py <path to the Helix binary>
 
@@ -39,7 +39,7 @@ def check(condition, message):
 class Server:
     def __init__(self, binary):
         self.process = subprocess.Popen(
-            [binary, "--mcp"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            [binary, "--mcp", "--headless"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL, text=True, bufsize=1,
         )
         self.lines = queue.Queue()

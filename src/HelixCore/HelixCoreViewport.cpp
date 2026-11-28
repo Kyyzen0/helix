@@ -193,6 +193,20 @@ ViewportCameraInfo viewportCameraInfo()
     return info;
 }
 
+ViewportCameraState viewportCameraState()
+{
+    const gfx::ViewportCamera& camera = viewport().camera;
+    const glm::vec3 center = camera.getCenter();
+    return {center.x, center.y, center.z, camera.getDistance(), camera.getYaw(), camera.getPitch()};
+}
+
+void restoreViewportCamera(const ViewportCameraState& state)
+{
+    viewport().camera.setView(
+        {state.centerX, state.centerY, state.centerZ}, state.distance, state.yaw, state.pitch
+    );
+}
+
 bool frameViewport(float aspect)
 {
     ViewportState& state = viewport();

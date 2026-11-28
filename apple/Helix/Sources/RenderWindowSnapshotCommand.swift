@@ -16,7 +16,7 @@ import SwiftUI
 enum RenderWindowSnapshotCommand {
     static let flag = "--render-window"
 
-    static let usage = "usage: Helix \(flag) <in.kut | 3D file | \(SnapshotCommand.newSceneArgument)> <out.png> [width height] [--pane network|spreadsheet] [--select <node>] [--size small|medium|large] [--show-inspector yes|no] [--example cube|waves|terrain] [--add <node type>]... [--layout viewing|building|animating] [--timeline automatic|always|never] \(ViewportOptions.usage) \(ThemeOptions.usage)"
+    static let usage = "usage: Helix \(flag) <in.kut | 3D file | \(SnapshotCommand.newSceneArgument)> <out.png> [width height] [--pane network|spreadsheet] [--select <node>] [--size small|medium|large] [--show-inspector yes|no] [--example cube|waves|terrain] [--add <node type>]... [--agent <client name>] [--agent-running] [--agent-popover <out.png>] [--layout viewing|building|animating] [--timeline automatic|always|never] \(ViewportOptions.usage) \(ThemeOptions.usage)"
 
     static func run(_ all: [String]) -> Int32 {
         guard let (themeOptions, themed) = ThemeOptions.extract(from: all),
@@ -31,6 +31,11 @@ enum RenderWindowSnapshotCommand {
         var timeline: TimelineMode?
         var example: StarterExample?
         var added: [String] = []
+        // A connected AI agent, made up: the status item of the toolbar and its popover are drawn
+        // with it, as they are while a real one works.
+        var agent: String?
+        var agentRunning = false
+        var agentPopover: String?
         var index = 0
         while index < arguments.count {
             switch arguments[index] {
@@ -70,6 +75,16 @@ enum RenderWindowSnapshotCommand {
                     return OffscreenRender.fail(usage)
                 }
                 timeline = parsed
+                index += 1
+            case "--agent":
+                guard index + 1 < arguments.count else { return OffscreenRender.fail(usage) }
+                agent = arguments[index + 1]
+                index += 1
+            case "--agent-running":
+                agentRunning = true
+            case "--agent-popover":
+                guard index + 1 < arguments.count else { return OffscreenRender.fail(usage) }
+                agentPopover = arguments[index + 1]
                 index += 1
             case "--show-inspector":
                 guard index + 1 < arguments.count else { return OffscreenRender.fail(usage) }
@@ -128,7 +143,17 @@ enum RenderWindowSnapshotCommand {
                 document.editor.select(nodes: Set(ids))
             }
 
+            if let agent { simulateAgent(named: agent, running: agentRunning) }
             let dark = themeOptions.appearanceDark ?? false
+            if let agentPopover {
+                guard let popover = OffscreenRender.image(
+                    of: AgentPopover(activity: AgentLink.shared.activity, disconnect: {}).background(ThemeColors(themeOptions.palette(dark: dark)).window)
+                        .themeEnvironment(themeOptions.palette(dark: dark)),
+                    width: 340, height: nil, dark: dark
+                ) else { return OffscreenRender.fail("the popover could not be drawn") }
+                try OffscreenRender.write(popover, to: agentPopover)
+                print("wrote \(agentPopover) (\(popover.width) x \(popover.height) pixels)")
+            }
             guard let image = render(document, title: title, width: width, height: height, themeOptions: themeOptions, dark: dark, view: look.view)
             else { return OffscreenRender.fail("the window could not be drawn") }
             try OffscreenRender.write(image, to: positional[1])
@@ -137,6 +162,17 @@ enum RenderWindowSnapshotCommand {
         } catch {
             return OffscreenRender.fail(error.localizedDescription)
         }
+    }
+
+    /// An agent that is connected and has done a few things, for a picture.
+    private static func simulateAgent(named name: String, running: Bool) {
+        let activity = AgentLink.shared.activity
+        activity.connected(AgentClient(id: UUID(), rawName: name, since: Date()))
+        let shown = AgentClients.displayName(for: name)
+        for tool in ["create_node", "create_node", "connect_nodes", "set_parameter", "render_view"] {
+            activity.record(client: shown, text: MCPLive.activityText(tool), failed: false)
+        }
+        if running { activity.callStarted() }
     }
 
     private static func render(

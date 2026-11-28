@@ -1,43 +1,6 @@
+import CxxStdlib
 import Foundation
-
-/// What a tool hands back: the content the agent reads, and the same data as a JSON object.
-struct MCPToolOutput {
-    var content: [JSONValue]
-    var structured: JSONValue?
-
-    /// A result that is data: the object goes out as structured content and, as text, with the
-    /// same JSON, for the clients that read only the text.
-    static func data(_ value: JSONValue) -> MCPToolOutput {
-        MCPToolOutput(content: [["type": "text", "text": .string(value.serialized())]], structured: value)
-    }
-}
-
-/// A tool that failed in a way the agent can read and correct: a node that does not exist, a
-/// value out of range, the engine refusing. It becomes a result with `isError`, not a protocol
-/// error.
-struct MCPToolError: Error {
-    let message: String
-    init(_ message: String) { self.message = message }
-}
-
-/// One tool of the server: how it is announced, and what it does.
-struct MCPTool {
-    let name: String
-    let summary: String
-    let inputSchema: JSONValue
-    let annotations: JSONValue
-    let handler: @MainActor (JSONValue) throws -> MCPToolOutput
-
-    /// The entry of `tools/list`.
-    var listing: JSONValue {
-        [
-            "name": .string(name),
-            "description": .string(summary),
-            "inputSchema": inputSchema,
-            "annotations": annotations,
-        ]
-    }
-}
+import HelixCore
 
 /// The tools of the server, by what they act on. The handlers are in `MCPHandlers.swift`.
 @MainActor
@@ -255,51 +218,59 @@ enum MCPTools {
     }
 }
 
-/// The arguments of a call, read with the errors an agent can act on.
-struct Arguments {
-    let values: JSONValue
-
-    func has(_ key: String) -> Bool {
-        if let value = values[key] { return !value.isNull }
-        return false
+/// The tools of the live server, in the app. They are the headless ones, except the three that
+/// would throw away or replace what the person has open: those ask them, or save the open
+/// document, and are described so.
+extension MCPTools {
+    static var live: [MCPTool] {
+        all.map { tool in
+            switch tool.name {
+            case "new_scene":
+                return replacing(tool, """
+                    Asks the person to replace the open scene with a new, empty one, and returns what they answered. \
+                    The question is on their screen, and a scene with unsaved changes asks to be saved first, so the call \
+                    can wait: switched is true when the new scene is the open one, false when the person kept theirs or \
+                    has not answered yet. A scene nothing was done to is kept as it is. Nothing is thrown away unasked.
+                    """, [:])
+            case "open_scene":
+                return replacing(tool, """
+                    Asks the person to replace the open scene with the one stored in a .kut file, and returns what they \
+                    answered. The question is on their screen, and a scene with unsaved changes asks to be saved first, so \
+                    the call can wait: switched is true when that scene is the open one, false when the person kept theirs or \
+                    has not answered yet. Nothing is thrown away unasked.
+                    """, ["path": string("The .kut file to open.")], required: ["path"])
+            case "save_scene":
+                return replacing(tool, """
+                    Saves the open scene, the way Save does in the window, and marks it as saved. Without a path it goes \
+                    to the file the scene came from. A scene that was never saved needs a path ending in .kut, and the \
+                    window then stands for that file. A path that names another file saves the scene there, as Save As.
+                    """, ["path": string("Where to write the .kut file. Not needed for a scene that has a file.")])
+            default:
+                return tool
+            }
+        }
     }
 
-    func value(_ key: String) -> JSONValue? {
-        has(key) ? values[key] : nil
+    private static func replacing(
+        _ tool: MCPTool, _ summary: String, _ properties: [String: JSONValue], required: [String] = []
+    ) -> MCPTool {
+        var schema: [String: JSONValue] = ["type": "object", "properties": .object(properties)]
+        if !required.isEmpty { schema["required"] = .array(required.map { .string($0) }) }
+        return MCPTool(
+            name: tool.name, summary: summary, inputSchema: .object(schema),
+            annotations: tool.annotations, handler: tool.handler
+        )
+    }
+}
+
+extension MCPDispatcher {
+    /// The conversation of the headless server, with the engine of this process.
+    static func headless() -> MCPDispatcher {
+        MCPDispatcher(context: .headless, tools: MCPTools.all, serverVersion: String(engine: helix.core.version()))
     }
 
-    func requiredString(_ key: String) throws -> String {
-        guard let value = value(key) else { throw MCPToolError("The argument '\(key)' is required.") }
-        guard let text = value.string else { throw MCPToolError("The argument '\(key)' must be a string.") }
-        return text
-    }
-
-    func string(_ key: String) throws -> String? {
-        guard let value = value(key) else { return nil }
-        guard let text = value.string else { throw MCPToolError("The argument '\(key)' must be a string.") }
-        return text
-    }
-
-    func number(_ key: String) throws -> Double? {
-        guard let value = value(key) else { return nil }
-        guard let number = value.number else { throw MCPToolError("The argument '\(key)' must be a number.") }
-        return number
-    }
-
-    func requiredNumber(_ key: String) throws -> Double {
-        guard let number = try number(key) else { throw MCPToolError("The argument '\(key)' is required.") }
-        return number
-    }
-
-    func integer(_ key: String) throws -> Int64? {
-        guard let value = value(key) else { return nil }
-        guard let integer = value.integer else { throw MCPToolError("The argument '\(key)' must be an integer.") }
-        return integer
-    }
-
-    func bool(_ key: String) throws -> Bool? {
-        guard let value = value(key) else { return nil }
-        guard let flag = value.bool else { throw MCPToolError("The argument '\(key)' must be true or false.") }
-        return flag
+    /// One conversation of the live server, on the scene of the window.
+    static func live() -> MCPDispatcher {
+        MCPDispatcher(context: .live, tools: MCPTools.live, serverVersion: String(engine: helix.core.version()))
     }
 }

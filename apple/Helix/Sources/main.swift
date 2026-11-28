@@ -62,9 +62,10 @@ if let flag = arguments.firstIndex(of: PaletteSnapshotCommand.flag) {
     exit(PaletteSnapshotCommand.run(Array(arguments[(flag + 1)...])))
 }
 
-// An AI agent starts the app with this flag and talks to it over standard input and output.
+// An AI agent starts the app with this flag and talks to it over standard input and output. It is
+// relayed to the Helix that is running, or served by a headless engine when none is (see `MCPLaunch`).
 if arguments.contains(MCPServer.flag) {
-    exit(MCPServer.run())
+    exit(MCPLaunch.run(arguments))
 }
 
 HelixApp.main()

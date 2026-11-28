@@ -19,6 +19,8 @@ extension HelixDocument {
             newName: SceneNames.name(for: fileURL, untitled: String(localized: "Untitled"))
         )
         switchRequest = request
+        // An agent that asked for this scene is waiting for the answer.
+        SceneSwitchWatch.shared.questionAsked()
         Self.debugLogSwitch("switch asked current=\(request.currentName) new=\(request.newName)") // l10n-ok: read by launch-smoke.py
     }
 
@@ -29,6 +31,7 @@ extension HelixDocument {
         if let other = EngineHost.shared.activeDocument, other !== self {
             guard await other.closeForSwitch() else {
                 Self.debugLogSwitch("switch kept current") // l10n-ok: read by launch-smoke.py
+                SceneSwitchWatch.shared.answered(.kept)
                 return false
             }
         }
@@ -36,8 +39,10 @@ extension HelixDocument {
             try activate()
         } catch {
             presentedError = error.localizedDescription
+            SceneSwitchWatch.shared.answered(.kept)
             return false
         }
+        SceneSwitchWatch.shared.answered(.switched)
         Self.debugLogSwitch("switch done") // l10n-ok: read by launch-smoke.py
         await finishOpening(fileURL: fileURL)
         return true
@@ -46,6 +51,7 @@ extension HelixDocument {
     /// Leaves the scene that is open as it is. The caller closes the new window.
     func cancelSwitch() {
         switchRequest = nil
+        SceneSwitchWatch.shared.answered(.kept)
         Self.debugLogSwitch("switch cancelled") // l10n-ok: read by launch-smoke.py
     }
 

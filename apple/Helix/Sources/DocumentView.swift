@@ -9,6 +9,8 @@ struct DocumentView: View {
     /// Where the document's file is, nil for a scene that was never saved.
     var fileURL: URL?
     @Environment(\.dismiss) private var dismiss
+    /// Who is connected as an AI agent, which the toolbar shows.
+    @ObservedObject private var agents = AgentLink.shared.activity
     @Environment(\.undoManager) private var undoManager
     @Environment(\.interfaceSize) private var size
     /// Whether the inspector column is shown. Kept across launches, and shared with the menu. It
@@ -98,6 +100,10 @@ struct DocumentView: View {
         // before it clips it.
         ToolbarItem(placement: .status) {
             DocumentStats(document: document)
+        }
+        // Present while an agent is connected: it is editing this scene, and the person sees who.
+        ToolbarItem(placement: .status) {
+            if agents.isConnected { AgentStatusItem(activity: agents) }
         }
         ToolbarItemGroup(placement: .primaryAction) {
             AddMenu(document: document)

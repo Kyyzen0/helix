@@ -20,6 +20,11 @@ class ViewportCamera
     /// distance. The pitch is held short of straight up and down, like @ref orbit does.
     void setAngles(float yaw, float pitch);
 
+    /// @brief Puts the camera exactly where it was read from: the centre, the distance and the
+    /// angles in radians. The pitch and the distance are held to what the other moves hold them
+    /// to. A value that is not a number leaves the camera as it is.
+    void setView(glm::vec3 center, float distance, float yaw, float pitch);
+
     /// @brief Moves the camera toward the centre for a negative amount and away for a positive one.
     ///
     /// @note Close to the centre the camera keeps moving forward and carries the centre with it.

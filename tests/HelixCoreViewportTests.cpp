@@ -162,6 +162,44 @@ TEST_CASE_METHOD(ViewportFixture, "The viewport reports its camera angles, dista
     core::resetViewport();
 }
 
+TEST_CASE_METHOD(ViewportFixture, "The whole viewport camera can be saved and put back")
+{
+    core::resetViewport();
+    core::orbitViewportTo(120.f, 10.f);
+    core::panViewport(30.f, -12.f);
+    core::dollyViewport(7.f);
+    const core::ViewportCameraState saved = core::viewportCameraState();
+    const core::ViewportCameraInfo before = core::viewportCameraInfo();
+
+    // A picture moves the camera: it is reset, turned and framed on some geometry.
+    showCube();
+    REQUIRE(core::updateViewportGeometry().status.ok);
+    core::resetViewport();
+    core::orbitViewportTo(-30.f, 60.f);
+    REQUIRE(core::frameViewport(1.5f));
+    REQUIRE(core::viewportCameraInfo().azimuthDegrees != Catch::Approx(before.azimuthDegrees));
+
+    core::restoreViewportCamera(saved);
+    const core::ViewportCameraState back = core::viewportCameraState();
+    REQUIRE(back.centerX == Catch::Approx(saved.centerX));
+    REQUIRE(back.centerY == Catch::Approx(saved.centerY));
+    REQUIRE(back.centerZ == Catch::Approx(saved.centerZ));
+    REQUIRE(back.distance == Catch::Approx(saved.distance));
+    REQUIRE(back.yaw == Catch::Approx(saved.yaw));
+    REQUIRE(back.pitch == Catch::Approx(saved.pitch));
+    const core::ViewportCameraInfo after = core::viewportCameraInfo();
+    REQUIRE(after.azimuthDegrees == Catch::Approx(before.azimuthDegrees));
+    REQUIRE(after.distance == Catch::Approx(before.distance));
+
+    // A state that is not a number changes nothing.
+    core::ViewportCameraState broken = saved;
+    broken.distance = std::nanf("");
+    core::resetViewport();
+    core::restoreViewportCamera(broken);
+    REQUIRE(core::viewportCameraInfo().distance == Catch::Approx(15.f));
+    core::resetViewport();
+}
+
 TEST_CASE_METHOD(
     ViewportFixture,
     "A viewport with no display node says so and has nothing to frame"
