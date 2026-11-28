@@ -322,6 +322,12 @@ def run(binary, env, app, socket_path, undo_file, folder):
     check(cancelled["steps"] == before_cancel["steps"] and cancelled["undo"] == before_cancel["undo"],
           f"... and the undo stack is as it was (steps {before_cancel['steps']} -> {cancelled['steps']}, top {cancelled['undo']})")
     check(any("import sheet cancelled file=textured-quad.glb" in l for l in app.log()), "the import sheet is closed")
+    # The app closed the socket, so the relay sees the end of it and exits on its own. A descriptor
+    # left open by the app would keep it waiting forever.
+    deadline = time.time() + 5
+    while importer.process.poll() is None and time.time() < deadline:
+        time.sleep(0.1)
+    check(importer.process.poll() is not None, "the relay of a disconnected agent exits by itself")
     time.sleep(1.0)
     check(app.live_lines()[-1] == cancelled, "nothing else happened to the scene afterwards")
     importer.close()

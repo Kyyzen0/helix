@@ -32,9 +32,12 @@ final class AgentConnection: @unchecked Sendable {
     func start() {
         let source = DispatchSource.makeReadSource(fileDescriptor: descriptor, queue: queue)
         source.setEventHandler { [weak self] in self?.readAvailable() }
-        source.setCancelHandler { [weak self] in
-            guard let self, closeOnCancel else { return }
-            Darwin.close(descriptor)
+        // Held strongly: the handler runs after finish() has returned, when nothing else may keep
+        // the connection, and a weak reference would skip the close, leak the descriptor and leave
+        // the relay waiting for an end that never comes. The source lets go of its handlers once
+        // it is cancelled, so this lasts no longer than the connection's source.
+        source.setCancelHandler { [self] in
+            if closeOnCancel { Darwin.close(descriptor) }
         }
         self.source = source
         source.resume()

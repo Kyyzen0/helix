@@ -425,6 +425,26 @@ final class AgentSocketServerTests: XCTestCase {
         XCTAssertEqual(readLine(client), "late: one")
     }
 
+    /// A connection the app closes, and lets go of at once, still closes its descriptor: the
+    /// other end reads the end of the stream. The close happens in the source's cancel handler,
+    /// which runs after nothing else holds the connection.
+    func testAConnectionClosedAndReleasedClosesItsDescriptor() throws {
+        var pair: [Int32] = [0, 0]
+        XCTAssertEqual(socketpair(AF_UNIX, SOCK_STREAM, 0, &pair), 0)
+        let peer = pair[1]
+        defer { Darwin.close(peer) }
+        do {
+            let connection = AgentConnection(descriptor: pair[0])
+            connection.start()
+            connection.close()
+        }
+        var timeout = timeval(tv_sec: 2, tv_usec: 0)
+        setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+        var byte: UInt8 = 0
+        let count = read(peer, &byte, 1)
+        XCTAssertEqual(count, 0, "the other end should read the end of the stream, got \(count) (errno \(errno))")
+    }
+
     func testSeveralClientsAreServedAtOnce() throws {
         let server = echoServer(path: path)
         XCTAssertEqual(server.start(), .listening)
