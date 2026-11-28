@@ -27,9 +27,13 @@ parameters:
     label: Clip
     type: string
     tooltip: >
-      The name of the clip to play. Empty plays the first clip of the skeleton. geometry_summary
-      lists the clips of a skeleton with their length, and the import reports them when it reads
-      the file. A name the skeleton does not have is an error that lists the ones it has.
+      The clip to play. The menu lists the clips of the skeleton wired into the input, with their
+      length, and the first one plays when none is picked. A name the skeleton does not have is an
+      error that lists the ones it has.
+    documentation: >-
+      A clip is one animation stored in the file, such as Walk or Roar. Pick it from the menu: it
+      lists the clips of the skeleton wired into this node, and plays the first one when none is
+      picked.
 
   - name: speed
     label: Speed
@@ -39,6 +43,9 @@ parameters:
     tooltip: >
       How fast the clip plays, as a multiple of the scene time. 2 plays it twice as fast, 0 holds
       it still on the frame the offset gives, and a negative speed plays it backward.
+    documentation: >-
+      1 plays the clip at its own pace and 2 twice as fast. 0 freezes it on one pose, and a
+      negative number plays it backwards.
 
   - name: offset
     label: Offset
@@ -48,6 +55,9 @@ parameters:
     tooltip: >
       Seconds added to the clip time (the scene time multiplied by the speed). A positive offset
       starts the clip part way through.
+    documentation: >-
+      Shifts the start of the clip, in seconds. 0.5 begins the animation half a second in, which
+      is useful to make two copies of a character move out of step.
 
   - name: loop
     label: Loop
@@ -60,3 +70,6 @@ parameters:
       - {value: loop, label: Loop}
       - {value: hold, label: Hold}
       - {value: once, label: "Once, then rest"}
+    documentation: >-
+      What happens when the clip is over. Loop starts it again, Hold stays on its last pose, and
+      Once, then rest plays it a single time and goes back to the rest pose.

@@ -26,3 +26,7 @@ parameters:
     tooltip: >
       Turns the Normal attribute of the points and vertices with the skin, so the shading follows
       the pose. A point the skin does not move keeps its normal.
+    documentation: >-
+      Skinning bends the surface to follow the bones. Normals are the directions the surface
+      faces, which shading uses: turning them with the skin keeps the lighting right on bent
+      limbs.

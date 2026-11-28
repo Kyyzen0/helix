@@ -36,6 +36,8 @@ final class HelixDocument: ReferenceFileDocument {
     @Published private(set) var viewportMessage: String?
     /// Whether the document holds the engine, so its scene is loaded and can be drawn.
     @Published private(set) var isActive = false
+    /// Whether the scene has something to play, which the timeline bar in Automatic mode follows.
+    @Published var sceneAnimates = false
     /// A failure to tell the person about, in an alert.
     @Published var presentedError: String?
     /// An edit that would make a very large geometry, waiting for the person to say to go on.
@@ -188,6 +190,7 @@ final class HelixDocument: ReferenceFileDocument {
         scheduleDebugOpenSecondScene()
         scheduleDebugFramingCheck()
         scheduleDebugNodeEditCheck()
+        scheduleDebugAnimateCheck()
     }
 
     /// Imports the 3D file this scene was opened for, from where it really is: `url` is what
@@ -251,7 +254,11 @@ final class HelixDocument: ReferenceFileDocument {
         let paths = nodes.filter { String(engine: $0.type).hasSuffix("geometryImport") }.map {
             String(engine: helix.core.getString($0.id, "filePath", 0).value)
         }
-        let missing = String(engine: helix.core.lastImportSummary()).contains("Missing:")
+        // From what the cook found, per material, not from the wording of the summary.
+        let missing = nodes.contains { node in
+            String(engine: node.type).hasSuffix("geometryImport")
+                && helix.core.cookNodeReport(node.id).materials.contains { !$0.missingTextureName.isEmpty }
+        }
         FileHandle.standardError.write(Data(
             ("helix-launch: scene nodes=\(types.count) types=\(types.joined(separator: ","))" // l10n-ok: read by launch-smoke.py
                 + " paths=\(paths.joined(separator: "|")) missingTexture=\(missing)\n").utf8)) // l10n-ok

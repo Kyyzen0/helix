@@ -118,8 +118,16 @@ enum EngineMessages {
         "No folder was given.",
         "Couldn't use %@ as the cache folder.",
         "The import node has no file path parameter.",
+        "Only an import node has a file to read again.",
         "The attribute '%@' has different types on the primitives.",
         "The node has no %@ attribute named '%@'.",
+        // The facade: writing the geometry to an obj file.
+        "There is no path to write to.",
+        "The display node produced no mesh to export.",
+        "A point has a position that is not a number, which an obj file cannot hold.",
+        "Couldn't write to %@, the disk may be full.",
+        "Couldn't write to %@: %@.",
+        "Couldn't write to %@.",
         // The facade: renaming, copying and pasting nodes.
         "A name has at most %@ characters.",
         "A node that holds other nodes cannot be renamed.",

@@ -2,6 +2,7 @@
 // parameters. The frame itself (timeInfo, setFrame) is in HelixCore.cpp. See the Time and
 // Keyframes sections of HelixCore.h.
 
+#include "Engine/Expression/ExpressionEngine.h"
 #include "Engine/Network/NetworkManager.h"
 #include "Engine/Network/Node.h"
 #include "Engine/Parameter/NodeParameter.h"
@@ -56,6 +57,41 @@ Interpolation fromEngine(sim::Interpolation interpolation)
         return Interpolation::Smooth;
     }
     return Interpolation::Smooth;
+}
+
+// Whether the text of an expression reads the time: `frame()` or `time()` called by name, once
+// `$F`, `$FF` and `$T` are expanded into them. A name inside a string is text, and `myframe(` or
+// `a.frame(` is some other function, so only a whole word outside a string counts.
+bool expressionReadsTime(const std::string& expression)
+{
+    const std::string text = expr::ExpressionEngine::expandVariables(expression);
+    auto isWord = [](char c) { return std::isalnum(static_cast<unsigned char>(c)) || c == '_'; };
+    bool inString = false;
+    for (std::size_t index = 0; index < text.size(); ++index)
+    {
+        const char c = text[index];
+        if (inString)
+        {
+            if (c == '\\') ++index;
+            else if (c == '"') inString = false;
+            continue;
+        }
+        if (c == '"')
+        {
+            inString = true;
+            continue;
+        }
+        if (!isWord(c) || (index > 0 && (isWord(text[index - 1]) || text[index - 1] == '.'))) continue;
+        std::size_t end = index;
+        while (end < text.size() && isWord(text[end])) ++end;
+        const std::string word = text.substr(index, end - index);
+        index = end - 1;
+        if (word != "frame" && word != "time") continue;
+        std::size_t after = end;
+        while (after < text.size() && text[after] == ' ') ++after;
+        if (after < text.size() && text[after] == '(') return true;
+    }
+    return false;
 }
 
 // Finds the float parameter a key would sit on, or says why there is none.
@@ -319,6 +355,31 @@ std::vector<NodeId> animatedNodes()
     for (const sim::KeyframeTarget& target : store().getTargets())
         if (nt::nm().isValidNode(target.nodeId)) nodes.insert(target.nodeId);
     return {nodes.begin(), nodes.end()};
+}
+
+AnimationHints sceneAnimation()
+{
+    AnimationHints hints;
+    if (!isInitialized()) return hints;
+    hints.keyedNodes = static_cast<std::uint32_t>(animatedNodes().size());
+    for (auto [id, node] : nt::nm().nodes())
+    {
+        const std::string type = node.getType().getFullName();
+        if (type == "helix::skeletonPose") ++hints.skeletonPoseNodes;
+        if (type == "helix::simulation") ++hints.simulationNodes;
+        for (const std::weak_ptr<prm::NodeParameter>& weak : node.getParameters())
+        {
+            const std::shared_ptr<prm::NodeParameter> parameter = weak.lock();
+            if (!parameter) continue;
+            for (std::uint32_t component = 0; component < parameter->getVectorSize(); ++component)
+            {
+                if (!parameter->hasExpression(component)) continue;
+                if (expressionReadsTime(parameter->getExpression(component).value_or("")))
+                    ++hints.timeExpressions;
+            }
+        }
+    }
+    return hints;
 }
 
 } // namespace helix::core

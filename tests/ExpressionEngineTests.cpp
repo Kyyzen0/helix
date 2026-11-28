@@ -6,6 +6,8 @@
 #include "Engine/Network/NodeLoader.h"
 #include "Engine/Parameter/NodeParameter.h"
 #include <atomic>
+#include <catch2/catch_approx.hpp>
+#include <cmath>
 #include <catch2/catch_test_macros.hpp>
 #include <thread>
 #include <vector>
@@ -216,6 +218,77 @@ TEST_CASE_METHOD(NMReset, "Time reads the scene time in seconds")
     String error;
     REQUIRE(engine.evalFloat("time()", nullptr, result, error));
     REQUIRE(result == 1.0f);
+}
+
+TEST_CASE("expandVariables rewrites $F, $FF and $T into the functions that read them")
+{
+    using expr::ExpressionEngine;
+    REQUIRE(ExpressionEngine::expandVariables("$F * 0.1") == "frame() * 0.1");
+    REQUIRE(ExpressionEngine::expandVariables("sin($T * 2)") == "sin(time() * 2)");
+    REQUIRE(ExpressionEngine::expandVariables("$FF+$F") == "frame()+frame()");
+    REQUIRE(ExpressionEngine::expandVariables("-$F") == "-frame()");
+    REQUIRE(ExpressionEngine::expandVariables("5 + 5") == "5 + 5");
+}
+
+TEST_CASE("expandVariables leaves strings and longer names alone")
+{
+    using expr::ExpressionEngine;
+    // A $ inside a string literal is text, escaped quotes included.
+    REQUIRE(ExpressionEngine::expandVariables("\"$F\"") == "\"$F\"");
+    REQUIRE(ExpressionEngine::expandVariables("\"a\\\"$T\" + $T") == "\"a\\\"$T\" + time()");
+    // Not a variable: the compiler reports it rather than the text being silently changed.
+    REQUIRE(ExpressionEngine::expandVariables("$Frame") == "$Frame");
+    REQUIRE(ExpressionEngine::expandVariables("$Total") == "$Total");
+    REQUIRE(ExpressionEngine::expandVariables("$") == "$");
+}
+
+TEST_CASE_METHOD(NMReset, "$F and $T read the frame and the time, and sin is available")
+{
+    expr::ExpressionEngine& engine = expr::ExpressionEngine::instance();
+    nt::nm().setFrame(25);
+
+    floatT result = 0;
+    String error;
+    REQUIRE(engine.evalFloat("$F * 2", nullptr, result, error));
+    REQUIRE(result == 50.0f);
+    REQUIRE(engine.evalFloat("$FF", nullptr, result, error));
+    REQUIRE(result == 25.0f);
+    REQUIRE(engine.evalFloat("$T + 1", nullptr, result, error));
+    REQUIRE(result == 2.0f);
+    // The help of the inspector offers sin($T * 2), so it has to compile.
+    REQUIRE(engine.evalFloat("sin($T * 2)", nullptr, result, error));
+    REQUIRE(result == Catch::Approx(std::sin(2.0f)));
+    REQUIRE(engine.evalFloat("cos(0.0)", nullptr, result, error));
+    REQUIRE(result == 1.0f);
+}
+
+TEST_CASE_METHOD(NMReset, "Every example of the expression help of the inspector compiles")
+{
+    // The same texts as ExpressionHelp.swift offers, which a click puts in the field. prm needs
+    // a node of that name, so it has its own test above.
+    expr::ExpressionEngine& engine = expr::ExpressionEngine::instance();
+    nt::nm().setFrame(11);
+
+    floatT result = 0;
+    String error;
+    for (const char* example : {"$F * 0.1", "sin($T * 2)", "rand($F)", "max($F - 10.0, 0.0)", "abs(-2.0) + min(1.0, 3.0)"})
+    {
+        INFO(example);
+        REQUIRE(engine.evalFloat(example, nullptr, result, error));
+    }
+    REQUIRE(engine.evalFloat("max($F - 10.0, 0.0)", nullptr, result, error));
+    REQUIRE(result == 1.0f);
+}
+
+TEST_CASE_METHOD(NMReset, "An expression with $F is time dependent like frame()")
+{
+    expr::ExpressionEngine& engine = expr::ExpressionEngine::instance();
+    expr::ExpressionContext context(nt::nullNode);
+
+    floatT result = 0;
+    String error;
+    REQUIRE(engine.evalFloat("$F", &context, result, error));
+    REQUIRE(context.dependsOnTime());
 }
 
 TEST_CASE_METHOD(NMReset, "Reading the frame makes the expression time dependent")

@@ -23,6 +23,9 @@ The runs, each ending with the process killed (a window flashes on the screen ea
   7b. a launch in French that makes a grid and a transform from the editor (HELIX_DEBUG_NODE_EDIT),
      duplicates them, renames one and undoes it: the names are French, the copy reads the copy, the
      rename is followed by what reads the node, and undo gives the old name back;
+  7c. a launch that imports a rigged file and builds its pose and skin nodes in one step
+     (HELIX_DEBUG_ANIMATE_SKELETON), in English and in French: the nodes, the links, the shown node
+     and the clip are the chain's, the scene counts as animated, and one undo takes it all back;
   8. a launch that opens a second scene while one is open (HELIX_DEBUG_OPEN_SECOND), answering the
      question "Close it and open this one?" with Close and Open, then with Cancel
      (HELIX_DEBUG_SWITCH): the app must live, the second scene must replace the first in the one
@@ -146,18 +149,48 @@ def nodes_are_named_copied_and_renamed(lines):
             continue
         fields = dict(part.split("=", 1) for part in line[len("helix-launch: node-edit "):].split(" "))
         return (
-            fields.get("added") == "grille1,transformer1"
-            and fields.get("duplicated") == "grille1,grille2,transformer1,transformer2"
+            fields.get("added") == "grille1,transformation1"
+            and fields.get("duplicated") == "grille1,grille2,transformation1,transformation2"
             and fields.get("copy-expression") == 'prm("grille2.size")'
-            and fields.get("renamed") == "grille2,sol,transformer1,transformer2"
+            and fields.get("renamed") == "grille2,sol,transformation1,transformation2"
             and fields.get("renamed-expression") == 'prm("sol.size")'
-            and fields.get("undone") == "grille1,grille2,transformer1,transformer2"
+            and fields.get("undone") == "grille1,grille2,transformation1,transformation2"
             and fields.get("selected-after-undo") == "1"
         )
     return False
 
 
 nodes_are_named_copied_and_renamed.whole_log = True
+
+
+def skeleton_chain_in_one_step(names, clip):
+    """An import with a skeleton gets its pose and skin in one step: the nodes take the names of the
+    language of the launch, the links are the three of the chain, the skin is shown, the clip is set,
+    the timeline counts the scene as animated, and one undo takes it all back."""
+    def check(lines):
+        for line in lines:
+            if not line.startswith("helix-launch: animate "):
+                continue
+            fields = dict(part.split("=", 1) for part in line[len("helix-launch: animate "):].split(" "))
+            pose, skin = names
+            importer = fields.get("before", "")
+            return (
+                fields.get("clips") == "Bend,Snap"
+                and fields.get("before-animates") == "false"
+                and fields.get("error") == "none"
+                and fields.get("after") == ",".join(sorted([importer, pose, skin]))
+                and fields.get("links") == ";".join(sorted(
+                    [f"{importer}.1>{pose}.0", f"{importer}.0>{skin}.0", f"{pose}.0>{skin}.1"]))
+                and fields.get("display") == skin
+                and fields.get("clip") == clip
+                and fields.get("animates") == "true"
+                and fields.get("selected") == "1"
+                and fields.get("undone") == importer
+                and fields.get("undone-animates") == "false"
+            )
+        return False
+    check.whole_log = True
+    return check
 
 
 def second_scene_replaced_the_first(path):
@@ -212,6 +245,7 @@ def main():
     waves = os.path.join(ROOT, "apple", "Helix", "Samples", "Waves.kut")
     quad = os.path.join(ROOT, "tests", "data", "import", "textured-quad.glb")
     gltf = os.path.join(ROOT, "tests", "data", "import", "textured-quad.gltf")
+    arm = os.path.join(ROOT, "tests", "data", "import", "skinned-arm.glb")
     runs = [
         ("plain launch opens an untitled scene in a big window", [], big_window),
         ("opens a .kut, and no untitled scene", [waves],
@@ -231,6 +265,12 @@ def main():
          {"HELIX_DEBUG_FRAMING_CHECK": "1"}),
         ("nodes: French names, duplicate, rename that follows, undo", ["--language", "fr"], nodes_are_named_copied_and_renamed,
          {"HELIX_DEBUG_NODE_EDIT": "1"}),
+        ("a rigged import: pose and skin in one step, English names, one undo", ["--language", "en"],
+         skeleton_chain_in_one_step(("skeletonPose1", "skinDeform1"), "Snap"),
+         {"HELIX_DEBUG_ANIMATE_SKELETON": arm, "HELIX_DEBUG_ANIMATE_CLIP": "Snap"}),
+        ("a rigged import in French: the nodes take the French labels", ["--language", "fr"],
+         skeleton_chain_in_one_step(("poseSquelette1", "deformationParSquelette1"), "Bend"),
+         {"HELIX_DEBUG_ANIMATE_SKELETON": arm, "HELIX_DEBUG_ANIMATE_CLIP": "Bend"}),
         ("a second scene: Close and Open replaces the first", [waves], second_scene_replaced_the_first(quad),
          {"HELIX_DEBUG_OPEN_SECOND": quad, "HELIX_DEBUG_SWITCH": "close"}),
         ("a second scene: Cancel leaves the first", [waves], second_scene_was_refused,

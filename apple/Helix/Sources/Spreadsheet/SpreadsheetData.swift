@@ -19,6 +19,17 @@ enum SpreadsheetOwner: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
+    /// What each choice means, one line each, for the tooltip of the picker: a point is a place,
+    /// and a vertex is one corner of a face, so a point shared by several faces has several.
+    static var explanation: String {
+        [
+            String(localized: "Points: the places in space that make up the shape."),
+            String(localized: "Vertices: the corners of the faces. A point shared by several faces has one vertex for each."),
+            String(localized: "Faces: the polygons that cover the shape."),
+            String(localized: "Primitives: whole pieces of geometry, such as one mesh or one skeleton."),
+        ].joined(separator: "\n")
+    }
+
     /// Reads the name the command line gives an owner, in the singular or the plural.
     init?(name: String) {
         switch name.lowercased() {

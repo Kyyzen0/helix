@@ -26,8 +26,12 @@ final class NodeEditorEventView: NSView, NSViewToolTipOwner {
         didSet {
             observePalette()
             observeDiagnostics()
+            if oldValue !== model { accessibilityTree = NodeAccessibilityTree(view: self, model: model) }
         }
     }
+
+    /// The cards, as the accessibility elements VoiceOver reads.
+    private var accessibilityTree: NodeAccessibilityTree?
 
     private var paletteObserver: AnyCancellable?
     private var diagnosticsObserver: AnyCancellable?
@@ -37,6 +41,17 @@ final class NodeEditorEventView: NSView, NSViewToolTipOwner {
     override var isFlipped: Bool { true }
     override var acceptsFirstResponder: Bool { true }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    // MARK: Accessibility
+
+    // The canvas is one drawing, so the cards are elements of this view, which sits over it.
+    override func isAccessibilityElement() -> Bool { true }
+    override func accessibilityRole() -> NSAccessibility.Role? { .group }
+    override func accessibilityLabel() -> String? { String(localized: "Node editor") }
+    override func accessibilityChildren() -> [Any]? { accessibilityTree?.children() }
+    override func accessibilitySelectedChildren() -> [Any]? {
+        accessibilityTree?.children().filter { $0.isAccessibilitySelected() }
+    }
 
     // MARK: Tracking
 
@@ -186,6 +201,13 @@ final class NodeEditorEventView: NSView, NSViewToolTipOwner {
     // key would also fire while a text field has the keys.
     override func keyDown(with event: NSEvent) {
         let flags = event.modifierFlags.intersection([.shift, .control, .option, .command])
+        // The arrows move the selection from card to card, and shift adds the card to it. Option
+        // with an arrow still goes to the ends of the timeline, and the space bar still plays: the
+        // frame by frame steps of the plain arrows are the Timeline menu's and the ruler's.
+        if let direction = NodeNavigation.Direction(keyCode: event.keyCode),
+           flags.subtracting(.shift).isEmpty, model?.moveSelection(direction, extending: flags.contains(.shift)) == true {
+            return
+        }
         if let timeline = model?.timeline,
            timeline.handleKey(code: event.keyCode, option: flags == .option, otherModifiers: !flags.subtracting(.option).isEmpty) {
             return

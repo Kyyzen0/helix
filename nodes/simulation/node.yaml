@@ -30,6 +30,9 @@ parameters:
       The frame the simulation starts on. The system is always worked out from
       this frame, so scrubbing back and forth gives the same result as playing
       forwards.
+    documentation: >-
+      The simulation always replays from this frame, so scrubbing the timeline back and forth
+      gives the same result as playing it.
 
   - name: sub_steps
     label: Sub Steps
@@ -39,6 +42,9 @@ parameters:
     tooltip: >
       How many steps each frame is broken into. More steps make a stiff system
       hold together better, at the cost of more work.
+    documentation: >-
+      Each frame is worked out in several smaller steps. More sub steps keep a stiff or fast
+      system from tearing apart, at the cost of more computing.
 
   - name: particle_divider
     label: Particles

@@ -48,6 +48,9 @@ parameters:
     tooltip: >
       Expands or dilates the extrusion front. This has no effect when
       extruding edges.
+    documentation: >-
+      Shrinks the front of the extrusion inwards, or grows it outwards with a negative value. It
+      is how you make a raised panel or a frame from a flat face.
 
   - name: frontRow
     label: Front

@@ -44,6 +44,7 @@ struct SpreadsheetHeader: View {
             .labelsHidden()
             .fixedSize()
             .disabled(model.state != .table)
+            .help(SpreadsheetOwner.explanation)
         }
     }
 

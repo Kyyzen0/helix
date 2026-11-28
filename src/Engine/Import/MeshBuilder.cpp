@@ -339,6 +339,8 @@ ImportedFile buildMeshes(
         material->baseColor = Vector4(raw.baseColor[0], raw.baseColor[1], raw.baseColor[2], raw.baseColor[3]);
         material->baseColorTexture = raw.texture;
         material->missingTexture = raw.missingTexture;
+        material->missingTextureName = raw.missingTextureName;
+        material->missingTextureNotFound = raw.missingTextureNotFound;
         sceneMaterials.push_back(std::move(material));
     }
 

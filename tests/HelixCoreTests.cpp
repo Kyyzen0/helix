@@ -1004,6 +1004,76 @@ TEST_CASE_METHOD(CoreFixture, "Warming the import cache from another thread make
     REQUIRE(core::listNodes().size() == 1);
 }
 
+TEST_CASE_METHOD(CoreFixture, "The report names the textures a model refers to and cannot find")
+{
+    TempFolder folder;
+    const fs::path data = fs::path(HELIX_TEST_DATA_DIR) / "import";
+    fs::copy_file(data / "textured-quad.gltf", folder.path / "textured-quad.gltf");
+    fs::copy_file(data / "textured-quad.bin", folder.path / "textured-quad.bin");
+
+    const core::CreateNodeResult imported = core::importFile((folder.path / "textured-quad.gltf").string());
+    REQUIRE(imported.status.ok);
+    const core::GeometryReport report = core::cookNodeReport(imported.id);
+    REQUIRE(report.status.ok);
+    REQUIRE(report.materials.size() == 1);
+    REQUIRE(report.materials.front().missingTextureName == "quadrants.png");
+    REQUIRE(report.materials.front().missingTextureNotFound);
+
+    // Nothing is missing for a file that carries its picture.
+    const core::CreateNodeResult whole = core::importFile((data / "textured-quad.glb").string());
+    REQUIRE(whole.status.ok);
+    const core::GeometryReport complete = core::cookNodeReport(whole.id);
+    REQUIRE(complete.materials.front().missingTextureName.empty());
+}
+
+TEST_CASE_METHOD(CoreFixture, "Reloading an import reads the file again, and only that file")
+{
+    TempFolder folder;
+    const fs::path file = folder.path / "reload.glb";
+    const fs::path other = folder.path / "other.glb";
+    fs::copy_file(fs::path(HELIX_TEST_DATA_DIR) / "import" / "textured-quad.glb", file);
+    fs::copy_file(fs::path(HELIX_TEST_DATA_DIR) / "import" / "textured-quad.glb", other);
+
+    const core::NodeId node = core::importFile(file.string()).id;
+    const core::NodeId second = core::importFile(other.string()).id;
+    REQUIRE(core::cookNodeReport(node).status.ok);
+    REQUIRE(core::cookNodeReport(second).status.ok);
+
+    // Cooking again reads nothing: the file is as it was.
+    const std::size_t reads = helix::import::importReadCount();
+    REQUIRE(core::reloadImport(node).ok == true);
+    REQUIRE(core::cookNodeReport(node).status.ok);
+    REQUIRE(helix::import::importReadCount() == reads + 1);
+
+    // The other file was kept: it is served from the cache.
+    REQUIRE(core::reloadImport(node).ok);
+    REQUIRE(core::cookNodeReport(second).status.ok);
+    REQUIRE(helix::import::importReadCount() == reads + 1);
+}
+
+TEST_CASE_METHOD(CoreFixture, "Reloading refuses what is not an import and ignores an import with no file")
+{
+    const core::NodeId cube = core::createNode("helix::cube", "", 0.f, 0.f).id;
+    REQUIRE_FALSE(core::reloadImport(cube).ok);
+    REQUIRE_FALSE(core::reloadImport(99999).ok);
+
+    const core::NodeId empty = core::createNode("helix::geometryImport", "", 0.f, 0.f).id;
+    REQUIRE(core::reloadImport(empty).ok);
+}
+
+TEST_CASE_METHOD(CoreFixture, "The file path of an import is a parameter of the file style, and the Blender one is not")
+{
+    const core::NodeId node = core::createNode("helix::geometryImport", "", 0.f, 0.f).id;
+    std::string pathStyle = "unset", blenderStyle = "unset";
+    for (const core::ParameterInfo& parameter : core::listParameters(node))
+    {
+        if (parameter.name == "filePath") pathStyle = parameter.style;
+        if (parameter.name == "blenderPath") blenderStyle = parameter.style;
+    }
+    REQUIRE(pathStyle == "file");
+    REQUIRE(blenderStyle.empty());
+}
+
 TEST_CASE_METHOD(CoreFixture, "Warming the import cache says why a file cannot be read, as importFile does")
 {
     TempFolder folder;

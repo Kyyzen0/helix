@@ -36,6 +36,7 @@
 		5E2B8D4A1C7F9063B8D1A4E7 /* ImportFormats.swift */ = {isa = PBXBuildFile; fileRef = 9A1C4E7B2D5F8031A6B94C20 /* ImportFormats.swift */; };
 		18485CD047FA97EB2E642D0A /* DocumentView.swift */ = {isa = PBXBuildFile; fileRef = BA89128C69AD540AF5DB2885 /* DocumentView.swift */; };
 		778229516B283DD35DA34D13 /* EngineHost.swift */ = {isa = PBXBuildFile; fileRef = D3267E492841E7AB897616F8 /* EngineHost.swift */; };
+		354A34CB5D09709982FF807C /* SkeletonChain.swift */ = {isa = PBXBuildFile; fileRef = 2E7D4B3A9EB9ACD58328777D /* SkeletonChain.swift */; };
 		C78E938AA9B588158567FA3E /* HelixApp.swift */ = {isa = PBXBuildFile; fileRef = 38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */; };
 		876DE517FD07C5B8353EF30F /* HelixDocument.swift */ = {isa = PBXBuildFile; fileRef = 22137D970CE01AF6540E6B07 /* HelixDocument.swift */; };
 		0EBBB41BFE29A7683A9F84AE /* HelixMetalView.swift */ = {isa = PBXBuildFile; fileRef = C487B92355DA31AAC19BB695 /* HelixMetalView.swift */; };
@@ -53,9 +54,11 @@
 		2BECC4E09E9D9CF250E70E3C /* EditorLayout.swift */ = {isa = PBXBuildFile; fileRef = 463D252985639658705EB25C /* EditorLayout.swift */; };
 		B2C8681B7A66E74D95E3C739 /* NodeSearch.swift */ = {isa = PBXBuildFile; fileRef = 1532547BA1E2B1813C3B8A48 /* NodeSearch.swift */; };
 		143E8C5976DF056DD013EFAF /* NodePlacement.swift */ = {isa = PBXBuildFile; fileRef = 36001A4884A5E17DBF28165C /* NodePlacement.swift */; };
+		5E92FDA4B500A2FC99253A18 /* NodeNavigation.swift */ = {isa = PBXBuildFile; fileRef = D9A81480F9AC2F25C9AE148A /* NodeNavigation.swift */; };
 		1ACE913DBF64EAE753A1DD04 /* NodeEditorModel.swift */ = {isa = PBXBuildFile; fileRef = CA43F87F4F7E713C9A7AF226 /* NodeEditorModel.swift */; };
 		356EB13B91509DDD220EA9D8 /* NodeEditorCanvas.swift */ = {isa = PBXBuildFile; fileRef = BC085FED8BAEBD4136D90989 /* NodeEditorCanvas.swift */; };
 		2B98823D9FB7125919F4BA5F /* NodeEditorEvents.swift */ = {isa = PBXBuildFile; fileRef = 4E405D576E574DD909F43B7B /* NodeEditorEvents.swift */; };
+		33C7F902BC74E4DDC9A676C9 /* NodeEditorAccessibility.swift */ = {isa = PBXBuildFile; fileRef = C6FD9E601935AD922AEE40D7 /* NodeEditorAccessibility.swift */; };
 		2E5E01258522C67BF93D6F45 /* NodePalette.swift */ = {isa = PBXBuildFile; fileRef = 8A0EB785D4E5486E7AE52D98 /* NodePalette.swift */; };
 		21B5DE93D67EBF7A764384BF /* NodeEditorView.swift */ = {isa = PBXBuildFile; fileRef = D4805582EA5F7146EE3498F5 /* NodeEditorView.swift */; };
 		2280E7AF9010AABED6CD1C69 /* NodeEditorBridge.swift */ = {isa = PBXBuildFile; fileRef = 122AC6F01D03989AE7FE0E3A /* NodeEditorBridge.swift */; };
@@ -67,6 +70,7 @@
 		B1D54542E4A011BE27C1C6BC /* EditorLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463D252985639658705EB25C /* EditorLayout.swift */; };
 		A8D0BBAEF61B15BEC4C4C8F1 /* NodeSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1532547BA1E2B1813C3B8A48 /* NodeSearch.swift */; };
 		F84D6267025A7FF720EBBA5F /* NodePlacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36001A4884A5E17DBF28165C /* NodePlacement.swift */; };
+		7441A46763144FA3FBAC6D9A /* NodeNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9A81480F9AC2F25C9AE148A /* NodeNavigation.swift */; };
 		63B2105D86411904207E519E /* NodeEditorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA43F87F4F7E713C9A7AF226 /* NodeEditorModel.swift */; };
 		903C6F7EEA615A17EE9C33AD /* InspectorValues.swift */ = {isa = PBXBuildFile; fileRef = 47811F10EBF32460D9AF3F42 /* InspectorValues.swift */; };
 		EA372CF0ACAF88C0F4625E94 /* InspectorValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47811F10EBF32460D9AF3F42 /* InspectorValues.swift */; };
@@ -95,7 +99,9 @@
 		4E0BF46B4FDDE83C72269A76 /* TimelineBridge.swift */ = {isa = PBXBuildFile; fileRef = A8C3D0A202F6055515BE2D85 /* TimelineBridge.swift */; };
 		67DE8D44F473D13AF312775F /* TimelineSnapshotCommand.swift */ = {isa = PBXBuildFile; fileRef = DDC30C64301F1392D92EF728 /* TimelineSnapshotCommand.swift */; };
 		7725D2864DE7B9756446733D /* SpreadsheetData.swift */ = {isa = PBXBuildFile; fileRef = CDCAE5BC29953DF462403683 /* SpreadsheetData.swift */; };
+		EC362E9AB7D5F067C7CB298C /* SpreadsheetWidths.swift */ = {isa = PBXBuildFile; fileRef = 5AB0B9B2FD2A945738729533 /* SpreadsheetWidths.swift */; };
 		AB0A4109400D60C307F37330 /* SpreadsheetData.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDCAE5BC29953DF462403683 /* SpreadsheetData.swift */; };
+		98DB4D25272C8740A98666D5 /* SpreadsheetWidths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AB0B9B2FD2A945738729533 /* SpreadsheetWidths.swift */; };
 		73E9875B6A471AC2481F6259 /* SpreadsheetModel.swift */ = {isa = PBXBuildFile; fileRef = FE86066298BFFADE6B0143D2 /* SpreadsheetModel.swift */; };
 		6A73A5D938DA7E19C6665A6F /* SpreadsheetModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE86066298BFFADE6B0143D2 /* SpreadsheetModel.swift */; };
 		38B73AE3EAE6783E538B2B67 /* SpreadsheetTable.swift */ = {isa = PBXBuildFile; fileRef = F2C7205F01E219A98F743652 /* SpreadsheetTable.swift */; };
@@ -103,7 +109,10 @@
 		FC9BCC9D4841B3269393DA2D /* SpreadsheetBridge.swift */ = {isa = PBXBuildFile; fileRef = 5B5498A2917551D1F978EDCE /* SpreadsheetBridge.swift */; };
 		8D15E231BD55D8AAAA24E03A /* SpreadsheetSnapshotCommand.swift */ = {isa = PBXBuildFile; fileRef = 564AE8AD9240154969677DCF /* SpreadsheetSnapshotCommand.swift */; };
 		759E6B1A10FFF3DB994FDBF7 /* HelixDocument+Timeline.swift */ = {isa = PBXBuildFile; fileRef = 18FF823E6FF8F5FB40A89AE3 /* HelixDocument+Timeline.swift */; };
+		8614281FBCD77A15ACCBDAB2 /* HelixDocument+Export.swift */ = {isa = PBXBuildFile; fileRef = 0EE01F6A04FD8D6D9EB17BD4 /* HelixDocument+Export.swift */; };
+		6320C7C7102161986019AAFB /* HelixDocument+Animation.swift */ = {isa = PBXBuildFile; fileRef = 3ECD4097069B5DF25335D297 /* HelixDocument+Animation.swift */; };
 		20AC52A64C274E856FFD6F76 /* MCPKeyframeHandlers.swift */ = {isa = PBXBuildFile; fileRef = 6108CA1E517EAA3666E470EF /* MCPKeyframeHandlers.swift */; };
+		9A2647A2E1D79FAA6D73F4E3 /* MCPAnimationHandlers.swift */ = {isa = PBXBuildFile; fileRef = F4682CFDE600BB7D05B2B45F /* MCPAnimationHandlers.swift */; };
 		456FC0A7AD9FB0164EEFDFD1 /* OffscreenRender.swift */ = {isa = PBXBuildFile; fileRef = ABE0D526DFEC1164CE9EB776 /* OffscreenRender.swift */; };
 		ECC499E7F03A1A0B45407D56 /* TimelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4296C9AEB8D4A12CA3A7B577 /* TimelineTests.swift */; };
 		C1DD6E33FF65E05BAD9C027B /* SpreadsheetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 440766BF689E8B73A699BD63 /* SpreadsheetTests.swift */; };
@@ -172,6 +181,22 @@
 		CE5CBDB06244EE5240ED907C /* HelixDocument+NodeClipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F9D4270221D1EB2226037E0 /* HelixDocument+NodeClipboard.swift */; };
 		03180DA7C32E81F763C6998B /* NodeEditingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5727291264E2888EA4FE27EB /* NodeEditingTests.swift */; };
 		58BF09B1650132468562D8B1 /* HelixDocument+DebugNodeEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0B103C6839F3E81E0F81DC2 /* HelixDocument+DebugNodeEdit.swift */; };
+		80DEC0EC05D9C001E45F81E0 /* HelixDocument+DebugAnimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2077753AB55B8F9C8D048012 /* HelixDocument+DebugAnimate.swift */; };
+		282C47CEB0A8B245A9E56545 /* InspectorFileValues.swift */ = {isa = PBXBuildFile; fileRef = ADCE00153AF9A1458DC0D661 /* InspectorFileValues.swift */; };
+		18A74FEBC10274A68D3F946A /* InspectorFileValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADCE00153AF9A1458DC0D661 /* InspectorFileValues.swift */; };
+		BB9389E6CBD229370870C988 /* ExpressionHelp.swift */ = {isa = PBXBuildFile; fileRef = 718690DFB1E04E29DA747B12 /* ExpressionHelp.swift */; };
+		26B52BB22279BDCE9DCB8094 /* SkeletonValues.swift */ = {isa = PBXBuildFile; fileRef = AA9B92565D967A8D5435E219 /* SkeletonValues.swift */; };
+		8D181D4AC03E039004CF3FB3 /* ExpressionHelp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 718690DFB1E04E29DA747B12 /* ExpressionHelp.swift */; };
+		A45573A165AA8052DF60C702 /* ExportOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D896D70AF35C6EE9238944C /* ExportOptions.swift */; };
+		F815BB1316287A1171F8E910 /* SkeletonValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9B92565D967A8D5435E219 /* SkeletonValues.swift */; };
+		ECFF4B038A787DCA146B7B46 /* ParameterLabel.swift */ = {isa = PBXBuildFile; fileRef = 160D872629470AFCF25DFC18 /* ParameterLabel.swift */; };
+		2BF2A29E18E1A6773F0E8F8D /* FileControl.swift */ = {isa = PBXBuildFile; fileRef = CD5DD8105742744A040FE863 /* FileControl.swift */; };
+		835008A2CE24F937A8A5BE13 /* ExportImageAccessory.swift */ = {isa = PBXBuildFile; fileRef = 138EF431B8A2D06EA145A12B /* ExportImageAccessory.swift */; };
+		9565930734CADE2CD98BB659 /* ExportOptions.swift */ = {isa = PBXBuildFile; fileRef = 2D896D70AF35C6EE9238944C /* ExportOptions.swift */; };
+		E5A7B56585ED17780E9D37CA /* AnimationSection.swift */ = {isa = PBXBuildFile; fileRef = 3C1437F6BDC9A44F53CC8F48 /* AnimationSection.swift */; };
+		9898AAD533351C1DB872AC0C /* ExpressionHelpBox.swift */ = {isa = PBXBuildFile; fileRef = BD15D2FE79FD6811A579B344 /* ExpressionHelpBox.swift */; };
+		5F8845C8683A3162CC2C4901 /* FileParameterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6FD0D0138081263EB1EBBEB /* FileParameterTests.swift */; };
+		36D423370BF1899D8641AC56 /* Lot4Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6FCDADAC6EA64796355BD69 /* Lot4Tests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -191,6 +216,7 @@
 		B6CF56C357EEF362D48B2B95 /* HelixDocument+Welcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Welcome.swift"; path = "Sources/HelixDocument+Welcome.swift"; sourceTree = "<group>"; };
 		A7ED59A2212CA75E5A595D89 /* HelixDocument+DebugImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+DebugImport.swift"; path = "Sources/HelixDocument+DebugImport.swift"; sourceTree = "<group>"; };
 		D3267E492841E7AB897616F8 /* EngineHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EngineHost.swift; path = Sources/EngineHost.swift; sourceTree = "<group>"; };
+		2E7D4B3A9EB9ACD58328777D /* SkeletonChain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkeletonChain.swift; path = Sources/SkeletonChain.swift; sourceTree = "<group>"; };
 		38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelixApp.swift; path = Sources/HelixApp.swift; sourceTree = "<group>"; };
 		22137D970CE01AF6540E6B07 /* HelixDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelixDocument.swift; path = Sources/HelixDocument.swift; sourceTree = "<group>"; };
 		C487B92355DA31AAC19BB695 /* HelixMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelixMetalView.swift; path = Sources/HelixMetalView.swift; sourceTree = "<group>"; };
@@ -215,9 +241,11 @@
 		1532547BA1E2B1813C3B8A48 /* NodeSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeSearch.swift; path = Sources/NodeEditor/NodeSearch.swift; sourceTree = "<group>"; };
 		D9F770E253497C500EC78D24 /* AddNodeMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddNodeMenu.swift; path = Sources/NodeEditor/AddNodeMenu.swift; sourceTree = "<group>"; };
 		36001A4884A5E17DBF28165C /* NodePlacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodePlacement.swift; path = Sources/NodeEditor/NodePlacement.swift; sourceTree = "<group>"; };
+		D9A81480F9AC2F25C9AE148A /* NodeNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeNavigation.swift; path = Sources/NodeEditor/NodeNavigation.swift; sourceTree = "<group>"; };
 		CA43F87F4F7E713C9A7AF226 /* NodeEditorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorModel.swift; path = Sources/NodeEditor/NodeEditorModel.swift; sourceTree = "<group>"; };
 		BC085FED8BAEBD4136D90989 /* NodeEditorCanvas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorCanvas.swift; path = Sources/NodeEditor/NodeEditorCanvas.swift; sourceTree = "<group>"; };
 		4E405D576E574DD909F43B7B /* NodeEditorEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorEvents.swift; path = Sources/NodeEditor/NodeEditorEvents.swift; sourceTree = "<group>"; };
+		C6FD9E601935AD922AEE40D7 /* NodeEditorAccessibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorAccessibility.swift; path = Sources/NodeEditor/NodeEditorAccessibility.swift; sourceTree = "<group>"; };
 		8A0EB785D4E5486E7AE52D98 /* NodePalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodePalette.swift; path = Sources/NodeEditor/NodePalette.swift; sourceTree = "<group>"; };
 		D4805582EA5F7146EE3498F5 /* NodeEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorView.swift; path = Sources/NodeEditor/NodeEditorView.swift; sourceTree = "<group>"; };
 		122AC6F01D03989AE7FE0E3A /* NodeEditorBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditorBridge.swift; path = Sources/NodeEditor/NodeEditorBridge.swift; sourceTree = "<group>"; };
@@ -245,6 +273,7 @@
 		A8C3D0A202F6055515BE2D85 /* TimelineBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimelineBridge.swift; path = Sources/Timeline/TimelineBridge.swift; sourceTree = "<group>"; };
 		DDC30C64301F1392D92EF728 /* TimelineSnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimelineSnapshotCommand.swift; path = Sources/Timeline/TimelineSnapshotCommand.swift; sourceTree = "<group>"; };
 		CDCAE5BC29953DF462403683 /* SpreadsheetData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetData.swift; path = Sources/Spreadsheet/SpreadsheetData.swift; sourceTree = "<group>"; };
+		5AB0B9B2FD2A945738729533 /* SpreadsheetWidths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetWidths.swift; path = Sources/Spreadsheet/SpreadsheetWidths.swift; sourceTree = "<group>"; };
 		FE86066298BFFADE6B0143D2 /* SpreadsheetModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetModel.swift; path = Sources/Spreadsheet/SpreadsheetModel.swift; sourceTree = "<group>"; };
 		F2C7205F01E219A98F743652 /* SpreadsheetTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetTable.swift; path = Sources/Spreadsheet/SpreadsheetTable.swift; sourceTree = "<group>"; };
 		77061C17B125BBCFE178E352 /* SpreadsheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetView.swift; path = Sources/Spreadsheet/SpreadsheetView.swift; sourceTree = "<group>"; };
@@ -253,7 +282,10 @@
 		5B5498A2917551D1F978EDCE /* SpreadsheetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetBridge.swift; path = Sources/Spreadsheet/SpreadsheetBridge.swift; sourceTree = "<group>"; };
 		564AE8AD9240154969677DCF /* SpreadsheetSnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetSnapshotCommand.swift; path = Sources/Spreadsheet/SpreadsheetSnapshotCommand.swift; sourceTree = "<group>"; };
 		18FF823E6FF8F5FB40A89AE3 /* HelixDocument+Timeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Timeline.swift"; path = "Sources/HelixDocument+Timeline.swift"; sourceTree = "<group>"; };
+		0EE01F6A04FD8D6D9EB17BD4 /* HelixDocument+Export.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Export.swift"; path = "Sources/HelixDocument+Export.swift"; sourceTree = "<group>"; };
+		3ECD4097069B5DF25335D297 /* HelixDocument+Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+Animation.swift"; path = "Sources/HelixDocument+Animation.swift"; sourceTree = "<group>"; };
 		6108CA1E517EAA3666E470EF /* MCPKeyframeHandlers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MCPKeyframeHandlers.swift; path = Sources/MCPKeyframeHandlers.swift; sourceTree = "<group>"; };
+		F4682CFDE600BB7D05B2B45F /* MCPAnimationHandlers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MCPAnimationHandlers.swift; path = Sources/MCPAnimationHandlers.swift; sourceTree = "<group>"; };
 		ABE0D526DFEC1164CE9EB776 /* OffscreenRender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OffscreenRender.swift; path = Sources/OffscreenRender.swift; sourceTree = "<group>"; };
 		4296C9AEB8D4A12CA3A7B577 /* TimelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimelineTests.swift; path = Tests/TimelineTests.swift; sourceTree = "<group>"; };
 		440766BF689E8B73A699BD63 /* SpreadsheetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpreadsheetTests.swift; path = Tests/SpreadsheetTests.swift; sourceTree = "<group>"; };
@@ -307,6 +339,18 @@
 		7F9D4270221D1EB2226037E0 /* HelixDocument+NodeClipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+NodeClipboard.swift"; path = "Sources/HelixDocument+NodeClipboard.swift"; sourceTree = "<group>"; };
 		5727291264E2888EA4FE27EB /* NodeEditingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditingTests.swift; path = Tests/NodeEditingTests.swift; sourceTree = "<group>"; };
 		E0B103C6839F3E81E0F81DC2 /* HelixDocument+DebugNodeEdit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+DebugNodeEdit.swift"; path = "Sources/HelixDocument+DebugNodeEdit.swift"; sourceTree = "<group>"; };
+		2077753AB55B8F9C8D048012 /* HelixDocument+DebugAnimate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+DebugAnimate.swift"; path = "Sources/HelixDocument+DebugAnimate.swift"; sourceTree = "<group>"; };
+		ADCE00153AF9A1458DC0D661 /* InspectorFileValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InspectorFileValues.swift; path = Sources/Inspector/InspectorFileValues.swift; sourceTree = "<group>"; };
+		718690DFB1E04E29DA747B12 /* ExpressionHelp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExpressionHelp.swift; path = Sources/Inspector/ExpressionHelp.swift; sourceTree = "<group>"; };
+		AA9B92565D967A8D5435E219 /* SkeletonValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkeletonValues.swift; path = Sources/Inspector/SkeletonValues.swift; sourceTree = "<group>"; };
+		160D872629470AFCF25DFC18 /* ParameterLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ParameterLabel.swift; path = Sources/Inspector/ParameterLabel.swift; sourceTree = "<group>"; };
+		CD5DD8105742744A040FE863 /* FileControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FileControl.swift; path = Sources/Inspector/FileControl.swift; sourceTree = "<group>"; };
+		138EF431B8A2D06EA145A12B /* ExportImageAccessory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExportImageAccessory.swift; path = Sources/Export/ExportImageAccessory.swift; sourceTree = "<group>"; };
+		2D896D70AF35C6EE9238944C /* ExportOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExportOptions.swift; path = Sources/Export/ExportOptions.swift; sourceTree = "<group>"; };
+		3C1437F6BDC9A44F53CC8F48 /* AnimationSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnimationSection.swift; path = Sources/Inspector/AnimationSection.swift; sourceTree = "<group>"; };
+		BD15D2FE79FD6811A579B344 /* ExpressionHelpBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExpressionHelpBox.swift; path = Sources/Inspector/ExpressionHelpBox.swift; sourceTree = "<group>"; };
+		F6FD0D0138081263EB1EBBEB /* FileParameterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FileParameterTests.swift; path = Tests/FileParameterTests.swift; sourceTree = "<group>"; };
+		B6FCDADAC6EA64796355BD69 /* Lot4Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Lot4Tests.swift; path = Tests/Lot4Tests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -331,6 +375,15 @@
 			isa = PBXGroup;
 			children = (
 				47811F10EBF32460D9AF3F42 /* InspectorValues.swift */,
+				BD15D2FE79FD6811A579B344 /* ExpressionHelpBox.swift */,
+				CD5DD8105742744A040FE863 /* FileControl.swift */,
+				138EF431B8A2D06EA145A12B /* ExportImageAccessory.swift */,
+				2D896D70AF35C6EE9238944C /* ExportOptions.swift */,
+				3C1437F6BDC9A44F53CC8F48 /* AnimationSection.swift */,
+				160D872629470AFCF25DFC18 /* ParameterLabel.swift */,
+				718690DFB1E04E29DA747B12 /* ExpressionHelp.swift */,
+				AA9B92565D967A8D5435E219 /* SkeletonValues.swift */,
+				ADCE00153AF9A1458DC0D661 /* InspectorFileValues.swift */,
 				B8686E19A796CE0DAB071246 /* InspectorFormatting.swift */,
 				9FF9886AAE6C8EB87B27B4DC /* ContinuousEdit.swift */,
 				5CD6B52CC05040329A7A8AA2 /* InspectorModel.swift */,
@@ -358,6 +411,8 @@
 				440766BF689E8B73A699BD63 /* SpreadsheetTests.swift */,
 				D3F54926D9EBC58B30CE4961 /* NodeEditorTests.swift */,
 				DFDAF0510D8421E7D0F36AC8 /* InspectorTests.swift */,
+				F6FD0D0138081263EB1EBBEB /* FileParameterTests.swift */,
+				B6FCDADAC6EA64796355BD69 /* Lot4Tests.swift */,
 				1251728C91F1884CC929E1D3 /* LocalizationTests.swift */,
 				5727291264E2888EA4FE27EB /* NodeEditingTests.swift */,
 			);
@@ -375,9 +430,11 @@
 				1532547BA1E2B1813C3B8A48 /* NodeSearch.swift */,
 				D9F770E253497C500EC78D24 /* AddNodeMenu.swift */,
 				36001A4884A5E17DBF28165C /* NodePlacement.swift */,
+				D9A81480F9AC2F25C9AE148A /* NodeNavigation.swift */,
 				CA43F87F4F7E713C9A7AF226 /* NodeEditorModel.swift */,
 				BC085FED8BAEBD4136D90989 /* NodeEditorCanvas.swift */,
 				4E405D576E574DD909F43B7B /* NodeEditorEvents.swift */,
+				C6FD9E601935AD922AEE40D7 /* NodeEditorAccessibility.swift */,
 				8A0EB785D4E5486E7AE52D98 /* NodePalette.swift */,
 				D4805582EA5F7146EE3498F5 /* NodeEditorView.swift */,
 				122AC6F01D03989AE7FE0E3A /* NodeEditorBridge.swift */,
@@ -423,7 +480,10 @@
 				14F9D9B016A9CCE8EBBF16AB /* Settings */,
 				94678D47A144029645677C7A /* Spreadsheet */,
 				18FF823E6FF8F5FB40A89AE3 /* HelixDocument+Timeline.swift */,
+				0EE01F6A04FD8D6D9EB17BD4 /* HelixDocument+Export.swift */,
+				3ECD4097069B5DF25335D297 /* HelixDocument+Animation.swift */,
 				6108CA1E517EAA3666E470EF /* MCPKeyframeHandlers.swift */,
+				F4682CFDE600BB7D05B2B45F /* MCPAnimationHandlers.swift */,
 				ABE0D526DFEC1164CE9EB776 /* OffscreenRender.swift */,
 				91F4A5417179B7CC81BBCC04 /* NodeEditor */,
 				03011B942D714D79F3FBB0DB /* Inspector */,
@@ -438,6 +498,7 @@
 				B6CF56C357EEF362D48B2B95 /* HelixDocument+Welcome.swift */,
 				A7ED59A2212CA75E5A595D89 /* HelixDocument+DebugImport.swift */,
 				D3267E492841E7AB897616F8 /* EngineHost.swift */,
+				2E7D4B3A9EB9ACD58328777D /* SkeletonChain.swift */,
 				38E25BB4EBCB9D2704A244F3 /* HelixApp.swift */,
 				22137D970CE01AF6540E6B07 /* HelixDocument.swift */,
 				CA78EAE0CFD1626154DB587E /* HelixDocument+NodeEditor.swift */,
@@ -457,6 +518,7 @@
 				1897A9FB8B71C86CA11ECFA9 /* main.swift */,
 				7F9D4270221D1EB2226037E0 /* HelixDocument+NodeClipboard.swift */,
 				E0B103C6839F3E81E0F81DC2 /* HelixDocument+DebugNodeEdit.swift */,
+				2077753AB55B8F9C8D048012 /* HelixDocument+DebugAnimate.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -509,6 +571,7 @@
 			isa = PBXGroup;
 			children = (
 				CDCAE5BC29953DF462403683 /* SpreadsheetData.swift */,
+				5AB0B9B2FD2A945738729533 /* SpreadsheetWidths.swift */,
 				FE86066298BFFADE6B0143D2 /* SpreadsheetModel.swift */,
 				F2C7205F01E219A98F743652 /* SpreadsheetTable.swift */,
 				77061C17B125BBCFE178E352 /* SpreadsheetView.swift */,
@@ -733,16 +796,29 @@
 				4E0BF46B4FDDE83C72269A76 /* TimelineBridge.swift */,
 				67DE8D44F473D13AF312775F /* TimelineSnapshotCommand.swift */,
 				7725D2864DE7B9756446733D /* SpreadsheetData.swift */,
+				EC362E9AB7D5F067C7CB298C /* SpreadsheetWidths.swift */,
 				73E9875B6A471AC2481F6259 /* SpreadsheetModel.swift */,
 				38B73AE3EAE6783E538B2B67 /* SpreadsheetTable.swift */,
 				C24AE958D5E53C4F5B1BDF9D /* SpreadsheetView.swift */,
 				FC9BCC9D4841B3269393DA2D /* SpreadsheetBridge.swift */,
 				8D15E231BD55D8AAAA24E03A /* SpreadsheetSnapshotCommand.swift */,
 				759E6B1A10FFF3DB994FDBF7 /* HelixDocument+Timeline.swift */,
+				8614281FBCD77A15ACCBDAB2 /* HelixDocument+Export.swift */,
+				6320C7C7102161986019AAFB /* HelixDocument+Animation.swift */,
 				20AC52A64C274E856FFD6F76 /* MCPKeyframeHandlers.swift */,
+				9A2647A2E1D79FAA6D73F4E3 /* MCPAnimationHandlers.swift */,
 				456FC0A7AD9FB0164EEFDFD1 /* OffscreenRender.swift */,
 				18485CD047FA97EB2E642D0A /* DocumentView.swift */,
 				903C6F7EEA615A17EE9C33AD /* InspectorValues.swift */,
+				9898AAD533351C1DB872AC0C /* ExpressionHelpBox.swift */,
+				2BF2A29E18E1A6773F0E8F8D /* FileControl.swift */,
+				835008A2CE24F937A8A5BE13 /* ExportImageAccessory.swift */,
+				9565930734CADE2CD98BB659 /* ExportOptions.swift */,
+				E5A7B56585ED17780E9D37CA /* AnimationSection.swift */,
+				ECFF4B038A787DCA146B7B46 /* ParameterLabel.swift */,
+				BB9389E6CBD229370870C988 /* ExpressionHelp.swift */,
+				26B52BB22279BDCE9DCB8094 /* SkeletonValues.swift */,
+				282C47CEB0A8B245A9E56545 /* InspectorFileValues.swift */,
 				BD86E35DB7E8CC84B46CCD74 /* InspectorFormatting.swift */,
 				0027E41216B7CB90A17488F9 /* ContinuousEdit.swift */,
 				B32DAA915CD56AC9442DC573 /* InspectorModel.swift */,
@@ -759,15 +835,18 @@
 				2BECC4E09E9D9CF250E70E3C /* EditorLayout.swift */,
 				B2C8681B7A66E74D95E3C739 /* NodeSearch.swift */,
 				143E8C5976DF056DD013EFAF /* NodePlacement.swift */,
+				5E92FDA4B500A2FC99253A18 /* NodeNavigation.swift */,
 				1ACE913DBF64EAE753A1DD04 /* NodeEditorModel.swift */,
 				356EB13B91509DDD220EA9D8 /* NodeEditorCanvas.swift */,
 				2B98823D9FB7125919F4BA5F /* NodeEditorEvents.swift */,
+				33C7F902BC74E4DDC9A676C9 /* NodeEditorAccessibility.swift */,
 				2E5E01258522C67BF93D6F45 /* NodePalette.swift */,
 				21B5DE93D67EBF7A764384BF /* NodeEditorView.swift */,
 				2280E7AF9010AABED6CD1C69 /* NodeEditorBridge.swift */,
 				414A6AF013ECFEAC4C76F54B /* NodeEditorSnapshotCommand.swift */,
 				E17CDFD78476195928FF8382 /* HelixDocument+NodeEditor.swift */,
 				778229516B283DD35DA34D13 /* EngineHost.swift */,
+				354A34CB5D09709982FF807C /* SkeletonChain.swift */,
 				C78E938AA9B588158567FA3E /* HelixApp.swift */,
 				876DE517FD07C5B8353EF30F /* HelixDocument.swift */,
 				5E2B8D4A1C7F9063B8D1A4E7 /* ImportFormats.swift */,
@@ -811,6 +890,7 @@
 				EEFED125787006DF53FD92E1 /* NodeMenu.swift in Sources */,
 				CE5CBDB06244EE5240ED907C /* HelixDocument+NodeClipboard.swift in Sources */,
 				58BF09B1650132468562D8B1 /* HelixDocument+DebugNodeEdit.swift in Sources */,
+				80DEC0EC05D9C001E45F81E0 /* HelixDocument+DebugAnimate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -834,12 +914,19 @@
 				B9627642D6CD747A0F7EDCFD /* TimelineKeys.swift in Sources */,
 				D2A9EA24CD9C9C7DCB1ECFE2 /* TimelineModel.swift in Sources */,
 				AB0A4109400D60C307F37330 /* SpreadsheetData.swift in Sources */,
+				98DB4D25272C8740A98666D5 /* SpreadsheetWidths.swift in Sources */,
 				6A73A5D938DA7E19C6665A6F /* SpreadsheetModel.swift in Sources */,
 				ECC499E7F03A1A0B45407D56 /* TimelineTests.swift in Sources */,
 				C1DD6E33FF65E05BAD9C027B /* SpreadsheetTests.swift in Sources */,
 				3D2B105261C495EB94860605 /* NodeEditorTests.swift in Sources */,
 				EAC964D7B3DB9036687C6BC3 /* InspectorTests.swift in Sources */,
 				EA372CF0ACAF88C0F4625E94 /* InspectorValues.swift in Sources */,
+				5F8845C8683A3162CC2C4901 /* FileParameterTests.swift in Sources */,
+				36D423370BF1899D8641AC56 /* Lot4Tests.swift in Sources */,
+				8D181D4AC03E039004CF3FB3 /* ExpressionHelp.swift in Sources */,
+				A45573A165AA8052DF60C702 /* ExportOptions.swift in Sources */,
+				F815BB1316287A1171F8E910 /* SkeletonValues.swift in Sources */,
+				18A74FEBC10274A68D3F946A /* InspectorFileValues.swift in Sources */,
 				EC8BB6598DB99ED501D3527B /* InspectorFormatting.swift in Sources */,
 				7FB7BB2D8E05410154BC01C1 /* ContinuousEdit.swift in Sources */,
 				018BE1EAF6E4F90757E5B1A5 /* InspectorModel.swift in Sources */,
@@ -848,6 +935,7 @@
 				B1D54542E4A011BE27C1C6BC /* EditorLayout.swift in Sources */,
 				A8D0BBAEF61B15BEC4C4C8F1 /* NodeSearch.swift in Sources */,
 				F84D6267025A7FF720EBBA5F /* NodePlacement.swift in Sources */,
+				7441A46763144FA3FBAC6D9A /* NodeNavigation.swift in Sources */,
 				63B2105D86411904207E519E /* NodeEditorModel.swift in Sources */,
 				BAD8B929F68F19F5F74C3DE0 /* InterfaceSize.swift in Sources */,
 				7D9242CBC86131AE70E667CF /* NodeCategories.swift in Sources */,

@@ -748,6 +748,29 @@ CreateNodeResult importFile(const std::string& path)
 
 std::string lastImportSummary() { return importSummary; }
 
+Status reloadImport(NodeId node)
+{
+    return guarded([&] {
+        if (Status status = requireInitialized(); !status.ok) return status;
+        if (Status status = requireNode(node); !status.ok) return status;
+        nt::Node& target = nt::nm().getNode(node);
+        if (target.getType().getFullName() != "helix::geometryImport")
+            return failure("Only an import node has a file to read again.");
+
+        const std::shared_ptr<prm::NodeParameter> filePath = target.getParameter("filePath").lock();
+        if (!filePath) return failure("The import node has no file path parameter.");
+        std::string path = filePath->evalString();
+        const auto first = path.find_first_not_of(" \t\r\n");
+        if (first == std::string::npos) return success();
+        path = path.substr(first, path.find_last_not_of(" \t\r\n") - first + 1);
+
+        import::forgetImportedFile(std::filesystem::path(path));
+        target.dirtyNode();
+        bumpRevision();
+        return success();
+    });
+}
+
 FloatValue getFloat(NodeId node, const std::string& parameter, std::uint32_t component)
 {
     FloatValue result;

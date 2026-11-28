@@ -46,7 +46,12 @@ struct GettingStartedView: View {
             Part(
                 icon: "play.rectangle",
                 title: String(localized: "The timeline"),
-                text: String(localized: "Press the space bar to play. Right-click a parameter to key it: the diamonds on the ruler are its keys, and the line with a small triangle is the current frame.")
+                text: String(localized: "The timeline shows up when the scene has something to play: a key, an animated model, a simulation or a formula that uses the time (View > Timeline Bar changes that). Press the space bar to play. Right-click a parameter to key it: the diamonds on the ruler are its keys, and the line with a small triangle is the current frame.")
+            ),
+            Part(
+                icon: "square.and.arrow.up",
+                title: String(localized: "Export"),
+                text: String(localized: "Export an image of the viewport with File > Export Image…, or the shown geometry as an OBJ file with File > Export Geometry….")
             ),
             Part(
                 icon: "square.and.arrow.down.on.square",

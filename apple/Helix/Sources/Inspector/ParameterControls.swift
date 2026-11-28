@@ -88,6 +88,8 @@ struct StringControl: View {
                 CodeEditor(text: text, label: parameter.label) { model.setString(parameter.name, to: $0) }
             case .attribute:
                 AttributeField(parameter: parameter, model: model)
+            case .file:
+                FileControl(parameter: parameter, model: model)
             default:
                 TextCommitField(text: text, name: parameter.label) { model.setString(parameter.name, to: $0) }
             }

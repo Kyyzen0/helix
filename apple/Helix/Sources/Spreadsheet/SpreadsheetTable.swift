@@ -36,6 +36,7 @@ struct SpreadsheetTable: NSViewRepresentable {
         scroll.hasHorizontalScroller = true
         scroll.autohidesScrollers = true
         scroll.drawsBackground = false
+        context.coordinator.watch(table: table, scroll: scroll)
         context.coordinator.apply(theme.palette)
         context.coordinator.apply(size: size)
         context.coordinator.sync()
@@ -55,6 +56,12 @@ struct SpreadsheetTable: NSViewRepresentable {
         weak var table: SpreadsheetTableView?
         private var shownColumns: [String] = []
         private var shownRevision = -1
+        /// The width of the table the columns were last fitted to, and whether the person has
+        /// dragged a column edge since: a width they chose is not taken back.
+        private var fittedWidth: CGFloat = 0
+        private var adjustedByHand = false
+        private var fitting = false
+        nonisolated(unsafe) private var observers: [NSObjectProtocol] = []
 
         private var palette: ThemePalette?
         private var size = InterfaceSize.medium
@@ -99,11 +106,75 @@ struct SpreadsheetTable: NSViewRepresentable {
                 for column in model.columns { table.addTableColumn(makeColumn(column)) }
                 shownColumns = ids
                 shownRevision = -1
+                adjustedByHand = false
+                fittedWidth = 0
             }
             if shownRevision != model.revision {
                 shownRevision = model.revision
                 table.reloadData()
             }
+            fitColumns()
+        }
+
+        /// Sizes the columns to what they hold, and shares the room that is left. Done when the
+        /// columns change and when the table changes width, and not again once the person has
+        /// dragged an edge, so a width they chose stays.
+        private func fitColumns() {
+            guard let table, !adjustedByHand, !table.tableColumns.isEmpty else { return }
+            let available = table.enclosingScrollView?.contentSize.width ?? 0
+            guard available > 0, abs(available - fittedWidth) > 0.5 else { return }
+            fittedWidth = available
+            let headerFont = NSFont.systemFont(ofSize: size.points(12), weight: .medium)
+            let cellFont = NSFont.monospacedDigitSystemFont(ofSize: size.points(13), weight: .regular)
+            let sampled = min(model.rowCount, Self.sampleRows)
+            var natural: [CGFloat] = []
+            var flexible: [Bool] = []
+            for tableColumn in table.tableColumns {
+                guard let column = model.columns.first(where: { $0.id == tableColumn.identifier.rawValue }) else {
+                    natural.append(tableColumn.width)
+                    flexible.append(false)
+                    continue
+                }
+                let header = (column.title as NSString).size(withAttributes: [.font: headerFont]).width
+                let samples = (0..<sampled).map { row in
+                    (model.cellText(row: row, column: column) as NSString).size(withAttributes: [.font: cellFont]).width
+                }
+                natural.append(SpreadsheetColumnWidths.natural(header: header, samples: samples))
+                // The row number and the primitive are narrow by nature: the room goes to the numbers.
+                if case .component = column.kind { flexible.append(true) } else { flexible.append(false) }
+            }
+            let widths = SpreadsheetColumnWidths.distribute(
+                natural: natural, flexible: flexible, available: available, spacing: table.intercellSpacing.width
+            )
+            fitting = true
+            for (tableColumn, width) in zip(table.tableColumns, widths) { tableColumn.width = width }
+            fitting = false
+        }
+
+        /// How many rows of the top of the table are measured to size a column.
+        private static let sampleRows = 64
+
+        /// Takes note of a column edge dragged by hand, and of the table changing width (a pane being
+        /// resized), which the columns are fitted to again.
+        func watch(table: NSTableView, scroll: NSScrollView) {
+            observers.append(NotificationCenter.default.addObserver(
+                forName: NSTableView.columnDidResizeNotification, object: table, queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    guard let self, !self.fitting else { return }
+                    self.adjustedByHand = true
+                }
+            })
+            scroll.postsFrameChangedNotifications = true
+            observers.append(NotificationCenter.default.addObserver(
+                forName: NSView.frameDidChangeNotification, object: scroll, queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated { self?.fitColumns() }
+            })
+        }
+
+        deinit {
+            for observer in observers { NotificationCenter.default.removeObserver(observer) }
         }
 
         private func makeColumn(_ column: SpreadsheetColumn) -> NSTableColumn {

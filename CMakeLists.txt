@@ -136,6 +136,7 @@ set(ENGINE_SOURCES
     src/Engine/Import/ImportFile.cpp
     src/Engine/Import/MeshBuilder.cpp
     src/Engine/Import/ModelIOReader.mm
+    src/Engine/Export/ObjWriter.cpp
     src/Engine/Util/UnionFind.cpp
 )
 
@@ -440,6 +441,7 @@ add_library(helixCore STATIC
     src/HelixCore/HelixCore.cpp
     src/HelixCore/HelixCoreCache.cpp
     src/HelixCore/HelixCoreEditing.cpp
+    src/HelixCore/HelixCoreExport.cpp
     src/HelixCore/HelixCoreParameters.cpp
     src/HelixCore/HelixCoreReport.cpp
     src/HelixCore/HelixCoreTime.cpp
@@ -774,6 +776,7 @@ if(HELIX_BUILD_TESTS)
         tests/ViewportLightingTests.cpp
         tests/HelixCoreViewportTests.cpp
         tests/NodeEditingTests.cpp
+        tests/ExportTests.cpp
     )
     # The one test of the engine that goes through a Qt type, the item QML holds for a parameter.
     if(HELIX_BUILD_GUI)

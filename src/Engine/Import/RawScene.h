@@ -113,6 +113,10 @@ struct RawMaterial
     std::shared_ptr<const geo::Image> texture;
     /// @brief What went wrong with the texture the file refers to, empty when nothing did.
     std::string missingTexture;
+    /// @brief The name the file gives the texture that is missing, empty when none is.
+    std::string missingTextureName;
+    /// @brief Whether the picture was not found, as opposed to found and not decoded.
+    bool missingTextureNotFound = false;
 };
 
 /// @brief What a reader hands the engine: meshes, where they sit, and what was left behind.

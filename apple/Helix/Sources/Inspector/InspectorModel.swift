@@ -42,6 +42,17 @@ protocol InspectorEditing: AnyObject {
     func setDisplay(_ node: UInt64) -> EditOutcome
     /// Gives the node another name, and what reads it by name follows.
     func rename(_ node: UInt64, to name: String) -> EditOutcome
+    /// Reads the file the node holds again, from the disk. It changes nothing in the scene, so it
+    /// is not a step of undo.
+    func reloadFile(node: UInt64) -> EditOutcome
+    /// Builds the pose and skin nodes of an import whose file has a skeleton, plays `clip` (the
+    /// first one when nil), and shows the result: one step of undo.
+    func animateSkeleton(importNode: UInt64, clip: String?) -> EditOutcome
+}
+
+extension InspectorEditing {
+    func reloadFile(node: UInt64) -> EditOutcome { .done }
+    func animateSkeleton(importNode: UInt64, clip: String?) -> EditOutcome { .done }
 }
 
 /// An expression being typed on a component, which is not on the node until it is committed.
@@ -67,6 +78,12 @@ final class InspectorModel: ObservableObject {
     @Published var renameDraft: String?
     /// Why the name typed cannot be taken, shown under the field.
     @Published private(set) var renameError: String?
+
+    /// A parameter whose row is drawn as if the pointer were over it, and one whose help is drawn
+    /// open under the row. Only a picture of the panel (`--render-inspector`) sets them: a person
+    /// has a pointer and a popover.
+    var forcedHover: String?
+    var pinnedHelp: String?
 
     weak var editing: InspectorEditing?
     /// Switches the lower pane to the spreadsheet, for the note of a node that writes data the
@@ -120,7 +137,7 @@ final class InspectorModel: ObservableObject {
 
     var entries: [InspectorEntry] {
         guard let node else { return [] }
-        return InspectorTree.build(layout: node.layout, parameters: node.parameters)
+        return InspectorTree.build(layout: node.layout, parameters: node.visibleParameters)
     }
 
     // MARK: Renaming
@@ -221,6 +238,12 @@ final class InspectorModel: ObservableObject {
         guard let info = node?.parameters[parameter], component < info.strings.count,
               info.strings[component] != value else { return }
         commit(.string(parameter: parameter, component: component, value: value))
+    }
+
+    /// "Animate with This Clip": the chain that plays one clip of the skeleton of the node.
+    func animateSkeleton(clip: String?) {
+        guard let node, node.skeleton != nil, let editing else { return }
+        finish(editing.animateSkeleton(importNode: node.id, clip: clip), parameter: nil)
     }
 
     func setRamp(_ parameter: String, points: [InspectorRampPoint]) {
@@ -379,6 +402,15 @@ final class InspectorModel: ObservableObject {
         }
         current.parameters[edit.parameter] = info
         content = .node(current)
+    }
+
+    // MARK: Files
+
+    /// Reads the file of the node again from the disk.
+    func reloadFile() {
+        guard let node, let editing else { return }
+        finish(editing.reloadFile(node: node.id), parameter: nil)
+        reload()
     }
 
     // MARK: Suggestions and display

@@ -10,6 +10,8 @@ struct HelixApp: App {
         UserDefaults.standard.register(defaults: [
             "NSShowAppCentricOpenPanelInsteadOfUntitledFile": false,
         ])
+        // The old on/off setting of the timeline becomes its mode.
+        TimelineSetting.migrateLegacy()
         // The appearance of the theme chosen last time, before the first window opens. Not here
         // and now: reading NSApplication.shared this early makes the application object before
         // SwiftUI does, and SwiftUI then crashes setting up its document classes at launch. The
@@ -61,7 +63,7 @@ struct HelixCommands: Commands {
     @Environment(\.openWindow) private var openWindow
     @AppStorage(NavigationLegendSetting.hiddenKey) private var navigationLegendHidden = false
     @AppStorage(InspectorSetting.defaultsKey) private var inspectorShown = true
-    @AppStorage(TimelineSetting.shownKey) private var timelineShown = true
+    @AppStorage(TimelineSetting.modeKey) private var timelineMode = TimelineMode.automatic
     @AppStorage(TimelineSetting.loopKey) private var loop = true
     @AppStorage(TimelineSetting.everyFrameKey) private var everyFrame = false
     @AppStorage(TimelineSetting.lowerPaneKey) private var lowerPane = TimelineSetting.LowerPane.network.rawValue
@@ -86,9 +88,21 @@ struct HelixCommands: Commands {
             Button(inspectorShown ? LocalizedStringKey("Hide Inspector") : LocalizedStringKey("Show Inspector")) { inspectorShown.toggle() }
                 .keyboardShortcut("i", modifiers: [.command, .option])
                 .disabled(document == nil)
-            Button(timelineShown ? LocalizedStringKey("Hide Timeline") : LocalizedStringKey("Show Timeline")) { timelineShown.toggle() }
-                .keyboardShortcut("t", modifiers: [.command, .option])
-                .disabled(document == nil)
+            // The shortcut shows or hides the bar for good (Always or Never), whatever the scene
+            // holds; the submenu lets the person go back to Automatic.
+            let timelineShown = timelineMode.isShown(sceneAnimates: document?.sceneAnimates ?? false)
+            Button(timelineShown ? LocalizedStringKey("Hide Timeline") : LocalizedStringKey("Show Timeline")) {
+                timelineMode = timelineShown ? .never : .always
+            }
+            .keyboardShortcut("t", modifiers: [.command, .option])
+            .disabled(document == nil)
+            Menu("Timeline Bar") {
+                Picker("Timeline Bar", selection: $timelineMode) {
+                    ForEach(TimelineMode.allCases) { mode in Text(mode.title).tag(mode) }
+                }
+                .pickerStyle(.inline)
+                .labelsHidden()
+            }
             Button(spreadsheetShown ? LocalizedStringKey("Show Node Editor") : LocalizedStringKey("Show Spreadsheet")) {
                 lowerPane = (spreadsheetShown ? TimelineSetting.LowerPane.network : .spreadsheet).rawValue
             }
@@ -100,6 +114,13 @@ struct HelixCommands: Commands {
             Button("Import a 3D Model…") { document?.chooseFileToImport() }
                 .keyboardShortcut("i", modifiers: .command)
                 .disabled(document == nil || document?.isActive != true)
+            Divider()
+            // What the work comes out as: a picture of the viewport, and the geometry it shows.
+            Button("Export Image…") { document?.exportImage() }
+                .keyboardShortcut("e", modifiers: [.command, .shift])
+                .disabled(document?.canExport != true)
+            Button("Export Geometry…") { document?.exportGeometry() }
+                .disabled(document?.canExport != true)
         }
         // The keys of playback (space, the arrows) belong to the views that have the keyboard, for
         // the reason the viewport keys do. These items have none, and do the same.

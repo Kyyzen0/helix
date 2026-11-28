@@ -221,6 +221,9 @@ TEST_CASE("A missing picture leaves the material with its factor and does not fa
     REQUIRE_FALSE(material.baseColorTexture);
     REQUIRE(material.baseColor.x() == Approx(0.9f));
     REQUIRE(material.missingTexture.find("quadrants.png") != std::string::npos);
+    // The name the file wrote, kept apart from the sentence, so a panel can list it.
+    REQUIRE(material.missingTextureName == "quadrants.png");
+    REQUIRE(material.missingTextureNotFound);
 
     REQUIRE(file->summary.texturedMaterialCount == 1);
     REQUIRE(file->summary.decodedTextureCount == 0);
@@ -234,6 +237,9 @@ TEST_CASE("A missing picture leaves the material with its factor and does not fa
         const geo::Material& flawed = *damaged->meshes.front()->materials().front();
         REQUIRE_FALSE(flawed.baseColorTexture);
         REQUIRE(flawed.missingTexture.find("could not be loaded") != std::string::npos);
+        // Found, so not "not found": the folder is not what to look in.
+        REQUIRE(flawed.missingTextureName == "quadrants.png");
+        REQUIRE_FALSE(flawed.missingTextureNotFound);
     }
 }
 

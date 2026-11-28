@@ -208,6 +208,46 @@ final class LocalizationTests: XCTestCase {
         XCTAssertEqual(sweep.french[""], "Balayage")
     }
 
+    func testTheTermsOfTheNodesHaveAnExplanationInBothLanguages() throws {
+        let entries = try catalog("Nodes.xcstrings")
+        let documentation = entries.filter { $0.key.hasSuffix(".documentation") }
+        // The jargon the usability audit cites, and the nodes it names.
+        XCTAssertGreaterThanOrEqual(documentation.count, 20)
+        for key in [
+            "param.helix::attributeNoise.lacunarity.documentation", "param.helix::attributeNoise.fractalType.documentation",
+            "param.helix::attributeNoise.octaves.documentation", "param.helix::attributeNoise.gain.documentation",
+            "param.helix::attributeNoise.weightedStrength.documentation", "param.helix::sineWave.remap.documentation",
+            "param.helix::simulation.sub_steps.documentation", "param.helix::extrude.inset.documentation",
+            "param.helix::sweep.endCapType.documentation", "param.helix::skeletonPose.clip.documentation",
+            "param.helix::skinDeform.normals.documentation", "param.helix::geometryImport.filePath.documentation",
+        ] {
+            let entry = try XCTUnwrap(entries.first { $0.key == key }, key)
+            XCTAssertFalse((entry.english[""] ?? "").isEmpty, key)
+            XCTAssertFalse((entry.french[""] ?? "").isEmpty, key)
+            XCTAssertNotEqual(entry.english[""], entry.french[""], "\(key) is not translated")
+        }
+    }
+
+    func testTheWordsTheAuditFoundConfusingAreRenamed() throws {
+        let entries = try catalog("Nodes.xcstrings")
+        func french(_ key: String) throws -> String? { try XCTUnwrap(entries.first { $0.key == key }, key).french[""] }
+        // A node is named by a noun, so that on the graph it does not read as a button.
+        XCTAssertEqual(try french("node.helix::delete.label"), "Suppression")
+        XCTAssertEqual(try french("node.helix::duplicate.label"), "Duplication")
+        XCTAssertEqual(try french("node.helix::extrude.label"), "Extrusion")
+        XCTAssertEqual(try french("node.helix::merge.label"), "Fusion")
+        XCTAssertEqual(try french("node.helix::transform.label"), "Transformation")
+        XCTAssertEqual(try french("node.helix::skinDeform.label"), "Déformation par squelette")
+        XCTAssertEqual(try french("param.helix::extrude.inset.label"), "Retrait")
+        XCTAssertEqual(try french("param.helix::sweep.caps_divider.label"), "Couvercles")
+        XCTAssertEqual(try french("param.helix::cylinder.caps_divider.label"), "Couvercles")
+        XCTAssertEqual(try french("param.helix::skeletonPose.clip.label"), "Animation (clip)")
+        // The scale of an import says what it is, in both languages.
+        XCTAssertEqual(try french("param.helix::geometryImport.size.label"), "Échelle")
+        let english = try XCTUnwrap(entries.first { $0.key == "param.helix::geometryImport.size.label" }).english[""]
+        XCTAssertEqual(english, "Scale")
+    }
+
     // MARK: The lookup of node text
 
     /// A bundle with one table, "Nodes", in English only.
@@ -230,6 +270,7 @@ final class LocalizationTests: XCTestCase {
             "node.helix::cube.label": "Cube!",
             "param.helix::cube.size.label": "Taille",
             "param.helix::cube.size.tooltip": "La taille",
+            "param.helix::cube.size.documentation": "Longue",
             "param.helix::circle.arc.caption": "arc!",
             "option.helix::circle.orientation.xy": "Plan XY",
             "node.helix::line.input.0": "Entrée",
@@ -242,6 +283,8 @@ final class LocalizationTests: XCTestCase {
         XCTAssertEqual(NodeText.option("helix::circle", parameter: "orientation", value: "xy", fallback: "XY Plane", in: bundle), "Plan XY")
         XCTAssertEqual(NodeText.inputLabel("helix::line", index: 0, fallback: "Input", in: bundle), "Entrée")
         XCTAssertEqual(NodeText.tag("curve", in: bundle), "courbe")
+        XCTAssertEqual(NodeText.documentation("helix::cube", parameter: "size", fallback: "Long", in: bundle), "Longue")
+        XCTAssertEqual(NodeText.documentation("helix::cube", parameter: "other", fallback: "Long", in: bundle), "Long")
 
         // A node that is not translated yet reads as the engine gives it.
         XCTAssertEqual(NodeText.typeLabel("helix::newNode", fallback: "New Node", in: bundle), "New Node")

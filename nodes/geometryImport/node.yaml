@@ -26,15 +26,22 @@ parameters:
   - name: filePath
     label: File Path
     type: string
+    style: file
     tooltip: >-
       The file to read. glTF, GLB, FBX, OBJ, STL, PLY, Collada, 3DS, 3MF, DXF, X3D and X are
       read directly, USD, USDA, USDC and USDZ through Model I/O, and BLEND through an installed
       Blender.
+    documentation: >-
+      The model file this node reads. If you move or rename it, Helix cannot find it any more:
+      use Locate to point the scene at its new place. The file itself is never changed.
 
   - name: size
-    label: Size
+    label: Scale
     type: float
     default: 1
+    documentation: >-
+      A scale factor applied to the whole model. 1 keeps the size of the file, 0.01 is a hundred
+      times smaller, which fixes a model made in centimeters.
 
   - name: upAxis
     label: Up Axis
@@ -45,15 +52,24 @@ parameters:
       - {value: auto, label: Auto}
       - {value: "y", label: Y}
       - {value: "z", label: Z}
+    documentation: >-
+      Some programs treat Y as up and others Z. Auto reads it from the file. Change it if the
+      model comes in lying on its back.
 
   - name: mergeMeshes
     label: Merge Meshes
     type: bool
     default: true
     tooltip: Joins the meshes of the file into one.
+    documentation: >-
+      A file often holds many separate objects. Merged, they become one piece of geometry that
+      is simpler to work with. Unmerged, each one stays apart.
 
   - name: blenderPath
     label: Blender
     type: string
     tooltip: >-
       The Blender used to open .blend files. Empty finds the installed one.
+    documentation: >-
+      Only for .blend files, which Helix opens by running Blender in the background. Leave it
+      empty to use the Blender that is installed, or give the path of another one.

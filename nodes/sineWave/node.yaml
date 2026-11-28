@@ -135,9 +135,15 @@ parameters:
     options:
       - {value: positive, label: Positive}
       - {value: zeroCentered, label: Zero Centered}
+    documentation: >-
+      Positive makes the wave run from 0 to 1, so it only raises. Zero centered runs from -1 to
+      1, so it raises and lowers around the original shape.
 
   - name: remap
     label: Remap
     type: ramp
     default: 2
     tooltip: Reshapes the wave from trough to peak.
+    documentation: >-
+      A curve that reshapes the wave from trough to peak. The left end is the lowest value of
+      the wave and the right end the highest: drag the points to flatten or sharpen it.

@@ -45,6 +45,9 @@ parameters:
     options:
       - {value: float, label: Float}
       - {value: vector, label: Vector}
+    documentation: >-
+      A float stores one number on each point, so the noise only changes how strong something
+      is. A vector stores three (x, y, z), so the points can be pushed in any direction.
 
   - name: alongVectorRow
     label: Noise Along Vector
@@ -87,6 +90,9 @@ parameters:
       - {value: multiply, label: Multiply}
       - {value: minimum, label: Minimum}
       - {value: maximum, label: Maximum}
+    documentation: >-
+      Set replaces what the attribute holds. Add and Subtract push it up or down, Multiply
+      scales it, and Minimum and Maximum keep the lower or the higher of the two values.
 
   - name: noise_divider
     label: Noise
@@ -104,6 +110,9 @@ parameters:
       - {value: perlin, label: Perlin}
       - {value: value, label: Value}
       - {value: cellular, label: Cellular}
+    documentation: >-
+      Each kind of noise has its own grain. Simplex and Perlin give smooth, natural bumps, Value
+      is blockier, and Cellular makes a pattern of cells, like cracked mud or scales.
 
   - name: cellularMode
     label: Cellular Mode
@@ -116,18 +125,27 @@ parameters:
     options:
       - {value: value, label: Value}
       - {value: distance, label: Distance}
+    documentation: >-
+      Cellular noise cuts space into cells. Value gives each cell one flat value, like tiles.
+      Distance gives how far the point is from the center of its cell, which draws soft blobs.
 
   - name: amplitude
     label: Amplitude
     type: float
     default: 0.2
     tooltip: Scales the noise, which otherwise runs from minus one to one.
+    documentation: >-
+      The strength of the noise. With 0.2, a point moves by at most 0.2 units. Raise it for
+      bigger bumps, lower it for a fine roughness.
 
   - name: frequency
     label: Frequency
     type: float
     default: 1
     tooltip: How many noise features fit in one unit of space.
+    documentation: >-
+      The size of the bumps. A higher value gives more, smaller bumps: at 4 there are four times
+      as many across the same space, each a quarter of the size.
 
   - name: offset
     label: Offset
@@ -135,12 +153,18 @@ parameters:
     size: 3
     style: xyz
     tooltip: Moves the noise through space.
+    documentation: >-
+      Slides the noise through space without changing its shape. Animate it to make the bumps
+      drift across the surface.
 
   - name: seed
     label: Seed
     type: int
     default: 0
     tooltip: Picks a different pattern of noise.
+    documentation: >-
+      A number that picks one pattern among many. The same seed always gives the same noise, so
+      change it to get another variation.
 
   - name: fractal_divider
     label: Fractal
@@ -158,6 +182,10 @@ parameters:
       - {value: none, label: None}
       - {value: fbm, label: FBm}
       - {value: ridged, label: Ridged}
+    documentation: >-
+      Fractal noise stacks several layers of the same noise, each finer than the last (Octaves
+      sets how many). FBm stands for fractal Brownian motion: it is the classic look of rock and
+      terrain.
 
   - name: octaves
     label: Octaves
@@ -166,6 +194,9 @@ parameters:
     range: {min: 1, max: 10, minLocked: true}
     hideCondition: fractalType == 0
     tooltip: How many layers of noise are stacked.
+    documentation: >-
+      Each octave is one more layer of noise, finer than the one before. More octaves add finer
+      detail but take longer to compute. Between 3 and 6 is usual.
 
   - name: lacunarity
     label: Lacunarity
@@ -173,6 +204,9 @@ parameters:
     default: 2
     hideCondition: fractalType == 0
     tooltip: How much the frequency grows from one octave to the next.
+    documentation: >-
+      How much finer each layer is than the one before: the frequency is multiplied by this at
+      every octave. At 2, each layer has twice as many bumps as the last.
 
   - name: gain
     label: Gain
@@ -180,6 +214,10 @@ parameters:
     default: 0.5
     hideCondition: fractalType == 0
     tooltip: How much each octave contributes compared with the one before it.
+    documentation: >-
+      How strong each layer is compared with the one before: the amplitude is multiplied by this
+      at every octave. At 0.5 each layer is half as strong, so the fine detail stays subtle.
+      Higher values make the surface rougher.
 
   - name: weightedStrength
     label: Weighted Strength
@@ -190,3 +228,6 @@ parameters:
     tooltip: >
       Lets octaves contribute less where the layers below them are low, so detail
       gathers on the peaks.
+    documentation: >-
+      At 0, every layer counts the same. Towards 1, the fine layers count less in the low parts
+      of the shape, so the detail gathers on the peaks and the valleys stay smooth.

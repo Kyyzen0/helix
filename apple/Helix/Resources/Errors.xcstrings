@@ -1395,6 +1395,23 @@
         }
       }
     },
+    "Only an import node has a file to read again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only an import node has a file to read again."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seul un nœud d’import a un fichier à relire."
+          }
+        }
+      }
+    },
     "The attribute '%@' has different types on the primitives.": {
       "extractionState": "manual",
       "localizations": {
@@ -2428,6 +2445,108 @@
           "stringUnit": {
             "state": "translated",
             "value": "Un paramètre de la copie a une expression qu'il ne peut pas contenir."
+          }
+        }
+      }
+    },
+    "There is no path to write to.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is no path to write to."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il n’y a pas de chemin où écrire."
+          }
+        }
+      }
+    },
+    "The display node produced no mesh to export.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The display node produced no mesh to export."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nœud affiché n’a produit aucun maillage à exporter."
+          }
+        }
+      }
+    },
+    "A point has a position that is not a number, which an obj file cannot hold.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A point has a position that is not a number, which an obj file cannot hold."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un point a une position qui n’est pas un nombre, ce qu’un fichier OBJ ne peut pas contenir."
+          }
+        }
+      }
+    },
+    "Couldn't write to %@, the disk may be full.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't write to %@, the disk may be full."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’écrire dans %@, le disque est peut-être plein."
+          }
+        }
+      }
+    },
+    "Couldn't write to %@: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't write to %@: %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’écrire dans %@ : %@."
+          }
+        }
+      }
+    },
+    "Couldn't write to %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't write to %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’écrire dans %@."
           }
         }
       }

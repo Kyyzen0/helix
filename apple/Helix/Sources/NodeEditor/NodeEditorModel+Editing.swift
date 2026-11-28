@@ -11,6 +11,20 @@ extension NodeEditorModel {
         selectedNodes.count == 1 ? selectedNodes.first : nil
     }
 
+    /// Moves the selection to the card nearest in a direction, or adds it to the selection. Returns
+    /// whether there was a card to go to, so a key with nowhere to go is left to the next responder.
+    @discardableResult
+    func moveSelection(_ direction: NodeNavigation.Direction, extending: Bool = false) -> Bool {
+        guard renaming == nil, palette == nil,
+              let target = NodeNavigation.target(
+                  from: selectedNodes, toward: direction, in: graph.nodes, display: graph.displayNode
+              )
+        else { return false }
+        select(nodes: extending ? selectedNodes.union([target]) : [target])
+        reveal(target)
+        return true
+    }
+
     /// Starts typing a new name for a node, over its card. The node is the selected one when none
     /// is given.
     func beginRename(_ id: UInt64? = nil) {

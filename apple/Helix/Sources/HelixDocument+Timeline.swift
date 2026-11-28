@@ -35,6 +35,14 @@ extension HelixDocument: TimelineEditing {
         timeline.reload()
     }
 
+    /// Asks the engine again whether the scene has anything that plays: a key, a pose node, a
+    /// simulation or an expression that reads the time. Called after every change of the graph,
+    /// not on a timer, and the published value is written only when it changes.
+    func refreshAnimation() {
+        let animates = helix.core.sceneAnimation().any()
+        if sceneAnimates != animates { sceneAnimates = animates }
+    }
+
     // MARK: The playhead
 
     func moveToFrame(_ frame: Double) {

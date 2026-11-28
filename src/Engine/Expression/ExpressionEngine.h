@@ -31,6 +31,13 @@ class ExpressionEngine
   public:
     static ExpressionEngine& instance();
 
+    /// @brief Rewrites the variables of other tools into the functions that read them: `$F` and
+    /// `$FF` into `frame()`, `$T` into `time()`.
+    /// @note It is token aware. A `$` inside a string literal is text, and `$Fx` or `$Total` are
+    /// not variables, so they are left as they are and the compiler reports them. `frame()`
+    /// already returns a float, so `$FF` and `$F` read the same value.
+    static String expandVariables(const String& expression);
+
     /// @brief Evaluates an expression and returns its result as a float.
     /// @param context The world the expression reads, e.g. for prm(), may be null.
     /// @return True on success, false when the expression fails to compile or run.

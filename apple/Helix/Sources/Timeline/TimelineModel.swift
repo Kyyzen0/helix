@@ -9,10 +9,56 @@ struct TimelineTime: Equatable, Sendable {
     var fps: Double = 24
 }
 
+/// When the timeline bar is shown. Automatic shows it when the scene has something to play
+/// (a key, a pose node, a simulation, an expression that reads the time) and keeps a still scene's
+/// window free of a ruler that would run over 240 frames of nothing; Always and Never are the
+/// person's own choice, whatever the scene holds.
+enum TimelineMode: String, CaseIterable, Identifiable, Sendable {
+    case automatic, always, never
+
+    var id: String { rawValue }
+
+    func isShown(sceneAnimates: Bool) -> Bool {
+        switch self {
+        case .automatic: sceneAnimates
+        case .always: true
+        case .never: false
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .automatic: String(localized: "Automatic")
+        case .always: String(localized: "Always")
+        case .never: String(localized: "Never")
+        }
+    }
+
+    /// The mode a person gets from the old on/off setting, or nil when there was none: shown
+    /// becomes Automatic (the bar still appears for a scene that animates, which is all it was
+    /// ever for) and hidden stays hidden.
+    static func migrated(fromLegacy legacy: Any?) -> TimelineMode? {
+        switch legacy {
+        case let flag as Bool: return flag ? .automatic : .never
+        case let text as String:
+            // A launch argument arrives as text.
+            switch text.uppercased() {
+            case "YES", "TRUE", "1": return .automatic
+            case "NO", "FALSE", "0": return .never
+            default: return nil
+            }
+        default: return nil
+        }
+    }
+}
+
 /// The settings of the timeline kept in the user defaults, so the menu, the bar and every window
 /// agree and a choice survives a restart.
 enum TimelineSetting {
-    static let shownKey = "timelineShown"
+    /// The mode of the bar, a `TimelineMode`.
+    static let modeKey = "timelineMode"
+    /// The on/off setting that the mode replaced. Read once, to carry a choice over, then removed.
+    static let legacyShownKey = "timelineShown"
     static let loopKey = "timelineLoop"
     static let everyFrameKey = "timelinePlayEveryFrame"
     static let lowerPaneKey = "lowerPane"
@@ -21,6 +67,15 @@ enum TimelineSetting {
         let defaults = UserDefaults.standard
         // bool(forKey:) also reads the YES and NO of a launch argument, which arrives as text.
         return defaults.object(forKey: key) == nil ? value : defaults.bool(forKey: key)
+    }
+
+    /// Carries the old on/off setting over to the mode, once: a person who had hidden the bar keeps
+    /// it hidden. A mode that was already chosen is left alone.
+    static func migrateLegacy(in defaults: UserDefaults = .standard) {
+        guard defaults.object(forKey: modeKey) == nil else { return }
+        let stored = defaults.object(forKey: legacyShownKey)
+        if let mode = TimelineMode.migrated(fromLegacy: stored) { defaults.set(mode.rawValue, forKey: modeKey) }
+        if stored != nil { defaults.removeObject(forKey: legacyShownKey) }
     }
 
     /// Whether playback goes back to the start at the end of the range. On until it is turned off.
@@ -32,6 +87,11 @@ enum TimelineSetting {
     /// Which of the two views the bottom pane of a window shows.
     enum LowerPane: String {
         case network, spreadsheet
+    }
+
+    /// The mode of the bar, Automatic until the person chooses.
+    static func mode(in defaults: UserDefaults = .standard) -> TimelineMode {
+        defaults.string(forKey: modeKey).flatMap(TimelineMode.init(rawValue:)) ?? .automatic
     }
 
     static var lowerPane: LowerPane {

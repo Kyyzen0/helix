@@ -34,12 +34,18 @@ parameters:
       - {value: round, label: Round}
       - {value: square, label: Square}
       - {value: ribbon, label: Ribbon}
+    documentation: >-
+      The cross-section that is swept along the curve. Round makes a tube, Square a bar and
+      Ribbon a flat strip. Second Input uses any shape you connect to the second input.
 
   - name: profileScale
     label: Profile Scale
     type: float
     default: 1
     range: {min: 0, max: 10}
+    documentation: >-
+      The thickness of the swept shape. At 1 it keeps the size it was drawn at; 2 makes it twice
+      as wide.
 
   - name: roundColumns
     label: Columns
@@ -47,6 +53,9 @@ parameters:
     default: 12
     range: {min: 3, max: 64, minLocked: true}
     hideCondition: profileShape != 1
+    documentation: >-
+      How many flat sides the round profile has. More columns give a smoother tube but a heavier
+      mesh.
 
   - name: squareColumns
     label: Columns
@@ -54,6 +63,9 @@ parameters:
     default: 1
     range: {min: 1, max: 64, minLocked: true}
     hideCondition: profileShape != 2
+    documentation: >-
+      How many divisions each side of the square profile is cut into. Use more to bend the bar
+      smoothly.
 
   - name: ribbonColumns
     label: Columns
@@ -61,6 +73,9 @@ parameters:
     default: 2
     range: {min: 2, max: 64, minLocked: true}
     hideCondition: profileShape != 3
+    documentation: >-
+      How many divisions the width of the ribbon is cut into. Use more to curve the strip across
+      its width.
 
   - name: caps_divider
     label: Caps
@@ -84,6 +99,9 @@ parameters:
         options:
           - {value: none, label: None}
           - {value: single, label: Single Polygon}
+        documentation: >-
+          Caps close the open ends of the tube. None leaves them open, like a pipe. Single
+          Polygon closes each end with one flat face.
 
       - name: endCapGroup
         label: Cap Group
@@ -129,6 +147,9 @@ parameters:
     tooltip: >
       Widen the profile where the curve bends so the tube keeps its thickness around
       turns instead of pinching.
+    documentation: >-
+      On a sharp bend the inside of a tube would pinch. This widens the profile there so the
+      tube keeps an even thickness.
 
   - name: applyScale
     label: Apply Scale
@@ -142,3 +163,6 @@ parameters:
     disableCondition: applyScale == 0
     instanceDefaults:
       value: [1, 1]
+    documentation: >-
+      A curve that sets the thickness along the sweep: its left end is the start of the curve
+      and its right end is the finish. Turn on Apply Scale to use it.

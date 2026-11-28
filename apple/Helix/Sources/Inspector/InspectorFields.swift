@@ -138,22 +138,6 @@ struct ExpressionDraftField: View {
     }
 }
 
-/// A small diamond for a value that follows keyframes: filled when the frame the scene sits on
-/// has a key of it, hollow when it does not.
-struct KeyframeBadge: View {
-    let filled: Bool
-
-    var body: some View {
-        Image(systemName: filled ? "diamond.fill" : "diamond")
-            .font(.system(size: 8, weight: .semibold))
-            .foregroundStyle(Color.orange)
-            .help(filled
-                ? Text("This value has a keyframe on this frame. Changing it changes the keyframe.")
-                : Text("This value follows keyframes. Changing it sets a keyframe on this frame."))
-            .accessibilityLabel(filled ? Text("Keyframe on this frame") : Text("Animated"))
-    }
-}
-
 enum InspectorIcons {
     /// The SF Symbol that stands for an icon a node names (the names are Lucide's). An icon with
     /// no counterpart gets a neutral symbol, so a toggle is still a button.

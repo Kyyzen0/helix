@@ -14,9 +14,9 @@ struct DocumentView: View {
     /// Whether the inspector column is shown. Kept across launches, and shared with the menu. It
     /// is shown until the person hides it.
     @AppStorage(InspectorSetting.defaultsKey) private var inspectorShown = true
-    /// Whether the timeline bar is shown, and what the bottom pane holds. Kept across launches,
-    /// and shared with the menu.
-    @AppStorage(TimelineSetting.shownKey) private var timelineShown = true
+    /// When the timeline bar is shown, and what the bottom pane holds. Kept across launches, and
+    /// shared with the menu.
+    @AppStorage(TimelineSetting.modeKey) private var timelineMode = TimelineMode.automatic
     @AppStorage(TimelineSetting.lowerPaneKey) private var lowerPane = TimelineSetting.LowerPane.network.rawValue
 
     /// The smallest a window gets, and the width of the inspector column.
@@ -28,7 +28,7 @@ struct DocumentView: View {
                 top: ViewportPane(document: document),
                 bottom: lowerPaneView
             )
-            if timelineShown, document.isActive { TimelineBar(model: document.timeline) }
+            if timelineMode.isShown(sceneAnimates: document.sceneAnimates), document.isActive { TimelineBar(model: document.timeline) }
         }
         .frame(minWidth: Self.minimumSize.width, minHeight: Self.minimumSize.height)
         .inspector(isPresented: $inspectorShown) {
