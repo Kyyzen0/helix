@@ -379,7 +379,7 @@ struct ViewportPane: View {
         // The size of a cell of the grid, at the bottom right.
         .overlay(alignment: .bottomTrailing) {
             if document.isActive, !isEmpty {
-                GridLabel(cell: document.viewport.camera.gridCellSize)
+                GridLabel(controller: document.viewport)
                     .environment(\.colorScheme, overlayScheme)
                     .padding(10)
             }

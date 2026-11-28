@@ -137,8 +137,12 @@ struct AxisTripod: View {
 
 /// The size of a cell of the grid, quietly, in a corner of the viewport.
 struct GridLabel: View {
-    let cell: Float
+    /// Observed, not read once: the cell size changes as the person zooms, and only the
+    /// controller says so; the view around the label is not redrawn then.
+    @ObservedObject var controller: ViewportController
     @Environment(\.interfaceSize) private var size
+
+    private var cell: Float { controller.camera.gridCellSize }
 
     var body: some View {
         Text("Grid: \(GridCellFormat.text(Double(cell)))")
