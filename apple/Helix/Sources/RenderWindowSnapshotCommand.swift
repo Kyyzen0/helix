@@ -16,7 +16,7 @@ import SwiftUI
 enum RenderWindowSnapshotCommand {
     static let flag = "--render-window"
 
-    static let usage = "usage: Helix \(flag) <in.kut | 3D file | \(SnapshotCommand.newSceneArgument)> <out.png> [width height] [--pane network|spreadsheet] [--select <node>] [--size small|medium|large] [--show-inspector yes|no] [--example cube|waves|terrain] [--add <node type>]... [--layout viewing|building|animating] \(ViewportOptions.usage) \(ThemeOptions.usage)"
+    static let usage = "usage: Helix \(flag) <in.kut | 3D file | \(SnapshotCommand.newSceneArgument)> <out.png> [width height] [--pane network|spreadsheet] [--select <node>] [--size small|medium|large] [--show-inspector yes|no] [--example cube|waves|terrain] [--add <node type>]... [--layout viewing|building|animating] [--timeline automatic|always|never] \(ViewportOptions.usage) \(ThemeOptions.usage)"
 
     static func run(_ all: [String]) -> Int32 {
         guard let (themeOptions, themed) = ThemeOptions.extract(from: all),
@@ -28,6 +28,7 @@ enum RenderWindowSnapshotCommand {
         var selected: [String] = []
         var size = InterfaceSize.default
         var inspector = true
+        var timeline: TimelineMode?
         var example: StarterExample?
         var added: [String] = []
         var index = 0
@@ -64,6 +65,12 @@ enum RenderWindowSnapshotCommand {
                 }
                 layout = parsed
                 index += 1
+            case "--timeline":
+                guard index + 1 < arguments.count, let parsed = TimelineMode(rawValue: arguments[index + 1]) else {
+                    return OffscreenRender.fail(usage)
+                }
+                timeline = parsed
+                index += 1
             case "--show-inspector":
                 guard index + 1 < arguments.count else { return OffscreenRender.fail(usage) }
                 inspector = arguments[index + 1] != "no"
@@ -85,7 +92,7 @@ enum RenderWindowSnapshotCommand {
         overrides[TimelineSetting.lowerPaneKey] = pane.rawValue
         overrides[InterfaceSize.defaultsKey] = size.rawValue
         overrides[InspectorSetting.defaultsKey] = inspector
-        overrides[TimelineSetting.shownKey] = true
+        if let timeline { overrides[TimelineSetting.modeKey] = timeline.rawValue }
         if let background = look.background { overrides[ViewportBackground.defaultsKey] = background.rawValue }
         if let navigation = look.navigation { overrides[NavigationPreset.defaultsKey] = navigation.rawValue }
         // A layout rides in the same domain, over the choices above.

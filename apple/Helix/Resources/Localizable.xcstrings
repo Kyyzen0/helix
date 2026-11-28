@@ -120,6 +120,23 @@
         }
       }
     },
+    "A number from 0 to 1, always the same for the same seed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A number from 0 to 1, always the same for the same seed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nombre de 0 à 1, toujours le même pour la même graine."
+          }
+        }
+      }
+    },
     "About Helix": {
       "extractionState": "manual",
       "localizations": {
@@ -494,6 +511,23 @@
         }
       }
     },
+    "Choose": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir"
+          }
+        }
+      }
+    },
     "Choose a 3D file to add to the scene. The file is not changed.": {
       "extractionState": "manual",
       "localizations": {
@@ -507,6 +541,91 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choisissez un fichier 3D à ajouter à la scène. Le fichier n’est pas modifié."
+          }
+        }
+      }
+    },
+    "Choose another file to read": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose another file to read"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir un autre fichier à lire"
+          }
+        }
+      }
+    },
+    "Choose File": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose File"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir un fichier"
+          }
+        }
+      }
+    },
+    "Choose the 3D file this node reads. The file is not changed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the 3D file this node reads. The file is not changed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez le fichier 3D que ce nœud lit. Le fichier n’est pas modifié."
+          }
+        }
+      }
+    },
+    "Choose the file “%@” again. The scene will read it from its new place.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the file “%@” again. The scene will read it from its new place."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez de nouveau le fichier « %@ ». La scène le lira à son nouvel emplacement."
+          }
+        }
+      }
+    },
+    "Choose…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir…"
           }
         }
       }
@@ -1514,6 +1633,23 @@
         }
       }
     },
+    "It was in %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It was in %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il se trouvait dans %@"
+          }
+        }
+      }
+    },
     "Keyframe at frame %@": {
       "extractionState": "manual",
       "localizations": {
@@ -1527,23 +1663,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Image clé à l’image %@"
-          }
-        }
-      }
-    },
-    "Keyframe on this frame": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keyframe on this frame"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Image clé sur cette image"
           }
         }
       }
@@ -1629,6 +1748,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Linéaire"
+          }
+        }
+      }
+    },
+    "Locate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locate"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Localiser"
+          }
+        }
+      }
+    },
+    "Locate File": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locate File"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Localiser le fichier"
+          }
+        }
+      }
+    },
+    "Locate…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locate…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Localiser…"
+          }
+        }
+      }
+    },
+    "Looked for in %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Looked for in %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cherchée dans %@"
           }
         }
       }
@@ -1799,6 +1986,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aucun nœud d’affichage"
+          }
+        }
+      }
+    },
+    "No file chosen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No file chosen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun fichier choisi"
           }
         }
       }
@@ -2194,6 +2398,23 @@
         }
       }
     },
+    "Read the file again, after it was changed outside Helix": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read the file again, after it was changed outside Helix"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relire le fichier, après l’avoir modifié en dehors de Helix"
+          }
+        }
+      }
+    },
     "Relaunch Now": {
       "extractionState": "manual",
       "localizations": {
@@ -2207,6 +2428,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Relancer maintenant"
+          }
+        }
+      }
+    },
+    "Reload": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reload"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recharger"
           }
         }
       }
@@ -2313,6 +2551,23 @@
         }
       }
     },
+    "Set a keyframe on this frame, so that the value can change over time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set a keyframe on this frame, so that the value can change over time."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poser une image clé sur cette image, pour que la valeur puisse changer au fil du temps."
+          }
+        }
+      }
+    },
     "Set Display Node": {
       "extractionState": "manual",
       "localizations": {
@@ -2343,6 +2598,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Définir une image clé"
+          }
+        }
+      }
+    },
+    "Show in Finder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show in Finder"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher dans le Finder"
           }
         }
       }
@@ -2415,6 +2687,23 @@
         }
       }
     },
+    "Show the file in the Finder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show the file in the Finder"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher le fichier dans le Finder"
+          }
+        }
+      }
+    },
     "Show this node in the viewport": {
       "extractionState": "manual",
       "localizations": {
@@ -2449,6 +2738,23 @@
         }
       }
     },
+    "Shows what this setting does": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows what this setting does"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explique à quoi sert ce réglage"
+          }
+        }
+      }
+    },
     "Smooth": {
       "extractionState": "manual",
       "localizations": {
@@ -2462,6 +2768,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lissé"
+          }
+        }
+      }
+    },
+    "Some textures of this model were not found. It is shown without them.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some textures of this model were not found. It is shown without them."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Certaines textures de ce modèle sont introuvables. Il est affiché sans elles."
           }
         }
       }
@@ -2602,6 +2925,23 @@
         }
       }
     },
+    "The current frame.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The current frame."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’image courante."
+          }
+        }
+      }
+    },
     "The file could not be read.": {
       "extractionState": "manual",
       "localizations": {
@@ -2615,6 +2955,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Le fichier n’a pas pu être lu."
+          }
+        }
+      }
+    },
+    "The file “%@” was moved or deleted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file “%@” was moved or deleted."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier « %@ » a été déplacé ou supprimé."
           }
         }
       }
@@ -2700,6 +3057,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "Les primitives lui donnent des types différents : il ne peut pas être lu."
+          }
+        }
+      }
+    },
+    "The time in seconds.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The time in seconds."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le temps, en secondes."
+          }
+        }
+      }
+    },
+    "The usual maths. Write decimals with a point, as in 10.0.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The usual maths. Write decimals with a point, as in 10.0."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les maths usuelles. Écrivez les décimales avec un point, comme dans 10.0."
+          }
+        }
+      }
+    },
+    "The value of another setting: the name of its node, a dot, then its name.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The value of another setting: the name of its node, a dot, then its name."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La valeur d’un autre réglage : le nom de son nœud, un point, puis son nom."
           }
         }
       }
@@ -2823,36 +3231,36 @@
         }
       }
     },
-    "This value follows keyframes. Changing it sets a keyframe on this frame.": {
+    "This value follows keyframes. Click to set a keyframe on this frame.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This value follows keyframes. Changing it sets a keyframe on this frame."
+            "value": "This value follows keyframes. Click to set a keyframe on this frame."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cette valeur suit des images clés. La modifier crée une image clé sur cette image."
+            "value": "Cette valeur suit des images clés. Cliquez pour poser une image clé sur cette image."
           }
         }
       }
     },
-    "This value has a keyframe on this frame. Changing it changes the keyframe.": {
+    "This value has a keyframe on this frame. Click to remove it.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This value has a keyframe on this frame. Changing it changes the keyframe."
+            "value": "This value has a keyframe on this frame. Click to remove it."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cette valeur a une image clé sur cette image. La modifier change l’image clé."
+            "value": "Cette valeur a une image clé sur cette image. Cliquez pour la supprimer."
           }
         }
       }
@@ -2887,6 +3295,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dessus"
+          }
+        }
+      }
+    },
+    "Use the example %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use the example %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utiliser l’exemple %@"
+          }
+        }
+      }
+    },
+    "Use this example": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use this example"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utiliser cet exemple"
           }
         }
       }
@@ -4136,6 +4578,23 @@
         }
       }
     },
+    "Write a formula. It is read again on every frame.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write a formula. It is read again on every frame."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Écrivez une formule. Elle est relue à chaque image."
+          }
+        }
+      }
+    },
     "⌥ drag, or middle button": {
       "extractionState": "manual",
       "localizations": {
@@ -4404,23 +4863,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "La chronologie"
-          }
-        }
-      }
-    },
-    "Press the space bar to play. Right-click a parameter to key it: the diamonds on the ruler are its keys, and the line with a small triangle is the current frame.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Press the space bar to play. Right-click a parameter to key it: the diamonds on the ruler are its keys, and the line with a small triangle is the current frame."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Appuyez sur la barre d’espace pour lancer la lecture. Un clic droit sur un paramètre y pose une image clé : les losanges de la règle sont les images clés, et la ligne surmontée d’un petit triangle est l’image courante."
           }
         }
       }
@@ -5407,6 +5849,635 @@
           "stringUnit": {
             "state": "translated",
             "value": "Afficher ce résultat dans la vue 3D"
+          }
+        }
+      }
+    },
+    "Automatic": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatique"
+          }
+        }
+      }
+    },
+    "Always": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toujours"
+          }
+        }
+      }
+    },
+    "Never": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Never"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jamais"
+          }
+        }
+      }
+    },
+    "Timeline Bar": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timeline Bar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Barre de chronologie"
+          }
+        }
+      }
+    },
+    "First clip": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First clip"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Premier clip"
+          }
+        }
+      }
+    },
+    "%@ (missing)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (missing)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (absent)"
+          }
+        }
+      }
+    },
+    "This model has a skeleton but no animation.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This model has a skeleton but no animation."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce modèle a un squelette mais aucune animation."
+          }
+        }
+      }
+    },
+    "Animation clips": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animation clips"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clips d’animation"
+          }
+        }
+      }
+    },
+    "Animate with This Clip": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animate with This Clip"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animer avec ce clip"
+          }
+        }
+      }
+    },
+    "Adds a Skeleton Pose and a Skin Deform node, wires them to this import and shows the result": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adds a Skeleton Pose and a Skin Deform node, wires them to this import and shows the result"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoute un nœud Pose de squelette et un nœud Déformation par squelette, les relie à cet import et affiche le résultat"
+          }
+        }
+      }
+    },
+    "Animate with Clip": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animate with Clip"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animer avec le clip"
+          }
+        }
+      }
+    },
+    "Animate Skeleton": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animate Skeleton"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animer le squelette"
+          }
+        }
+      }
+    },
+    "This node has no skeleton to animate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This node has no skeleton to animate."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce nœud n’a pas de squelette à animer."
+          }
+        }
+      }
+    },
+    "The skeleton has no clip named “%@”. Its clips are: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The skeleton has no clip named “%@”. Its clips are: %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le squelette n’a pas de clip nommé « %@ ». Ses clips sont : %@."
+          }
+        }
+      }
+    },
+    "The nodes that animate the skeleton could not be made.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The nodes that animate the skeleton could not be made."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les nœuds qui animent le squelette n’ont pas pu être créés."
+          }
+        }
+      }
+    },
+    "Export Image…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export Image…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exporter l’image…"
+          }
+        }
+      }
+    },
+    "Export Geometry…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export Geometry…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exporter la géométrie…"
+          }
+        }
+      }
+    },
+    "Export Image": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export Image"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exporter l’image"
+          }
+        }
+      }
+    },
+    "Export Geometry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export Geometry"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exporter la géométrie"
+          }
+        }
+      }
+    },
+    "Export": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exporter"
+          }
+        }
+      }
+    },
+    "Image": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image"
+          }
+        }
+      }
+    },
+    "Geometry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geometry"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Géométrie"
+          }
+        }
+      }
+    },
+    "Viewport Size": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viewport Size"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taille de la vue"
+          }
+        }
+      }
+    },
+    "Size:": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Size:"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taille :"
+          }
+        }
+      }
+    },
+    "Size": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Size"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taille"
+          }
+        }
+      }
+    },
+    "Writes the geometry of the node shown in the viewport as an OBJ file.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Writes the geometry of the node shown in the viewport as an OBJ file."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Écrit la géométrie du nœud affiché dans la vue 3D dans un fichier OBJ."
+          }
+        }
+      }
+    },
+    "Points: the places in space that make up the shape.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Points: the places in space that make up the shape."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Points : les emplacements dans l’espace qui composent la forme."
+          }
+        }
+      }
+    },
+    "Vertices: the corners of the faces. A point shared by several faces has one vertex for each.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vertices: the corners of the faces. A point shared by several faces has one vertex for each."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sommets : les coins des faces. Un point partagé par plusieurs faces a un sommet pour chacune."
+          }
+        }
+      }
+    },
+    "Faces: the polygons that cover the shape.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faces: the polygons that cover the shape."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faces : les polygones qui recouvrent la forme."
+          }
+        }
+      }
+    },
+    "Primitives: whole pieces of geometry, such as one mesh or one skeleton.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primitives: whole pieces of geometry, such as one mesh or one skeleton."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primitives : des pièces entières de géométrie, comme un maillage ou un squelette."
+          }
+        }
+      }
+    },
+    "node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nœud"
+          }
+        }
+      }
+    },
+    "Select": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sélectionner"
+          }
+        }
+      }
+    },
+    "Warnings: %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warnings: %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avertissements : %lld"
+          }
+        }
+      }
+    },
+    "Displayed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Displayed"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affiché"
+          }
+        }
+      }
+    },
+    "Selected": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selected"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sélectionné"
+          }
+        }
+      }
+    },
+    "The timeline shows up when the scene has something to play: a key, an animated model, a simulation or a formula that uses the time (View > Timeline Bar changes that). Press the space bar to play. Right-click a parameter to key it: the diamonds on the ruler are its keys, and the line with a small triangle is the current frame.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The timeline shows up when the scene has something to play: a key, an animated model, a simulation or a formula that uses the time (View > Timeline Bar changes that). Press the space bar to play. Right-click a parameter to key it: the diamonds on the ruler are its keys, and the line with a small triangle is the current frame."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La chronologie apparaît quand la scène a quelque chose à lire : une image clé, un modèle animé, une simulation ou une formule qui utilise le temps (Présentation > Barre de chronologie permet de changer cela). Appuyez sur la barre d’espace pour lancer la lecture. Un clic droit sur un paramètre y pose une image clé : les losanges de la règle sont les images clés, et la ligne surmontée d’un petit triangle est l’image courante."
+          }
+        }
+      }
+    },
+    "Export an image of the viewport with File > Export Image…, or the shown geometry as an OBJ file with File > Export Geometry….": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export an image of the viewport with File > Export Image…, or the shown geometry as an OBJ file with File > Export Geometry…."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fichier > Exporter l’image… enregistre une image de la vue 3D, et Fichier > Exporter la géométrie… écrit la géométrie affichée dans un fichier OBJ."
           }
         }
       }

@@ -49,6 +49,16 @@ extension HelixDocument: InspectorEditing {
         return outcome
     }
 
+    func reloadFile(node: UInt64) -> EditOutcome {
+        guard isActive else { return .failed(String(localized: "This scene is closed.")) }
+        let status = helix.core.reloadImport(node)
+        guard status.ok else { return .failed(String(engineMessage: status.error)) }
+        cookGeometry()
+        spreadsheet.refresh()
+        refreshEditor()
+        return .done
+    }
+
     // setDisplay(_:) is the node editor's, which the inspector shares.
 
     // MARK: A drag as one step

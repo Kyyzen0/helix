@@ -14,6 +14,7 @@
 #include <cmath>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <type_traits>
 #include <string>
@@ -161,6 +162,29 @@ template <typename T> void copyRange(
     }
 }
 
+// Fills what a mesh says about itself when it is a skeleton: the joints, the roots and the clips.
+// Leaves `info` as it was for a mesh that is not one.
+void describeSkeleton(const geo::Mesh& mesh, SkeletonInfo& info)
+{
+    if (!mesh.skeleton()) return;
+    const auto parents = mesh.getAttribByName(attr::AttributeOwner::POINT, attr::names::jointParent);
+    if (!parents || parents->getType() != attr::AttributeType::intT) return;
+    info.present = true;
+    info.jointCount = mesh.getNumPoints();
+    const attr::AttributeHandleRO<helix::intT> parentHandle(parents);
+    for (std::size_t joint = 0; joint < parentHandle.getSize(); ++joint)
+        if (parentHandle.getValue(joint) < 0) ++info.rootCount;
+    for (const std::shared_ptr<const geo::AnimationClip>& clip : mesh.skeleton()->clips)
+    {
+        if (!clip) continue;
+        ClipInfo clipInfo;
+        clipInfo.name = clip->name;
+        clipInfo.duration = clip->duration;
+        clipInfo.channelCount = clip->channelCount();
+        info.clips.push_back(std::move(clipInfo));
+    }
+}
+
 } // namespace
 
 GeometryReport cookNodeReport(NodeId node)
@@ -224,31 +248,13 @@ GeometryReport cookNodeReport(NodeId node)
                         info.textureSource = material->baseColorTexture->source;
                     }
                     info.missingTexture = material->missingTexture;
+                    info.missingTextureName = material->missingTextureName;
+                    info.missingTextureNotFound = material->missingTextureNotFound;
                     report.materials.push_back(std::move(info));
                 }
                 // A skeleton is a mesh whose points are the joints: its parents say how many roots it
                 // has, and the table it carries lists the clips.
-                if (!report.skeleton.present && mesh->skeleton())
-                {
-                    const auto parents = std::as_const(*mesh).getAttribByName(attr::AttributeOwner::POINT, attr::names::jointParent);
-                    if (parents && parents->getType() == attr::AttributeType::intT)
-                    {
-                        report.skeleton.present = true;
-                        report.skeleton.jointCount = mesh->getNumPoints();
-                        const attr::AttributeHandleRO<helix::intT> parentHandle(parents);
-                        for (std::size_t joint = 0; joint < parentHandle.getSize(); ++joint)
-                            if (parentHandle.getValue(joint) < 0) ++report.skeleton.rootCount;
-                        for (const std::shared_ptr<const geo::AnimationClip>& clip : mesh->skeleton()->clips)
-                        {
-                            if (!clip) continue;
-                            ClipInfo info;
-                            info.name = clip->name;
-                            info.duration = clip->duration;
-                            info.channelCount = clip->channelCount();
-                            report.skeleton.clips.push_back(std::move(info));
-                        }
-                    }
-                }
+                if (!report.skeleton.present) describeSkeleton(*mesh, report.skeleton);
                 const auto positions = mesh->pointPosSpan();
                 for (std::size_t point = 0; point < positions.size(); ++point)
                 {
@@ -295,6 +301,53 @@ GeometryReport cookNodeReport(NodeId node)
         return success();
     });
     return report;
+}
+
+SkeletonClipsResult skeletonClipsOfOutput(NodeId node, std::uint32_t output)
+{
+    SkeletonClipsResult result;
+    result.status = guarded([&] {
+        if (Status status = detail::requireNodeInScene(node); !status.ok) return status;
+        detail::ensureSynchronousCooking();
+        nt::nm().cook(node);
+        const nt::Node& cooked = nt::nm().getNode(node);
+        if (!cooked.getError().empty())
+            return failure(cooked.getPath().getString() + ": " + cooked.getError());
+        const std::shared_ptr<const NodePacket> packet = cooked.getOutputPacket(output);
+        if (!packet) return success();
+        for (const auto& primitive : packet->getPrimitives())
+        {
+            const auto mesh = std::dynamic_pointer_cast<const geo::Mesh>(primitive);
+            if (!mesh) continue;
+            SkeletonInfo info;
+            describeSkeleton(*mesh, info);
+            if (!info.present) continue;
+            result.present = true;
+            result.clips = std::move(info.clips);
+            break;
+        }
+        return success();
+    });
+    return result;
+}
+
+SkeletonClipsResult skeletonClipsReachingInput(NodeId node, std::uint32_t input)
+{
+    SkeletonClipsResult result;
+    const Status inScene = detail::requireNodeInScene(node);
+    if (!inScene.ok)
+    {
+        result.status = inScene;
+        return result;
+    }
+    const std::optional<nt::NodeLink> link = nt::nm().graph().getInputNodeLink(node, input);
+    // Nothing wired in is not an error: the pose node has no skeleton to list the clips of yet.
+    if (!link)
+    {
+        result.status = success();
+        return result;
+    }
+    return skeletonClipsOfOutput(link->sourceNode, link->sourceOutput);
 }
 
 std::uint64_t nodeCookGeneration(NodeId node)

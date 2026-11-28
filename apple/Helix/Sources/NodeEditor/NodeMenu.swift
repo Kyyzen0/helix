@@ -8,7 +8,7 @@ struct NodeMenuContent: View {
 
     var body: some View {
         if let document {
-            NodeMenuItems(document: document, editor: document.editor)
+            NodeMenuItems(document: document, editor: document.editor, inspector: document.inspector)
         } else {
             Button("Add Node…") {}.disabled(true)
             Divider()
@@ -26,6 +26,8 @@ struct NodeMenuContent: View {
 private struct NodeMenuItems: View {
     @ObservedObject var document: HelixDocument
     @ObservedObject var editor: NodeEditorModel
+    /// What the inspector loaded for the selected node, which says whether it has a skeleton.
+    @ObservedObject var inspector: InspectorModel
 
     private var isActive: Bool { document.isActive }
     private var hasSelection: Bool { !editor.selectedNodes.isEmpty }
@@ -50,6 +52,16 @@ private struct NodeMenuItems: View {
             .disabled(!isActive || soleNode == nil)
         Button("Delete") { editor.deleteSelection() }
             .disabled(!isActive || (!hasSelection && editor.selectedLinks.isEmpty))
+        // An import whose file has a skeleton: one click makes the nodes that play a clip of it.
+        if isActive, let soleNode, inspector.node?.id == soleNode, let skeleton = inspector.node?.skeleton,
+           !skeleton.clips.isEmpty {
+            Divider()
+            Menu("Animate with Clip") {
+                ForEach(skeleton.clips, id: \.name) { clip in
+                    Button { inspector.animateSkeleton(clip: clip.name) } label: { Text(verbatim: "\(clip.name) (\(clip.durationText))") }
+                }
+            }
+        }
         Divider()
         // Shift L, shown by the menu. AppKit keeps a key without a command key from the menu while
         // a text field is being edited, so a capital L typed in a field is safe.

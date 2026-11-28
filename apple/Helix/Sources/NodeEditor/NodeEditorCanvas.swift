@@ -14,7 +14,8 @@ struct NodeEditorCanvas: View {
         Canvas(rendersAsynchronously: false) { context, size in
             NodeEditorPainter(model: model, colors: theme, size: size).paint(&context)
         }
-        .accessibilityLabel(Text("Node editor"))
+        // The cards are elements of the view that takes the events (`NodeAccessibilityTree`).
+        .accessibilityHidden(true)
     }
 }
 

@@ -396,6 +396,13 @@ CreateNodeResult importFile(const std::string& path);
 /// stays in the cache, which is where the next import of it finds it.
 Status warmImportCache(const std::string& path);
 
+/// @brief Makes an import node read its file again: what the import kept of the file is
+/// forgotten (the other files it kept are left alone) and the node is dirtied, so the next cook
+/// reads the file from the disk even when its size and date are as they were.
+/// @note Fails for a node that does not exist or is not a `helix::geometryImport`. A node with no
+/// file succeeds and does nothing. It does not change the scene, so it is not a step of undo.
+Status reloadImport(NodeId node);
+
 /// @brief A sentence on what the last successful importFile found: the counts, what the file
 /// carries (normals, UVs, colours), the first base colour, and what was left out (animations,
 /// skins). Empty before any import.
@@ -451,7 +458,7 @@ struct ParameterInfo
     /// @brief Longer documentation, empty when there is none.
     std::string documentation;
     /// @brief How the node asks for the parameter to be drawn: "" (the plain widget), "xyz",
-    /// "rangeCircle", "boolIcon", "boolSwitch", "attribute" or "code".
+    /// "rangeCircle", "boolIcon", "boolSwitch", "attribute", "file" (a path to a file) or "code".
     std::string style;
     /// @brief The options the style carries, such as `icon` for boolIcon, `caption` and
     /// `ordered` for rangeCircle, `owners` and `attributeTypes` for attribute.
@@ -600,6 +607,11 @@ setString(NodeId node, const std::string& parameter, std::uint32_t component, co
 Status setVector3(NodeId node, const std::string& parameter, float x, float y, float z);
 
 /// @brief Makes a component read from a daslang expression, such as "sin($F * 0.1)".
+///
+/// `$F` (the frame) and `$T` (the time in seconds) are read as `frame()` and `time()`, which can
+/// be written as well. `prm("node.parameter")` reads another parameter, `rand(seed)` gives a
+/// number from 0 to 1, and `sin`, `cos`, `abs`, `min` and `max` are there too (decimals take a
+/// point: `max($F - 10.0, 0.0)`).
 ///
 /// The text is kept even when it does not compile, the way the Qt editor did: the person is
 /// typing, and what they typed is not thrown away. The status is therefore ok whenever the
@@ -856,6 +868,26 @@ std::vector<KeyframeTrackInfo> listKeyframes(NodeId node);
 /// @brief The nodes that hold at least one key, in no particular order.
 std::vector<NodeId> animatedNodes();
 
+/// @brief What in the scene changes with time, so an interface can tell whether a timeline has
+/// anything to play.
+struct AnimationHints
+{
+    /// @brief The nodes that hold at least one key (the size of animatedNodes).
+    std::uint32_t keyedNodes = 0;
+    /// @brief The pose nodes (helix::skeletonPose), which play a clip of a skeleton over time.
+    std::uint32_t skeletonPoseNodes = 0;
+    /// @brief The simulation nodes (helix::simulation), whose state follows the frames.
+    std::uint32_t simulationNodes = 0;
+    /// @brief The expressions that read the time: `$F`, `$FF`, `$T`, `frame()` or `time()`.
+    std::uint32_t timeExpressions = 0;
+    /// @brief Whether anything above is present.
+    bool any() const { return keyedNodes + skeletonPoseNodes + simulationNodes + timeExpressions > 0; }
+};
+
+/// @brief Counts what in the scene depends on time. Reading it cooks nothing.
+/// @note A script node that reads the time is not counted, since its text is not scanned.
+AnimationHints sceneAnimation();
+
 /** @} */
 
 /** @name Display geometry
@@ -928,6 +960,13 @@ struct MaterialInfo
     /// @brief Empty, or what went wrong with a texture the file referred to and the import could
     /// not load (the material keeps its base colour factor).
     std::string missingTexture;
+    /// @brief The name the file gives the texture that is missing, as it wrote it (usually a
+    /// relative path such as "textures/wood.png"). Empty when nothing is missing. Read this to list
+    /// the textures, and `missingTexture` for the sentence.
+    std::string missingTextureName;
+    /// @brief True when the picture was not found next to the model, false when it was found and
+    /// could not be decoded. Only meaningful with a `missingTextureName`.
+    bool missingTextureNotFound = false;
 };
 
 /// @brief One clip of a skeleton: an animation sampled as a function of time.
@@ -951,6 +990,26 @@ struct SkeletonInfo
     std::uint64_t rootCount = 0;
     std::vector<ClipInfo> clips;
 };
+
+/// @brief The skeleton an output of a node carries, or the one that reaches an input.
+struct SkeletonClipsResult
+{
+    /// @brief Fails when the node does not exist or what feeds it failed to cook. A node that has
+    /// nothing wired in, or a skeleton-less geometry, succeeds with `present` false.
+    Status status;
+    /// @brief True when a primitive of the packet is a skeleton.
+    bool present = false;
+    std::vector<ClipInfo> clips;
+};
+
+/// @brief The clips of the skeleton the output of a node produces. Cooks the node when it is dirty.
+/// @param output the output to look at: 1 for the skeleton of an import node.
+SkeletonClipsResult skeletonClipsOfOutput(NodeId node, std::uint32_t output);
+
+/// @brief The clips of the skeleton that reaches an input of a node, whatever the nodes between
+/// the import and it are. A pose node reads its clip list this way.
+/// @note An input with nothing wired in succeeds with `present` false.
+SkeletonClipsResult skeletonClipsReachingInput(NodeId node, std::uint32_t input);
 
 /// @brief Where one primitive's elements sit among the elements of the whole node output, which
 /// are numbered one primitive after the other, as readAttribute reads them.
@@ -1261,6 +1320,33 @@ ViewportFrame encodeViewport(void* commandBuffer, const ViewportFrameOptions& op
 /// the camera is a new one that frames the geometry from the default angles.
 Status
 renderToImage(const std::string& path, const ViewportFrameOptions& options, bool useViewportCamera);
+
+/** @} */
+
+/** @name Export
+ * @{
+ */
+
+/// @brief What an export of the display geometry wrote.
+struct GeometryExportResult
+{
+    /// @brief Fails when no node is displayed, the node cannot be cooked, it produced no mesh, the
+    /// file cannot be written, or a point has no finite position. Nothing is left behind then,
+    /// and a file that was already at the path is untouched.
+    Status status;
+    std::uint64_t pointCount = 0;
+    /// @brief The closed faces written as `f` records.
+    std::uint64_t faceCount = 0;
+    /// @brief The open faces (polylines) written as `l` records.
+    std::uint64_t lineCount = 0;
+};
+
+/// @brief Cooks the display node and writes its meshes as a Wavefront obj file.
+/// @param path where the file goes, replaced when it exists. Its folder must exist.
+/// @note Positions, the normals of the vertices, the `uv` attribute and the faces are written, and
+/// a point no face uses is a `v` record, so a set of points alone survives. The file is written
+/// next to its destination and moved over it, so a failure never leaves half a file.
+GeometryExportResult exportGeometry(const std::string& path);
 
 /** @} */
 

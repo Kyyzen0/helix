@@ -521,3 +521,52 @@ final class TimelineModelTests: XCTestCase {
         XCTAssertEqual(editing.calls.last, "remove 1")
     }
 }
+
+/// When the bar is shown: only a scene that plays anything gets one, unless the person decided.
+final class TimelineModeTests: XCTestCase {
+    private func freshDefaults() -> UserDefaults {
+        let defaults = UserDefaults(suiteName: "TimelineModeTests")!
+        defaults.removePersistentDomain(forName: "TimelineModeTests")
+        return defaults
+    }
+
+    func testAutomaticFollowsTheSceneAndTheOthersDoNot() {
+        XCTAssertFalse(TimelineMode.automatic.isShown(sceneAnimates: false))
+        XCTAssertTrue(TimelineMode.automatic.isShown(sceneAnimates: true))
+        XCTAssertTrue(TimelineMode.always.isShown(sceneAnimates: false))
+        XCTAssertFalse(TimelineMode.never.isShown(sceneAnimates: true))
+    }
+
+    func testAutomaticIsTheDefault() {
+        XCTAssertEqual(TimelineSetting.mode(in: freshDefaults()), .automatic)
+    }
+
+    func testTheOldOnSettingBecomesAutomaticAndTheOldOffSettingStaysOff() {
+        let on = freshDefaults()
+        on.set(true, forKey: TimelineSetting.legacyShownKey)
+        TimelineSetting.migrateLegacy(in: on)
+        XCTAssertEqual(TimelineSetting.mode(in: on), .automatic)
+        XCTAssertNil(on.object(forKey: TimelineSetting.legacyShownKey))
+
+        let off = freshDefaults()
+        off.set(false, forKey: TimelineSetting.legacyShownKey)
+        TimelineSetting.migrateLegacy(in: off)
+        XCTAssertEqual(TimelineSetting.mode(in: off), .never)
+        XCTAssertEqual(off.string(forKey: TimelineSetting.modeKey), "never")
+    }
+
+    func testAModeAlreadyChosenIsNotOverwrittenByTheOldSetting() {
+        let defaults = freshDefaults()
+        defaults.set(TimelineMode.always.rawValue, forKey: TimelineSetting.modeKey)
+        defaults.set(false, forKey: TimelineSetting.legacyShownKey)
+        TimelineSetting.migrateLegacy(in: defaults)
+        XCTAssertEqual(TimelineSetting.mode(in: defaults), .always)
+    }
+
+    func testAnArgumentGivenAsTextIsReadAsAFlag() {
+        XCTAssertEqual(TimelineMode.migrated(fromLegacy: "NO"), .never)
+        XCTAssertEqual(TimelineMode.migrated(fromLegacy: "YES"), .automatic)
+        XCTAssertNil(TimelineMode.migrated(fromLegacy: "maybe"))
+        XCTAssertNil(TimelineMode.migrated(fromLegacy: nil))
+    }
+}

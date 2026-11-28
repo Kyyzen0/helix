@@ -113,6 +113,11 @@ std::shared_ptr<const ImportedFile> importFile(
 /// @brief Forgets what importFile kept.
 void clearImportCache();
 
+/// @brief Forgets what importFile kept of one file, in every setting it was read with. The other
+/// files stay in the cache.
+/// @return The number of entries that were dropped.
+std::size_t forgetImportedFile(const std::filesystem::path& file);
+
 /// @brief The number of times a file was really read (not served from the cache) since the start.
 std::size_t importReadCount();
 

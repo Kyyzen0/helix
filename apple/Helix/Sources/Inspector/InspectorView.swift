@@ -52,6 +52,7 @@ struct InspectorNodeView: View {
 
     private var rows: some View {
         VStack(alignment: .leading, spacing: 7) {
+            if let skeleton = node.skeleton { AnimationSection(skeleton: skeleton, model: model) }
             ForEach(model.entries) { entry in
                 EntryView(entry: entry, model: model, nested: false)
             }
@@ -101,7 +102,14 @@ struct InspectorHeader: View {
                 .accessibilityValue(node.isDisplay ? Text("On") : Text("Off"))
             }
             if let attribute = node.writtenAttribute { AttributeNote(attribute: attribute, model: model) }
-            if let error = node.error { DiagnosticBanner(text: error, isError: true) }
+            if let missing = node.missingFile, let parameter = node.fileParameters.first {
+                // The engine's own error says the same thing, in English and with a path: the
+                // banner replaces it, and has the button.
+                MissingFileBanner(path: missing, parameter: parameter.name, model: model)
+            } else if let error = node.error {
+                DiagnosticBanner(text: error, isError: true)
+            }
+            if !node.missingTextures.isEmpty { MissingTexturesBanner(textures: node.missingTextures) }
             ForEach(node.warnings, id: \.self) { DiagnosticBanner(text: $0, isError: false) }
             if let message = model.message {
                 DiagnosticBanner(text: message, isError: true)

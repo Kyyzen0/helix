@@ -314,6 +314,18 @@ fs::path blendCacheDirectory()
     return fs::temp_directory_path() / "HelixBlendCache";
 }
 
+std::size_t forgetImportedFile(const fs::path& file)
+{
+    std::error_code error;
+    // The key starts with the absolute path and a bar, so one path is not taken for the start of
+    // another ("a.glb" and "a.glb2").
+    const std::string prefix = fs::absolute(file, error).string() + "|";
+    const std::lock_guard<std::mutex> lock(cacheMutex);
+    const std::size_t before = cache.size();
+    std::erase_if(cache, [&](const CacheEntry& entry) { return entry.key.starts_with(prefix); });
+    return before - cache.size();
+}
+
 void clearImportCache()
 {
     const std::lock_guard<std::mutex> lock(cacheMutex);

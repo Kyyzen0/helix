@@ -177,7 +177,7 @@ final class WindowLayoutTests: XCTestCase {
         XCTAssertEqual(defaults.double(forKey: WindowLayout.fractionKey), 0.8)
         XCTAssertFalse(defaults.bool(forKey: InspectorSetting.defaultsKey))
         // It leaves the timeline and the bottom pane as the person had them.
-        XCTAssertNil(defaults.object(forKey: TimelineSetting.shownKey))
+        XCTAssertNil(defaults.object(forKey: TimelineSetting.modeKey))
         XCTAssertNil(defaults.object(forKey: TimelineSetting.lowerPaneKey))
     }
 
@@ -192,16 +192,16 @@ final class WindowLayoutTests: XCTestCase {
 
     func testAnimatingShowsTheTimelineAndTakesRoomFromTheNetwork() {
         let defaults = freshDefaults()
-        defaults.set(false, forKey: TimelineSetting.shownKey)
+        defaults.set(TimelineMode.never.rawValue, forKey: TimelineSetting.modeKey)
         WindowLayout.animating.apply(to: defaults)
-        XCTAssertTrue(defaults.bool(forKey: TimelineSetting.shownKey))
+        XCTAssertEqual(TimelineSetting.mode(in: defaults), .always)
         XCTAssertGreaterThan(defaults.double(forKey: WindowLayout.fractionKey), 0.6)
         XCTAssertLessThan(defaults.double(forKey: WindowLayout.fractionKey), 0.8)
     }
 
     func testEveryLayoutWritesOnlyTheKeysTheWindowAlreadyKeeps() {
         let known: Set<String> = [
-            WindowLayout.fractionKey, InspectorSetting.defaultsKey, TimelineSetting.shownKey, TimelineSetting.lowerPaneKey,
+            WindowLayout.fractionKey, InspectorSetting.defaultsKey, TimelineSetting.modeKey, TimelineSetting.lowerPaneKey,
         ]
         for layout in WindowLayout.allCases {
             XCTAssertTrue(Set(layout.settings.keys).isSubset(of: known), layout.rawValue)

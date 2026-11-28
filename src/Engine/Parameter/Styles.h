@@ -25,6 +25,12 @@ struct Code
 {
 };
 
+// A string holding the path of a file, drawn as the name of the file with a button to choose
+// another one, rather than as a field.
+struct File
+{
+};
+
 // A vector whose components read as x, y and z axes, each with its own colour.
 struct Xyz
 {

@@ -57,6 +57,20 @@ std::filesystem::path convertBlendToGlb(
     bool* fromCache = nullptr
 );
 
+/// @brief The start of the names of the cache entries of a .blend file: the hash of its absolute path.
+std::string blendCachePrefix(const std::filesystem::path& blendFile);
+
+/**
+ * @brief Deletes the converted GLB files the blend cache holds for a .blend file.
+ *
+ * The cache is keyed on the size and the date of the file, so a file edited in place with both
+ * unchanged would be served from it for ever; Reload calls this to force a new conversion.
+ * Entries of other files stay.
+ *
+ * @return The number of files removed.
+ */
+std::size_t forgetBlendConversion(const std::filesystem::path& blendFile);
+
 /// @brief The number of times Blender was run for a conversion since the start.
 std::size_t blenderRunCount();
 

@@ -20,6 +20,7 @@ extension HelixDocument: NodeEditorEditing {
         inspector.reload()
         // So can the keys on the ruler, the range, and what the table follows and shows.
         timeline.reload()
+        refreshAnimation()
         followedNodeChanged(selection: editor.selectedNodes)
     }
 

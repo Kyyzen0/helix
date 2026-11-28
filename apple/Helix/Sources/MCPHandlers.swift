@@ -147,7 +147,7 @@ enum MCPHandlers {
         ]
     }
 
-    private static func expanded(_ path: String) -> String {
+    static func expanded(_ path: String) -> String {
         (path as NSString).expandingTildeInPath
     }
 

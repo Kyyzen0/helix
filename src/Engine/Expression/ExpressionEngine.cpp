@@ -1,5 +1,7 @@
 #include "Engine/Expression/ExpressionEngine.h"
 #include "Engine/Daslang/Runtime.h"
+#include <cctype>
+#include <string>
 
 namespace helix::expr {
 
@@ -18,11 +20,71 @@ String wrapExpression(const String& expression, const String& returnType)
            String(evalFunctionName) + " : " + returnType +
            " {\n"
            "    return " +
-           returnType + "(" + expression +
+           returnType + "(" + ExpressionEngine::expandVariables(expression) +
            ")\n"
            "}\n";
 }
 } // namespace
+
+String ExpressionEngine::expandVariables(const String& expression)
+{
+    if (expression.find('$') == String::npos) return expression;
+
+    auto isWordCharacter = [](char c) {
+        return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
+    };
+
+    String result;
+    result.reserve(expression.size() + 8);
+    bool inString = false;
+    for (size_t index = 0; index < expression.size(); ++index)
+    {
+        const char c = expression[index];
+        if (inString)
+        {
+            result += c;
+            // A backslash keeps the next character in the string, so \" does not close it.
+            if (c == '\\' && index + 1 < expression.size())
+                result += expression[++index];
+            else if (c == '"')
+                inString = false;
+            continue;
+        }
+        if (c == '"')
+        {
+            inString = true;
+            result += c;
+            continue;
+        }
+        if (c != '$')
+        {
+            result += c;
+            continue;
+        }
+
+        // The longest name first, so $FF is not read as $F followed by an F.
+        struct Variable
+        {
+            const char* name;
+            const char* call;
+        };
+        static constexpr Variable variables[] = {{"FF", "frame()"}, {"F", "frame()"}, {"T", "time()"}};
+        bool replaced = false;
+        for (const Variable& variable : variables)
+        {
+            const size_t length = std::char_traits<char>::length(variable.name);
+            if (expression.compare(index + 1, length, variable.name) != 0) continue;
+            const size_t end = index + 1 + length;
+            if (end < expression.size() && isWordCharacter(expression[end])) continue;
+            result += variable.call;
+            index += length;
+            replaced = true;
+            break;
+        }
+        if (!replaced) result += c;
+    }
+    return result;
+}
 
 ExpressionEngine& ExpressionEngine::instance()
 {

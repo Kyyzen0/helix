@@ -179,6 +179,8 @@ void readTexture(const aiMaterial& source, TextureContext& context, RawMaterial&
                         context.opened->end())
                         context.opened->push_back(candidate);
             material.missingTexture = "texture \"" + written.substr(0, 200) + "\" not found next to the model";
+            material.missingTextureName = written.substr(0, 200);
+            material.missingTextureNotFound = true;
             return;
         }
         remember("file:" + file.string(), [&] { return decodeImageFile(file); });
@@ -190,7 +192,10 @@ void readTexture(const aiMaterial& source, TextureContext& context, RawMaterial&
     if (result->image)
         material.texture = result->image;
     else
+    {
         material.missingTexture = "texture \"" + written.substr(0, 200) + "\" could not be loaded: " + result->error;
+        material.missingTextureName = written.substr(0, 200);
+    }
 }
 
 RawMaterial readMaterial(const aiMaterial& source, TextureContext& context)

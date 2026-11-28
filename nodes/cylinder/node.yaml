@@ -144,6 +144,9 @@ parameters:
         options:
           - {value: none, label: None}
           - {value: single, label: Single Polygon}
+        documentation: >-
+          Caps close the ends of the cylinder. None leaves it open, like a pipe. Single Polygon
+          closes each end with one flat face.
 
       - name: endCapGroup
         label: Cap Group

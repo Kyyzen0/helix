@@ -6,7 +6,12 @@ import ImageIO
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// `Helix --render-inspector <in.kut | --new-scene> <node name or path> <out.png> [width [height]] [--dark]`
+/// `Helix --render-inspector <in.kut | --new-scene> <node name or path> <out.png> [width [height]] [--dark]
+/// [--hover <parameter>] [--pin-help <parameter>] [--edit-expression <parameter>]`
+///
+/// The three options draw what a pointer and a keyboard would bring up, which a picture has not
+/// got: a row as if the pointer were over it, the help of a row opened under it, and an
+/// expression being typed in a row.
 ///
 /// Opens a scene with no window, cooks it as the window would, and writes a picture of the
 /// inspector for one node in an off screen window. It is how the drawing of the inspector is checked
@@ -16,7 +21,7 @@ import UniformTypeIdentifiers
 enum InspectorSnapshotCommand {
     static let flag = "--render-inspector"
 
-    static let usage = "usage: Helix \(flag) <in.kut | \(SnapshotCommand.newSceneArgument)> <node name or path> <out.png> [width [height]] [--dark] \(ThemeOptions.usage)"
+    static let usage = "usage: Helix \(flag) <in.kut | \(SnapshotCommand.newSceneArgument)> <node name or path> <out.png> [width [height]] [--dark] [--hover <parameter>] [--pin-help <parameter>] [--edit-expression <parameter>] \(ThemeOptions.usage)"
 
     /// What an inspector with no document behind it does: it reads the engine and edits nothing.
     @MainActor
@@ -29,14 +34,27 @@ enum InspectorSnapshotCommand {
         func endContinuousEdit() {}
         func setDisplay(_ node: UInt64) -> EditOutcome { .done }
         func rename(_ node: UInt64, to name: String) -> EditOutcome { .done }
+        func reloadFile(node: UInt64) -> EditOutcome { .done }
     }
 
     static func run(_ all: [String]) -> Int32 {
         guard let (themeOptions, arguments) = ThemeOptions.extract(from: all) else { return fail(usage) }
         var positional: [String] = []
         var dark = false
-        for argument in arguments {
-            if argument == "--dark" { dark = true } else { positional.append(argument) }
+        var hover: String?, help: String?, expression: String?
+        var index = 0
+        while index < arguments.count {
+            let argument = arguments[index]
+            index += 1
+            switch argument {
+            case "--dark": dark = true
+            case "--hover", "--pin-help", "--edit-expression":
+                guard index < arguments.count else { return fail(usage) }
+                let value = arguments[index]
+                index += 1
+                if argument == "--hover" { hover = value } else if argument == "--pin-help" { help = value } else { expression = value }
+            default: positional.append(argument)
+            }
         }
         guard (3...5).contains(positional.count) else { return fail(usage) }
         let width = positional.count >= 4 ? Double(positional[3]) : 320
@@ -71,6 +89,9 @@ enum InspectorSnapshotCommand {
             // The button of the note is drawn, though it does nothing in a picture.
             model.showSpreadsheet = {}
             model.select(nodes: [node.id])
+            model.forcedHover = hover
+            model.pinnedHelp = help
+            if let expression { model.beginExpression(expression, component: 0) }
             guard case .node(let loaded) = model.content else { return fail("the node could not be read") }
 
             // The app has not started, but AppKit needs to exist to draw controls and symbols.

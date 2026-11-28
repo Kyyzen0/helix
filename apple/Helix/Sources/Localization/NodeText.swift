@@ -48,6 +48,11 @@ enum NodeText {
         localized("param.\(type).\(parameter).tooltip", fallback: fallback, in: bundle)
     }
 
+    /// The longer explanation of a parameter, which the info button of its row opens.
+    static func documentation(_ type: String, parameter: String, fallback: String, in bundle: Bundle = .main) -> String {
+        localized("param.\(type).\(parameter).documentation", fallback: fallback, in: bundle)
+    }
+
     /// The caption a range circle shows beside its numbers.
     static func caption(_ type: String, parameter: String, fallback: String, in bundle: Bundle = .main) -> String {
         localized("param.\(type).\(parameter).caption", fallback: fallback, in: bundle)

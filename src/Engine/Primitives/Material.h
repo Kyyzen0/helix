@@ -78,6 +78,12 @@ struct Material
     /// @brief Empty, or what went wrong with a texture the file referenced and the import could
     /// not load: which one, and why. The material keeps its factor.
     std::string missingTexture;
+    /// @brief The name the file gives that texture (a path as it was written there), empty when
+    /// none is missing. This is what a person looks for, where `missingTexture` is the sentence.
+    std::string missingTextureName;
+    /// @brief True when the picture was not found where the model is, False when it was found and
+    /// could not be decoded. Only meaningful with a `missingTextureName`.
+    bool missingTextureNotFound = false;
 };
 
 } // namespace helix::geo

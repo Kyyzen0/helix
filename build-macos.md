@@ -212,6 +212,12 @@ text field is being edited, so typing an "f" in the palette search or the inspec
 - **Navigate.** Two-finger scroll pans, pinch zooms around the pointer, Command and scroll (or a
   mouse wheel) zoom, the middle button pans. Zoom is held between 0.1 and 5. `H` frames the selected
   nodes, or all of them when none is selected (Node > Frame Nodes does the same).
+- **Keyboard and VoiceOver.** The arrow keys move the selection to the nearest card in that direction
+  (`NodeNavigation`; Shift adds it; with nothing selected the first arrow lands on the displayed node),
+  and Return renames. The plain Left and Right arrows no longer step the timeline from the editor (the
+  Timeline menu and the ruler do; Option with an arrow and the space bar still go to it). Each card is an
+  accessibility element of the editor view (`NodeAccessibilityTree`): "name, type", its state (error,
+  displayed, selected), its frame, and the actions Select, Show This Result, Rename and Delete.
 - **Select.** Click a node; Shift or Command click toggles; drag on empty space for a marquee (a
   node is taken when the box touches its card); click empty space clears; `Command A` selects all;
   click a link to select it.
@@ -332,6 +338,38 @@ the person is still typing it, shown in red with its first line of error under t
 as zero. A component that holds keyframes shows a diamond, which is filled when the frame the scene
 sits on has a key of it and hollow when it does not, and is edited like any other (see Keyframes).
 
+**The diamond and the arrow.** At the end of the label column of every row sit a diamond (a float
+only) and a reset arrow. They show while the pointer is over the row, and stay when the value
+follows keyframes (the diamond, orange) or is not the default (the arrow). The diamond is one for
+the whole value: it keys every component of a vector together (a position moves as one thing), and
+a click while any component has a key on the frame takes the keys of that frame off. A single
+component is keyed from its own context menu. The arrow is dimmed while the value follows keyframes,
+and a click says why nothing happened, as the menu does. The context menu stays. The rows of a
+horizontal group have neither. `Sources/Inspector/ParameterLabel.swift`.
+
+**Help.** A row with a tooltip or a `documentation:` in its `node.yaml` has an info mark after its
+label, and a click on the label opens a popover with the tooltip, then the documentation. The
+documentation is plain language, one or two sentences, in English in the node file and in French in
+`Nodes.xcstrings` under `param.<type>.<name>.documentation` (`Scripts/extract-node-strings.py`
+reads it, and `--check` wants its French).
+
+**Files.** A string parameter of `style: file` (the path of an import) is drawn as the name of the
+file, the folder in secondary text (the home folder as `~`, the whole path in the tooltip), and the
+buttons Choose… (an open panel on the formats the engine imports), Show in Finder and Reload. Reload
+is `core::reloadImport(node)`: it forgets what the import cache holds for that path and dirties the
+node, and it is not a step of undo. When the file is not there, the panel shows a banner, “The file
+… was moved or deleted”, in place of the engine's error, with Locate…, which opens the panel in the
+nearest folder that still exists and writes the new path as one step of undo. The textures a model
+refers to and cannot find are listed from `MaterialInfo.missingTextureName` of the cook report,
+with the folder they were looked for in (the model's). Blender's path is shown only when the file
+is a `.blend` (`InspectorNode.isHiddenByRule`).
+
+**Expressions.** `$F` and `$FF` (the frame) and `$T` (the time in seconds) are read as `frame()` and
+`time()` by the engine, before the expression is compiled and outside string literals
+(`ExpressionEngine::expandVariables`). While an expression is typed, a box under the field lists the
+variables and functions with one example each, which a click puts in the field
+(`Sources/Inspector/ExpressionHelp.swift`; `tests/ExpressionEngineTests.cpp` compiles every example).
+
 **Undo.** Every edit is one step of the window's undo manager, named "Change <label>", "Edit
 Expression", "Clear Expression" or "Reset <label>", through the same scene snapshots as the node
 editor. A drag (a slider, a scrub) updates the scene live and registers one step when it ends, and
@@ -341,12 +379,25 @@ and steppers commit one step each. Typing in a field never reaches the single-ke
 the viewport or the node editor, which only act while they have the keys.
 
 `Helix --render-inspector <in.kut | --new-scene> <node name or path> <out.png> [width [height]]
-[--dark]` draws the inspector of one node to a PNG with no window (the panel is laid out in an
-off screen window and its pixels read back), as `--render-node-editor` does for the editor.
+[--dark] [--hover <parameter>] [--pin-help <parameter>] [--edit-expression <parameter>]` draws the
+inspector of one node to a PNG with no window (the panel is laid out in an off screen window and its
+pixels read back), as `--render-node-editor` does for the editor. The three options draw what a
+pointer and a keyboard bring up: a row as if the pointer were over it, the help of a row open under
+it (a popover is a window of its own, which the picture does not hold), and an expression being typed.
 
 ### Timeline
 
-A bar at the bottom of the window (View > Show Timeline, `⌥⌘T`; shown by default, and remembered)
+A bar at the bottom of the window. **When it shows** is a setting of three, View > Timeline Bar:
+**Automatic** (the default) shows it when the scene has something to play, **Always** and **Never** are
+the person's own choice. The rule is `AnimationHints` of the facade (`sceneAnimation()`): a node that
+holds a key, a `skeletonPose` node, a `simulation` node, or an expression that reads the time (`$F`,
+`$FF`, `$T`, `frame()`, `time()`, found on the text of every expression; a script node's text is not
+scanned). The document asks again after every change of the graph (`refreshAnimation`, called by
+`refreshEditor`), not on a timer, and publishes `sceneAnimates` only when it changes. `⌥⌘T` shows or hides
+the bar for good (it sets Always or Never, and the submenu goes back to Automatic). The old on/off setting
+`timelineShown` becomes `timelineMode` once (true gives Automatic, false gives Never). Layout Animating
+sets Always; `--render-window` takes `--timeline automatic|always|never`.
+The bar (remembered) 
 holds the playback controls, the frame, and a ruler. Left to right: go to start, step back, play or
 pause, step forward, go to end, a loop toggle (on by default), then the frame, the first and the last
 frame of the range, and the frame rate. The ruler numbers the frames (the step between two labels
@@ -490,7 +541,23 @@ yet, so a frame that was not cooked still stalls the interface for its cook. The
 so it is empty when the document is closed, and the budget is a count of attributes, not a measure of
 the memory the process uses.
 
+### Exporting
+
+File > **Export Image…** (`⇧⌘E`) writes a PNG of the viewport through its own camera, with a size in the
+save panel (the viewport's, 1920 × 1080 or 3840 × 2160). The picture is opaque: the PNG writer of the
+engine leaves the alpha out, so there is no transparent background. File > **Export Geometry…** writes the
+display node's meshes as a Wavefront OBJ (`exportGeometry` of the facade, `Engine/Export/ObjWriter`):
+`v` for every point (points no face uses too), `vn` and `vt` per vertex (the `uv` attribute), `f` for
+closed faces, `l` for open ones, a `g` per mesh when there are several, written next to the destination
+and renamed over it. A point whose position is not a number refuses the export. Both are greyed with no
+display geometry. The MCP tool `export_geometry` (path, `.obj`) does the second.
+
 ### Spreadsheet
+
+The columns are sized to what they hold (`SpreadsheetColumnWidths`: the header and the first 64 rows are
+measured), the room left over is shared among the columns of numbers, and a column edge dragged by hand
+stays where it was put until the columns change. The picker of the elements has a tooltip that says
+what points, vertices, faces and primitives are.
 
 The bottom of the window has two views, switched by a control above it: **Network** (the node editor)
 and **Spreadsheet** (View > Show Spreadsheet, `⌥⌘S`). The spreadsheet is a native `NSTableView`: a
@@ -589,6 +656,8 @@ The tools:
 - `import_file`: imports a 3D file as a node (see Importing 3D files).
 - `set_frame`, `set_time_range`: move the scene in time, and set the range and the frame rate.
 - `set_keyframe`, `remove_keyframe`, `clear_keyframes`, `list_keyframes`: keyframes (see Keyframes).
+- `animate_skeleton` (node, clip): the pose and skin nodes of a rigged import, wired, with the clip set and the skin displayed.
+- `export_geometry` (path ending in `.obj`): the display node's geometry as a Wavefront OBJ.
 - `geometry_summary`: counts, bounds, attributes and materials (base colour, texture size and
   source) of the output of any node.
 - `read_attribute`: the values of an attribute, up to 10 000 elements a call, with the total to page by.
@@ -783,10 +852,18 @@ and the root with them.
 
 | Parameter | |
 | --- | --- |
-| `clip` | The clip to play, by name. Empty plays the first one. A name the skeleton does not have is a node error that lists the clips it has. |
+| `clip` | The clip to play, by name. The inspector shows a menu of the clips of the skeleton wired into the input (`skeletonClipsReachingInput` of the facade), with their length; a name that is not among them stays in the menu, marked missing. Empty plays the first one. A name the skeleton does not have is a node error that lists the clips it has. |
 | `speed` | A multiple of the scene time, default 1. 0 holds the pose of `offset`, a negative speed plays backward. |
 | `offset` | Seconds added to the clip time, default 0. |
 | `loop` | `loop` starts the clip over, `hold` stays on the first or last pose, `once` plays it one time and then returns to the rest pose. |
+
+**Animating in one click.** An import whose file has a skeleton shows an Animation section in the
+inspector: its clips with their length, and *Animate with This Clip* (Node > Animate with Clip lists the
+same clips). It makes a `skeletonPose` on the second output and a `skinDeform` on the first output and the
+pose, sets the clip, shows the skin and selects the pose, as one step of undo (`SkeletonChain`,
+`HelixDocument.animateSkeleton`). The nodes take the names of the language of the app
+(`poseSquelette1`, `deformationParSquelette1`) and go under the import (`NodePlacement.skeletonChain`).
+The MCP tool `animate_skeleton` (node, clip) does the same with the engine's names.
 
 The clip time is `offset + time * speed`, with the scene time `(frame - 1) / fps` (see Timeline), so
 the pose is a pure function of the frame, whatever order the frames are visited in. A joint the clip

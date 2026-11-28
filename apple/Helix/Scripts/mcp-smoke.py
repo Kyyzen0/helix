@@ -22,7 +22,7 @@ EXPECTED_TOOLS = {
     "delete_node", "connect_nodes", "disconnect_nodes", "set_display_node", "list_parameters",
     "set_parameter", "reset_parameter", "import_file", "set_frame", "geometry_summary", "read_attribute", "render_view",
     "set_time_range", "set_keyframe", "remove_keyframe", "clear_keyframes", "list_keyframes",
-    "clear_cook_cache",
+    "clear_cook_cache", "animate_skeleton", "export_geometry",
 }
 
 failures = []
@@ -384,6 +384,55 @@ def main(binary):
         for name in (rigged["node"]["id"], posed["id"], skin["id"]):
             server.data("delete_node", {"node": name})
 
+        # animate_skeleton: the chain in one call, a clip checked before anything is made.
+        arm = server.data("import_file", {"path": os.path.join(fixtures, "skinned-arm.glb")})["node"]
+        count = len(server.data("scene_info")["nodes"])
+        wrong = server.call("animate_skeleton", {"node": arm["name"], "clip": "Dance"})
+        check(wrong["isError"] is True and "Bend, Snap" in wrong["content"][0]["text"]
+              and len(server.data("scene_info")["nodes"]) == count,
+              "animate_skeleton refuses a clip the skeleton does not have, lists the clips, and makes nothing")
+        check(server.call("animate_skeleton", {"node": "box"})["isError"] is True
+              and len(server.data("scene_info")["nodes"]) == count,
+              "animate_skeleton refuses a node that is not a rigged import")
+        animated = server.data("animate_skeleton", {"node": arm["name"], "clip": "Snap"})
+        check(animated["pose"]["type"] == "helix::skeletonPose" and animated["deform"]["type"] == "helix::skinDeform"
+              and animated["clip"] == "Snap" and [c["name"] for c in animated["clips"]] == ["Bend", "Snap"],
+              "animate_skeleton makes the pose and the skin and reports the clips")
+        scene = server.data("scene_info")
+        links = sorted((l["from"], l["output"], l["to"], l["input"]) for l in scene["links"])
+        pose_name, skin_name = animated["pose"]["name"], animated["deform"]["name"]
+        check(len(scene["nodes"]) == count + 2 and scene["display_node"]["name"] == skin_name,
+              "animate_skeleton shows the skin")
+        check(links == sorted([(arm["name"], 1, pose_name, 0), (arm["name"], 0, skin_name, 0), (pose_name, 0, skin_name, 1)]),
+              "and wires the skeleton to the pose, the geometry and the pose to the skin")
+        pose_clip = [p for p in server.data("list_parameters", {"node": pose_name})["parameters"] if p["name"] == "clip"][0]["value"]
+        check(pose_clip == ["Snap"] or pose_clip == "Snap", "and sets the clip of the pose: %r" % (pose_clip,))
+        check(server.data("geometry_summary", {"node": skin_name})["point_count"] == 12, "and the skin cooks")
+        for name in (skin_name, pose_name, arm["name"]):
+            server.data("delete_node", {"node": name})
+        server.data("set_display_node", {"node": "box"})
+
+        # export_geometry: the display node as an obj file the importer reads back.
+        exported_path = os.path.join(folder, "box.obj")
+        exported = server.data("export_geometry", {"path": exported_path})
+        check(exported["point_count"] == 8 and exported["face_count"] == 6 and exported["format"] == "obj",
+              "export_geometry reports what it wrote: %r" % (exported,))
+        text = open(exported_path).read()
+        check(sum(1 for line in text.splitlines() if line.startswith("v ")) == 8
+              and sum(1 for line in text.splitlines() if line.startswith("f ")) == 6
+              and any(line.startswith("vn ") for line in text.splitlines()),
+              "the file holds the positions, the normals and the faces")
+        again = server.data("import_file", {"path": exported_path})["node"]
+        reread = server.data("geometry_summary", {"node": again["name"]})
+        check(reread["face_count"] == 6 and reread["bounds"]["size"] == [8.0, 4.0, 6.0],
+              "the importer reads the exported file back with the same faces and size")
+        server.data("delete_node", {"node": again["id"]})
+        check(server.call("export_geometry", {"path": os.path.join(folder, "missing", "a.obj")})["isError"] is True,
+              "export_geometry refuses a folder that is not there")
+        check(server.call("export_geometry", {"path": os.path.join(folder, "a.glb")})["isError"] is True
+              and not os.path.exists(os.path.join(folder, "a.glb")),
+              "export_geometry writes obj only, and says so")
+
         path = os.path.join(folder, "smoke.kut")
         before = sorted(n["name"] for n in server.data("scene_info")["nodes"])
         server.data("save_scene", {"path": path})
@@ -408,6 +457,9 @@ def main(binary):
         _, lonely = render(server, node="lonely", width=64, height=64)
         check(png_size(lonely) == (64, 64) and server.data("scene_info")["display_node"] is None,
               "render_view of a node with no display node set puts back no display node")
+        check(server.call("export_geometry", {"path": os.path.join(folder, "none.obj")})["isError"] is True
+              and not os.path.exists(os.path.join(folder, "none.obj")),
+              "export_geometry with no display node is an error and writes nothing")
 
     # Failures are results, not protocol errors.
     unknown = server.call("geometry_summary", {"node": "ghost"})

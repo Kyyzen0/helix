@@ -11,7 +11,7 @@ enum InspectorKind: Equatable, Sendable {
 
 /// How a node asks for a parameter to be drawn.
 enum InspectorStyle: Equatable, Sendable {
-    case plain, xyz, rangeCircle, boolIcon, boolSwitch, attribute, code
+    case plain, xyz, rangeCircle, boolIcon, boolSwitch, attribute, code, file
 
     /// The style a node.yaml name stands for. An unknown name draws the plain widget.
     init(name: String) {
@@ -22,6 +22,7 @@ enum InspectorStyle: Equatable, Sendable {
         case "boolSwitch": self = .boolSwitch
         case "attribute": self = .attribute
         case "code": self = .code
+        case "file": self = .file
         default: self = .plain
         }
     }
@@ -179,6 +180,14 @@ struct InspectorNode: Equatable, Sendable {
     var warnings: [String] = []
     var layout: [InspectorLayoutItem] = []
     var parameters: [String: InspectorParameter] = [:]
+    /// The file the node reads when it is not there (moved or deleted), as the node spells it.
+    /// Nil when there is none to read or it is.
+    var missingFile: String?
+    /// The pictures the file refers to that the import could not use, by name.
+    var missingTextures: [MissingTexture] = []
+    /// The skeleton the file of an import carries, with its clips. Nil for any other node, and for
+    /// an import whose file has none.
+    var skeleton: InspectorSkeleton?
 }
 
 extension InspectorNode {

@@ -6,43 +6,39 @@ struct ParameterRow: View {
     @ObservedObject var model: InspectorModel
     /// Whether the row sits in a group laid out side by side, where the group gives the label.
     var inline = false
+    @State private var pointerIsOver = false
 
     private var availability: RowAvailability { RowAvailability(parameter: parameter) }
+    private var hovering: Bool { pointerIsOver || model.forcedHover == parameter.name }
+
+    /// A path is too long for what is left of the row beside its label, so the label sits above.
+    private var stacked: Bool { parameter.style == .file && !inline }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                if !inline, !parameter.labelHidden { ParameterLabel(parameter: parameter) }
-                if inline, !parameter.labelHidden, parameter.kind != .toggle {
-                    Text(parameter.label).uiFont(.caption).foregroundStyle(.secondary)
+            if stacked {
+                VStack(alignment: .leading, spacing: 4) {
+                    if !parameter.labelHidden { ParameterLabel(parameter: parameter, model: model, hovering: hovering) }
+                    ParameterControl(parameter: parameter, model: model, availability: availability)
                 }
-                ParameterControl(parameter: parameter, model: model, availability: availability)
+            } else {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    if !inline, !parameter.labelHidden { ParameterLabel(parameter: parameter, model: model, hovering: hovering) }
+                    if inline, !parameter.labelHidden, parameter.kind != .toggle {
+                        Text(parameter.label).uiFont(.caption).foregroundStyle(.secondary)
+                    }
+                    ParameterControl(parameter: parameter, model: model, availability: availability)
+                }
             }
             ParameterMessages(parameter: parameter, model: model)
+            if model.expressionDraft?.parameter == parameter.name { ExpressionHelpBox(model: model) }
+            if model.pinnedHelp == parameter.name { ParameterHelpCard(parameter: parameter) }
         }
         .opacity(availability.isDisabled ? 0.4 : 1)
         .disabled(availability.isDisabled)
+        .onHover { pointerIsOver = $0 }
         .help(parameter.tooltip)
         .contextMenu { ParameterMenu(parameter: parameter, model: model, component: nil) }
-    }
-}
-
-/// The label of a row, with the keyframe diamond when a component follows the timeline.
-struct ParameterLabel: View {
-    let parameter: InspectorParameter
-
-    static let width: CGFloat = 116
-
-    var body: some View {
-        HStack(spacing: 3) {
-            Text(parameter.label)
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
-            if !parameter.animated.isEmpty { KeyframeBadge(filled: !parameter.keyed.isEmpty) }
-            Spacer(minLength: 0)
-        }
-        .frame(width: Self.width, alignment: .leading)
     }
 }
 

@@ -30,12 +30,27 @@ enum NodePlacement {
         return Result(position: free(below, in: graph), wiredFrom: (selected.id, 0))
     }
 
-    private static func free(_ position: CGPoint, in graph: EditorGraph) -> CGPoint {
+    /// Where the two nodes of a skeleton chain go under an import: the skin deform two rows down, in
+    /// line with it (its geometry input comes straight from the import), and the pose one row
+    /// down and one card to the right, so that the straight link does not run behind it. A spot
+    /// another card holds is passed to the right, as for any new node, and the pose never takes
+    /// the spot the deform was given.
+    static func skeletonChain(below source: CGPoint, in graph: EditorGraph) -> (pose: CGPoint, deform: CGPoint) {
+        let row = EditorLayout.chainSpacing
+        let deform = free(CGPoint(x: source.x, y: source.y + 2 * row), in: graph)
+        let pose = free(
+            CGPoint(x: source.x + EditorLayout.cardSize.width + 12, y: source.y + row), in: graph, alsoAvoiding: [deform]
+        )
+        return (pose, deform)
+    }
+
+    private static func free(_ position: CGPoint, in graph: EditorGraph, alsoAvoiding extra: [CGPoint] = []) -> CGPoint {
         var candidate = position
         let step = EditorLayout.cardSize.width + 12
         for _ in 0..<64 {
             let card = EditorLayout.cardRect(at: candidate).insetBy(dx: 1, dy: 1)
-            guard graph.nodes.contains(where: { EditorLayout.cardRect(at: $0.position).intersects(card) }) else {
+            let taken = graph.nodes.map(\.position) + extra
+            guard taken.contains(where: { EditorLayout.cardRect(at: $0).intersects(card) }) else {
                 return candidate
             }
             candidate.x += step

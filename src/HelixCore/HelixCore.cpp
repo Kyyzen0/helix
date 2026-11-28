@@ -2,6 +2,7 @@
 #include "HelixCore/HelixCoreInternal.h"
 #include "Engine/Core/Path.h"
 #include "Engine/Daslang/Runtime.h"
+#include "Engine/Import/BlenderConverter.h"
 #include "Engine/Import/ImportFile.h"
 #include "Engine/Network/NetworkManager.h"
 #include "Engine/Network/Node.h"
@@ -747,6 +748,35 @@ CreateNodeResult importFile(const std::string& path)
 }
 
 std::string lastImportSummary() { return importSummary; }
+
+Status reloadImport(NodeId node)
+{
+    return guarded([&] {
+        if (Status status = requireInitialized(); !status.ok) return status;
+        if (Status status = requireNode(node); !status.ok) return status;
+        nt::Node& target = nt::nm().getNode(node);
+        if (target.getType().getFullName() != "helix::geometryImport")
+            return failure("Only an import node has a file to read again.");
+
+        const std::shared_ptr<prm::NodeParameter> filePath = target.getParameter("filePath").lock();
+        if (!filePath) return failure("The import node has no file path parameter.");
+        std::string path = filePath->evalString();
+        const auto first = path.find_first_not_of(" \t\r\n");
+        if (first == std::string::npos) return success();
+        path = path.substr(first, path.find_last_not_of(" \t\r\n") - first + 1);
+
+        import::forgetImportedFile(std::filesystem::path(path));
+        // A .blend file also has a converted copy on disk, keyed on its size and date: Reload must
+        // not be answered by it, or a file edited in place would keep its old geometry.
+        std::string extension = std::filesystem::path(path).extension().string();
+        std::transform(extension.begin(), extension.end(), extension.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        if (extension == ".blend")
+            import::forgetBlendConversion(std::filesystem::path(path));
+        target.dirtyNode();
+        bumpRevision();
+        return success();
+    });
+}
 
 FloatValue getFloat(NodeId node, const std::string& parameter, std::uint32_t component)
 {

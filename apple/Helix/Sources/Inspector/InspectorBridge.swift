@@ -18,7 +18,7 @@ enum InspectorLoader {
 
         let parameters = Array(helix.core.listParameters(id)).map { convert($0, of: id, type: typeName) }
         let layout = Array(helix.core.listParameterLayout(id)).map { convert($0, type: typeName) }
-        return InspectorNode(
+        var node = InspectorNode(
             id: id,
             name: String(engine: info.name),
             path: String(engine: info.path),
@@ -31,6 +31,56 @@ enum InspectorLoader {
             layout: layout,
             parameters: Dictionary(parameters.map { ($0.name, $0) }, uniquingKeysWith: { first, _ in first })
         )
+        readFiles(into: &node)
+        readSkeleton(into: &node)
+        return node
+    }
+
+    /// The clips of an import's skeleton, for its Animation section, and the menu a pose node
+    /// picks its clip from: the clips of the skeleton wired into it, or the plain text field when
+    /// nothing is wired in yet.
+    private static func readSkeleton(into node: inout InspectorNode) {
+        switch node.type {
+        case SkeletonChain.importType:
+            // A file that is not there has nothing to read, and its error is already shown.
+            guard node.missingFile == nil, let clips = SkeletonChain.clips(ofImport: node.id) else { return }
+            node.skeleton = InspectorSkeleton(clips: clips)
+        case SkeletonChain.poseType:
+            let result = helix.core.skeletonClipsReachingInput(node.id, 0)
+            guard result.status.ok, result.present, var clip = node.parameters["clip"] else { return }
+            let clips = result.clips.map { SkeletonClip(name: String(engine: $0.name), duration: Double($0.duration)) }
+            clip.kind = .dropdown
+            clip.options = SkeletonClipChoices.options(clips: clips, current: clip.strings.first ?? "")
+            node.parameters["clip"] = clip
+        default:
+            break
+        }
+    }
+
+    /// Whether the file the node reads is there, and which of the pictures it refers to are not.
+    private static func readFiles(into node: inout InspectorNode) {
+        guard let path = node.filePath else { return }
+        guard FileManager.default.fileExists(atPath: path) else {
+            node.missingFile = path
+            return
+        }
+        // Only an import has pictures to lose. The report is what the cook found, kept by the
+        // engine until the node cooks again, so asking again after an edit that changed nothing
+        // here costs nothing.
+        guard node.type == "helix::geometryImport" else { return }
+        let report = helix.core.cookNodeReport(node.id)
+        guard report.status.ok else { return }
+        let folder = (path as NSString).deletingLastPathComponent
+        var seen = Set<String>()
+        for material in report.materials {
+            let name = String(engine: material.missingTextureName)
+            guard !name.isEmpty, seen.insert(name).inserted else { continue }
+            node.missingTextures.append(MissingTexture(
+                name: name,
+                folder: material.missingTextureNotFound ? folder : nil,
+                detail: material.missingTextureNotFound ? nil : String(engineMessage: material.missingTexture)
+            ))
+        }
     }
 
     private static func convert(_ item: helix.core.ParameterLayoutItem, type: String) -> InspectorLayoutItem {
@@ -67,7 +117,7 @@ enum InspectorLoader {
         let name = String(engine: info.name)
         var parameter = InspectorParameter(name: name, label: NodeText.label(type, parameter: name, fallback: String(engine: info.label)))
         parameter.tooltip = NodeText.tooltip(type, parameter: name, fallback: String(engine: info.tooltip))
-        parameter.documentation = String(engine: info.documentation)
+        parameter.documentation = NodeText.documentation(type, parameter: name, fallback: String(engine: info.documentation))
         parameter.kind = kind(of: info.type)
         parameter.style = InspectorStyle(name: String(engine: info.style))
         for option in info.styleOptions {

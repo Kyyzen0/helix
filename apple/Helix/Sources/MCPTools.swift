@@ -108,7 +108,7 @@ enum MCPTools {
                  ["node": nodeReference()],
                  required: ["node"], readOnly: true, MCPHandlers.listParameters),
             tool("set_parameter",
-                 "Sets a parameter of a node and returns what it reads back: the value, and the expression and its error if it has one. Give a number, an integer, a boolean or a string for one component, or an array for all of them, such as [1, 2, 3] for a vector. A value at a locked end of the range is held to it. A ramp takes an array of points {position, value, interpolation}. Give 'expression' (a daslang expression such as \"sin($F * 0.1)\") instead of 'value' to drive a component by it: the text is kept even when it does not compile, expression_error says why, and a broken expression reads as zero. Writing a value takes the expression off the component. A component that holds keyframes is keyed instead: the value is set as the key on the current frame (or replaces it), since the timeline would put a plain write back at the next frame.",
+                 "Sets a parameter of a node and returns what it reads back: the value, and the expression and its error if it has one. Give a number, an integer, a boolean or a string for one component, or an array for all of them, such as [1, 2, 3] for a vector. A value at a locked end of the range is held to it. A ramp takes an array of points {position, value, interpolation}. Give 'expression' (a daslang expression such as \"sin($F * 0.1)\", where $F is the current frame and $T the time in seconds, the same as frame() and time(); prm(\"node.parameter\") reads another parameter, rand(seed) gives a number from 0 to 1, and sin, cos, abs, min and max are there too: write decimals with a point, as in 10.0) instead of 'value' to drive a component by it: the text is kept even when it does not compile, expression_error says why, and a broken expression reads as zero. Writing a value takes the expression off the component. A component that holds keyframes is keyed instead: the value is set as the key on the current frame (or replaces it), since the timeline would put a plain write back at the next frame.",
                  ["node": nodeReference(),
                   "parameter": string("The name of the parameter, as list_parameters gives it."),
                   "value": ["description": "A number, integer, boolean, string, or an array of them, one per component. For a ramp, an array of points."],
@@ -136,6 +136,16 @@ enum MCPTools {
                   "end": integer("The last frame."),
                   "fps": number("Frames a second, above 0 and at most 1000. A simulation steps by one over this, so changing it changes a simulation.")],
                  idempotent: true, MCPHandlers.setTimeRange),
+
+            tool("animate_skeleton",
+                 "Animates a rigged import in one call: makes a skeletonPose node on the skeleton output (the second) of the import node and a skinDeform node on its geometry output and that pose, sets the pose's clip, and makes the skin the display node. Returns the nodes and the clips the skeleton has (geometry_summary on the import's second output lists them too). Refuses a node that is not an import whose file has a skeleton, and a clip the skeleton does not have; nothing is made then.",
+                 ["node": nodeReference("The import node (helix::geometryImport) that holds the skeleton."),
+                  "clip": string("The name of the clip to play, as the skeleton lists it. The first clip when left out.")],
+                 required: ["node"], MCPHandlers.animateSkeleton),
+            tool("export_geometry",
+                 "Writes the geometry of the display node to a Wavefront obj file: positions, vertex normals, uv coordinates, faces, polylines, and points no face uses. The path must end in .obj and its folder must exist; a file that is there is replaced by a whole one. Returns what was written. Fails when no node is displayed or the display node has no mesh.",
+                 ["path": string("Where to write the .obj file.")],
+                 required: ["path"], destructive: true, idempotent: true, MCPHandlers.exportGeometry),
 
             // Keyframes.
             tool("set_keyframe",

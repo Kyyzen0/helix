@@ -31,7 +31,7 @@ enum WindowLayout: String, CaseIterable, Identifiable, Sendable {
             ]
         case .animating:
             [
-                Self.fractionKey: 0.7, InspectorSetting.defaultsKey: true, TimelineSetting.shownKey: true,
+                Self.fractionKey: 0.7, InspectorSetting.defaultsKey: true, TimelineSetting.modeKey: TimelineMode.always.rawValue,
                 TimelineSetting.lowerPaneKey: TimelineSetting.LowerPane.network.rawValue,
             ]
         }

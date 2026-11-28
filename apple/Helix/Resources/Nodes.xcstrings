@@ -647,6 +647,23 @@
         }
       }
     },
+    "param.helix::attributeNoise.type.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A float stores one number on each point, so the noise only changes how strong something is. A vector stores three (x, y, z), so the points can be pushed in any direction."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un flottant garde un seul nombre par point : le bruit ne change alors qu’une intensité. Un vecteur en garde trois (x, y, z) : les points peuvent être poussés dans toutes les directions."
+          }
+        }
+      }
+    },
     "option.helix::attributeNoise.type.float": {
       "extractionState": "manual",
       "localizations": {
@@ -817,6 +834,23 @@
         }
       }
     },
+    "param.helix::attributeNoise.operation.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set replaces what the attribute holds. Add and Subtract push it up or down, Multiply scales it, and Minimum and Maximum keep the lower or the higher of the two values."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Définir remplace ce que l’attribut contient. Ajouter et Soustraire le font monter ou descendre, Multiplier le met à l’échelle, et Minimum et Maximum gardent la plus petite ou la plus grande des deux valeurs."
+          }
+        }
+      }
+    },
     "option.helix::attributeNoise.operation.set": {
       "extractionState": "manual",
       "localizations": {
@@ -970,6 +1004,23 @@
         }
       }
     },
+    "param.helix::attributeNoise.noiseType.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each kind of noise has its own grain. Simplex and Perlin give smooth, natural bumps, Value is blockier, and Cellular makes a pattern of cells, like cracked mud or scales."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque type de bruit a son grain. Simplex et Perlin donnent des bosses douces et naturelles, Valeur est plus anguleux, et Cellulaire dessine des cellules, comme de la boue craquelée ou des écailles."
+          }
+        }
+      }
+    },
     "option.helix::attributeNoise.noiseType.simplex": {
       "extractionState": "manual",
       "localizations": {
@@ -1089,6 +1140,23 @@
         }
       }
     },
+    "param.helix::attributeNoise.cellularMode.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cellular noise cuts space into cells. Value gives each cell one flat value, like tiles. Distance gives how far the point is from the center of its cell, which draws soft blobs."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le bruit cellulaire découpe l’espace en cellules. Valeur donne à chaque cellule une valeur plate, comme des carreaux. Distance donne l’éloignement du point au centre de sa cellule, ce qui dessine des taches douces."
+          }
+        }
+      }
+    },
     "option.helix::attributeNoise.cellularMode.value": {
       "extractionState": "manual",
       "localizations": {
@@ -1157,6 +1225,23 @@
         }
       }
     },
+    "param.helix::attributeNoise.amplitude.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The strength of the noise. With 0.2, a point moves by at most 0.2 units. Raise it for bigger bumps, lower it for a fine roughness."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La force du bruit. Avec 0,2, un point bouge d’au plus 0,2 unité. Augmentez-la pour de plus grosses bosses, diminuez-la pour une rugosité fine."
+          }
+        }
+      }
+    },
     "param.helix::attributeNoise.frequency.label": {
       "extractionState": "manual",
       "localizations": {
@@ -1187,6 +1272,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Le nombre de motifs de bruit qui tiennent dans une unité d’espace."
+          }
+        }
+      }
+    },
+    "param.helix::attributeNoise.frequency.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The size of the bumps. A higher value gives more, smaller bumps: at 4 there are four times as many across the same space, each a quarter of the size."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La taille des bosses. Une valeur plus haute donne des bosses plus nombreuses et plus petites : à 4, il y en a quatre fois plus sur le même espace, chacune quatre fois plus petite."
           }
         }
       }
@@ -1225,6 +1327,23 @@
         }
       }
     },
+    "param.helix::attributeNoise.offset.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slides the noise through space without changing its shape. Animate it to make the bumps drift across the surface."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fait glisser le bruit dans l’espace sans changer sa forme. Animez-le pour faire dériver les bosses sur la surface."
+          }
+        }
+      }
+    },
     "param.helix::attributeNoise.seed.label": {
       "extractionState": "manual",
       "localizations": {
@@ -1255,6 +1374,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choisit un autre motif de bruit."
+          }
+        }
+      }
+    },
+    "param.helix::attributeNoise.seed.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A number that picks one pattern among many. The same seed always gives the same noise, so change it to get another variation."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nombre qui choisit un motif parmi beaucoup d’autres. La même graine donne toujours le même bruit : changez-la pour obtenir une autre variation."
           }
         }
       }
@@ -1306,6 +1442,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "La façon dont les octaves du bruit sont superposées. FBm ajoute des détails plus fins par-dessus le bruit de base, et À crêtes plie chaque octave en arêtes vives."
+          }
+        }
+      }
+    },
+    "param.helix::attributeNoise.fractalType.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fractal noise stacks several layers of the same noise, each finer than the last (Octaves sets how many). FBm stands for fractal Brownian motion: it is the classic look of rock and terrain."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le bruit fractal empile plusieurs couches du même bruit, chacune plus fine que la précédente (Octaves en règle le nombre). FBm signifie mouvement brownien fractionnaire : c’est l’aspect classique de la roche et des terrains."
           }
         }
       }
@@ -1395,6 +1548,23 @@
         }
       }
     },
+    "param.helix::attributeNoise.octaves.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each octave is one more layer of noise, finer than the one before. More octaves add finer detail but take longer to compute. Between 3 and 6 is usual."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une octave est une couche de bruit de plus, plus fine que la précédente. Plus d’octaves ajoutent du détail fin mais demandent plus de calcul. Entre 3 et 6, c’est courant."
+          }
+        }
+      }
+    },
     "param.helix::attributeNoise.lacunarity.label": {
       "extractionState": "manual",
       "localizations": {
@@ -1425,6 +1595,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "De combien la fréquence augmente d’une octave à la suivante."
+          }
+        }
+      }
+    },
+    "param.helix::attributeNoise.lacunarity.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How much finer each layer is than the one before: the frequency is multiplied by this at every octave. At 2, each layer has twice as many bumps as the last."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De combien chaque couche est plus fine que la précédente : la fréquence est multipliée par cette valeur à chaque octave. À 2, chaque couche a deux fois plus de bosses que la précédente."
           }
         }
       }
@@ -1463,6 +1650,23 @@
         }
       }
     },
+    "param.helix::attributeNoise.gain.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How strong each layer is compared with the one before: the amplitude is multiplied by this at every octave. At 0.5 each layer is half as strong, so the fine detail stays subtle. Higher values make the surface rougher."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La force de chaque couche par rapport à la précédente : l’amplitude est multipliée par cette valeur à chaque octave. À 0,5, chaque couche est deux fois plus faible, et le détail fin reste discret. Plus haut, la surface devient plus rugueuse."
+          }
+        }
+      }
+    },
     "param.helix::attributeNoise.weightedStrength.label": {
       "extractionState": "manual",
       "localizations": {
@@ -1493,6 +1697,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Réduit la contribution des octaves là où les couches inférieures sont basses, pour que le détail se concentre sur les sommets."
+          }
+        }
+      }
+    },
+    "param.helix::attributeNoise.weightedStrength.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At 0, every layer counts the same. Towards 1, the fine layers count less in the low parts of the shape, so the detail gathers on the peaks and the valleys stay smooth."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À 0, toutes les couches comptent pareil. Vers 1, les couches fines comptent moins dans les creux de la forme : le détail se concentre sur les sommets et les vallées restent lisses."
           }
         }
       }
@@ -2444,7 +2665,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Copier sur des points"
+            "value": "Copie sur des points"
           }
         }
       }
@@ -3158,7 +3379,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fonds"
+            "value": "Couvercles"
           }
         }
       }
@@ -3175,7 +3396,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fond d’extrémité"
+            "value": "Couvercle d’extrémité"
           }
         }
       }
@@ -3192,7 +3413,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Réglages pour fermer les extrémités ouvertes du cylindre et regrouper les fonds."
+            "value": "Réglages pour fermer les extrémités ouvertes du cylindre et regrouper les couvercles."
           }
         }
       }
@@ -3209,7 +3430,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Type de fond"
+            "value": "Type de couvercle"
           }
         }
       }
@@ -3227,6 +3448,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Comment fermer les extrémités du cylindre. Aucun les laisse ouvertes, Polygone unique remplit chaque extrémité d’une seule face."
+          }
+        }
+      }
+    },
+    "param.helix::cylinder.endCapType.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caps close the ends of the cylinder. None leaves it open, like a pipe. Single Polygon closes each end with one flat face."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les couvercles ferment les extrémités du cylindre. Aucun le laisse ouvert, comme un tuyau. Polygone unique ferme chaque bout avec une seule face plate."
           }
         }
       }
@@ -3277,7 +3515,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Groupe des fonds"
+            "value": "Groupe des couvercles"
           }
         }
       }
@@ -3294,7 +3532,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Saisissez le nom du groupe dans lequel placer les polygones des fonds. Vous pouvez utiliser ce nom dans les nœuds suivants pour cibler facilement les seuls polygones des fonds."
+            "value": "Saisissez le nom du groupe dans lequel placer les polygones des couvercles. Vous pouvez utiliser ce nom dans les nœuds suivants pour cibler facilement les seuls polygones des couvercles."
           }
         }
       }
@@ -3311,7 +3549,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Groupe des fonds"
+            "value": "Groupe des couvercles"
           }
         }
       }
@@ -3328,7 +3566,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Crée un groupe de faces contenant les polygones des fonds. Vous pouvez utiliser ce groupe dans les nœuds suivants pour cibler facilement les seuls polygones des fonds."
+            "value": "Crée un groupe de faces contenant les polygones des couvercles. Vous pouvez utiliser ce groupe dans les nœuds suivants pour cibler facilement les seuls polygones des couvercles."
           }
         }
       }
@@ -3362,7 +3600,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Saisissez le nom du groupe dans lequel placer les polygones des fonds. Vous pouvez utiliser ce nom dans les nœuds suivants pour cibler facilement les seuls polygones des fonds."
+            "value": "Saisissez le nom du groupe dans lequel placer les polygones des couvercles. Vous pouvez utiliser ce nom dans les nœuds suivants pour cibler facilement les seuls polygones des couvercles."
           }
         }
       }
@@ -3396,7 +3634,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Partage les points du bord entre les fonds et le côté, pour que le cylindre forme une seule surface continue. Désactivez pour donner aux fonds leurs propres points et garder vive l’arête entre le fond et le côté."
+            "value": "Partage les points du bord entre les couvercles et le côté, pour que le cylindre forme une seule surface continue. Désactivez pour donner aux couvercles leurs propres points et garder vive l’arête entre le couvercle et le côté."
           }
         }
       }
@@ -3413,7 +3651,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Supprimer"
+            "value": "Suppression"
           }
         }
       }
@@ -3566,7 +3804,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dupliquer"
+            "value": "Duplication"
           }
         }
       }
@@ -4008,7 +4246,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Extruder"
+            "value": "Extrusion"
           }
         }
       }
@@ -4178,7 +4416,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Inset"
+            "value": "Retrait"
           }
         }
       }
@@ -4196,6 +4434,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Élargit ou dilate l’avant de l’extrusion. Sans effet lors de l’extrusion d’arêtes."
+          }
+        }
+      }
+    },
+    "param.helix::extrude.inset.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shrinks the front of the extrusion inwards, or grows it outwards with a negative value. It is how you make a raised panel or a frame from a flat face."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rétrécit la face avant de l’extrusion vers l’intérieur, ou l’agrandit avec une valeur négative. C’est ainsi qu’on fait un panneau en relief ou un cadre à partir d’une face plane."
           }
         }
       }
@@ -4812,19 +5067,53 @@
         }
       }
     },
+    "param.helix::geometryImport.filePath.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The model file this node reads. If you move or rename it, Helix cannot find it any more: use Locate to point the scene at its new place. The file itself is never changed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le fichier de modèle que ce nœud lit. Si vous le déplacez ou le renommez, Helix ne le trouve plus : utilisez Localiser pour indiquer son nouvel emplacement. Le fichier lui-même n’est jamais modifié."
+          }
+        }
+      }
+    },
     "param.helix::geometryImport.size.label": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Size"
+            "value": "Scale"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Taille"
+            "value": "Échelle"
+          }
+        }
+      }
+    },
+    "param.helix::geometryImport.size.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A scale factor applied to the whole model. 1 keeps the size of the file, 0.01 is a hundred times smaller, which fixes a model made in centimeters."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un facteur d’échelle appliqué à tout le modèle. 1 garde la taille du fichier, 0,01 le rend cent fois plus petit, ce qui corrige un modèle fait en centimètres."
           }
         }
       }
@@ -4859,6 +5148,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "L’axe que le fichier considère comme vertical. Auto le lit dans le fichier ou d’après le format."
+          }
+        }
+      }
+    },
+    "param.helix::geometryImport.upAxis.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some programs treat Y as up and others Z. Auto reads it from the file. Change it if the model comes in lying on its back."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Certains logiciels prennent Y pour le haut et d’autres Z. Auto le lit dans le fichier. Changez-le si le modèle arrive couché sur le dos."
           }
         }
       }
@@ -4948,6 +5254,23 @@
         }
       }
     },
+    "param.helix::geometryImport.mergeMeshes.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A file often holds many separate objects. Merged, they become one piece of geometry that is simpler to work with. Unmerged, each one stays apart."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un fichier contient souvent plusieurs objets séparés. Fusionnés, ils forment une seule géométrie, plus simple à manipuler. Non fusionnés, chacun reste à part."
+          }
+        }
+      }
+    },
     "param.helix::geometryImport.blenderPath.label": {
       "extractionState": "manual",
       "localizations": {
@@ -4978,6 +5301,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Le Blender utilisé pour ouvrir les fichiers .blend. Vide, il cherche celui qui est installé."
+          }
+        }
+      }
+    },
+    "param.helix::geometryImport.blenderPath.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only for .blend files, which Helix opens by running Blender in the background. Leave it empty to use the Blender that is installed, or give the path of another one."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seulement pour les fichiers .blend, que Helix ouvre en lançant Blender en arrière-plan. Laissez vide pour utiliser le Blender installé, ou indiquez le chemin d’un autre."
           }
         }
       }
@@ -5283,7 +5623,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fusionner"
+            "value": "Fusion"
           }
         }
       }
@@ -6240,6 +6580,23 @@
         }
       }
     },
+    "param.helix::simulation.start_frame.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The simulation always replays from this frame, so scrubbing the timeline back and forth gives the same result as playing it."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La simulation est toujours rejouée depuis cette image : parcourir la chronologie dans les deux sens donne le même résultat que la lecture."
+          }
+        }
+      }
+    },
     "param.helix::simulation.sub_steps.label": {
       "extractionState": "manual",
       "localizations": {
@@ -6270,6 +6627,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Le nombre d’étapes en lesquelles chaque image est découpée. Plus d’étapes aident un système raide à tenir, au prix de plus de calcul."
+          }
+        }
+      }
+    },
+    "param.helix::simulation.sub_steps.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each frame is worked out in several smaller steps. More sub steps keep a stiff or fast system from tearing apart, at the cost of more computing."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque image est calculée en plusieurs petits pas. Plus de sous-étapes évitent qu’un système raide ou rapide ne se disloque, au prix de plus de calcul."
           }
         }
       }
@@ -7464,6 +7838,23 @@
         }
       }
     },
+    "param.helix::sineWave.range.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Positive makes the wave run from 0 to 1, so it only raises. Zero centered runs from -1 to 1, so it raises and lowers around the original shape."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Positive fait aller l’onde de 0 à 1 : elle ne fait que soulever. Centrée sur zéro va de -1 à 1 : elle soulève et abaisse autour de la forme d’origine."
+          }
+        }
+      }
+    },
     "option.helix::sineWave.range.positive": {
       "extractionState": "manual",
       "localizations": {
@@ -7528,6 +7919,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Remodèle l’onde du creux au sommet."
+          }
+        }
+      }
+    },
+    "param.helix::sineWave.remap.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A curve that reshapes the wave from trough to peak. The left end is the lowest value of the wave and the right end the highest: drag the points to flatten or sharpen it."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une courbe qui remodèle l’onde du creux au sommet. L’extrémité gauche est la valeur la plus basse de l’onde et la droite la plus haute : déplacez les points pour l’aplatir ou l’accentuer."
           }
         }
       }
@@ -7663,7 +8071,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Clip"
+            "value": "Animation (clip)"
           }
         }
       }
@@ -7680,7 +8088,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Clip"
+            "value": "Animation (clip)"
           }
         }
       }
@@ -7691,13 +8099,30 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The name of the clip to play. Empty plays the first clip of the skeleton. geometry_summary lists the clips of a skeleton with their length, and the import reports them when it reads the file. A name the skeleton does not have is an error that lists the ones it has."
+            "value": "The clip to play. The menu lists the clips of the skeleton wired into the input, with their length, and the first one plays when none is picked. A name the skeleton does not have is an error that lists the ones it has."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le nom du clip à lire. Vide, il lit le premier clip du squelette. geometry_summary liste les clips d’un squelette avec leur durée, et l’import les signale à la lecture du fichier. Un nom que le squelette n’a pas provoque une erreur qui liste ceux qu’il a."
+            "value": "Le clip à lire. Le menu liste les clips du squelette relié à l’entrée, avec leur durée, et le premier est lu quand aucun n’est choisi. Un nom que le squelette n’a pas provoque une erreur qui liste ceux qu’il a."
+          }
+        }
+      }
+    },
+    "param.helix::skeletonPose.clip.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A clip is one animation stored in the file, such as Walk or Roar. Pick it from the menu: it lists the clips of the skeleton wired into this node, and plays the first one when none is picked."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un clip est une animation enregistrée dans le fichier, comme Marche ou Rugissement. Choisissez-le dans le menu : il liste les clips du squelette relié à ce nœud, et lit le premier quand aucun n’est choisi."
           }
         }
       }
@@ -7736,6 +8161,23 @@
         }
       }
     },
+    "param.helix::skeletonPose.speed.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 plays the clip at its own pace and 2 twice as fast. 0 freezes it on one pose, and a negative number plays it backwards."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 joue le clip à son rythme et 2 deux fois plus vite. 0 le fige sur une pose, et un nombre négatif le joue à l’envers."
+          }
+        }
+      }
+    },
     "param.helix::skeletonPose.offset.label": {
       "extractionState": "manual",
       "localizations": {
@@ -7770,6 +8212,23 @@
         }
       }
     },
+    "param.helix::skeletonPose.offset.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shifts the start of the clip, in seconds. 0.5 begins the animation half a second in, which is useful to make two copies of a character move out of step."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décale le début du clip, en secondes. 0,5 commence l’animation une demi-seconde plus loin, ce qui sert à désynchroniser deux copies d’un personnage."
+          }
+        }
+      }
+    },
     "param.helix::skeletonPose.loop.label": {
       "extractionState": "manual",
       "localizations": {
@@ -7800,6 +8259,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ce que fait le squelette quand le temps du clip sort du clip. Boucle le relance, Maintenir reste sur la première ou la dernière pose, et Une fois, puis repos le joue une fois puis revient à la pose de repos."
+          }
+        }
+      }
+    },
+    "param.helix::skeletonPose.loop.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What happens when the clip is over. Loop starts it again, Hold stays on its last pose, and Once, then rest plays it a single time and goes back to the rest pose."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce qui se passe quand le clip est fini. Boucle le relance, Maintenir reste sur sa dernière pose, et Une fois, puis repos le joue une seule fois puis revient à la pose de repos."
           }
         }
       }
@@ -7867,7 +8343,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Déformation par skin"
+            "value": "Déformation par squelette"
           }
         }
       }
@@ -7970,6 +8446,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fait suivre au skin l’attribut Normal des points et des sommets, pour que l’ombrage suive la pose. Un point que le skin ne déplace pas garde sa normale."
+          }
+        }
+      }
+    },
+    "param.helix::skinDeform.normals.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skinning bends the surface to follow the bones. Normals are the directions the surface faces, which shading uses: turning them with the skin keeps the lighting right on bent limbs."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le skinning plie la surface pour suivre les os. Les normales sont les directions vers lesquelles la surface est tournée, que l’ombrage utilise : les faire suivre le skin garde un éclairage juste sur les membres pliés."
           }
         }
       }
@@ -8926,6 +9419,23 @@
         }
       }
     },
+    "param.helix::sweep.profileShape.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The cross-section that is swept along the curve. Round makes a tube, Square a bar and Ribbon a flat strip. Second Input uses any shape you connect to the second input."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La section qui est balayée le long de la courbe. Rond fait un tube, Carré une barre et Ruban une bande plate. Seconde entrée utilise la forme de votre choix, branchée sur la seconde entrée."
+          }
+        }
+      }
+    },
     "option.helix::sweep.profileShape.input": {
       "extractionState": "manual",
       "localizations": {
@@ -9011,6 +9521,23 @@
         }
       }
     },
+    "param.helix::sweep.profileScale.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The thickness of the swept shape. At 1 it keeps the size it was drawn at; 2 makes it twice as wide."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’épaisseur de la forme balayée. À 1, elle garde sa taille d’origine ; à 2, elle est deux fois plus large."
+          }
+        }
+      }
+    },
     "param.helix::sweep.roundColumns.label": {
       "extractionState": "manual",
       "localizations": {
@@ -9024,6 +9551,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Colonnes"
+          }
+        }
+      }
+    },
+    "param.helix::sweep.roundColumns.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How many flat sides the round profile has. More columns give a smoother tube but a heavier mesh."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nombre de côtés plats du profil rond. Plus de colonnes donnent un tube plus lisse mais un maillage plus lourd."
           }
         }
       }
@@ -9045,6 +9589,23 @@
         }
       }
     },
+    "param.helix::sweep.squareColumns.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How many divisions each side of the square profile is cut into. Use more to bend the bar smoothly."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En combien de divisions chaque côté du profil carré est découpé. Utilisez-en plus pour plier la barre en douceur."
+          }
+        }
+      }
+    },
     "param.helix::sweep.ribbonColumns.label": {
       "extractionState": "manual",
       "localizations": {
@@ -9062,6 +9623,23 @@
         }
       }
     },
+    "param.helix::sweep.ribbonColumns.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How many divisions the width of the ribbon is cut into. Use more to curve the strip across its width."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En combien de divisions la largeur du ruban est découpée. Utilisez-en plus pour courber la bande dans sa largeur."
+          }
+        }
+      }
+    },
     "param.helix::sweep.caps_divider.label": {
       "extractionState": "manual",
       "localizations": {
@@ -9074,7 +9652,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fonds"
+            "value": "Couvercles"
           }
         }
       }
@@ -9091,7 +9669,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fond d’extrémité"
+            "value": "Couvercle d’extrémité"
           }
         }
       }
@@ -9108,7 +9686,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Réglages pour fermer les extrémités ouvertes du tube balayé et regrouper les fonds."
+            "value": "Réglages pour fermer les extrémités ouvertes du tube balayé et regrouper les couvercles."
           }
         }
       }
@@ -9125,7 +9703,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Type de fond"
+            "value": "Type de couvercle"
           }
         }
       }
@@ -9143,6 +9721,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Comment fermer les extrémités ouvertes du tube balayé. Aucun les laisse ouvertes, Polygone unique remplit chaque extrémité d’une seule face."
+          }
+        }
+      }
+    },
+    "param.helix::sweep.endCapType.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caps close the open ends of the tube. None leaves them open, like a pipe. Single Polygon closes each end with one flat face."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les couvercles ferment les extrémités ouvertes du tube. Aucun les laisse ouvertes, comme un tuyau. Polygone unique ferme chaque bout avec une seule face plate."
           }
         }
       }
@@ -9193,7 +9788,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Groupe des fonds"
+            "value": "Groupe des couvercles"
           }
         }
       }
@@ -9210,7 +9805,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Saisissez le nom du groupe dans lequel placer les polygones des fonds. Vous pouvez utiliser ce nom dans les nœuds suivants pour cibler facilement les seuls polygones des fonds."
+            "value": "Saisissez le nom du groupe dans lequel placer les polygones des couvercles. Vous pouvez utiliser ce nom dans les nœuds suivants pour cibler facilement les seuls polygones des couvercles."
           }
         }
       }
@@ -9227,7 +9822,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Groupe des fonds"
+            "value": "Groupe des couvercles"
           }
         }
       }
@@ -9244,7 +9839,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Crée un groupe de faces contenant les polygones des fonds. Vous pouvez utiliser ce groupe dans les nœuds suivants pour cibler facilement les seuls polygones des fonds."
+            "value": "Crée un groupe de faces contenant les polygones des couvercles. Vous pouvez utiliser ce groupe dans les nœuds suivants pour cibler facilement les seuls polygones des couvercles."
           }
         }
       }
@@ -9278,7 +9873,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Saisissez le nom du groupe dans lequel placer les polygones des fonds. Vous pouvez utiliser ce nom dans les nœuds suivants pour cibler facilement les seuls polygones des fonds."
+            "value": "Saisissez le nom du groupe dans lequel placer les polygones des couvercles. Vous pouvez utiliser ce nom dans les nœuds suivants pour cibler facilement les seuls polygones des couvercles."
           }
         }
       }
@@ -9334,6 +9929,23 @@
         }
       }
     },
+    "param.helix::sweep.stretchTurns.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On a sharp bend the inside of a tube would pinch. This widens the profile there so the tube keeps an even thickness."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dans un coude serré, l’intérieur d’un tube se pincerait. Cette option élargit le profil à cet endroit pour que le tube garde une épaisseur régulière."
+          }
+        }
+      }
+    },
     "param.helix::sweep.applyScale.label": {
       "extractionState": "manual",
       "localizations": {
@@ -9364,6 +9976,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rampe d’échelle"
+          }
+        }
+      }
+    },
+    "param.helix::sweep.scaleRamp.documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A curve that sets the thickness along the sweep: its left end is the start of the curve and its right end is the finish. Turn on Apply Scale to use it."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une courbe qui règle l’épaisseur le long du balayage : son extrémité gauche est le début de la courbe, la droite en est la fin. Activez Appliquer l’échelle pour l’utiliser."
           }
         }
       }
@@ -9703,7 +10332,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Transformer"
+            "value": "Transformation"
           }
         }
       }

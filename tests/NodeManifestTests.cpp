@@ -1,5 +1,6 @@
 #include "Engine/Network/NodeLoader.h"
 #include "Engine/Network/NodeManifest.h"
+#include "Engine/Parameter/StyleAccess.h"
 #include "Engine/Parameter/Styles.h"
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -551,6 +552,19 @@ TEST_CASE("A range circle style marks a float pair as a dial")
     REQUIRE(
         std::any_cast<std::shared_ptr<prm::style::RangeCircle>>(parameter.getStyle()) != nullptr
     );
+}
+
+TEST_CASE("A file style marks a string as the path of a file")
+{
+    const nt::NodeManifest manifest = manifestWithParameters(R"(
+  - name: source
+    type: string
+    style: file
+)");
+    const prm::Template& parameter = manifest.getNodeType().templates.at(0);
+
+    REQUIRE(std::any_cast<std::shared_ptr<prm::style::File>>(parameter.getStyle()) != nullptr);
+    REQUIRE(prm::style::toString(parameter.getStyle()) == "file");
 }
 
 TEST_CASE("A range circle keeps its bounds in order when asked to")

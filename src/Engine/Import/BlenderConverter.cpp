@@ -77,6 +77,8 @@ std::string hashToName(const std::string& text)
     return name.str();
 }
 
+// The cache entries of one .blend all start with the hash of its absolute path, so Reload can find
+// and delete them without knowing the size, the date or the Blender version they were made with.
 bool isExecutableFile(const fs::path& path)
 {
     std::error_code ignored;
@@ -262,7 +264,32 @@ std::string blenderVersion(const fs::path& blender)
     return version;
 }
 
+std::string blendCachePrefix(const fs::path& blendFile)
+{
+    std::error_code error;
+    return hashToName(fs::absolute(blendFile, error).string()) + "-";
+}
+
 std::size_t blenderRunCount() { return blenderRuns.load(); }
+
+std::size_t forgetBlendConversion(const fs::path& blendFile)
+{
+    std::error_code error;
+    const std::string prefix = blendCachePrefix(blendFile);
+    const fs::path directory = blendCacheDirectory();
+    std::size_t removed = 0;
+    // Only the finished glb files: a ".partial-" file belongs to a conversion that is running now.
+    for (fs::directory_iterator it(directory, error), end; !error && it != end; it.increment(error))
+    {
+        const std::string name = it->path().filename().string();
+        if (name.starts_with(prefix) && it->path().extension() == ".glb" && name.find(".partial-") == std::string::npos)
+        {
+            std::error_code ignored;
+            if (fs::remove(it->path(), ignored)) ++removed;
+        }
+    }
+    return removed;
+}
 
 fs::path convertBlendToGlb(const fs::path& blendFile, const std::string& configuredBlender, bool* fromCache)
 {
@@ -289,7 +316,8 @@ fs::path convertBlendToGlb(const fs::path& blendFile, const std::string& configu
                             // older conversion (made without skins) is not served again.
                             "|skins1";
     const fs::path directory = blendCacheDirectory();
-    const fs::path output = directory / (hashToName(key) + ".glb");
+    const std::string prefix = blendCachePrefix(absolute);
+    const fs::path output = directory / (prefix + hashToName(key) + ".glb");
 
     if (fs::is_regular_file(output, error) && fs::file_size(output, error) > 0)
     {
@@ -303,7 +331,7 @@ fs::path convertBlendToGlb(const fs::path& blendFile, const std::string& configu
 
     // Blender writes next to the final name and the result is renamed into place, so a
     // conversion that is cut short never leaves a file that looks complete.
-    const fs::path partial = directory / (hashToName(key) + ".partial-" + std::to_string(::getpid()) + ".glb");
+    const fs::path partial = directory / (prefix + hashToName(key) + ".partial-" + std::to_string(::getpid()) + ".glb");
     fs::remove(partial, error);
 
     ++blenderRuns;

@@ -16,6 +16,7 @@ Keys (the type is `<namespace>::<name>`, as the engine names it):
   node.<type>.input.<index>         the label of an input port
   param.<type>.<name>.label         a parameter, a group or a divider
   param.<type>.<name>.tooltip       its tooltip
+  param.<type>.<name>.documentation its longer explanation, which the info button of its row opens
   param.<type>.<name>.caption       the caption a range circle shows beside its numbers
   option.<type>.<param>.<value>     an entry of a dropdown
   tag.<tag>                         a search tag, shared by every node
@@ -226,6 +227,8 @@ def collect(node_dir):
                 out.append((f"param.{type_name}.{name}.label", str(parameter["label"])))
             if parameter.get("tooltip"):
                 out.append((f"param.{type_name}.{name}.tooltip", str(parameter["tooltip"])))
+            if parameter.get("documentation"):
+                out.append((f"param.{type_name}.{name}.documentation", str(parameter["documentation"])))
             caption = (parameter.get("styleOptions") or {}).get("caption")
             if caption:
                 out.append((f"param.{type_name}.{name}.caption", str(caption)))
