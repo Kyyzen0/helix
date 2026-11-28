@@ -54,6 +54,11 @@ struct GettingStartedView: View {
                 text: String(localized: "Export an image of the viewport with File > Export Image…, or the shown geometry as an OBJ file with File > Export Geometry….")
             ),
             Part(
+                icon: "sparkles",
+                title: String(localized: "Work with an AI agent"),
+                text: String(localized: "Open Helix, then set up your AI app once: Settings ▸ AI Agents ▸ Copy setup, and paste it where the app says. After that, ask it in its own chat to build or change something in the scene you have open. You see each step as it happens, and ⌘Z takes it back. Nothing leaves your Mac except what your AI app itself sends to its provider.")
+            ),
+            Part(
                 icon: "square.and.arrow.down.on.square",
                 title: String(localized: "Save"),
                 text: String(localized: "⌘S saves the scene as a .kut file. A 3D file you open becomes a new scene that holds the model, and saving asks where to put it: the model itself is never written to.")

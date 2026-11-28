@@ -44,7 +44,7 @@ enum NodePlacement {
         return (pose, deform)
     }
 
-    private static func free(_ position: CGPoint, in graph: EditorGraph, alsoAvoiding extra: [CGPoint] = []) -> CGPoint {
+    static func free(_ position: CGPoint, in graph: EditorGraph, alsoAvoiding extra: [CGPoint] = []) -> CGPoint {
         var candidate = position
         let step = EditorLayout.cardSize.width + 12
         for _ in 0..<64 {

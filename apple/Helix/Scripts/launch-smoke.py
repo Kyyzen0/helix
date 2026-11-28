@@ -53,7 +53,10 @@ IMPORT_ALIVE_SECONDS = 20.0
 
 
 def launch(binary, extra, expect=None, extra_env=None, seconds=ALIVE_SECONDS):
-    env = dict(os.environ, HELIX_DEBUG_LAUNCH="1", **(extra_env or {}))
+    # The app listens for AI agents on a socket: this run has one of its own, so that it never meets
+    # the Helix of the person who runs the checks.
+    socket_path = f"/tmp/helix-launch-smoke-{os.getpid()}.sock"
+    env = dict(os.environ, HELIX_DEBUG_LAUNCH="1", HELIX_MCP_SOCKET=socket_path, **(extra_env or {}))
     with tempfile.TemporaryFile() as err:
         process = subprocess.Popen(
             [binary, "-ApplePersistenceIgnoreState", "YES", *extra],
@@ -72,6 +75,8 @@ def launch(binary, extra, expect=None, extra_env=None, seconds=ALIVE_SECONDS):
             process.wait()
         err.seek(0)
         log = err.read().decode(errors="replace")
+    if os.path.exists(socket_path):
+        os.unlink(socket_path)
     lines = log.splitlines()
     ok = (expect(lines) if getattr(expect, "whole_log", False) else any(expect(line) for line in lines)) if expect else True
     if not ok:

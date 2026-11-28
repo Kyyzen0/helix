@@ -615,22 +615,62 @@ clears its verdict until it cooks again.
 
 ## Helix MCP
 
-`Helix --mcp` runs a [Model Context Protocol](https://modelcontextprotocol.io) server on standard
-input and output, so an AI agent can create, inspect and change a scene and check the result as
-data and as a picture. It is the app binary itself, with no window: newline delimited JSON-RPC
-2.0, one message per line, over the same `HelixCore` facade the interface uses
-(`apple/Helix/Sources/MCP*.swift`). Standard output carries the protocol only. The engine prints
-debug output, so the server points it at standard error before the engine starts.
+`Helix --mcp` is the [Model Context Protocol](https://modelcontextprotocol.io) server an AI agent
+(Claude, Claude Code, Codex, Gemini CLI, GLM and MiniMax clients, anything that speaks MCP over
+standard input and output) uses to create, inspect and change a scene and to check the result as
+data and as a picture. It is newline delimited JSON-RPC 2.0, one message per line, over the same
+`HelixCore` facade the interface uses (`apple/Helix/Sources/MCP*.swift`, `Agent*.swift`).
 
-Register it with Claude Code, with the path of a built app:
+It works in one of two ways, and says nothing of which in its configuration:
+
+- **Live.** When a Helix app is open, `Helix --mcp` is only a **relay**: it passes the lines of
+  standard input to the app and the lines of the app to standard output, with no engine and no
+  AppKit of its own. The agent edits the scene open in the window. The person sees each step as it
+  is made, and each call that changes the scene is **one step of Edit > Undo** ("AI: Create Node",
+  « IA : Créer un nœud »).
+- **Headless.** With no app open, `Helix --mcp` serves on its own, with an engine of its own in its
+  own process and no window: the scene is one nobody sees, and nothing is undoable. This is the
+  behaviour of the first version of the server.
 
 ```sh
+Helix --mcp               # the app if it is open, headless otherwise
+Helix --mcp --live        # needs the app: fails with a message on standard error if it is not open
+Helix --mcp --headless    # always its own engine, even when an app is open (the smoke test does)
+```
+
+`--live` and `--headless` together are refused (exit 2). A client that should never edit a scene
+by mistake in an invisible engine uses `--live`.
+
+### The live link
+
+At launch the app listens on a Unix domain socket,
+`~/Library/Application Support/com.kyyzen.helix/mcp.sock` (the folder is `0700`, the socket `0600`).
+A socket address holds 103 bytes, so a path that is longer falls back to `/tmp/helix-<uid>/mcp.sock`.
+`HELIX_MCP_SOCKET=<path>` puts it elsewhere, for both the app and the relay: the smoke tests use it
+so that they never meet the Helix of the person who runs them. The relay computes the same path and
+connects; if nothing answers it is headless.
+
+- If a socket file is there and something answers, **another Helix owns it** and this one leaves it
+  alone (it logs so, and the Settings tab says it). If nothing answers it is what a crashed Helix
+  left behind, and it is replaced. A file that is not a socket is never removed. The socket is
+  removed when the app quits, and on SIGTERM, SIGINT and SIGHUP.
+- The app refuses a connection from any other user (`getpeereid`). Nothing is listening on the
+  network: the link is local, and nothing leaves the Mac except what the person's own AI app sends
+  to its provider.
+- Several agents can be connected. A message is one line of at most 64 MB. The tools run one call
+  at a time, in order, on the main actor, where the engine lives (the engine is not thread safe).
+- Settings > AI Agents has the switch "Let AI agents edit the open scene" (on by default). Off, the
+  socket is closed and removed, and the relay falls back to headless. The same tab shows the socket path and has
+  **Copy setup** buttons that put on the clipboard what to paste into each AI app, with the real path of the app binary:
+
+```sh
+# Claude Code
 claude mcp add helix -- /path/to/Helix.app/Contents/MacOS/Helix --mcp
 ```
 
-or with any other MCP client, in its JSON configuration:
-
 ```json
+// Claude Desktop (~/Library/Application Support/Claude/claude_desktop_config.json) and Gemini CLI (~/.gemini/settings.json),
+// and any other app that reads an mcpServers object
 {
   "mcpServers": {
     "helix": {
@@ -641,13 +681,51 @@ or with any other MCP client, in its JSON configuration:
 }
 ```
 
+```toml
+# Codex CLI (~/.codex/config.toml)
+[mcp_servers.helix]
+command = "/path/to/Helix.app/Contents/MacOS/Helix"
+args = ["--mcp"]
+```
+
+(`apple/Helix/Sources/AgentSetup.swift` writes them; `Tests/AgentLinkTests.swift` checks the forms.)
+
+**What the live tools do differently.** The tools are the same, and read the open document:
+
+- With no scene open, a tool returns an error ("No scene is open in Helix. Open or create one
+  first."). `new_scene` and `open_scene` open one.
+- A tool that changes the scene runs inside `HelixDocument.performToolEdit`, which is `performEdit`
+  with two differences: a call that fails leaves nothing (the scene is put back as it was and no
+  step is registered), and the step is closed on its own (an agent's calls do not come with the run
+  loop passes the undo manager groups by, and two calls would be one Undo). The window updates at
+  once and the document is marked as edited. `set_frame` moves the visible timeline and is no step;
+  `import_file` reads the file behind the sheet of the window and returns when it is imported.
+- `render_view` puts the viewport camera, the display node and the frame back after the picture
+  (`viewportCameraState` and `restoreViewportCamera` in the facade), and the viewport is cooked again.
+- `new_scene` and `open_scene` never discard the person's work: they open a window as File > New
+  and File > Open do, and the window asks the question of the app (« Close the open scene, and open
+  this one? », with the question about saving unsaved changes). The call waits for the answer, 120
+  seconds at most, and returns `switched: true` or `false` (the person kept their scene, or has not
+  answered; the question stays on screen). A scene nothing was done to is already new.
+- `save_scene` saves the open document as Save does: to its file, or to the `path` of an untitled
+  one (and the window then stands for that file); a path to another file is a Save As.
+
+**In the window.** While an agent is connected the toolbar shows "AI" and the client's name (from
+its `initialize`: Claude, Claude Code, Codex, Gemini… and the raw name for one nobody knows), which
+pulses while a call runs. A click opens the agents connected, the last ten things they did in plain
+words, and Disconnect (an app may connect again).
+
+Not live yet: the person's selection is not read or changed, the node editor is not told to
+scroll to what was made (a new node goes to a free place under the others), and a very large geometry
+made by an agent is not asked about as the person's own edits are.
+
 The tools:
 
 - `scene_info`: the nodes, links, display node, time, the cook cache and whether there are unsaved
   changes.
 - `clear_cook_cache`: forgets what the cook cache holds (the scene is not changed).
-- `new_scene`, `open_scene`, `save_scene`: scene files. The first two refuse while the scene has
-  unsaved changes, unless `discard_changes` is true.
+- `new_scene`, `open_scene`, `save_scene`: scene files. Headless, the first two refuse while the scene has
+  unsaved changes, unless `discard_changes` is true. Live, they ask the person (see above).
 - `list_node_types`: the type names `create_node` accepts.
 - `create_node`, `delete_node`, `connect_nodes`, `disconnect_nodes`, `set_display_node`: the graph.
   `create_node` takes the name it is given, or the engine's own (`grid1`), and refuses a taken one.
@@ -686,10 +764,20 @@ sandbox:
 python3 -I apple/Helix/Scripts/launch-smoke.py /path/to/Helix.app/Contents/MacOS/Helix
 ```
 
-Limits for now: the server runs its own engine in its own process, so it works on its own scene,
-not on the one open in a window of the app; its changes are not grouped into undoable steps with
-an intent; and the scripts a node runs are not sandboxed. The three go with track two of the
-[roadmap](ROADMAP.md).
+`apple/Helix/Scripts/mcp-smoke.py` runs `--mcp --headless`. `apple/Helix/Scripts/live-smoke.py` starts the app on a
+socket of its own with a new scene, relays a client that calls itself `codex` to it, builds a grid and a transform,
+wires and sets them, renders, and reads what the app logged (`HELIX_DEBUG_LAUNCH=1`): the nodes of the open document,
+one step of undo per call (taken back one at a time with `HELIX_DEBUG_LIVE_UNDO_FILE`), no step and no change for a
+call that fails, even after it changed the scene (`HELIX_DEBUG_LIVE_FAIL_AFTER=<tool>`), the same viewport camera
+after `render_view`, a `new_scene` that the person refuses; then, with no app, `--live` failing clearly and `--mcp`
+falling back to headless:
+
+```sh
+python3 -I apple/Helix/Scripts/live-smoke.py /path/to/Helix.app
+```
+
+Limits for now: the headless server has a scene of its own that nobody sees; the scripts a node runs are not
+sandboxed. The second goes with track two of the [roadmap](ROADMAP.md).
 
 ## Themes
 

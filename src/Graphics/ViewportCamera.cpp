@@ -54,6 +54,16 @@ void ViewportCamera::setAngles(float yaw, float pitch)
     pitch_ = std::clamp(pitch, -maxPitch, maxPitch);
 }
 
+void ViewportCamera::setView(glm::vec3 center, float distance, float yaw, float pitch)
+{
+    const bool finite = std::isfinite(center.x) && std::isfinite(center.y) && std::isfinite(center.z)
+        && std::isfinite(distance) && std::isfinite(yaw) && std::isfinite(pitch);
+    if (!finite) return;
+    center_ = center;
+    distance_ = std::max(distance, minDistance);
+    setAngles(yaw, pitch);
+}
+
 void ViewportCamera::pan(glm::vec2 delta)
 {
     const glm::vec3 forward = getForward();
