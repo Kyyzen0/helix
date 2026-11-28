@@ -76,6 +76,15 @@ class Client:
                 return reply
         return None
 
+    def send_call(self, name, arguments=None):
+        """Sends a call and does not wait for the reply."""
+        identifier = self.next_id
+        self.next_id += 1
+        message = {"jsonrpc": "2.0", "id": identifier, "method": "tools/call", "params": {"name": name, "arguments": arguments or {}}}
+        self.process.stdin.write(json.dumps(message) + "\n")
+        self.process.stdin.flush()
+        return identifier
+
     def call(self, name, arguments=None, timeout=60):
         reply = self.request("tools/call", {"name": name, "arguments": arguments or {}}, timeout)
         return reply["result"] if reply and "result" in reply else None
@@ -147,6 +156,23 @@ def parse(line):
     return fields
 
 
+def touch(path):
+    """Asks the app for something it watches a file for (the debug hooks of `AgentLink`)."""
+    if os.path.exists(path):
+        os.unlink(path)
+    open(path, "w").close()
+
+
+def alive_conversations(app, count_file, timeout=10):
+    """How many conversations the app holds alive: it writes the number when the file appears."""
+    marker = "helix-launch: live-conversations alive="
+    seen = len([l for l in app.log() if l.startswith(marker)])
+    touch(count_file)
+    app.wait(lambda lines: len([l for l in lines if l.startswith(marker)]) > seen, timeout)
+    lines = [l for l in app.log() if l.startswith(marker)]
+    return int(lines[-1][len(marker):]) if len(lines) > seen else None
+
+
 def main():
     if len(sys.argv) != 2:
         sys.exit("usage: python3 -I live-smoke.py <path to Helix.app>")
@@ -158,10 +184,13 @@ def main():
     undo_file = os.path.join(folder, "undo")
     env = dict(os.environ, HELIX_MCP_SOCKET=socket_path)
     app_env = dict(env, HELIX_DEBUG_LAUNCH="1", HELIX_DEBUG_LIVE_UNDO_FILE=undo_file, HELIX_DEBUG_SWITCH="cancel",
-                   HELIX_DEBUG_LIVE_FAIL_AFTER="delete_node")
+                   HELIX_DEBUG_LIVE_FAIL_AFTER="delete_node",
+                   HELIX_DEBUG_LIVE_DISCONNECT_FILE=os.path.join(folder, "disconnect"),
+                   HELIX_DEBUG_LIVE_COUNT_FILE=os.path.join(folder, "count"),
+                   HELIX_DEBUG_IMPORT_READ_DELAY_MS="3000")
     app = App(binary, app_env)
     try:
-        run(binary, env, app, socket_path, undo_file)
+        run(binary, env, app, socket_path, undo_file, folder)
     finally:
         app.stop()
         shutil.rmtree(folder, ignore_errors=True)
@@ -170,7 +199,7 @@ def main():
     sys.exit(1 if failures else 0)
 
 
-def run(binary, env, app, socket_path, undo_file):
+def run(binary, env, app, socket_path, undo_file, folder):
     ready = app.wait(lambda lines: any(l.startswith("helix-launch: untitled scene") for l in lines)
                      and os.path.exists(socket_path))
     check(ready, "the app opens a new scene and listens on its socket")
@@ -271,6 +300,33 @@ def run(binary, env, app, socket_path, undo_file):
     check(len(data(alone.call("scene_info"))["nodes"]) == 0, "--mcp --headless has a scene of its own, not the open one")
     alone.close()
 
+    # Access withdrawn while a file is being read: the call changes nothing. The read takes three
+    # seconds (HELIX_DEBUG_IMPORT_READ_DELAY_MS); the agent is disconnected during them.
+    quad = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "tests", "data", "import", "textured-quad.glb")
+    quad = os.path.normpath(quad)
+    check(os.path.exists(quad), "the test file textured-quad.glb exists")
+    before_cancel = app.live_lines()[-1]
+    importer = Client(binary, env)
+    importer.initialize("importer")
+    importer.send_call("import_file", {"path": quad})
+    shown = app.wait(lambda lines: any("import sheet shown file=textured-quad.glb" in l for l in lines), 10)
+    check(shown, "the import of an agent shows its sheet")
+    imports_before = len([l for l in app.live_lines() if l["tool"] == "import_file"])
+    touch(os.path.join(folder, "disconnect"))
+    check(app.wait(lambda lines: any(l.startswith("helix-launch: live-disconnect done") for l in lines), 10), "the agents are disconnected while the file is read")
+    finished = app.wait(lambda lines: len([l for l in lines if l.startswith("helix-launch: live tool=import_file")]) > imports_before, 15)
+    check(finished, "the call that was reading ends")
+    cancelled = app.live_lines()[-1]
+    check(cancelled["tool"] == "import_file" and cancelled["error"] != "none", f"... as a refused call ({cancelled['error']})")
+    check(cancelled["nodes"] == before_cancel["nodes"], f"the scene has no new node ({cancelled['nodes']})")
+    check(cancelled["steps"] == before_cancel["steps"] and cancelled["undo"] == before_cancel["undo"],
+          f"... and the undo stack is as it was (steps {before_cancel['steps']} -> {cancelled['steps']}, top {cancelled['undo']})")
+    check(any("import sheet cancelled file=textured-quad.glb" in l for l in app.log()), "the import sheet is closed")
+    time.sleep(1.0)
+    check(app.live_lines()[-1] == cancelled, "nothing else happened to the scene afterwards")
+    importer.close()
+    agent.close()
+
     # Each call is one step of Undo, and the steps come back in order.
     undone = []
     for _ in range(5):
@@ -287,7 +343,33 @@ def run(binary, env, app, socket_path, undo_file):
           f"Edit > Undo takes the steps back one call at a time ({names_undone})")
     check(undone[3].split("nodes=")[1].split(" ")[0].count("/") == 1 and undone[4].split("nodes=")[1].split(" ")[0] == "",
           "the last two undos remove the transform, then the grid")
-    agent.close()
+
+    # A normal import still works afterwards (the scene is empty again: the five steps were undone).
+    steps_cancelled = app.live_lines()[-1]["steps"]
+    fresh = Client(binary, env)
+    fresh.initialize("fresh")
+    imported = fresh.call("import_file", {"path": quad}, timeout=60)
+    check(imported is not None and not imported.get("isError"), f"import_file works for a client that was not disconnected ({imported and imported.get('isError')})")
+    done = app.live_lines()[-1]
+    check(done["tool"] == "import_file" and done["error"] == "none" and done["nodes"].count("/") == 1 and done["undo"] == "AI: Import File"
+          and int(done["steps"]) == int(steps_cancelled) + 1,
+          f"... as one step of undo ({done['nodes']}, {done['undo']}, steps {steps_cancelled} -> {done['steps']})")
+
+    # A conversation that is closed is freed: connect, initialize and leave, several times.
+    count_file = os.path.join(folder, "count")
+    baseline = alive_conversations(app, count_file)
+    for index in range(4):
+        visitor = Client(binary, env)
+        visitor.initialize(f"visitor-{index}")
+        visitor.close()
+    freed = None
+    for _ in range(20):
+        freed = alive_conversations(app, count_file)
+        if freed == baseline:
+            break
+        time.sleep(0.25)
+    check(baseline is not None and freed == baseline, f"closed conversations are freed: {baseline} alive before four reconnections, {freed} after")
+    fresh.close()
 
     # No app: the relay says so, or falls back.
     app.stop()

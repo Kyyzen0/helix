@@ -1,6 +1,7 @@
 import AppKit
 import CxxStdlib
 import Foundation
+import os
 
 /// The live link between the app and the AI agents on this Mac.
 ///
@@ -31,6 +32,7 @@ final class AgentLink {
     private var jobs: [(Conversation, String)] = []
     private var draining = false
     private var debugUndoScheduled = false
+    private var debugDisconnectScheduled = false
     private var signalSources: [DispatchSourceSignal] = []
 
     /// One connected agent.
@@ -43,11 +45,23 @@ final class AgentLink {
         /// The agent has said it will send no more.
         var inputEnded = false
         var closed = false
+        /// The call that is running for this agent. Closing the conversation cancels it: an agent
+        /// that was disconnected (the toggle of the Settings, Disconnect in the popover) must not
+        /// find its call finishing in the scene after the person withdrew access.
+        var operation: Task<MCPToolOutput, Error>?
+
+        /// How many conversations are alive, which `Scripts/live-smoke.py` reads to prove that a
+        /// closed one is freed (a closure that holds its own conversation would keep it for good).
+        private nonisolated static let alive = OSAllocatedUnfairLock(initialState: 0)
+        static var aliveCount: Int { alive.withLock { $0 } }
 
         init(connection: AgentConnection) {
             id = connection.id
             self.connection = connection
+            Self.alive.withLock { $0 += 1 }
         }
+
+        deinit { Self.alive.withLock { $0 -= 1 } }
     }
 
     static var isEnabled: Bool {
@@ -122,12 +136,15 @@ final class AgentLink {
         let conversation = Conversation(connection: connection)
         conversations[conversation.id] = conversation
         activity.connected(AgentClient(id: conversation.id, rawName: nil, since: Date()))
+        // The dispatcher belongs to the conversation: a closure of it that held the conversation
+        // would be a cycle, and a closed conversation would never be freed. So the closures take
+        // the identifier, and nothing else of it.
+        let id = conversation.id
         conversation.dispatcher.onInitialize = { [weak self] name in
             guard let self else { return }
-            activity.renamed(conversation.id, to: name)
+            activity.renamed(id, to: name)
             Self.log("client connected: \(AgentClients.displayName(for: name))")
         }
-        let id = conversation.id
         connection.onLine = { line in
             DispatchQueue.main.async { MainActor.assumeIsolated { AgentLink.shared.conversations[id].map { AgentLink.shared.receive(line, from: $0) } } }
         }
@@ -170,12 +187,11 @@ final class AgentLink {
         case .call(let id, let tool, let arguments):
             let client = AgentClients.displayName(for: conversation.dispatcher.clientName)
             activity.callStarted()
-            let outcome: Result<MCPToolOutput, Error>
-            do {
-                outcome = .success(try await MCPLive.run(tool, arguments: arguments))
-            } catch {
-                outcome = .failure(error)
-            }
+            // The call runs as a task of its own so that closing the conversation can cancel it.
+            let call = Task { try await MCPLive.run(tool, arguments: arguments) }
+            conversation.operation = call
+            let outcome = await call.result
+            conversation.operation = nil
             var failed = false
             if case .failure = outcome { failed = true }
             activity.callEnded(client: client, text: MCPLive.activityText(tool.name), failed: failed)
@@ -199,6 +215,7 @@ final class AgentLink {
     private func close(_ conversation: Conversation) {
         guard !conversation.closed else { return }
         conversation.closed = true
+        conversation.operation?.cancel()
         conversation.connection.close()
         conversations[conversation.id] = nil
         activity.disconnected(conversation.id)
@@ -215,6 +232,8 @@ final class AgentLink {
     /// file appears (and removes it), and says what is left. `Scripts/live-smoke.py` uses it to
     /// check that a call of an agent is one step of Edit > Undo, as a person's ⌘Z would take it back.
     func scheduleDebugUndo() {
+        scheduleDebugDisconnect()
+
         guard !debugUndoScheduled, let path = ProcessInfo.processInfo.environment["HELIX_DEBUG_LIVE_UNDO_FILE"], !path.isEmpty else { return }
         debugUndoScheduled = true
         Task { @MainActor in
@@ -231,6 +250,33 @@ final class AgentLink {
                 if could { manager.undo() }
                 let nodes = MCPHandlers.nodeList().map { String(engine: $0.path) }.joined(separator: ",")
                 HelixDocument.debugLog("live-undo undone=\(could) name=\(name) nodes=\(nodes) can-undo-more=\(manager.canUndo)") // l10n-ok: read by live-smoke.py
+            }
+        }
+    }
+
+    /// With `HELIX_DEBUG_LIVE_DISCONNECT_FILE=<path>`, disconnects every agent (what Disconnect in
+    /// the popover does) each time that file appears, and says how many conversations are still
+    /// alive a moment after. With `HELIX_DEBUG_LIVE_COUNT_FILE=<path>`, only says how many are.
+    /// `Scripts/live-smoke.py` uses them to check that a call that was waiting is cancelled, and
+    /// that a closed conversation is freed.
+    private func scheduleDebugDisconnect() {
+        let environment = ProcessInfo.processInfo.environment
+        let disconnectPath = environment["HELIX_DEBUG_LIVE_DISCONNECT_FILE"] ?? ""
+        let countPath = environment["HELIX_DEBUG_LIVE_COUNT_FILE"] ?? ""
+        guard !debugDisconnectScheduled, !disconnectPath.isEmpty || !countPath.isEmpty else { return }
+        debugDisconnectScheduled = true
+        Task { @MainActor in
+            while true {
+                try? await Task.sleep(for: .milliseconds(200))
+                if !disconnectPath.isEmpty, FileManager.default.fileExists(atPath: disconnectPath) {
+                    try? FileManager.default.removeItem(atPath: disconnectPath)
+                    disconnectAll()
+                    HelixDocument.debugLog("live-disconnect done") // l10n-ok: read by live-smoke.py
+                }
+                if !countPath.isEmpty, FileManager.default.fileExists(atPath: countPath) {
+                    try? FileManager.default.removeItem(atPath: countPath)
+                    HelixDocument.debugLog("live-conversations alive=\(Conversation.aliveCount)") // l10n-ok: read by live-smoke.py
+                }
             }
         }
     }

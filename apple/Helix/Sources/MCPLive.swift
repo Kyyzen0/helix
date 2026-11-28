@@ -87,7 +87,16 @@ enum MCPLive {
         guard document.importProgress == nil else {
             throw MCPToolError("Another import is going on in Helix. Try again when it is done.") // l10n-ok: for an agent, in English
         }
-        switch await document.readForImport(url) {
+        // Disconnecting the agent cancels the call: the sheet closes at once (the read itself cannot
+        // be interrupted, and its answer is thrown away), and nothing is made of the file.
+        let read = await withTaskCancellationHandler {
+            await document.readForImport(url)
+        } onCancel: {
+            Task { @MainActor in document.cancelImport() }
+        }
+        // The agent may have been disconnected while the file was read: the scene stays as it was.
+        try Task.checkCancellation()
+        switch read {
         case .ready:
             break
         case .cancelled:

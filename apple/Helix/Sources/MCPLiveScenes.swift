@@ -78,7 +78,9 @@ enum MCPLiveScenes {
                     return result(switched: false, note: "That scene is already the open one.")
                 }
             }
-            try? await Task.sleep(for: pollInterval)
+            // A call that was cancelled stops waiting; the question stays in the window, as it does
+            // after the timeout, and what the person answers is theirs.
+            try await Task.sleep(for: pollInterval)
         }
         return result(switched: false, note: "The person has not answered the question in Helix yet. It is still on their screen.")
     }
