@@ -3,6 +3,7 @@ version: 1
 name: sineWave
 namespace: helix
 label: Sine Wave
+description: "Ripples a surface with a moving sine wave."
 tags: [deform, displace]
 
 inputs:

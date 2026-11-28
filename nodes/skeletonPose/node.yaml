@@ -3,6 +3,7 @@ version: 1
 name: skeletonPose
 namespace: helix
 label: Skeleton Pose
+description: "Poses a skeleton by playing one of its animation clips."
 tags: [skeleton, animation, pose, clip, rig]
 
 inputs:

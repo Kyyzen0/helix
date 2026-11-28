@@ -3,6 +3,7 @@ version: 1
 name: line
 namespace: helix
 label: Line
+description: "Makes a straight line between two points."
 tags: [primitive, curve]
 
 outputs: 1

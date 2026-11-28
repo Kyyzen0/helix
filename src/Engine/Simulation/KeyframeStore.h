@@ -133,6 +133,23 @@ class KeyframeStore
     /// @brief The value a parameter held before its track was made.
     std::optional<floatT> getBaseValue(const KeyframeTarget& target) const;
 
+    /// @brief Everything one track holds, to carry it to another node.
+    struct TrackCopy
+    {
+        floatT baseValue = 0;
+        /// @brief The expression the parameter held before the track was made, if it held one.
+        std::optional<String> baseExpression;
+        std::vector<Keyframe> keyframes;
+    };
+
+    /// @brief Returns a copy of a track, or nothing when the value holds no keyframes.
+    std::optional<TrackCopy> copyTrack(const KeyframeTarget& target) const;
+
+    /// @brief Gives a value the keyframes of a copied track, replacing the ones it had.
+    /// @note The parameter takes the value of the track at the current frame, as it does when
+    /// a keyframe is set.
+    void pasteTrack(const KeyframeTarget& target, const TrackCopy& copy);
+
     /**
      * @brief Resolves every track at a frame and writes the results into the
      * parameters they belong to.

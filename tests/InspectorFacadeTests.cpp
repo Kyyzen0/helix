@@ -122,7 +122,8 @@ TEST_CASE_METHOD(Fixture, "A parameter says what it is: tooltip, style, defaults
     const core::ParameterInfo name = parameterOf(noise, "name");
     REQUIRE(name.style == "attribute");
     REQUIRE_FALSE(name.tooltip.empty());
-    REQUIRE(name.defaultStrings == std::vector<std::string>{"noise"});
+    // The default makes the node visible: it writes Position, so the geometry moves.
+    REQUIRE(name.defaultStrings == std::vector<std::string>{"Position"});
     bool ownersFound = false;
     for (const core::ParameterStyleOption& option : name.styleOptions)
         if (option.name == "owners" && option.value == "point") ownersFound = true;
@@ -136,7 +137,9 @@ TEST_CASE_METHOD(Fixture, "A parameter says what it is: tooltip, style, defaults
     const core::ParameterInfo along = parameterOf(noise, "alongVector");
     REQUIRE(along.group == "Noise Along Vector");
     REQUIRE(along.labelHidden);
-    REQUIRE(along.hidden); // the group is hidden until the type is a vector
+    REQUIRE_FALSE(along.hidden); // the type is a vector by default
+    REQUIRE(core::setString(noise, "type", 0, "float").ok);
+    REQUIRE(parameterOf(noise, "alongVector").hidden); // the group hides until the type is a vector
     REQUIRE(core::setString(noise, "type", 0, "vector").ok);
     REQUIRE_FALSE(parameterOf(noise, "alongVector").hidden);
 
@@ -147,6 +150,8 @@ TEST_CASE_METHOD(Fixture, "A parameter says what it is: tooltip, style, defaults
 TEST_CASE_METHOD(Fixture, "The layout keeps the order of the node, with groups and dividers", "[inspector]")
 {
     const core::NodeId noise = makeNode("helix::attributeNoise");
+    // The group of the along vector row hides until the type is a vector, which it is by default.
+    REQUIRE(core::setString(noise, "type", 0, "float").ok);
     const std::vector<core::ParameterLayoutItem> layout = core::listParameterLayout(noise);
     REQUIRE(layout.size() > 8);
 
@@ -360,6 +365,7 @@ TEST_CASE_METHOD(Fixture, "An attribute parameter offers the attributes of its i
     REQUIRE(core::connectNodes(create, 0, noise, 0).ok);
     REQUIRE(core::setString(create, "name", 0, "temperature").ok);
     REQUIRE(core::setString(create, "type", 0, "float").ok);
+    REQUIRE(core::setString(noise, "type", 0, "float").ok);
 
     core::AttributeNames names = core::listAttributeSuggestions(noise, "name");
     REQUIRE(names.status.ok);

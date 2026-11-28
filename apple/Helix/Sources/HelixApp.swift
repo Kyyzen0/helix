@@ -95,6 +95,12 @@ struct HelixCommands: Commands {
             .keyboardShortcut("s", modifiers: [.command, .option])
             .disabled(document == nil)
         }
+        // Importing a model is a way to bring a file in, which a Mac keeps in the File menu.
+        CommandGroup(replacing: .importExport) {
+            Button("Import a 3D Model…") { document?.chooseFileToImport() }
+                .keyboardShortcut("i", modifiers: .command)
+                .disabled(document == nil || document?.isActive != true)
+        }
         // The keys of playback (space, the arrows) belong to the views that have the keyboard, for
         // the reason the viewport keys do. These items have none, and do the same.
         CommandMenu("Timeline") {
@@ -115,21 +121,11 @@ struct HelixCommands: Commands {
             Button("Clear Cook Cache") { document?.clearCookCache() }
                 .disabled(document == nil || document?.isActive != true)
         }
-        CommandMenu("Add") {
-            Button("Add Node…") { document?.showNodePalette() }
-                .keyboardShortcut("k", modifiers: .command)
-                .disabled(document == nil || document?.isActive != true)
-            Divider()
-            if let document, document.isActive {
-                AddNodeSubmenus(types: document.editor.paletteTypes) { document.editor.addNode($0) }
-            }
-            Divider()
-            Button("Import a 3D Model…") { document?.chooseFileToImport() }
-                .keyboardShortcut("i", modifiers: .command)
-                .disabled(document == nil || document?.isActive != true)
-            Divider()
-            Button("Frame Nodes") { document?.editor.frameSelection() }
-                .disabled(document == nil || document?.isActive != true)
+        // The nodes: adding one and what is done to the ones selected. The commands that work on
+        // the selection are greyed when nothing is selected, and the key of the editor (H) is
+        // shown, as the menu of the View does for its own.
+        CommandMenu("Node") {
+            NodeMenuContent(document: document)
         }
     }
 }

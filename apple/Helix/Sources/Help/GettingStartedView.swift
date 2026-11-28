@@ -21,12 +21,12 @@ struct GettingStartedView: View {
             Part(
                 icon: "plus.square",
                 title: String(localized: "Create something"),
-                text: String(localized: "Open the Add menu, or click a button of the shelf under the 3D view, to make a node: a cube, a grid, a sphere. On an empty scene you can also start from an example.")
+                text: String(localized: "Open the Node menu, or click a button of the shelf under the 3D view, to make a node: a cube, a grid, a sphere. On an empty scene you can also start from an example.")
             ),
             Part(
                 icon: "square.and.arrow.down",
                 title: String(localized: "Import a model"),
-                text: String(localized: "Choose Add ▸ Import a 3D Model (⌘I), or drop a file on the window. Helix reads glTF, FBX, OBJ and more. The file itself is never changed.")
+                text: String(localized: "Choose File ▸ Import a 3D Model (⌘I), or drop a file on the window. Helix reads glTF, FBX, OBJ and more. The file itself is never changed.")
             ),
             Part(
                 icon: "cube.transparent",
@@ -36,7 +36,7 @@ struct GettingStartedView: View {
             Part(
                 icon: "point.3.connected.trianglepath.dotted",
                 title: String(localized: "Nodes"),
-                text: String(localized: "A node is one step. Connect the output at the bottom of a node to the input at the top of the next. The flag marks the node the 3D view shows: double-click a node to show it. A node in error has a red outline and a warning triangle; select it to read why.")
+                text: String(localized: "A node is one step. Connect the output at the bottom of a node to the input at the top of the next. The eye at the left of a card marks the node the 3D view shows: click it to show a node (a double click on the card works too). A node in error has a red outline and a warning triangle; select it to read why. A new node is named after its type: select it and press Return, or click its name in the inspector, to give it a name you will recognise. ⌘D duplicates the selected nodes, and ⌘C, ⌘X and ⌘V copy, cut and paste them, links between them included.")
             ),
             Part(
                 icon: "slider.horizontal.3",

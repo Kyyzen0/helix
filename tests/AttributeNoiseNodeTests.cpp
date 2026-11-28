@@ -37,7 +37,14 @@ nt::NodeId addAttributeNoiseAfter(nt::NodeId input)
     auto& nm = nt::nm();
     const nt::NodeId attributeNoise = nm.createNode("helix::attributeNoise");
     nm.connectNodes(input, 0, attributeNoise, 0);
-    nm.getNode(attributeNoise).getParameter("frequency").lock()->setFloat(0.37f);
+    // The node starts by moving the points of the geometry, which these tests do not look at:
+    // they read the float attribute the node first wrote by default, so they ask for it.
+    nt::Node& node = nm.getNode(attributeNoise);
+    node.getParameter("name").lock()->setString("noise");
+    node.getParameter("type").lock()->setString("float");
+    node.getParameter("alongVector").lock()->setInt(0);
+    node.getParameter("amplitude").lock()->setFloat(1.0f);
+    node.getParameter("frequency").lock()->setFloat(0.37f);
     return attributeNoise;
 }
 
@@ -112,6 +119,24 @@ TEST_CASE_METHOD(NMReset, "Every point gets a noise value between minus one and 
 
     // Points at different positions get different values.
     REQUIRE(values.front() != values.back());
+}
+
+TEST_CASE_METHOD(NMReset, "A new attribute noise visibly moves the points of its geometry")
+{
+    auto& nm = nt::nm();
+    const nt::NodeId grid = addGrid();
+    const nt::NodeId noise = nm.createNode("helix::attributeNoise");
+    nm.connectNodes(grid, 0, noise, 0);
+    nm.cook(noise);
+
+    // Nothing was set: the defaults write Position, as a vector, along the normals.
+    const std::vector<Vector3> movements =
+        getPointMovements(*getMesh(nm.getNode(grid)), *getMesh(nm.getNode(noise)));
+    float farthest = 0.0f;
+    for (const Vector3& movement : movements) farthest = std::max(farthest, movement.norm());
+    REQUIRE(farthest > 0.01f);
+    // A modest amplitude: nothing leaves the geometry by more than the amplitude.
+    REQUIRE(farthest <= 0.2f * 1.01f);
 }
 
 TEST_CASE_METHOD(NMReset, "A mesh with no points goes through without a crash")

@@ -20,6 +20,9 @@ The runs, each ending with the process killed (a window flashes on the screen ea
 
   7. a launch that makes a node, edits it, drags a value and asks to frame (HELIX_DEBUG_FRAMING_CHECK):
      only the first node and the explicit request move the camera, an edit and a drag leave it;
+  7b. a launch in French that makes a grid and a transform from the editor (HELIX_DEBUG_NODE_EDIT),
+     duplicates them, renames one and undoes it: the names are French, the copy reads the copy, the
+     rename is followed by what reads the node, and undo gives the old name back;
   8. a launch that opens a second scene while one is open (HELIX_DEBUG_OPEN_SECOND), answering the
      question "Close it and open this one?" with Close and Open, then with Cancel
      (HELIX_DEBUG_SWITCH): the app must live, the second scene must replace the first in the one
@@ -135,6 +138,28 @@ def framing_follows_the_rule(lines):
 framing_follows_the_rule.whole_log = True
 
 
+def nodes_are_named_copied_and_renamed(lines):
+    """Nodes made from the editor take the French labels, a duplicate reads the copy of what the
+    original read, a rename is followed by what reads the node, and undo puts the name back."""
+    for line in lines:
+        if not line.startswith("helix-launch: node-edit "):
+            continue
+        fields = dict(part.split("=", 1) for part in line[len("helix-launch: node-edit "):].split(" "))
+        return (
+            fields.get("added") == "grille1,transformer1"
+            and fields.get("duplicated") == "grille1,grille2,transformer1,transformer2"
+            and fields.get("copy-expression") == 'prm("grille2.size")'
+            and fields.get("renamed") == "grille2,sol,transformer1,transformer2"
+            and fields.get("renamed-expression") == 'prm("sol.size")'
+            and fields.get("undone") == "grille1,grille2,transformer1,transformer2"
+            and fields.get("selected-after-undo") == "1"
+        )
+    return False
+
+
+nodes_are_named_copied_and_renamed.whole_log = True
+
+
 def second_scene_replaced_the_first(path):
     """The question was asked about both scenes, answered, and the second scene is the one open."""
     def check(lines):
@@ -204,6 +229,8 @@ def main():
     extra_runs = [
         ("a node, an edit, a drag and Frame: only the first node and Frame move the camera", [], framing_follows_the_rule,
          {"HELIX_DEBUG_FRAMING_CHECK": "1"}),
+        ("nodes: French names, duplicate, rename that follows, undo", ["--language", "fr"], nodes_are_named_copied_and_renamed,
+         {"HELIX_DEBUG_NODE_EDIT": "1"}),
         ("a second scene: Close and Open replaces the first", [waves], second_scene_replaced_the_first(quad),
          {"HELIX_DEBUG_OPEN_SECOND": quad, "HELIX_DEBUG_SWITCH": "close"}),
         ("a second scene: Cancel leaves the first", [waves], second_scene_was_refused,

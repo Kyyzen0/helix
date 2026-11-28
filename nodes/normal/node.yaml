@@ -3,6 +3,7 @@ version: 1
 name: normal
 namespace: helix
 label: Normal
+description: "Works out which way each point faces and stores it as data, without changing the shape."
 tags: [attribute, utility]
 
 inputs:

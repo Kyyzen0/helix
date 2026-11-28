@@ -3,6 +3,7 @@ version: 1
 name: modelRat
 namespace: helix
 label: "Model: Rat"
+description: "A test model of a rat, only for checking that models load."
 tags: [model, test, animal]
 
 outputs: 1

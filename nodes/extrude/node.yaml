@@ -3,6 +3,7 @@ version: 1
 name: extrude
 namespace: helix
 label: Extrude
+description: "Pushes the faces of a shape outward to give it thickness."
 tags: [polygon, surface, modelling]
 
 inputs:

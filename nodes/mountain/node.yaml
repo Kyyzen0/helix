@@ -3,6 +3,7 @@ version: 1
 name: mountain
 namespace: helix
 label: Mountain
+description: "Raises hills and mountains on a surface with layered noise."
 tags: [mountain, terrain, noise]
 
 implementation:
@@ -12,6 +13,7 @@ implementation:
 parameterValues:
   name: Position
   type: vector
+  amplitude: 1
   fractalType: fbm
   alongVector: true
   octaves: 5

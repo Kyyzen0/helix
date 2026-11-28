@@ -167,13 +167,33 @@ struct InspectorNode: Equatable, Sendable {
     var id: UInt64
     var name: String
     var path: String
-    /// The name of the type, such as "Attribute Noise".
+    /// The full name of the type the node is, such as `helix::attributeNoise`, whatever alias made it.
+    var type = ""
+    /// The name of the type, such as "Attribute Noise", or of the alias the node was made from,
+    /// such as "Mountain".
     var typeLabel: String
+    /// The type an alias node is based on, such as "Attribute Noise", or nil.
+    var basedOn: String? = nil
     var isDisplay: Bool
     var error: String?
     var warnings: [String] = []
     var layout: [InspectorLayoutItem] = []
     var parameters: [String: InspectorParameter] = [:]
+}
+
+extension InspectorNode {
+    /// The types that write an attribute, and the parameter that names it.
+    private static let attributeWriters: Set<String> = ["helix::attributeNoise", "helix::normal", "helix::attributeCreate"]
+
+    /// The attribute a node writes when that leaves the shape as it was, or nil. Position is the
+    /// one attribute that is the shape: a node that writes it moves the points. A node that
+    /// writes any other, "noise" or "Normal", adds data that nothing draws, so the inspector says
+    /// so, and where to see it. It is read from the value typed, not from what the node cooked.
+    var writtenAttribute: String? {
+        guard Self.attributeWriters.contains(type) else { return nil }
+        let name = (parameters["name"]?.strings.first ?? "").trimmingCharacters(in: .whitespaces)
+        return name.isEmpty || name == "Position" ? nil : name // l10n-ok: the name of the attribute of the points
+    }
 }
 
 /// What the inspector has to show.

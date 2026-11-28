@@ -59,6 +59,13 @@ Status requireNodeInScene(NodeId node);
 /// @brief Notes that the scene has changed since it was saved.
 void noteSceneModified();
 
+/// @brief Empties the engine's own undo stack, which nothing reads (see HelixCore.cpp).
+void dropEngineUndo();
+
+/// @brief Waits for a background cook to finish and turns background cooking off, so the calling
+/// thread can edit the network.
+void ensureSynchronousCooking();
+
 /// @brief Pulls a value back to the locked ends of the range a component declares, as a literal
 /// written through the facade is.
 float holdFloatToRange(prm::NodeParameter& parameter, std::uint32_t component, float value);

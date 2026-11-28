@@ -16,6 +16,9 @@ struct NodeEditorView: View {
             if let request = model.palette {
                 NodePalette(model: model, request: request, area: model.viewSize)
             }
+            if let session = model.renaming {
+                NodeRenameField(model: model, session: session)
+            }
             if let message = model.message {
                 Text(message)
                     .padding(.horizontal, 14)
@@ -54,5 +57,44 @@ struct NetworkEmptyHint: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .allowsHitTesting(false)
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// The name of a node being typed over its card. Return takes it, Escape and a click elsewhere
+/// leave the old one, and a name that cannot be taken stays here with the reason under it.
+struct NodeRenameField: View {
+    @ObservedObject var model: NodeEditorModel
+    let session: RenameSession
+    @Environment(\.interfaceSize) private var size
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        if let node = model.graph.node(session.node) {
+            let card = model.transform.viewRect(EditorLayout.cardRect(at: model.displayPosition(of: node)))
+            let width = max(card.width, size.points(190))
+            VStack(alignment: .leading, spacing: 4) {
+                TextField("Name", text: Binding(get: { session.text }, set: { model.renameTextChanged($0) }))
+                    .textFieldStyle(.roundedBorder)
+                    .focused($focused)
+                    .onSubmit { model.commitRename() }
+                    .onExitCommand { model.cancelRename() }
+                    .onAppear { focused = true }
+                    .onChange(of: focused) { _, isFocused in
+                        if !isFocused { model.cancelRename() }
+                    }
+                    .accessibilityLabel(Text("Node name"))
+                if let error = session.error {
+                    Text(error)
+                        .uiFont(.caption)
+                        .foregroundStyle(.red)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6))
+                }
+            }
+            .frame(width: width, alignment: .leading)
+            .position(x: card.midX, y: card.midY + (session.error == nil ? 0 : size.points(18)))
+        }
     }
 }

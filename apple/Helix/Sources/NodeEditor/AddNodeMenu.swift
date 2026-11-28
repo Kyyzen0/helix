@@ -27,6 +27,7 @@ struct NodeList: View {
             Button { add(type) } label: {
                 Label(type.label, systemImage: NodeCategory.symbol(of: type))
             }
+            .help(type.description)
         }
     }
 }

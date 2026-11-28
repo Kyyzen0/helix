@@ -28,6 +28,7 @@ enum InspectorSnapshotCommand {
         func beginContinuousEdit(named name: String) {}
         func endContinuousEdit() {}
         func setDisplay(_ node: UInt64) -> EditOutcome { .done }
+        func rename(_ node: UInt64, to name: String) -> EditOutcome { .done }
     }
 
     static func run(_ all: [String]) -> Int32 {
@@ -67,6 +68,8 @@ enum InspectorSnapshotCommand {
             let source = ReadOnlySource()
             let model = InspectorModel()
             model.editing = source
+            // The button of the note is drawn, though it does nothing in a picture.
+            model.showSpreadsheet = {}
             model.select(nodes: [node.id])
             guard case .node(let loaded) = model.content else { return fail("the node could not be read") }
 
@@ -96,7 +99,9 @@ enum InspectorSnapshotCommand {
 
     /// Draws a view in an off screen window, as tall as the rows need when no height is given.
     private static func draw<Content: View>(_ content: Content, width: Double, height: Double?, dark: Bool) -> CGImage? {
-        let host = NSHostingView(rootView: content)
+        // With no height the panel is drawn as tall as its rows. Left to fill the window it would
+        // centre them in it, and the header would sit in the middle of a tall empty picture.
+        let host = NSHostingView(rootView: height == nil ? AnyView(content.fixedSize(horizontal: false, vertical: true)) : AnyView(content))
         host.frame = NSRect(x: 0, y: 0, width: width, height: height ?? 100)
         let window = NSWindow(contentRect: host.frame, styleMask: [.borderless], backing: .buffered, defer: false)
         window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
@@ -107,7 +112,10 @@ enum InspectorSnapshotCommand {
             RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.15))
         }
         // The height the rows ask for at this width, from SwiftUI itself.
-        let natural = NSHostingController(rootView: content).sizeThatFits(in: CGSize(width: width, height: 20_000)).height
+        // Measured with the height left free (`fixedSize`): the panel fills the height it is given, so
+        // measured as it is it answers with the 20 000 points offered, and the picture is that tall.
+        let natural = NSHostingController(rootView: content.fixedSize(horizontal: false, vertical: true))
+            .sizeThatFits(in: CGSize(width: width, height: 20_000)).height
         let size = NSSize(width: width, height: height ?? ceil(natural))
         window.setContentSize(size)
         host.frame = NSRect(origin: .zero, size: size)
@@ -119,25 +127,30 @@ enum InspectorSnapshotCommand {
         return height == nil ? trimmed(image) : image
     }
 
-    /// The picture without the empty window background under the last row, which SwiftUI's
-    /// estimate of the height of the rows overshoots.
+    /// The picture without the empty window background above the header and under the last row,
+    /// which SwiftUI's estimate of the height of the rows overshoots.
     private static func trimmed(_ image: CGImage) -> CGImage {
         guard let data = image.dataProvider?.data, let bytes = CFDataGetBytePtr(data) else { return image }
         let bytesPerPixel = image.bitsPerPixel / 8
         guard bytesPerPixel >= 3 else { return image }
         let background = (0..<bytesPerPixel).map { bytes[$0] }
-        var last = image.height - 1
-        rows: while last > 0 {
+        func rowHasInk(_ row: Int) -> Bool {
             for x in 0..<image.width {
-                let offset = last * image.bytesPerRow + x * bytesPerPixel
+                let offset = row * image.bytesPerRow + x * bytesPerPixel
                 for channel in 0..<bytesPerPixel where abs(Int(bytes[offset + channel]) - Int(background[channel])) > 3 {
-                    break rows
+                    return true
                 }
             }
-            last -= 1
+            return false
         }
+        var first = 0
+        while first < image.height - 1, !rowHasInk(first) { first += 1 }
+        var last = image.height - 1
+        while last > first, !rowHasInk(last) { last -= 1 }
+        // Some air above the header and under the last row, so nothing sits against the edge.
+        let top = max(first - 24, 0)
         let keep = min(image.height, last + 1 + 24)
-        return image.cropping(to: CGRect(x: 0, y: 0, width: image.width, height: keep)) ?? image
+        return image.cropping(to: CGRect(x: 0, y: top, width: image.width, height: keep - top)) ?? image
     }
 
     private static func write(_ image: CGImage, to path: String) throws {

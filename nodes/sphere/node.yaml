@@ -3,6 +3,7 @@ version: 1
 name: sphere
 namespace: helix
 label: Sphere
+description: "Makes a ball."
 tags: [primitive, surface, polygon]
 
 outputs: 1

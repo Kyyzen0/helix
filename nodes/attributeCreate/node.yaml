@@ -3,6 +3,7 @@ version: 1
 name: attributeCreate
 namespace: helix
 label: Attribute Create
+description: "Adds a named piece of data with a fixed value to the geometry, without changing its shape."
 tags: [attribute, utility]
 
 inputs:

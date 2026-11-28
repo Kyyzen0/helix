@@ -20,6 +20,8 @@ struct EditorNodeType: Hashable, Sendable {
     /// The name a person reads, such as "Cube".
     var label: String
     var tags: [String] = []
+    /// One sentence that says what the node does, in the language of the interface, or empty.
+    var description = ""
     /// What the palette also searches: the English label and tags the engine gives, when `label`
     /// and `tags` are in another language, so a search works in both.
     var searchLabels: [String] = []
@@ -32,6 +34,10 @@ struct EditorNodeType: Hashable, Sendable {
         EditorNodeType(name: name, label: name, inputs: [EditorPortInfo(label: "")], outputCount: 1)
     }
 
+    /// Whether the type is a test node, which is not offered to a person (palette, shelf, menus).
+    /// A scene that already holds one still loads and draws it.
+    var isTest: Bool { (tags + searchTags).contains { $0.lowercased() == "test" } }
+
     var hasMultiInput: Bool { inputs.last?.multiInput ?? false }
 
     /// The number of ports that take one input each.
@@ -43,6 +49,9 @@ struct EditorNode: Hashable, Identifiable, Sendable {
     var id: UInt64
     /// The full type name, such as `helix::cube`.
     var type: String
+    /// The alias the node was made from, such as `helix::mountain`, or empty. The type above is
+    /// then the type the alias stands for.
+    var aliasType = ""
     var name: String
     /// The path in the scene, such as `/cube1`. A restore of the scene gives nodes new ids, so
     /// the path is what finds a node again.
@@ -106,6 +115,19 @@ struct EditorGraph: Sendable {
 
     func type(of node: EditorNode) -> EditorNodeType {
         types[node.type] ?? .unknown(node.type)
+    }
+
+    /// The name of the entry a person picked to make a node, which is the alias when the node was
+    /// made from one ("Mountain") and its type otherwise. An alias this build does not know leaves
+    /// the type.
+    func label(of node: EditorNode) -> String {
+        (types[node.aliasType].map(\.label)) ?? type(of: node).label
+    }
+
+    /// The type an alias node is based on, for a card and the inspector to say so under its
+    /// label ("Attribute Noise"). Nil for a node made from its type.
+    func basedOn(_ node: EditorNode) -> String? {
+        types[node.aliasType] == nil ? nil : type(of: node).label
     }
 
     /// The links that end in a node.

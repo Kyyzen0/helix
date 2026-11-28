@@ -30,7 +30,7 @@ enum PaletteSnapshotCommand {
         do {
             try EngineHost.shared.startEngine()
             let model = NodeEditorModel()
-            model.paletteTypes = NodeTypeCatalog.all
+            model.paletteTypes = NodeTypeCatalog.offered
             let request = PaletteRequest(anchor: CGPoint(x: 20, y: 10), canvas: .zero)
             let palette = themeOptions.palette(dark: dark)
             let view = NodePalette(model: model, request: request, area: CGSize(width: width, height: height), query: positional[0])

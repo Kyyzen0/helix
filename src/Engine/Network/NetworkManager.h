@@ -218,6 +218,23 @@ class NetworkManager
     void deleteNode(NodeId nodeId);
 
     /**
+     * @brief Gives a node another name, and every reference to it the new one.
+     *
+     * A node is read by its path from the expressions and the scripts of other nodes, so the
+     * references in every parameter of the network are rewritten to the new name (see
+     * rewriteNodeReferences). Keyframes, links, the display node and the selection hold the node
+     * by id and need nothing.
+     *
+     * @note Does nothing when the node already has that name. The change is not pushed on the
+     * undo stack of the engine.
+     *
+     * @throws std::invalid_argument when the name is not valid or another node of the scope has
+     * it, or when the node holds a scope (the nodes inside would have to move with it).
+     * @throws std::out_of_range when there is no such node.
+     */
+    void renameNode(NodeId nodeId, const std::string& newName);
+
+    /**
      * @brief Creates a node with an identity the caller dictates rather than one picked here.
      *
      * Every node enters the network here. createNode picks a free id and name and calls this,

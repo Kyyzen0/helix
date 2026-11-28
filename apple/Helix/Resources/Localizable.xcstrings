@@ -4306,23 +4306,6 @@
         }
       }
     },
-    "Open the Add menu, or click a button of the shelf under the 3D view, to make a node: a cube, a grid, a sphere. On an empty scene you can also start from an example.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open the Add menu, or click a button of the shelf under the 3D view, to make a node: a cube, a grid, a sphere. On an empty scene you can also start from an example."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ouvrez le menu Ajouter, ou cliquez sur un bouton du bandeau sous la vue 3D, pour créer un nœud : un cube, une grille, une sphère. Sur une scène vide, vous pouvez aussi partir d’un exemple."
-          }
-        }
-      }
-    },
     "Import a model": {
       "extractionState": "manual",
       "localizations": {
@@ -4336,23 +4319,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Importer un modèle"
-          }
-        }
-      }
-    },
-    "Choose Add ▸ Import a 3D Model (⌘I), or drop a file on the window. Helix reads glTF, FBX, OBJ and more. The file itself is never changed.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose Add ▸ Import a 3D Model (⌘I), or drop a file on the window. Helix reads glTF, FBX, OBJ and more. The file itself is never changed."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choisissez Ajouter ▸ Importer un modèle 3D (⌘I), ou déposez un fichier sur la fenêtre. Helix lit glTF, FBX, OBJ et d’autres formats. Le fichier lui-même n’est jamais modifié."
           }
         }
       }
@@ -4387,23 +4353,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nœuds"
-          }
-        }
-      }
-    },
-    "A node is one step. Connect the output at the bottom of a node to the input at the top of the next. The flag marks the node the 3D view shows: double-click a node to show it. A node in error has a red outline and a warning triangle; select it to read why.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A node is one step. Connect the output at the bottom of a node to the input at the top of the next. The flag marks the node the 3D view shows: double-click a node to show it. A node in error has a red outline and a warning triangle; select it to read why."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un nœud est une étape. Reliez la sortie, en bas d’un nœud, à l’entrée, en haut du suivant. Le drapeau marque le nœud que la vue 3D montre : double-cliquez sur un nœud pour l’afficher. Un nœud en erreur a un contour rouge et un triangle d’avertissement ; sélectionnez-le pour lire la cause."
           }
         }
       }
@@ -4931,6 +4880,533 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sur un trackpad, faites défiler à deux doigts pour tourner, gardez ⇧ pour déplacer la vue, et pincez ou gardez ⌘ pour zoomer. Avec une souris ou une Magic Mouse, le défilement doit zoomer : choisissez le préréglage Souris ou Magic Mouse dans Réglages ▸ Navigation. Appuyez sur F pour cadrer ce que vous avez fait. La carte en bas à gauche de la vue liste les gestes du préréglage ; Aide ▸ Afficher l’aide à la navigation la fait revenir."
+          }
+        }
+      }
+    },
+    "Rename Node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename Node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renommer le nœud"
+          }
+        }
+      }
+    },
+    "Cut Node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cut Node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couper le nœud"
+          }
+        }
+      }
+    },
+    "Cut Nodes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cut Nodes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couper les nœuds"
+          }
+        }
+      }
+    },
+    "Paste": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coller"
+          }
+        }
+      }
+    },
+    "Copy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copier"
+          }
+        }
+      }
+    },
+    "Cut": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cut"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couper"
+          }
+        }
+      }
+    },
+    "Duplicate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dupliquer"
+          }
+        }
+      }
+    },
+    "Duplicate Node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate Node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dupliquer le nœud"
+          }
+        }
+      }
+    },
+    "Duplicate Nodes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate Nodes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dupliquer les nœuds"
+          }
+        }
+      }
+    },
+    "Rename…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renommer…"
+          }
+        }
+      }
+    },
+    "Show This Result": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show This Result"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher ce résultat"
+          }
+        }
+      }
+    },
+    "There are no nodes to paste. Copy some nodes first.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There are no nodes to paste. Copy some nodes first."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il n’y a aucun nœud à coller. Copiez d’abord des nœuds."
+          }
+        }
+      }
+    },
+    "Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom"
+          }
+        }
+      }
+    },
+    "Node name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Node name"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom du nœud"
+          }
+        }
+      }
+    },
+    "Node name: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Node name: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom du nœud : %@"
+          }
+        }
+      }
+    },
+    "Renames the node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renames the node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renomme le nœud"
+          }
+        }
+      }
+    },
+    "Click to rename the node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click to rename the node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cliquez pour renommer le nœud"
+          }
+        }
+      }
+    },
+    "based on %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "based on %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "basé sur %@"
+          }
+        }
+      }
+    },
+    "A name cannot be empty.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A name cannot be empty."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nom ne peut pas être vide."
+          }
+        }
+      }
+    },
+    "A name has at most %lld characters.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A name has at most %lld characters."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nom compte au plus %lld caractères."
+          }
+        }
+      }
+    },
+    "Use letters, digits and underscores, with no spaces or accents.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use letters, digits and underscores, with no spaces or accents."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilisez des lettres, des chiffres et des tirets bas, sans espace ni accent."
+          }
+        }
+      }
+    },
+    "Node": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Node"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nœud"
+          }
+        }
+      }
+    },
+    "Open the Node menu, or click a button of the shelf under the 3D view, to make a node: a cube, a grid, a sphere. On an empty scene you can also start from an example.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the Node menu, or click a button of the shelf under the 3D view, to make a node: a cube, a grid, a sphere. On an empty scene you can also start from an example."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrez le menu Nœud, ou cliquez sur un bouton du bandeau sous la vue 3D, pour créer un nœud : un cube, une grille, une sphère. Sur une scène vide, vous pouvez aussi partir d’un exemple."
+          }
+        }
+      }
+    },
+    "Choose File ▸ Import a 3D Model (⌘I), or drop a file on the window. Helix reads glTF, FBX, OBJ and more. The file itself is never changed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose File ▸ Import a 3D Model (⌘I), or drop a file on the window. Helix reads glTF, FBX, OBJ and more. The file itself is never changed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez Fichier ▸ Importer un modèle 3D (⌘I), ou déposez un fichier sur la fenêtre. Helix lit glTF, FBX, OBJ et d’autres formats. Le fichier lui-même n’est jamais modifié."
+          }
+        }
+      }
+    },
+    "A node is one step. Connect the output at the bottom of a node to the input at the top of the next. The eye at the left of a card marks the node the 3D view shows: click it to show a node (a double click on the card works too). A node in error has a red outline and a warning triangle; select it to read why. A new node is named after its type: select it and press Return, or click its name in the inspector, to give it a name you will recognise. ⌘D duplicates the selected nodes, and ⌘C, ⌘X and ⌘V copy, cut and paste them, links between them included.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A node is one step. Connect the output at the bottom of a node to the input at the top of the next. The eye at the left of a card marks the node the 3D view shows: click it to show a node (a double click on the card works too). A node in error has a red outline and a warning triangle; select it to read why. A new node is named after its type: select it and press Return, or click its name in the inspector, to give it a name you will recognise. ⌘D duplicates the selected nodes, and ⌘C, ⌘X and ⌘V copy, cut and paste them, links between them included."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nœud est une étape. Reliez la sortie, en bas d’un nœud, à l’entrée, en haut du suivant. L’œil, à gauche d’une carte, marque le nœud que la vue 3D montre : cliquez dessus pour afficher un nœud (un double-clic sur la carte fonctionne aussi). Un nœud en erreur a un contour rouge et un triangle d’avertissement ; sélectionnez-le pour lire la cause. Un nouveau nœud porte le nom de son type : sélectionnez-le et appuyez sur Retour, ou cliquez sur son nom dans l’inspecteur, pour lui donner un nom que vous reconnaîtrez. ⌘D duplique les nœuds sélectionnés, et ⌘C, ⌘X et ⌘V les copient, les coupent et les collent, avec les liens qui les relient."
+          }
+        }
+      }
+    },
+    "This node adds the data “%@” without changing the shape.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This node adds the data “%@” without changing the shape."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce nœud ajoute la donnée « %@ » sans changer la forme."
+          }
+        }
+      }
+    },
+    "Show in Spreadsheet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show in Spreadsheet"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir dans le Tableur"
+          }
+        }
+      }
+    },
+    "Output": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Output"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sortie"
+          }
+        }
+      }
+    },
+    "Output %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Output %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sortie %lld"
+          }
+        }
+      }
+    },
+    "Tidy Graph": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidy Graph"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ranger le graphe"
+          }
+        }
+      }
+    },
+    "Show this result in the 3D view": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show this result in the 3D view"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher ce résultat dans la vue 3D"
           }
         }
       }

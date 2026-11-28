@@ -32,8 +32,25 @@ class NodeSnapshot
     /// restored before the nodes living inside it.
     void restore(NodeId nodeId) const;
 
+    /// @brief Rebuilds the node under another path and position than the ones it had.
+    /// @note Pasting a copy uses it, to make the node under a name that is free.
+    void restore(NodeId nodeId, const Path& path, Vector2 position) const;
+
     /// @brief Returns the path the node sat at, whose leaf is the node name.
     const Path& getPath() const { return path_; }
+
+    /// @brief Returns where the node sat.
+    Vector2 getPosition() const { return position_; }
+
+    /// @brief Returns the full name of the node's type, an alias's own type included.
+    const std::string& getTypeName() const { return typeName_; }
+
+    /// @brief Returns the alias the node was created from, empty when there was none.
+    const std::string& getAliasType() const { return aliasType_; }
+
+    /// @brief Returns the parameters, for a caller that has to change what they say before the
+    /// node is rebuilt (a copy points its expressions at the copies of the nodes they read).
+    std::vector<ParameterSerializable>& parameters() { return parameters_; }
 
   private:
     friend class cereal::access;
@@ -47,6 +64,9 @@ class NodeSnapshot
             cereal::make_nvp("posY", position_.y()),
             cereal::make_nvp("parameters", parameters_)
         );
+        // Written last and only when there is one, so a file of a node made from its type is
+        // what it always was.
+        if (!aliasType_.empty()) archive(cereal::make_nvp("alias", aliasType_));
     }
 
     template <class Archive> void load(Archive& archive)
@@ -63,9 +83,22 @@ class NodeSnapshot
         );
         path_ = Path(path);
         position_ = {posX, posY};
+
+        // A file written before nodes remembered their alias has no such field, and still
+        // opens: the field comes last, so a missing one leaves the archive where it was.
+        aliasType_.clear();
+        try
+        {
+            archive(cereal::make_nvp("alias", aliasType_));
+        }
+        catch (const cereal::Exception&)
+        {
+            aliasType_.clear();
+        }
     }
 
     std::string typeName_;
+    std::string aliasType_;
     Path path_;
     Vector2 position_ = {0.f, 0.f};
     std::vector<ParameterSerializable> parameters_;

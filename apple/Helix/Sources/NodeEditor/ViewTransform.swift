@@ -5,8 +5,12 @@ import CoreGraphics
 /// A canvas point maps to `canvas * zoom + offset`. Both spaces have y growing downward, so the
 /// view of the editor is flipped and nothing here turns an axis around.
 struct ViewTransform: Equatable, Sendable {
-    static let minZoom: CGFloat = 0.1
+    /// Below this the names of the cards are too small to read at all, so the view stops here.
+    static let minZoom: CGFloat = 0.25
     static let maxZoom: CGFloat = 5
+    /// The zoom framing never goes below: a graph that does not fit at this zoom is shown at it
+    /// and the rest is reached by scrolling, since a graph shrunk to fit is one nobody can read.
+    static let minFramedZoom: CGFloat = 0.6
 
     /// Where the origin of the canvas is, in the view.
     var offset = CGPoint.zero
@@ -46,22 +50,30 @@ struct ViewTransform: Equatable, Sendable {
 
     /// The transform that shows a rectangle of the canvas whole and centred in a view, with a
     /// margin around it. It does not zoom in past `maxFramedZoom`, so one small node does not
-    /// fill the view.
+    /// fill the view, and it does not zoom out past `minFramedZoom`: a rectangle that does not
+    /// fit at that zoom is shown at it, centred on `focus` (the node to look at) and not on the
+    /// middle of the rectangle, and the rest of it is a scroll away.
     static func framing(
         _ rect: CGRect,
         in size: CGSize,
         margin: CGFloat = 48,
-        maxFramedZoom: CGFloat = 1.5
+        maxFramedZoom: CGFloat = 1.5,
+        minFramedZoom: CGFloat = ViewTransform.minFramedZoom,
+        focus: CGPoint? = nil
     ) -> ViewTransform {
         guard size.width > 0, size.height > 0 else { return ViewTransform() }
         let availableWidth = max(size.width - 2 * margin, 1)
         let availableHeight = max(size.height - 2 * margin, 1)
         let fit = min(availableWidth / max(rect.width, 1), availableHeight / max(rect.height, 1))
-        let zoom = min(max(fit, minZoom), min(maxFramedZoom, maxZoom))
+        let ceiling = min(maxFramedZoom, maxZoom)
+        let floor = min(max(minFramedZoom, minZoom), ceiling)
+        let zoom = min(max(fit, floor), ceiling)
+        // Only a rectangle that does not fit is centred on the focus. One that fits is shown whole.
+        let centre = fit < floor ? (focus ?? CGPoint(x: rect.midX, y: rect.midY)) : CGPoint(x: rect.midX, y: rect.midY)
         return ViewTransform(
             offset: CGPoint(
-                x: size.width / 2 - rect.midX * zoom,
-                y: size.height / 2 - rect.midY * zoom
+                x: size.width / 2 - centre.x * zoom,
+                y: size.height / 2 - centre.y * zoom
             ),
             zoom: zoom
         )

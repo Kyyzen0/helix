@@ -3,6 +3,7 @@ version: 1
 name: sweep
 namespace: helix
 label: Sweep
+description: "Drags a profile along a curve to make a surface, like a pipe or a rail."
 tags: [curve, surface, polygon]
 
 inputs:

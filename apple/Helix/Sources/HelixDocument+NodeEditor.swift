@@ -26,8 +26,11 @@ extension HelixDocument: NodeEditorEditing {
     /// Makes the editor and the inspector ready, once the scene is loaded.
     func prepareEditor() {
         editor.editing = self
-        editor.paletteTypes = NodeTypeCatalog.all
+        editor.paletteTypes = NodeTypeCatalog.offered
         inspector.editing = self
+        inspector.showSpreadsheet = {
+            UserDefaults.standard.set(TimelineSetting.LowerPane.spreadsheet.rawValue, forKey: TimelineSetting.lowerPaneKey)
+        }
         // The inspector shows the node the editor has selected. The publisher fires before the
         // selection is set, so the new selection comes with it.
         inspectorSubscription = editor.$selectedNodes.sink { [weak self] selection in
@@ -44,7 +47,8 @@ extension HelixDocument: NodeEditorEditing {
     /// is unless `reframe` is set (see `FramingPolicy`).
     @discardableResult
     func performEdit(
-        named name: String, recook: Bool = true, reframe: Bool = false, _ body: () -> EditOutcome
+        named name: String, recook: Bool = true, reframe: Bool = false, pathChange: PathChange? = nil,
+        _ body: () -> EditOutcome
     ) -> EditOutcome {
         guard isActive else { return .failed(String(localized: "This scene is closed.")) }
         // An edit made while playing stops the playback: the frame that goes on moving would make
@@ -70,7 +74,7 @@ extension HelixDocument: NodeEditorEditing {
         let afterText = after.status.ok ? String(engineBytes: after.data) : nil
         let changed = afterText != beforeText
         if let afterText, changed {
-            registerUndo(named: name, restoring: beforeText, otherwise: afterText)
+            registerUndo(named: name, restoring: beforeText, otherwise: afterText, pathChange: pathChange)
         }
         if changed, recook { cookGeometry(reframe: reframe) }
         refreshEditor()
@@ -79,24 +83,27 @@ extension HelixDocument: NodeEditorEditing {
 
     /// Puts a step on the undo manager that restores `snapshot`. The step, in turn, registers
     /// the way back to `otherwise`, which is how redo comes about.
-    func registerUndo(named name: String, restoring snapshot: String, otherwise: String) {
+    ///
+    /// A step that renames a node says so in `pathChange`: the path the selected node has when the
+    /// step is undone is not the one it has when it is redone, and the selection is kept by path.
+    func registerUndo(named name: String, restoring snapshot: String, otherwise: String, pathChange: PathChange? = nil) {
         guard let undoManager else { return }
         undoManager.registerUndo(withTarget: self) { document in
             MainActor.assumeIsolated {
-                document.restore(snapshot, otherwise: otherwise, named: name)
+                document.restore(snapshot, otherwise: otherwise, named: name, pathChange: pathChange)
             }
         }
         undoManager.setActionName(name)
     }
 
-    private func restore(_ snapshot: String, otherwise: String, named name: String) {
-        let selectedPaths = selectedPathsBeforeRestore()
+    private func restore(_ snapshot: String, otherwise: String, named name: String, pathChange: PathChange?) {
+        let selectedPaths = Set(selectedPathsBeforeRestore().map { pathChange?.apply(to: $0) ?? $0 })
         timeline.pause()
         var status = helix.core.Status()
         // The scene holds the frame it was captured on, and the playhead is not part of an edit.
         keepingPlayhead { status = helix.core.restoreScene(std.string(snapshot)) }
         if !status.ok { presentedError = String(engineMessage: status.error) }
-        registerUndo(named: name, restoring: otherwise, otherwise: snapshot)
+        registerUndo(named: name, restoring: otherwise, otherwise: snapshot, pathChange: pathChange?.reversed)
         cookGeometry(reframe: false)
         reselectAfterRestore(paths: selectedPaths)
     }
@@ -114,11 +121,11 @@ extension HelixDocument: NodeEditorEditing {
         editor.select(nodes: Set(editor.graph.nodes.filter { selected.contains($0.path) }.map(\.id)))
     }
 
-    private func failure(_ status: helix.core.Status) -> EditOutcome {
+    func failure(_ status: helix.core.Status) -> EditOutcome {
         .failed(String(engineMessage: status.error))
     }
 
-    private func outcome(_ status: helix.core.Status) -> EditOutcome {
+    func outcome(_ status: helix.core.Status) -> EditOutcome {
         status.ok ? .done : failure(status)
     }
 
@@ -182,7 +189,12 @@ extension HelixDocument: NodeEditorEditing {
 
     func create(_ type: EditorNodeType, at position: CGPoint, wiredFrom: (node: UInt64, output: Int)?) -> EditOutcome {
         performEdit(named: String(localized: "Add \(type.label)")) {
-            let result = helix.core.createNode(std.string(type.name), std.string(""), Float(position.x), Float(position.y))
+            // The name comes from the label the person reads ("grille1", not "grid1"), numbered by the
+            // engine so that it is free. The engine checks it like a name that was typed, and an
+            // empty one (a label no name can be made of) leaves the naming to the engine.
+            let first = NodeNaming.firstName(forLabel: type.label)
+            let name = first.isEmpty ? "" : String(engine: helix.core.freeNodeName(std.string(first)))
+            let result = helix.core.createNode(std.string(type.name), std.string(name), Float(position.x), Float(position.y))
             if !result.status.ok { return failure(result.status) }
             if let wiredFrom {
                 let link = EditorLink(sourceNode: wiredFrom.node, sourceOutput: wiredFrom.output, targetNode: result.id, targetInput: 0)

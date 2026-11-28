@@ -3,6 +3,7 @@ version: 1
 name: circle
 namespace: helix
 label: Circle
+description: "Makes a circle drawn as a curve."
 tags: [primitive, curve, 2d]
 
 outputs: 1

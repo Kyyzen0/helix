@@ -248,6 +248,29 @@ TEST_CASE_METHOD(CoreFixture, "Cooking without a display node fails with a messa
     REQUIRE_FALSE(core::setDisplayNode(9999).ok);
 }
 
+TEST_CASE_METHOD(CoreFixture, "A scene keeps the values it saved when a node changes its defaults")
+{
+    TempFolder folder;
+
+    // What an attribute noise started with before it began by moving the geometry. A scene
+    // writes every value of every parameter, so it reads them back as they were saved.
+    const core::NodeId noise = core::createNode("helix::attributeNoise", "bruit", 0.f, 0.f).id;
+    REQUIRE(core::setString(noise, "name", 0, "noise").ok);
+    REQUIRE(core::setString(noise, "type", 0, "float").ok);
+    REQUIRE(core::setFloat(noise, "amplitude", 0, 1.f).ok);
+    REQUIRE(core::setInt(noise, "alongVector", 0, 0).ok);
+
+    const fs::path file = folder.file("old.kut");
+    REQUIRE(core::saveScene(file.string()).ok);
+    REQUIRE(core::newScene().ok);
+    REQUIRE(core::openScene(file.string()).ok);
+
+    const core::NodeId reopened = core::listNodes().front().id;
+    CHECK(core::getString(reopened, "name", 0).value == "noise");
+    CHECK(core::getString(reopened, "type", 0).value == "float");
+    CHECK(core::getFloat(reopened, "amplitude", 0).value == 1.f);
+}
+
 TEST_CASE_METHOD(CoreFixture, "A saved scene reopens as the same graph")
 {
     TempFolder folder;
@@ -701,6 +724,14 @@ TEST_CASE_METHOD(CoreFixture, "A node type tells its label, tags, input ports an
     REQUIRE(cube.status.ok);
     REQUIRE(cube.info.name == "helix::cube");
     REQUIRE(cube.info.label == "Cube");
+    // Every type the library ships says in a sentence what it does, an alias included. Types
+    // another test registers (a script, a user node) are not the library's.
+    for (const core::NodeTypeInfo& info : core::listNodeTypeInfos())
+    {
+        CAPTURE(info.name);
+        if (info.name.rfind("helix::", 0) == 0) REQUIRE_FALSE(info.description.empty());
+    }
+    REQUIRE(core::nodeTypeInfo("helix::mountain").info.description.size() > 10);
     REQUIRE(cube.info.inputs.empty());
     REQUIRE(cube.info.outputCount == 1);
 

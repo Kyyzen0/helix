@@ -254,6 +254,37 @@ void KeyframeStore::applyToParameters(floatT frame)
     }
 }
 
+std::optional<KeyframeStore::TrackCopy> KeyframeStore::copyTrack(const KeyframeTarget& target) const
+{
+    auto found = tracks_.find(target);
+    if (found == tracks_.end()) return std::nullopt;
+
+    TrackCopy copy;
+    copy.baseValue = found->second.getBaseValue();
+    copy.keyframes = found->second.getKeyframes();
+    auto expression = baseExpressions_.find(target);
+    if (expression != baseExpressions_.end()) copy.baseExpression = expression->second;
+    return copy;
+}
+
+void KeyframeStore::pasteTrack(const KeyframeTarget& target, const TrackCopy& copy)
+{
+    if (copy.keyframes.empty()) return;
+
+    KeyframeTrack track(copy.baseValue);
+    for (const Keyframe& key : copy.keyframes)
+        track.addKeyframe(key.frame, key.value, key.interpolation);
+    tracks_[target] = std::move(track);
+    if (copy.baseExpression) baseExpressions_[target] = copy.baseExpression;
+    else baseExpressions_.erase(target);
+
+    nt::nm().graph().setTimeDependent(nt::Unit{target.nodeId, target.parameter, target.component}, true);
+
+    trackChanged(target);
+    tracksChanged();
+    applyToParameters(nt::nm().getFrame());
+}
+
 KeyframeStore::KeyframeRecord KeyframeStore::makeRecord_(const KeyframeTarget& target) const
 {
     KeyframeRecord record;

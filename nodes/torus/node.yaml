@@ -3,6 +3,7 @@ version: 1
 name: torus
 namespace: helix
 label: Torus
+description: "Makes a ring shaped like a doughnut."
 tags: [primitive, surface, polygon]
 
 outputs: 1

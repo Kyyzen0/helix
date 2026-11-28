@@ -84,8 +84,11 @@ struct InspectorHeader: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(node.name).uiFont(.headline).lineLimit(1)
+                    InspectorNameField(node: node, model: model)
                     Text(node.typeLabel).uiFont(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    if let basedOn = node.basedOn {
+                        Text("based on \(basedOn)").uiFont(.caption).foregroundStyle(.tertiary).lineLimit(1)
+                    }
                 }
                 Spacer()
                 Button { model.setDisplay() } label: {
@@ -97,6 +100,7 @@ struct InspectorHeader: View {
                 .accessibilityLabel(Text("Display node"))
                 .accessibilityValue(node.isDisplay ? Text("On") : Text("Off"))
             }
+            if let attribute = node.writtenAttribute { AttributeNote(attribute: attribute, model: model) }
             if let error = node.error { DiagnosticBanner(text: error, isError: true) }
             ForEach(node.warnings, id: \.self) { DiagnosticBanner(text: $0, isError: false) }
             if let message = model.message {
@@ -104,6 +108,74 @@ struct InspectorHeader: View {
             }
         }
         .padding(12)
+    }
+}
+
+/// What a node that writes data without moving the shape says: what it writes, and a button to
+/// see it in the spreadsheet, since nothing in the 3D view shows it.
+struct AttributeNote: View {
+    let attribute: String
+    @ObservedObject var model: InspectorModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Image(systemName: "info.circle.fill").foregroundStyle(.secondary)
+                Text("This node adds the data “\(attribute)” without changing the shape.")
+                    .uiFont(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+            }
+            if model.showSpreadsheet != nil {
+                Button("Show in Spreadsheet") { model.showSpreadsheet?() }
+                    .controlSize(.small)
+            }
+        }
+        .padding(8)
+        .background(RoundedRectangle(cornerRadius: 7).fill(Color.secondary.opacity(0.12)))
+        .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color.secondary.opacity(0.35)))
+        .accessibilityElement(children: .contain)
+    }
+}
+
+/// The name of the node in the header, which a click or Return changes. Return takes the new name,
+/// Escape leaves the old one, and a name that cannot be taken stays in the field with the reason
+/// under it.
+struct InspectorNameField: View {
+    let node: InspectorNode
+    @ObservedObject var model: InspectorModel
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        if let draft = model.renameDraft {
+            VStack(alignment: .leading, spacing: 3) {
+                TextField("Name", text: Binding(get: { draft }, set: {
+                    model.renameDraft = $0
+                    model.renameDraftChanged()
+                }))
+                .textFieldStyle(.roundedBorder)
+                .uiFont(.headline)
+                .focused($focused)
+                .onSubmit { model.commitRename() }
+                .onExitCommand { model.cancelRename() }
+                .onAppear { focused = true }
+                .accessibilityLabel(Text("Node name"))
+                if let error = model.renameError {
+                    Text(error)
+                        .uiFont(.caption)
+                        .foregroundStyle(.red)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        } else {
+            Button { model.beginRename() } label: {
+                Text(node.name).uiFont(.headline).lineLimit(1)
+            }
+            .buttonStyle(.plain)
+            .help("Click to rename the node")
+            .accessibilityLabel(Text("Node name: \(node.name)"))
+            .accessibilityHint(Text("Renames the node"))
+        }
     }
 }
 

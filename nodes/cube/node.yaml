@@ -3,6 +3,7 @@ version: 1
 name: cube
 namespace: helix
 label: Cube
+description: "Makes a box."
 tags: [primitive, surface, polygon]
 
 outputs: 1

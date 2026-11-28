@@ -40,6 +40,8 @@ protocol InspectorEditing: AnyObject {
     func beginContinuousEdit(named name: String)
     func endContinuousEdit()
     func setDisplay(_ node: UInt64) -> EditOutcome
+    /// Gives the node another name, and what reads it by name follows.
+    func rename(_ node: UInt64, to name: String) -> EditOutcome
 }
 
 /// An expression being typed on a component, which is not on the node until it is committed.
@@ -61,8 +63,15 @@ final class InspectorModel: ObservableObject {
     @Published private(set) var suggestions: [String: [String]] = [:]
     /// A refusal of the engine, to show in the inspector.
     @Published private(set) var message: String?
+    /// The name being typed in the header, or nil when the name is not being edited.
+    @Published var renameDraft: String?
+    /// Why the name typed cannot be taken, shown under the field.
+    @Published private(set) var renameError: String?
 
     weak var editing: InspectorEditing?
+    /// Switches the lower pane to the spreadsheet, for the note of a node that writes data the
+    /// shape does not show. Nil where there is no pane (a picture of the panel).
+    var showSpreadsheet: (() -> Void)?
 
     private var selection: Set<UInt64> = []
     private var gate = LiveUpdateGate()
@@ -88,6 +97,8 @@ final class InspectorModel: ObservableObject {
         rowMessages = [:]
         suggestions = [:]
         message = nil
+        renameDraft = nil
+        renameError = nil
         reload()
     }
 
@@ -110,6 +121,46 @@ final class InspectorModel: ObservableObject {
     var entries: [InspectorEntry] {
         guard let node else { return [] }
         return InspectorTree.build(layout: node.layout, parameters: node.parameters)
+    }
+
+    // MARK: Renaming
+
+    /// Starts editing the name of the node in the header.
+    func beginRename() {
+        guard let node else { return }
+        renameDraft = node.name
+        renameError = nil
+    }
+
+    /// Takes the name typed. A name that cannot be taken stays in the field with the reason under
+    /// it; one that is the node's own, or a rename that went through, ends the editing.
+    func commitRename() {
+        guard let node, let draft = renameDraft else { return }
+        let name = draft.trimmingCharacters(in: .whitespaces)
+        if name == node.name {
+            cancelRename()
+            return
+        }
+        if let problem = NodeNaming.problem(with: name) {
+            renameError = problem
+            return
+        }
+        if let error = editing?.rename(node.id, to: name).error {
+            renameError = error
+            return
+        }
+        renameDraft = nil
+        renameError = nil
+        reload()
+    }
+
+    func cancelRename() {
+        renameDraft = nil
+        renameError = nil
+    }
+
+    func renameDraftChanged() {
+        renameError = nil
     }
 
     // MARK: Editing

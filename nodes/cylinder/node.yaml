@@ -3,6 +3,7 @@ version: 1
 name: cylinder
 namespace: helix
 label: Cylinder
+description: "Makes a cylinder with a radius and a height."
 tags: [primitive, surface, polygon]
 
 outputs: 1

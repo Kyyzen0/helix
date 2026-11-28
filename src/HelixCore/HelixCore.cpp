@@ -128,6 +128,7 @@ NodeInfo describe(nt::NodeId id, nt::Node& node)
     info.y = node.getPosition().y();
     info.error = node.getError();
     info.warnings = node.getWarnings();
+    info.aliasType = node.getAliasType();
     return info;
 }
 
@@ -293,6 +294,7 @@ NodeTypeInfo describeType(
     const std::string& name,
     const std::string& label,
     const std::vector<std::string>& tags,
+    const std::string& description,
     const nt::NodeType& type
 )
 {
@@ -300,6 +302,7 @@ NodeTypeInfo describeType(
     info.name = name;
     info.label = label;
     info.tags = tags;
+    info.description = description;
     info.outputCount = type.maxOutputs;
     for (const nt::InputPort& port : type.inputPorts)
         info.inputs.push_back({port.label, port.multiInput, port.optional});
@@ -311,14 +314,14 @@ bool describeTypeNamed(const std::string& fullName, NodeTypeInfo& info)
 {
     if (const nt::NodeType* type = nt::NodeTypeTable::getNodeType(fullName))
     {
-        info = describeType(type->getFullName(), type->getLabel(), type->tags, *type);
+        info = describeType(type->getFullName(), type->getLabel(), type->tags, type->description, *type);
         return true;
     }
     if (const nt::NodeAlias* alias = nt::NodeTypeTable::getNodeAlias(fullName))
     {
         const nt::NodeType* aliased = nt::NodeTypeTable::getNodeType(alias->aliasedType);
         if (!aliased) return false;
-        info = describeType(alias->getFullName(), alias->getLabel(), alias->tags, *aliased);
+        info = describeType(alias->getFullName(), alias->getLabel(), alias->tags, alias->description, *aliased);
         return true;
     }
     return false;
@@ -357,6 +360,10 @@ Status requireNodeInScene(NodeId node)
 }
 
 void noteSceneModified() { markModified(); }
+
+void dropEngineUndo() { core::dropEngineUndo(); }
+
+void ensureSynchronousCooking() { core::ensureSynchronousCooking(); }
 
 } // namespace detail
 

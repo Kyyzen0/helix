@@ -66,6 +66,10 @@ struct NodeType
     /// @brief The words the tab menu searches on, such as "curve" or "primitive".
     std::vector<std::string> tags;
 
+    /// @brief One plain sentence saying what the node does, shown beside it in the palette.
+    /// Empty when the node.yaml gives none.
+    std::string description;
+
     /// @brief The folder the node was loaded from, which is also where its assets live.
     std::filesystem::path folder;
 

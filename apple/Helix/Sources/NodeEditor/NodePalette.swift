@@ -21,8 +21,8 @@ struct NodePalette: View {
         _query = State(initialValue: query)
     }
 
-    private static let width: CGFloat = 340
-    private static let rowHeight: CGFloat = 36
+    private static let width: CGFloat = 380
+    private static let rowHeight: CGFloat = 52
     private static let maxRows = 8
 
     private var results: [NodeSearch.Result] {
@@ -84,21 +84,24 @@ struct NodePalette: View {
     }
 
     private func row(_ type: EditorNodeType, isChosen: Bool) -> some View {
-        HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(type.label).fontWeight(.medium)
-                Text(type.name).font(.caption).foregroundStyle(isChosen ? .primary : .secondary)
+        // What the node does, in a sentence, and not its internal name, which the tooltip keeps.
+        VStack(alignment: .leading, spacing: 1) {
+            Text(type.label).fontWeight(.medium)
+            if !type.description.isEmpty {
+                Text(type.description)
+                    .font(.caption)
+                    .foregroundStyle(isChosen ? .primary : .secondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            Spacer(minLength: 8)
-            Text(type.tags.prefix(2).joined(separator: ", "))
-                .font(.caption)
-                .foregroundStyle(isChosen ? .primary : .secondary)
-                .lineLimit(1)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 10)
         .frame(height: Self.rowHeight)
         .background(isChosen ? theme.accent.opacity(0.3) : Color.clear)
         .contentShape(Rectangle())
+        .help(type.name)
+        .accessibilityElement(children: .combine)
     }
 }
 

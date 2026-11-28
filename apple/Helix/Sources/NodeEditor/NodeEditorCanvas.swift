@@ -42,6 +42,7 @@ struct NodeEditorPainter {
         paintGrid(&context)
         paintLinks(&context)
         paintNodes(&context)
+        paintHover(&context)
         paintGesture(&context)
     }
 
@@ -166,34 +167,52 @@ struct NodeEditorPainter {
         paintBadge(of: node, in: card, &context)
 
         paintPorts(of: node, type: type, &context)
-        guard zoom >= 0.3 else { return }
+        paintEye(of: node, in: card, shape: shape, &context)
 
-        let left = card.minX + (isDisplay ? 12 : 9) * zoom
-        let flagSpace: CGFloat = isDisplay ? 18 * zoom : 0
-        let textWidth = card.width - (left - card.minX) - 8 * zoom - flagSpace
-        let name = fitted(node.name, font: .system(size: 13 * zoom, weight: .semibold), width: textWidth, in: context)
+        // The name stays down to the smallest zoom, in a font that does not shrink below what
+        // can still be told apart. The type under it joins it from 0.4.
+        let hasEye = zoom >= EditorLayout.eyeMinZoom
+        let left = card.minX + (hasEye ? 27 : (isDisplay ? 12 : 9)) * zoom
+        let textWidth = card.width - (left - card.minX) - 8 * zoom
+        let twoLines = zoom >= 0.4
+        let nameFont = Font.system(size: max(13 * zoom, 7), weight: .semibold)
+        let name = fitted(node.name, font: nameFont, width: textWidth, in: context)
         context.draw(
-            context.resolve(Text(name).font(.system(size: 13 * zoom, weight: .semibold)).foregroundColor(colors.text)),
-            at: CGPoint(x: left, y: card.minY + card.height * (zoom >= 0.5 ? 0.38 : 0.5)),
+            context.resolve(Text(name).font(nameFont).foregroundColor(colors.text)),
+            at: CGPoint(x: left, y: card.minY + card.height * (zoom >= 0.5 ? 0.38 : (twoLines ? 0.34 : 0.5))),
             anchor: .leading
         )
-        if zoom >= 0.5 {
-            let label = fitted(type.label, font: .system(size: 11 * zoom), width: textWidth, in: context)
+        if twoLines {
+            let labelFont = Font.system(size: max(11 * zoom, 6))
+            let label = fitted(graph.label(of: node), font: labelFont, width: textWidth, in: context)
             context.draw(
-                context.resolve(Text(label).font(.system(size: 11 * zoom)).foregroundColor(colors.textSecondary)),
-                at: CGPoint(x: left, y: card.minY + card.height * 0.7),
+                context.resolve(Text(label).font(labelFont).foregroundColor(colors.textSecondary)),
+                at: CGPoint(x: left, y: card.minY + card.height * (zoom >= 0.5 ? 0.7 : 0.72)),
                 anchor: .leading
             )
         }
-        if isDisplay {
-            var flag = context.resolve(Image(systemName: "flag.fill"))
-            flag.shading = .color(colors.displayFlag)
-            let side = 11 * zoom
-            context.draw(
-                flag,
-                in: CGRect(x: card.maxX - 8 * zoom - side, y: card.minY + 6 * zoom, width: side, height: side)
-            )
+    }
+
+    /// The eye at the left of a card: filled, in the colour of the display, on the node that is
+    /// shown in the 3D view, and an outline on a card the pointer is over, which the person can
+    /// click to show it. It lights up when the pointer is on the eye itself.
+    private func paintEye(of node: EditorNode, in card: CGRect, shape: Path, _ context: inout GraphicsContext) {
+        guard zoom >= EditorLayout.eyeMinZoom else { return }
+        let isDisplay = graph.displayNode == node.id
+        let overCard = model.hover.node == node.id
+        let overEye = overCard && model.hover.eye
+        guard isDisplay || overCard else { return }
+        let strip = CGRect(x: card.minX, y: card.minY, width: EditorLayout.eyeWidth * zoom, height: card.height)
+        if overEye {
+            var clipped = context
+            clipped.clip(to: shape)
+            clipped.fill(Path(strip), with: .color(colors.text.opacity(0.1)))
         }
+        let name = isDisplay ? "eye.fill" : "eye"
+        var symbol = context.resolve(Image(systemName: name))
+        symbol.shading = .color(isDisplay ? colors.displayFlag : (overEye ? colors.text : colors.textSecondary))
+        let width = 15 * zoom
+        context.draw(symbol, in: CGRect(x: strip.midX - width / 2 + 1 * zoom, y: strip.midY - width / 2, width: width, height: width))
     }
 
     /// A red triangle for a node that failed, an orange circle for one that only warns, at the
@@ -227,13 +246,16 @@ struct NodeEditorPainter {
         let radius = max(EditorLayout.portRadius * zoom, 2.5)
         let linked = Set(graph.links(into: node.id).map(\.targetInput))
         let outputsLinked = Set(graph.links.filter { $0.sourceNode == node.id }.map(\.sourceOutput))
+        // A port the pointer is on grows a little, so it reads as the thing under it.
+        func grown(_ port: EditorPort) -> CGFloat { model.hover.port == port ? radius * 1.45 : radius }
 
         for index in 0..<type.singleInputCount {
             let centre = transform.viewPoint(EditorLayout.inputPoint(of: node, type: type, index: index, multiCount: 0))
-            paintPort(at: centre, radius: radius, filled: linked.contains(index), &context)
+            paintPort(at: centre, radius: grown(.input(node: node.id, index: index)), filled: linked.contains(index), &context)
         }
         if let bar = EditorLayout.multiInputBar(of: node, type: type) {
-            let rect = transform.viewRect(bar)
+            var rect = transform.viewRect(bar)
+            if model.hover.port == .input(node: node.id, index: type.inputs.count - 1) { rect = rect.insetBy(dx: -2, dy: -1.5) }
             let shape = Path(roundedRect: rect, cornerRadius: rect.height / 2)
             let single = type.singleInputCount
             let isLinked = linked.contains { $0 >= single }
@@ -242,7 +264,42 @@ struct NodeEditorPainter {
         }
         for index in 0..<max(type.outputCount, 0) {
             let centre = transform.viewPoint(EditorLayout.outputPoint(of: node, type: type, index: index))
-            paintPort(at: centre, radius: radius, filled: outputsLinked.contains(index), &context)
+            paintPort(at: centre, radius: grown(.output(node: node.id, index: index)), filled: outputsLinked.contains(index), &context)
+        }
+        paintPortNames(of: node, type: type, &context)
+    }
+
+    /// The short names of the ports of a node that has several, above its inputs and under its
+    /// outputs, once the zoom is large enough to read them. With one port the name says nothing
+    /// the card does not, and it shows on hover instead.
+    private func paintPortNames(of node: EditorNode, type: EditorNodeType, _ context: inout GraphicsContext) {
+        guard zoom >= 1 else { return }
+        let font = Font.system(size: 10)
+        if type.inputs.count >= 2 {
+            let slot = EditorLayout.cardSize.width / CGFloat(type.inputs.count + 1) * zoom
+            for (index, port) in type.inputs.enumerated() where !port.label.isEmpty && model.hover.port != .input(node: node.id, index: index) {
+                let anchor = index < type.singleInputCount
+                    ? EditorLayout.inputPoint(of: node, type: type, index: index, multiCount: 0)
+                    : EditorLayout.multiInputBar(of: node, type: type).map { CGPoint(x: $0.midX, y: $0.minY + 3) }
+                guard let anchor else { continue }
+                let centre = transform.viewPoint(anchor)
+                let text = fitted(port.label, font: font, width: slot, in: context)
+                context.draw(
+                    context.resolve(Text(text).font(font).foregroundColor(colors.textSecondary)),
+                    at: CGPoint(x: centre.x, y: centre.y - 8 - 3 * zoom)
+                )
+            }
+        }
+        if type.outputCount >= 2 {
+            let slot = EditorLayout.cardSize.width / CGFloat(type.outputCount + 1) * zoom - 6
+            for index in 0..<type.outputCount where model.hover.port != .output(node: node.id, index: index) {
+                let centre = transform.viewPoint(EditorLayout.outputPoint(of: node, type: type, index: index))
+                let text = fitted(EditorLayout.outputLabel(index, of: type.outputCount), font: font, width: slot, in: context)
+                context.draw(
+                    context.resolve(Text(text).font(font).foregroundColor(colors.textSecondary)),
+                    at: CGPoint(x: centre.x, y: centre.y + 8 + 3 * zoom)
+                )
+            }
         }
     }
 
@@ -250,6 +307,52 @@ struct NodeEditorPainter {
         let circle = Path(ellipseIn: CGRect(x: centre.x - radius, y: centre.y - radius, width: radius * 2, height: radius * 2))
         context.fill(circle, with: .color(filled ? portFill : cardFill))
         context.stroke(circle, with: .color(portFill), lineWidth: 1)
+    }
+
+    // MARK: Hover
+
+    /// The label of the port the pointer is on, in a bubble over its card: above an input, under an
+    /// output, drawn last so no card covers it.
+    private func paintHover(_ context: inout GraphicsContext) {
+        guard let port = model.hover.port, let point = EditorLayout.point(of: port, in: graph) else { return }
+        let text = EditorLayout.label(of: port, in: graph)
+        guard !text.isEmpty else { return }
+        var shownPoint = point
+        if let node = graph.node(port.node) {
+            // The port moves with its card while the card is dragged.
+            let delta = CGPoint(x: model.displayPosition(of: node).x - node.position.x, y: model.displayPosition(of: node).y - node.position.y)
+            shownPoint = CGPoint(x: point.x + delta.x, y: point.y + delta.y)
+        }
+        let centre = transform.viewPoint(shownPoint)
+        let resolved = context.resolve(Text(text).font(.system(size: 12, weight: .medium)).foregroundColor(colors.text))
+        let measured = resolved.measure(in: CGSize(width: 400, height: 40))
+        let above: Bool = { if case .input = port { return true } else { return false } }()
+        let lift = max(EditorLayout.portRadius * zoom, 2.5) * 1.45 + 6
+        let width = measured.width + 14, height = measured.height + 6
+        // The wire of the port leaves towards one side, so the bubble goes to the other: it names
+        // the port without covering the link it is about.
+        var wireX: CGFloat?
+        switch port {
+        case .input(let id, let index):
+            if let link = graph.link(into: id, input: index), let (start, _) = EditorLayout.endpoints(of: link, in: graph) { wireX = start.x }
+        case .output(let id, let index):
+            let link = graph.links.first { $0.sourceNode == id && $0.sourceOutput == index }
+            if let link, let (_, end) = EditorLayout.endpoints(of: link, in: graph) { wireX = end.x }
+        }
+        var chip = CGRect(x: centre.x - width / 2, y: above ? centre.y - lift - height : centre.y + lift, width: width, height: height)
+        if let wireX {
+            let wireInView = transform.viewPoint(CGPoint(x: wireX, y: 0)).x
+            chip.origin.x = wireInView > centre.x ? centre.x - 10 - width : centre.x + 10
+            // Above the row of the short names of the other ports, which it would cover.
+            chip.origin.y = above ? centre.y - 20 - height : centre.y + 20
+        }
+        // Kept inside the view, so a card at an edge does not cut it off.
+        chip.origin.x = min(max(chip.origin.x, 4), max(size.width - width - 4, 4))
+        chip.origin.y = min(max(chip.origin.y, 4), max(size.height - height - 4, 4))
+        let bubble = Path(roundedRect: chip, cornerRadius: height / 2)
+        context.fill(bubble, with: .color(cardFill))
+        context.stroke(bubble, with: .color(accent), lineWidth: 1.2)
+        context.draw(resolved, at: CGPoint(x: chip.midX, y: chip.midY))
     }
 
     // MARK: The gesture in progress

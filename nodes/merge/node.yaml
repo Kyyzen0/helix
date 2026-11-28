@@ -3,6 +3,7 @@ version: 1
 name: merge
 namespace: helix
 label: Merge
+description: "Joins several shapes into one."
 tags: [utility, combine]
 
 inputs:

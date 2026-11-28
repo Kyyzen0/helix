@@ -131,7 +131,18 @@ class Node
     const Path& getPath() const { return path_; }
 
     /// @brief Sets the full path locating this node within the network.
+    /// @note Only NetworkManager::renameNode calls this: a path is also what expressions use to
+    /// find the node, so changing it alone would break every reference to it.
     void setPath(const Path& path) { path_ = path; }
+
+    /// @brief Returns the full name of the alias the node was created from, such as
+    /// "helix::mountain", or an empty string for a node created from its type.
+    /// @note The node is a node of the aliased type, with the alias's values set when it was
+    /// made. The name is only kept so that a person still sees the entry they picked.
+    const std::string& getAliasType() const { return aliasType_; }
+
+    /// @brief Records the alias the node was created from.
+    void setAliasType(std::string aliasType) { aliasType_ = std::move(aliasType); }
 
     /**
      * @brief Returns the static type definition this node was created from.
@@ -268,6 +279,8 @@ class Node
     const helix::nt::NodeType& nodeType_;
     // Full path locating this node within the network, its leaf is the node name
     Path path_;
+    // The alias the node was created from, empty when it was created from its type
+    std::string aliasType_;
     Vector2 position_{0.f, 0.f};
     bool dirty_ = true;
 };

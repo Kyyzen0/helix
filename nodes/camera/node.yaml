@@ -3,6 +3,7 @@ version: 1
 name: camera
 namespace: helix
 label: Camera
+description: "Makes a camera that looks at the scene."
 tags: [primitive, camera, scene]
 
 outputs: 1

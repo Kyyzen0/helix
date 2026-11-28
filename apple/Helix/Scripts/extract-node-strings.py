@@ -12,6 +12,7 @@ is missing, so a new node still shows up in English until it is translated.
 
 Keys (the type is `<namespace>::<name>`, as the engine names it):
   node.<type>.label                 the name of the node type
+  node.<type>.description           the sentence that says what the node does (palette, menus)
   node.<type>.input.<index>         the label of an input port
   param.<type>.<name>.label         a parameter, a group or a divider
   param.<type>.<name>.tooltip       its tooltip
@@ -210,6 +211,8 @@ def collect(node_dir):
     out = []
     if data.get("label"):
         out.append((f"node.{type_name}.label", str(data["label"])))
+    if data.get("description"):
+        out.append((f"node.{type_name}.description", str(data["description"])))
     for index, port in enumerate(data.get("inputs") or []):
         if isinstance(port, dict) and port.get("label"):
             out.append((f"node.{type_name}.input.{index}", str(port["label"])))

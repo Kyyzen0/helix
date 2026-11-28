@@ -3,6 +3,7 @@ version: 1
 name: grid
 namespace: helix
 label: Grid
+description: "Makes a flat grid of squares."
 tags: [primitive, surface, polygon]
 
 outputs: 1

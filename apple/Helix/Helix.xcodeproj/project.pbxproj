@@ -158,6 +158,20 @@
 		AFCD1617782B829C57D5562F /* ViewCubeOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1557980CD2E34F236662CA3 /* ViewCubeOverlay.swift */; };
 		3636F7F43756D662BC4D2D97 /* ViewMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8CFBABDCE8A9BA43B326F7A /* ViewMenu.swift */; };
 		19E3389BB17016D1D42ABF06 /* ViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC8B3BF9C27809D9863EEA2D /* ViewTests.swift */; };
+		7AEB64EEAEF96CFD560D5B82 /* NodeNaming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 426B1397F448D4006FCC0372 /* NodeNaming.swift */; };
+		A51E0A431EC81853C5F1ED90 /* GraphTidy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC482A279F1C0470C4DEEDF /* GraphTidy.swift */; };
+		89FC116BB338CC98DDCF2684 /* GraphTidy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC482A279F1C0470C4DEEDF /* GraphTidy.swift */; };
+		23178507B45AE050701EAFDE /* EditorHover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C131437B4C23887F33CCCE /* EditorHover.swift */; };
+		37A368FFF22AB90DE82963B0 /* EditorHover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C131437B4C23887F33CCCE /* EditorHover.swift */; };
+		B7FA870E832AC4E9CB76359B /* NodeNaming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 426B1397F448D4006FCC0372 /* NodeNaming.swift */; };
+		72CCD13BE4FD64EE96905E28 /* NodeClipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A70125A62DFB8338C1C88A93 /* NodeClipboard.swift */; };
+		B69049071647AC2B011E3585 /* NodeClipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A70125A62DFB8338C1C88A93 /* NodeClipboard.swift */; };
+		81E5426E2541CD0BE6B78FCF /* NodeEditorModel+Editing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B24D23F6BB45BD689F5B283E /* NodeEditorModel+Editing.swift */; };
+		CB84AE20AA9E14F6539E73F9 /* NodeEditorModel+Editing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B24D23F6BB45BD689F5B283E /* NodeEditorModel+Editing.swift */; };
+		EEFED125787006DF53FD92E1 /* NodeMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9184A63A6060D57FEE3E07A /* NodeMenu.swift */; };
+		CE5CBDB06244EE5240ED907C /* HelixDocument+NodeClipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F9D4270221D1EB2226037E0 /* HelixDocument+NodeClipboard.swift */; };
+		03180DA7C32E81F763C6998B /* NodeEditingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5727291264E2888EA4FE27EB /* NodeEditingTests.swift */; };
+		58BF09B1650132468562D8B1 /* HelixDocument+DebugNodeEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0B103C6839F3E81E0F81DC2 /* HelixDocument+DebugNodeEdit.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -284,6 +298,15 @@
 		5A11C0DE00000000000000A1 /* NavigationPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NavigationPreset.swift; path = Sources/Viewport/NavigationPreset.swift; sourceTree = "<group>"; };
 		5A11C0DE00000000000000B1 /* NavigationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NavigationSettingsView.swift; path = Sources/Settings/NavigationSettingsView.swift; sourceTree = "<group>"; };
 		5A11C0DE00000000000000C1 /* NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NavigationTests.swift; path = Tests/NavigationTests.swift; sourceTree = "<group>"; };
+		426B1397F448D4006FCC0372 /* NodeNaming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeNaming.swift; path = Sources/NodeEditor/NodeNaming.swift; sourceTree = "<group>"; };
+		2AC482A279F1C0470C4DEEDF /* GraphTidy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GraphTidy.swift; path = Sources/NodeEditor/GraphTidy.swift; sourceTree = "<group>"; };
+		09C131437B4C23887F33CCCE /* EditorHover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EditorHover.swift; path = Sources/NodeEditor/EditorHover.swift; sourceTree = "<group>"; };
+		A70125A62DFB8338C1C88A93 /* NodeClipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeClipboard.swift; path = Sources/NodeEditor/NodeClipboard.swift; sourceTree = "<group>"; };
+		B24D23F6BB45BD689F5B283E /* NodeEditorModel+Editing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "NodeEditorModel+Editing.swift"; path = "Sources/NodeEditor/NodeEditorModel+Editing.swift"; sourceTree = "<group>"; };
+		F9184A63A6060D57FEE3E07A /* NodeMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeMenu.swift; path = Sources/NodeEditor/NodeMenu.swift; sourceTree = "<group>"; };
+		7F9D4270221D1EB2226037E0 /* HelixDocument+NodeClipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+NodeClipboard.swift"; path = "Sources/HelixDocument+NodeClipboard.swift"; sourceTree = "<group>"; };
+		5727291264E2888EA4FE27EB /* NodeEditingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NodeEditingTests.swift; path = Tests/NodeEditingTests.swift; sourceTree = "<group>"; };
+		E0B103C6839F3E81E0F81DC2 /* HelixDocument+DebugNodeEdit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "HelixDocument+DebugNodeEdit.swift"; path = "Sources/HelixDocument+DebugNodeEdit.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -336,6 +359,7 @@
 				D3F54926D9EBC58B30CE4961 /* NodeEditorTests.swift */,
 				DFDAF0510D8421E7D0F36AC8 /* InspectorTests.swift */,
 				1251728C91F1884CC929E1D3 /* LocalizationTests.swift */,
+				5727291264E2888EA4FE27EB /* NodeEditingTests.swift */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -359,6 +383,12 @@
 				122AC6F01D03989AE7FE0E3A /* NodeEditorBridge.swift */,
 				7A3D298FBC64B6B06BD58AEC /* NodeEditorSnapshotCommand.swift */,
 				1978AE8702A3FF95D7833A19 /* PaletteSnapshotCommand.swift */,
+				426B1397F448D4006FCC0372 /* NodeNaming.swift */,
+				2AC482A279F1C0470C4DEEDF /* GraphTidy.swift */,
+				09C131437B4C23887F33CCCE /* EditorHover.swift */,
+				A70125A62DFB8338C1C88A93 /* NodeClipboard.swift */,
+				B24D23F6BB45BD689F5B283E /* NodeEditorModel+Editing.swift */,
+				F9184A63A6060D57FEE3E07A /* NodeMenu.swift */,
 			);
 			name = NodeEditor;
 			sourceTree = "<group>";
@@ -425,6 +455,8 @@
 				E27EC0CCDEB296D5F887B697 /* ViewportRenderer.swift */,
 				A60E5D3D69B45D8B43B4079E /* ViewportView.swift */,
 				1897A9FB8B71C86CA11ECFA9 /* main.swift */,
+				7F9D4270221D1EB2226037E0 /* HelixDocument+NodeClipboard.swift */,
+				E0B103C6839F3E81E0F81DC2 /* HelixDocument+DebugNodeEdit.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -771,6 +803,14 @@
 				DE377001B005E5657B88CDE3 /* ViewportOptions.swift in Sources */,
 				AFCD1617782B829C57D5562F /* ViewCubeOverlay.swift in Sources */,
 				3636F7F43756D662BC4D2D97 /* ViewMenu.swift in Sources */,
+				7AEB64EEAEF96CFD560D5B82 /* NodeNaming.swift in Sources */,
+				A51E0A431EC81853C5F1ED90 /* GraphTidy.swift in Sources */,
+				23178507B45AE050701EAFDE /* EditorHover.swift in Sources */,
+				72CCD13BE4FD64EE96905E28 /* NodeClipboard.swift in Sources */,
+				81E5426E2541CD0BE6B78FCF /* NodeEditorModel+Editing.swift in Sources */,
+				EEFED125787006DF53FD92E1 /* NodeMenu.swift in Sources */,
+				CE5CBDB06244EE5240ED907C /* HelixDocument+NodeClipboard.swift in Sources */,
+				58BF09B1650132468562D8B1 /* HelixDocument+DebugNodeEdit.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -823,6 +863,12 @@
 				5A11C0DE00000000000000A3 /* NavigationPreset.swift in Sources */,
 				5A11C0DE00000000000000C2 /* NavigationTests.swift in Sources */,
 				5A11C0DE00000000000000D1 /* NavigationSettings.swift in Sources */,
+				B7FA870E832AC4E9CB76359B /* NodeNaming.swift in Sources */,
+				89FC116BB338CC98DDCF2684 /* GraphTidy.swift in Sources */,
+				37A368FFF22AB90DE82963B0 /* EditorHover.swift in Sources */,
+				B69049071647AC2B011E3585 /* NodeClipboard.swift in Sources */,
+				CB84AE20AA9E14F6539E73F9 /* NodeEditorModel+Editing.swift in Sources */,
+				03180DA7C32E81F763C6998B /* NodeEditingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
