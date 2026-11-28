@@ -123,70 +123,73 @@ $(function(){ initResizable(false); });
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keyword">static</span> <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionEngine.html">ExpressionEngine</a>&amp; instance();</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classhelix_1_1expr_1_1ExpressionEngine.html#a5c12a50f99b529b594690789377fd4ff">evalFloat</a>(</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        <span class="keyword">const</span> String&amp; expression,</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionContext.html">ExpressionContext</a>* context,</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        floatT&amp; result,</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        String&amp; error</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    );</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classhelix_1_1expr_1_1ExpressionEngine.html#a6f337568a7808a42068a44741cfa48ce">evalInt</a>(</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keyword">const</span> String&amp; expression,</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionContext.html">ExpressionContext</a>* context,</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        intT&amp; result,</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        String&amp; error</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    );</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classhelix_1_1expr_1_1ExpressionEngine.html#aef0b2312d74799b1ebf0a4fa0889da93">evalString</a>(</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        <span class="keyword">const</span> String&amp; expression,</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionContext.html">ExpressionContext</a>* context,</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        String&amp; result,</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        String&amp; error</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    );</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionEngine.html">ExpressionEngine</a>(<span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionEngine.html">ExpressionEngine</a>&amp;) = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionEngine.html">ExpressionEngine</a>&amp; operator=(<span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionEngine.html">ExpressionEngine</a>&amp;) = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionEngine.html">ExpressionEngine</a>() = <span class="keywordflow">default</span>;</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keyword">enum class</span> ReturnType : <span class="keywordtype">size_t</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    {</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        Float,</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        Int,</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        String,</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        Count</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    };</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keyword">using </span>ProgramMap = std::unordered_map&lt;String, std::shared_ptr&lt;daslang::CompiledProgram&gt;&gt;;</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keyword">using </span>ProgramMaps = std::array&lt;ProgramMap, size_t(ReturnType::Count)&gt;;</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keyword">struct </span>ThreadCache</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    {</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        ProgramMaps programs;</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    };</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    ThreadCache&amp; threadCache_();</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <a class="code hl_class" href="classhelix_1_1daslang_1_1CompiledProgram.html">daslang::CompiledProgram</a>* program_(ReturnType type, <span class="keyword">const</span> String&amp; expression, String&amp; error);</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="comment">// Guards the masters and the registry of thread caches. Evaluation never holds it.</span></div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    std::mutex mutex_;</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="comment">// One compiled program per expression and return type, cloned for each thread.</span></div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    ProgramMaps masters_;</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="comment">// Owns the thread caches, so no clone is destroyed while another thread runs daslang.</span></div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    std::unordered_map&lt;std::thread::id, std::unique_ptr&lt;ThreadCache&gt;&gt; threadCaches_;</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>};</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">static</span> String <a class="code hl_function" href="classhelix_1_1expr_1_1ExpressionEngine.html#a9242e4f1008ab68ae9875fac67045327">expandVariables</a>(<span class="keyword">const</span> String&amp; expression);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classhelix_1_1expr_1_1ExpressionEngine.html#a5c12a50f99b529b594690789377fd4ff">evalFloat</a>(</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keyword">const</span> String&amp; expression,</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionContext.html">ExpressionContext</a>* context,</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        floatT&amp; result,</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        String&amp; error</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    );</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classhelix_1_1expr_1_1ExpressionEngine.html#a6f337568a7808a42068a44741cfa48ce">evalInt</a>(</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        <span class="keyword">const</span> String&amp; expression,</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        <span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionContext.html">ExpressionContext</a>* context,</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        intT&amp; result,</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        String&amp; error</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    );</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classhelix_1_1expr_1_1ExpressionEngine.html#aef0b2312d74799b1ebf0a4fa0889da93">evalString</a>(</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="keyword">const</span> String&amp; expression,</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionContext.html">ExpressionContext</a>* context,</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        String&amp; result,</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        String&amp; error</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    );</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionEngine.html">ExpressionEngine</a>(<span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionEngine.html">ExpressionEngine</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionEngine.html">ExpressionEngine</a>&amp; operator=(<span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionEngine.html">ExpressionEngine</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <a class="code hl_class" href="classhelix_1_1expr_1_1ExpressionEngine.html">ExpressionEngine</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keyword">enum class</span> ReturnType : <span class="keywordtype">size_t</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    {</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        Float,</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        Int,</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        String,</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        Count</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    };</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keyword">using </span>ProgramMap = std::unordered_map&lt;String, std::shared_ptr&lt;daslang::CompiledProgram&gt;&gt;;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keyword">using </span>ProgramMaps = std::array&lt;ProgramMap, size_t(ReturnType::Count)&gt;;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keyword">struct </span>ThreadCache</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    {</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        ProgramMaps programs;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    };</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    ThreadCache&amp; threadCache_();</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <a class="code hl_class" href="classhelix_1_1daslang_1_1CompiledProgram.html">daslang::CompiledProgram</a>* program_(ReturnType type, <span class="keyword">const</span> String&amp; expression, String&amp; error);</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    <span class="comment">// Guards the masters and the registry of thread caches. Evaluation never holds it.</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    std::mutex mutex_;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="comment">// One compiled program per expression and return type, cloned for each thread.</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    ProgramMaps masters_;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="comment">// Owns the thread caches, so no clone is destroyed while another thread runs daslang.</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    std::unordered_map&lt;std::thread::id, std::unique_ptr&lt;ThreadCache&gt;&gt; threadCaches_;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>};</div>
 </div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>} <span class="comment">// namespace helix::expr</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>} <span class="comment">// namespace helix::expr</span></div>
 <div class="ttc" id="aTypes_8h_html"><div class="ttname"><a href="Types_8h.html">Types.h</a></div><div class="ttdoc">Basic attribute, parameter, and node types for Helix.</div></div>
 <div class="ttc" id="aclasshelix_1_1daslang_1_1CompiledProgram_html"><div class="ttname"><a href="classhelix_1_1daslang_1_1CompiledProgram.html">helix::daslang::CompiledProgram</a></div><div class="ttdoc">A compiled daslang program ready to run.</div><div class="ttdef"><b>Definition</b> Runtime.h:46</div></div>
 <div class="ttc" id="aclasshelix_1_1expr_1_1ExpressionContext_html"><div class="ttname"><a href="classhelix_1_1expr_1_1ExpressionContext.html">helix::expr::ExpressionContext</a></div><div class="ttdoc">The world a single expression evaluation reads and writes to.</div><div class="ttdef"><b>Definition</b> ExpressionContext.h:28</div></div>
 <div class="ttc" id="aclasshelix_1_1expr_1_1ExpressionEngine_html"><div class="ttname"><a href="classhelix_1_1expr_1_1ExpressionEngine.html">helix::expr::ExpressionEngine</a></div><div class="ttdoc">Evaluator for parameter expressions written in daslang.</div><div class="ttdef"><b>Definition</b> ExpressionEngine.h:30</div></div>
-<div class="ttc" id="aclasshelix_1_1expr_1_1ExpressionEngine_html_a5c12a50f99b529b594690789377fd4ff"><div class="ttname"><a href="classhelix_1_1expr_1_1ExpressionEngine.html#a5c12a50f99b529b594690789377fd4ff">helix::expr::ExpressionEngine::evalFloat</a></div><div class="ttdeci">bool evalFloat(const String &amp;expression, const ExpressionContext *context, floatT &amp;result, String &amp;error)</div><div class="ttdoc">Evaluates an expression and returns its result as a float.</div><div class="ttdef"><b>Definition</b> ExpressionEngine.cpp:78</div></div>
-<div class="ttc" id="aclasshelix_1_1expr_1_1ExpressionEngine_html_a6f337568a7808a42068a44741cfa48ce"><div class="ttname"><a href="classhelix_1_1expr_1_1ExpressionEngine.html#a6f337568a7808a42068a44741cfa48ce">helix::expr::ExpressionEngine::evalInt</a></div><div class="ttdeci">bool evalInt(const String &amp;expression, const ExpressionContext *context, intT &amp;result, String &amp;error)</div><div class="ttdoc">Evaluates an expression and returns its result as an integer.</div><div class="ttdef"><b>Definition</b> ExpressionEngine.cpp:90</div></div>
-<div class="ttc" id="aclasshelix_1_1expr_1_1ExpressionEngine_html_aef0b2312d74799b1ebf0a4fa0889da93"><div class="ttname"><a href="classhelix_1_1expr_1_1ExpressionEngine.html#aef0b2312d74799b1ebf0a4fa0889da93">helix::expr::ExpressionEngine::evalString</a></div><div class="ttdeci">bool evalString(const String &amp;expression, const ExpressionContext *context, String &amp;result, String &amp;error)</div><div class="ttdoc">Evaluates an expression and returns its result as a string.</div><div class="ttdef"><b>Definition</b> ExpressionEngine.cpp:102</div></div>
+<div class="ttc" id="aclasshelix_1_1expr_1_1ExpressionEngine_html_a5c12a50f99b529b594690789377fd4ff"><div class="ttname"><a href="classhelix_1_1expr_1_1ExpressionEngine.html#a5c12a50f99b529b594690789377fd4ff">helix::expr::ExpressionEngine::evalFloat</a></div><div class="ttdeci">bool evalFloat(const String &amp;expression, const ExpressionContext *context, floatT &amp;result, String &amp;error)</div><div class="ttdoc">Evaluates an expression and returns its result as a float.</div><div class="ttdef"><b>Definition</b> ExpressionEngine.cpp:140</div></div>
+<div class="ttc" id="aclasshelix_1_1expr_1_1ExpressionEngine_html_a6f337568a7808a42068a44741cfa48ce"><div class="ttname"><a href="classhelix_1_1expr_1_1ExpressionEngine.html#a6f337568a7808a42068a44741cfa48ce">helix::expr::ExpressionEngine::evalInt</a></div><div class="ttdeci">bool evalInt(const String &amp;expression, const ExpressionContext *context, intT &amp;result, String &amp;error)</div><div class="ttdoc">Evaluates an expression and returns its result as an integer.</div><div class="ttdef"><b>Definition</b> ExpressionEngine.cpp:152</div></div>
+<div class="ttc" id="aclasshelix_1_1expr_1_1ExpressionEngine_html_a9242e4f1008ab68ae9875fac67045327"><div class="ttname"><a href="classhelix_1_1expr_1_1ExpressionEngine.html#a9242e4f1008ab68ae9875fac67045327">helix::expr::ExpressionEngine::expandVariables</a></div><div class="ttdeci">static String expandVariables(const String &amp;expression)</div><div class="ttdoc">Rewrites the variables of other tools into the functions that read them: $F and $FF into frame(),...</div><div class="ttdef"><b>Definition</b> ExpressionEngine.cpp:29</div></div>
+<div class="ttc" id="aclasshelix_1_1expr_1_1ExpressionEngine_html_aef0b2312d74799b1ebf0a4fa0889da93"><div class="ttname"><a href="classhelix_1_1expr_1_1ExpressionEngine.html#aef0b2312d74799b1ebf0a4fa0889da93">helix::expr::ExpressionEngine::evalString</a></div><div class="ttdeci">bool evalString(const String &amp;expression, const ExpressionContext *context, String &amp;result, String &amp;error)</div><div class="ttdoc">Evaluates an expression and returns its result as a string.</div><div class="ttdef"><b>Definition</b> ExpressionEngine.cpp:164</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

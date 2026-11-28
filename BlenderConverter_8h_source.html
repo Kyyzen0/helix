@@ -135,9 +135,13 @@ $(function(){ initResizable(false); });
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordtype">bool</span>* fromCache = <span class="keyword">nullptr</span></div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>);</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>std::size_t blenderRunCount();</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>std::string blendCachePrefix(<span class="keyword">const</span> std::filesystem::path&amp; blendFile);</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>} <span class="comment">// namespace helix::import</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>std::size_t forgetBlendConversion(<span class="keyword">const</span> std::filesystem::path&amp; blendFile);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>std::size_t blenderRunCount();</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>} <span class="comment">// namespace helix::import</span></div>
 <div class="ttc" id="astructhelix_1_1import_1_1ProcessResult_html"><div class="ttname"><a href="structhelix_1_1import_1_1ProcessResult.html">helix::import::ProcessResult</a></div><div class="ttdoc">What a process that was run left behind.</div><div class="ttdef"><b>Definition</b> BlenderConverter.h:10</div></div>
 <div class="ttc" id="astructhelix_1_1import_1_1ProcessResult_html_a2ebca6768bf90e7d6478a231179c3044"><div class="ttname"><a href="structhelix_1_1import_1_1ProcessResult.html#a2ebca6768bf90e7d6478a231179c3044">helix::import::ProcessResult::output</a></div><div class="ttdeci">std::string output</div><div class="ttdoc">What the process wrote on its output and error streams, cut to its last bytes.</div><div class="ttdef"><b>Definition</b> BlenderConverter.h:15</div></div>
 </div><!-- fragment --></div><!-- contents -->

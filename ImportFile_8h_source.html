@@ -182,9 +182,11 @@ $(function(){ initResizable(false); });
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="keywordtype">void</span> clearImportCache();</div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>std::size_t importReadCount();</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>} <span class="comment">// namespace helix::import</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>std::size_t forgetImportedFile(<span class="keyword">const</span> std::filesystem::path&amp; file);</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>std::size_t importReadCount();</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>} <span class="comment">// namespace helix::import</span></div>
 <div class="ttc" id="astructhelix_1_1import_1_1ImportOptions_html"><div class="ttname"><a href="structhelix_1_1import_1_1ImportOptions.html">helix::import::ImportOptions</a></div><div class="ttdoc">What the import is asked for, besides the file.</div><div class="ttdef"><b>Definition</b> ImportFile.h:17</div></div>
 <div class="ttc" id="astructhelix_1_1import_1_1ImportOptions_html_aba8ff59f3c2b46b88521e019e3acaa78"><div class="ttname"><a href="structhelix_1_1import_1_1ImportOptions.html#aba8ff59f3c2b46b88521e019e3acaa78">helix::import::ImportOptions::mergeMeshes</a></div><div class="ttdeci">bool mergeMeshes</div><div class="ttdoc">Whether the meshes of the file become one mesh.</div><div class="ttdef"><b>Definition</b> ImportFile.h:20</div></div>
 <div class="ttc" id="astructhelix_1_1import_1_1ImportOptions_html_af83cba830d859ddc6f0e38808ac13bf3"><div class="ttname"><a href="structhelix_1_1import_1_1ImportOptions.html#af83cba830d859ddc6f0e38808ac13bf3">helix::import::ImportOptions::blenderPath</a></div><div class="ttdeci">std::string blenderPath</div><div class="ttdoc">The Blender to convert a .blend file with. Empty looks for an installed one.</div><div class="ttdef"><b>Definition</b> ImportFile.h:22</div></div>

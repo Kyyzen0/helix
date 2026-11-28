@@ -9,5 +9,6 @@ var searchData=
   ['evalint_6',['evalInt',['../classhelix_1_1daslang_1_1CompiledProgram.html#a5a491b10e1f023bcb9f1c9f56abfb221',1,'helix::daslang::CompiledProgram::evalInt()'],['../classhelix_1_1expr_1_1ExpressionEngine.html#a6f337568a7808a42068a44741cfa48ce',1,'helix::expr::ExpressionEngine::evalInt()']]],
   ['evalparmramp_7',['evalParmRamp',['../classhelix_1_1nt_1_1NodeImpl.html#a722a82831c89f83e0691d39582eba01b',1,'helix::nt::NodeImpl']]],
   ['evalstring_8',['evalString',['../classhelix_1_1daslang_1_1CompiledProgram.html#a8556867362714298eeb722d3701d3285',1,'helix::daslang::CompiledProgram::evalString()'],['../classhelix_1_1expr_1_1ExpressionEngine.html#aef0b2312d74799b1ebf0a4fa0889da93',1,'helix::expr::ExpressionEngine::evalString()']]],
-  ['evaluate_9',['evaluate',['../classhelix_1_1sim_1_1KeyframeTrack.html#abc6d5635f74c819957058487fbee5f82',1,'helix::sim::KeyframeTrack::evaluate()'],['../classhelix_1_1sim_1_1KeyframeStore.html#a692b3701c2ba5eecddc30961b7a12b1f',1,'helix::sim::KeyframeStore::evaluate()']]]
+  ['evaluate_9',['evaluate',['../classhelix_1_1sim_1_1KeyframeTrack.html#abc6d5635f74c819957058487fbee5f82',1,'helix::sim::KeyframeTrack::evaluate()'],['../classhelix_1_1sim_1_1KeyframeStore.html#a692b3701c2ba5eecddc30961b7a12b1f',1,'helix::sim::KeyframeStore::evaluate()']]],
+  ['expandvariables_10',['expandVariables',['../classhelix_1_1expr_1_1ExpressionEngine.html#a9242e4f1008ab68ae9875fac67045327',1,'helix::expr::ExpressionEngine']]]
 ];

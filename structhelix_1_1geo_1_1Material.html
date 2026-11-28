@@ -127,6 +127,14 @@ std::shared_ptr&lt; const <a class="el" href="structhelix_1_1geo_1_1Image.html">
 std::string&#160;</td><td class="memItemRight" valign="bottom"><b>missingTexture</b></td></tr>
 <tr class="memdesc:a4bd6abe9d1604d46688ce08689665f9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Empty, or what went wrong with a texture the file referenced and the import could not load: which one, and why. The material keeps its factor. <br /></td></tr>
 <tr class="separator:a4bd6abe9d1604d46688ce08689665f9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfaf6a280fa291d6b812739ef095cf76" id="r_adfaf6a280fa291d6b812739ef095cf76"><td class="memItemLeft" align="right" valign="top"><a id="adfaf6a280fa291d6b812739ef095cf76" name="adfaf6a280fa291d6b812739ef095cf76"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>missingTextureName</b></td></tr>
+<tr class="memdesc:adfaf6a280fa291d6b812739ef095cf76"><td class="mdescLeft">&#160;</td><td class="mdescRight">The name the file gives that texture (a path as it was written there), empty when none is missing. This is what a person looks for, where <code>missingTexture</code> is the sentence. <br /></td></tr>
+<tr class="separator:adfaf6a280fa291d6b812739ef095cf76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0c2fe63e1bad5b82cbeac176b4f1dfb" id="r_ae0c2fe63e1bad5b82cbeac176b4f1dfb"><td class="memItemLeft" align="right" valign="top"><a id="ae0c2fe63e1bad5b82cbeac176b4f1dfb" name="ae0c2fe63e1bad5b82cbeac176b4f1dfb"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>missingTextureNotFound</b> = false</td></tr>
+<tr class="memdesc:ae0c2fe63e1bad5b82cbeac176b4f1dfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">True when the picture was not found where the model is, False when it was found and could not be decoded. Only meaningful with a <code>missingTextureName</code>. <br /></td></tr>
+<tr class="separator:ae0c2fe63e1bad5b82cbeac176b4f1dfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>What a face is made of, as the file described it. Immutable once built, shared by <code>std::shared_ptr&lt;const <a class="el" href="structhelix_1_1geo_1_1Material.html" title="What a face is made of, as the file described it. Immutable once built, shared by std::shared_ptr&lt;con...">Material</a>&gt;</code> between every mesh that uses it. </p>
