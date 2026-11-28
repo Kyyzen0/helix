@@ -1,4 +1,5 @@
 #include "Graphics/Passes/GridPass.h"
+#include "Graphics/GridScale.h"
 #include <glm/vec3.hpp>
 #include <vector>
 
@@ -6,25 +7,37 @@ namespace helix::gfx {
 
 namespace {
 
-constexpr int lineCount = 40;
-constexpr float lineSpacing = 2.f;
-constexpr float halfLength = 50.f;
+// What a vertex says about its line: the shader draws a minor line, a major one, or one of the two
+// lines through the origin, each with its own strength and tint.
+constexpr float minorLine = 0.f;
+constexpr float majorLine = 1.f;
+constexpr float xAxisLine = 2.f;
+constexpr float zAxisLine = 3.f;
 
-/// @brief Returns the endpoints of the grid lines on the ground plane, two per line.
+/// @brief Returns the endpoints of the grid lines, two per line, as (x, z, kind).
+///
+/// The positions are in cells from the centre of the grid: the shader scales them by the cell
+/// size of the frame, so one buffer serves every zoom. The axes are drawn on top of the lines the
+/// grid has at the origin: their vertices carry the kind, and the shader puts them on the world
+/// axis, wherever the centre of the grid is.
 std::vector<glm::vec3> buildGridVertices()
 {
     std::vector<glm::vec3> vertices;
-    const float firstOffset = -0.5f * (lineCount - 1) * lineSpacing;
-    for (int lineIndex = 0; lineIndex < lineCount; ++lineIndex)
+    const float half = float(gridHalfCells);
+    for (int index = -gridHalfCells; index <= gridHalfCells; ++index)
     {
-        const float offset = firstOffset + lineIndex * lineSpacing;
-
+        const float kind = index % gridMajorEvery == 0 ? majorLine : minorLine;
+        const float offset = float(index);
         // Runs one line along z and one along x at the same offset.
-        vertices.emplace_back(offset, 0.f, -halfLength);
-        vertices.emplace_back(offset, 0.f, halfLength);
-        vertices.emplace_back(-halfLength, 0.f, offset);
-        vertices.emplace_back(halfLength, 0.f, offset);
+        vertices.emplace_back(offset, -half, kind);
+        vertices.emplace_back(offset, half, kind);
+        vertices.emplace_back(-half, offset, kind);
+        vertices.emplace_back(half, offset, kind);
     }
+    vertices.emplace_back(-half, 0.f, xAxisLine);
+    vertices.emplace_back(half, 0.f, xAxisLine);
+    vertices.emplace_back(0.f, -half, zAxisLine);
+    vertices.emplace_back(0.f, half, zAxisLine);
     return vertices;
 }
 

@@ -27,4 +27,7 @@ enum NavigationSettings {
     /// Orbit units per degree of a two finger rotation, which turns the scene around the
     /// vertical axis.
     static let rotationPerDegree: Float = 1.75
+
+    // The three presets that share these sensitivities, and the speed options on top of them, are
+    // in `NavigationMapper`.
 }

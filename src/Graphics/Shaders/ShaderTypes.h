@@ -50,6 +50,9 @@ struct FrameConstants
     float pixelRatio;
     /// How opaque the wireframe is, from 0 to 1.
     float wireframeOpacity;
+    /// The ground grid: x is the side of a cell, y and z the world x and z of its centre (a multiple
+    /// of a major cell, so the lines stay where they are in the world), w the cells on each side.
+    HELIX_SHADER_VEC4 gridParams;
 };
 
 /// What one draw of the mesh is shaded with, set per batch of faces.
@@ -66,7 +69,7 @@ struct MaterialConstants
 };
 
 #ifndef __METAL_VERSION__
-static_assert(sizeof(FrameConstants) == 160, "FrameConstants must match the layout the shaders read");
+static_assert(sizeof(FrameConstants) == 176, "FrameConstants must match the layout the shaders read");
 static_assert(sizeof(MaterialConstants) == 32, "MaterialConstants must match the layout the shaders read");
 } // namespace helix::gfx
 #endif

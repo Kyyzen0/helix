@@ -298,8 +298,8 @@ final class NavigationLegendTests: XCTestCase {
         XCTAssertFalse(NavigationLegendSetting.isHidden(in: defaults))
     }
 
-    func testTheLegendListsWhatTheViewportReallyDoes() {
-        let gestures = NavigationBindings.rows.map(\.gesture)
+    func testTheLegendOfTheTrackpadListsWhatTheViewportReallyDoes() {
+        let gestures = NavigationBindings.rows(for: .trackpad).map(\.gesture)
         // The keys HelixMetalView handles: orbit, pan with option, zoom with control or the wheel,
         // the scroll with shift and command, a pinch, and F.
         XCTAssertTrue(gestures.contains("Drag"))

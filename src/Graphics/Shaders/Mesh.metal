@@ -3,7 +3,8 @@
 // The lights follow the camera, as in the viewport of a modelling tool: the main light comes
 // from above and to the left of the viewer, a fill light from the right and below, and a rim
 // light from behind lifts the silhouette off the background. A hemisphere term (sky above,
-// ground below, in world space) keeps the faces that turn away from every light readable.
+// ground below, in world space) keeps the faces that turn away from every light readable, and the
+// same sky and ground are mirrored faintly in the surface, so a dark material still has an edge.
 //
 // The colour the host asks for is a display (sRGB) colour. The lighting is computed in linear
 // light and the result is encoded back, so the shading is neither washed out nor crushed.
@@ -35,8 +36,16 @@ constant float3 fillLightColor = float3(0.50, 0.55, 0.64);
 constant float3 rimLightColor = float3(0.62, 0.74, 1.0);
 
 // The light of the sky and of the ground, in linear light.
-constant float3 skyColor = float3(0.14, 0.16, 0.20);
-constant float3 groundColor = float3(0.05, 0.045, 0.04);
+// Soft enough that a light surface does not wash out, and bright enough that a dark one still
+// shows its shape: the ambient is a gradient, so a face is lit by where it points.
+constant float3 skyColor = float3(0.30, 0.34, 0.42);
+constant float3 groundColor = float3(0.11, 0.10, 0.09);
+
+// How much of the sky and the ground a surface mirrors at a grazing angle, and head on (4% for a
+// dielectric). It is what gives a very dark material, which no ambient light can lift, an edge
+// and a sheen to read it by.
+constant float environmentReflection = 0.9;
+constant float reflectanceHeadOn = 0.04;
 
 // The wireframe is a darker shade of the mesh, so that it reads on any background.
 constant float wireframeShade = 0.35;
@@ -122,9 +131,18 @@ fragment float4 meshShadedFragment(
     // asked for: a pure red mesh stays pure red, and only its brightness changes.
     const float3 halfVector = normalize(keyDirection + view);
     const float highlight = pow(saturate(dot(normal, halfVector)), 40.0) * 0.10;
-    float3 light = hemisphere + keyLightColor * key * 1.05 + fillLightColor * fill * 0.30 +
+    float3 light = hemisphere + keyLightColor * key * 0.95 + fillLightColor * fill * 0.25 +
                    rimLightColor * rim * 0.8 + keyLightColor * highlight;
     float3 color = albedo * light;
+
+    // The environment: the sky and the ground seen in the surface, stronger toward the edge.
+    const float3 reflected = reflect(-view, normal);
+    const float3 environment = mix(groundColor, skyColor, reflected.y * 0.5 + 0.5);
+    const float fresnel = reflectanceHeadOn + (1.0 - reflectanceHeadOn) * pow(1.0 - saturate(dot(normal, view)), 5.0);
+    // Tinted by the hue of the albedo, so a pure red mesh stays pure red: the reflection lifts a
+    // dark material without turning it grey.
+    const float3 hue = saturate(albedo / max(max(albedo.r, max(albedo.g, albedo.b)), 0.04));
+    color += environment * fresnel * environmentReflection * hue;
 
     return float4(saturate(linearToSrgb(saturate(color))), 1.0);
 }

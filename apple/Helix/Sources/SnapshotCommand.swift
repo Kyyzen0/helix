@@ -14,11 +14,13 @@ enum SnapshotCommand {
     static let flag = "--render-snapshot"
     static let newSceneArgument = "--new-scene"
 
-    static let usage = "usage: Helix \(flag) <in.kut | 3D file | \(newSceneArgument)> <out.png> [width height] \(ThemeOptions.usage)"
+    static let usage = "usage: Helix \(flag) <in.kut | 3D file | \(newSceneArgument)> <out.png> [width height] \(ThemeOptions.usage) \(ViewportOptions.usage)"
 
     /// Runs the command on its arguments, the ones after the flag, and returns the exit code.
     static func run(_ all: [String]) -> Int32 {
-        guard let (theme, arguments) = ThemeOptions.extract(from: all) else { return fail(usage) }
+        guard let (theme, themed) = ThemeOptions.extract(from: all),
+              let (look, arguments) = ViewportOptions.extract(from: themed)
+        else { return fail(usage) }
         guard arguments.count == 2 || arguments.count == 4 else { return fail(usage) }
         let width = arguments.count == 4 ? UInt32(arguments[2]) : 1024
         let height = arguments.count == 4 ? UInt32(arguments[3]) : 768
@@ -38,14 +40,13 @@ enum SnapshotCommand {
             try HelixError.check(geometry.status)
             print("\(geometry.pointCount) points, \(geometry.triangleCount) triangles")
 
-            // The same framing the window does on its first frame.
-            helix.core.resetViewport()
-            _ = helix.core.frameViewport(Float(width) / Float(height))
+            // The same framing the window does on its first frame, from the view asked for.
+            ViewportController.place(look.view, aspect: Float(width) / Float(height))
 
             var options = helix.core.ViewportFrameOptions()
             options.pixelWidth = width
             options.pixelHeight = height
-            theme.palette().apply(to: &options)
+            theme.palette().apply(to: &options, background: look.background ?? .stored())
             options.wireframe = WireframeSetting.current.facadeMode
             options.materialsVisible = MaterialsSetting.isVisible
             let drawStarted = DispatchTime.now()

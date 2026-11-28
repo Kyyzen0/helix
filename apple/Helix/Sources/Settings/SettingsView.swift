@@ -1,13 +1,30 @@
 import SwiftUI
 
-/// The Settings window (⌘,): the language, and the theme.
+/// The tabs of the Settings window. The one in front is kept in the defaults, so that a link
+/// elsewhere in the app (the legend of the viewport) can open Settings on a given tab.
+enum SettingsTab: String {
+    case general
+    case appearance
+    case navigation
+
+    static let defaultsKey = "settingsTab"
+}
+
+/// The Settings window (⌘,): the language, the theme and the navigation of the viewport.
 struct SettingsView: View {
+    @AppStorage(SettingsTab.defaultsKey) private var tab = SettingsTab.general.rawValue
+
     var body: some View {
-        TabView {
+        TabView(selection: $tab) {
             GeneralSettings()
                 .tabItem { Label("General", systemImage: "gearshape") }
+                .tag(SettingsTab.general.rawValue)
             AppearanceSettings()
                 .tabItem { Label("Appearance", systemImage: "paintpalette") }
+                .tag(SettingsTab.appearance.rawValue)
+            NavigationSettingsTab()
+                .tabItem { Label("Navigation", systemImage: "computermouse") }
+                .tag(SettingsTab.navigation.rawValue)
         }
         .frame(width: 540)
         .scenePadding()
@@ -99,12 +116,47 @@ struct LanguagePane: View {
 /// defaults, so a click applies at once, in every window.
 struct AppearanceSettings: View {
     @AppStorage(Theme.defaultsKey) private var stored = Theme.default.rawValue
+    @AppStorage(ViewportBackground.defaultsKey) private var background = ViewportBackground.default.rawValue
 
     var body: some View {
-        AppearancePane(selection: Binding(
-            get: { Theme(rawValue: stored) ?? .default },
-            set: { stored = $0.rawValue }
-        ))
+        VStack(alignment: .leading, spacing: 0) {
+            AppearancePane(selection: Binding(
+                get: { Theme(rawValue: stored) ?? .default },
+                set: { stored = $0.rawValue }
+            ))
+            Divider().padding(.horizontal, 20)
+            ViewportBackgroundPane(selection: Binding(
+                get: { ViewportBackground(rawValue: background) ?? .default },
+                set: { background = $0.rawValue }
+            ))
+        }
+    }
+}
+
+/// The background of the viewport: the colour of the theme, or a dark, a medium or a light grey. It
+/// applies at once, in every window; View > Viewport Background has the same choice.
+struct ViewportBackgroundPane: View {
+    @Binding var selection: ViewportBackground
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Viewport Background").font(.headline)
+            Picker("Viewport Background", selection: $selection) {
+                ForEach(ViewportBackground.allCases) { choice in
+                    Text(choice.title).tag(choice)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.segmented)
+            .fixedSize()
+            Text("Theme uses the colours of the theme. A light background suits a dark model.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 

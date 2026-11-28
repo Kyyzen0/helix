@@ -101,6 +101,12 @@ struct DocumentView: View {
         }
         ToolbarItemGroup(placement: .primaryAction) {
             AddMenu(document: document)
+            Menu {
+                ViewMenuContent(document: document, shortcuts: false)
+            } label: {
+                Label("View", systemImage: "cube")
+            }
+            .help("Camera, wireframe, materials, background and layout")
             Button {
                 document.requestFrame()
             } label: {
@@ -317,6 +323,14 @@ struct ViewportPane: View {
     @Environment(\.theme) private var theme
     @Environment(\.viewportStill) private var still
     @AppStorage(NavigationLegendSetting.hiddenKey) private var legendHidden = false
+    @AppStorage(ViewportBackground.defaultsKey) private var background = ViewportBackground.default.rawValue
+
+    /// What the overlays are drawn for: light text on a dark background, and the other way round.
+    /// It follows the luminance of the background the viewport really has, so a light background
+    /// gets dark text whatever the theme of the window is.
+    private var overlayScheme: ColorScheme {
+        (ViewportBackground(rawValue: background) ?? .default).colors(for: theme.palette).isDark ? .dark : .light
+    }
 
     init(document: HelixDocument) {
         self.document = document
@@ -343,15 +357,30 @@ struct ViewportPane: View {
                     .foregroundStyle(.secondary)
                     .padding()
                     .allowsHitTesting(false)
-                    // The viewport is dark in every theme, so what sits on it is drawn as on dark.
-                    .environment(\.colorScheme, .dark)
+                    .environment(\.colorScheme, overlayScheme)
             }
         }
         // How to move around, at the bottom left, until the person hides it.
         .overlay(alignment: .bottomLeading) {
             if document.isActive, !isEmpty, !legendHidden {
                 NavigationLegend { legendHidden = true }
-                    .environment(\.colorScheme, .dark)
+                    .environment(\.colorScheme, overlayScheme)
+                    .padding(10)
+            }
+        }
+        // The view cube and the home button, at the top right.
+        .overlay(alignment: .topTrailing) {
+            if document.isActive, !isEmpty {
+                ViewCubeOverlay(controller: document.viewport)
+                    .environment(\.colorScheme, overlayScheme)
+                    .padding(10)
+            }
+        }
+        // The size of a cell of the grid, at the bottom right.
+        .overlay(alignment: .bottomTrailing) {
+            if document.isActive, !isEmpty {
+                GridLabel(cell: document.viewport.camera.gridCellSize)
+                    .environment(\.colorScheme, overlayScheme)
                     .padding(10)
             }
         }
@@ -366,6 +395,7 @@ struct ViewportPane: View {
                     .overlay(Capsule().stroke(Color.primary.opacity(0.12)))
                     .padding(.top, 8)
                     .allowsHitTesting(false)
+                    .environment(\.colorScheme, overlayScheme)
                     .accessibilityAddTraits(.updatesFrequently)
             }
         }
@@ -377,7 +407,7 @@ struct ViewportPane: View {
 struct ViewportSplit<Top: View, Bottom: View>: View {
     let top: Top
     let bottom: Bottom
-    @AppStorage("viewportFraction") private var fraction = 0.6
+    @AppStorage(WindowLayout.fractionKey) private var fraction = 0.6
     @State private var dragStart: Double?
 
     static var minimumTop: CGFloat { 220 }

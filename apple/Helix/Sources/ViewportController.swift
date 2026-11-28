@@ -1,3 +1,4 @@
+import Combine
 import HelixCore
 import MetalKit
 import SwiftUI
@@ -67,8 +68,13 @@ enum MaterialsSetting {
 /// for a new frame has somewhere to go, and the one request that has to wait for the size of the
 /// view to be known.
 @MainActor
-final class ViewportController {
+final class ViewportController: ObservableObject {
     weak var view: MTKView?
+
+    /// Where the camera is, for the view cube and the grid label. The facade owns the camera; this
+    /// is a copy the interface can follow, refreshed after every frame (`refreshCamera`) and only
+    /// published when it changed, so a window that is not moving the camera is not redrawn.
+    @Published private(set) var camera = ViewportCameraState()
 
     /// The timeline of the window, which the space bar and the arrow keys drive while the viewport
     /// has the keys.
@@ -100,6 +106,50 @@ final class ViewportController {
 
     func redraw() {
         view?.needsDisplay = true
+    }
+
+    /// Reads the camera from the facade into `camera`. The renderer calls it after each frame it
+    /// draws, which is after every move of the camera, and the commands below call it so the cube
+    /// does not wait for a frame.
+    func refreshCamera() {
+        let info = helix.core.viewportCameraInfo()
+        let state = ViewportCameraState(
+            azimuth: info.azimuthDegrees, elevation: info.elevationDegrees,
+            distance: info.distance, gridCellSize: info.gridCellSize
+        )
+        if state != camera { camera = state }
+    }
+
+    /// Looks at the geometry from a standard view, and frames it. The angles are set before the
+    /// frame is asked for, which frames at the angles of the moment.
+    func show(_ standard: StandardView) {
+        helix.core.orbitViewportTo(standard.azimuth, standard.elevation)
+        requestFrame()
+        refreshCamera()
+    }
+
+    /// Puts the camera back where a scene starts, and frames the geometry.
+    func goHome() {
+        helix.core.resetViewport()
+        requestFrame()
+        refreshCamera()
+    }
+
+    func go(to view: CameraView) {
+        switch view {
+        case .home: goHome()
+        case .standard(let standard): show(standard)
+        }
+    }
+
+    /// Puts the camera where a view says and frames the geometry for a picture of this size, with
+    /// no window and no wait for a frame: what the commands that draw off screen do.
+    static func place(_ view: CameraView, aspect: Float) {
+        switch view {
+        case .home: helix.core.resetViewport()
+        case .standard(let standard): helix.core.orbitViewportTo(standard.azimuth, standard.elevation)
+        }
+        _ = helix.core.frameViewport(aspect)
     }
 
     /// Moves the wireframe setting to the next one, for the key that does it. The menu reads the

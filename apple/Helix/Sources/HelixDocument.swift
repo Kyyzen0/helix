@@ -211,7 +211,13 @@ final class HelixDocument: ReferenceFileDocument {
         guard isActive else { return }
         switch read {
         case .ready:
-            if let message = importNode(target) { presentedError = message }
+            if let message = importNode(target) {
+                presentedError = message
+            } else {
+                // A model that was opened is first of all to be looked at: the viewport takes the room.
+                // The one place a layout is chosen for the person; the View menu has the others.
+                WindowLayout.viewing.apply()
+            }
         case .failed(let message):
             presentedError = message
         case .cancelled:
