@@ -179,6 +179,19 @@ bool linksLoop(std::size_t nodeCount, const std::vector<ClipLink>& links)
     return visited != nodeCount;
 }
 
+// Whether a parameter of the copy holds an expression for a component its values do not have.
+// The restore would throw on it, so it is refused before any node is made.
+bool hasExpressionBeyondValues(const ParameterSerializable& parameter)
+{
+    const std::size_t components =
+        std::max({parameter.floatValues.size(), parameter.intValues.size(), parameter.stringValues.size()});
+    if (components > 0 && parameter.expressions.size() > components) return true;
+    for (const std::vector<ParameterSerializable>& instance : parameter.instances)
+        for (const ParameterSerializable& field : instance)
+            if (hasExpressionBeyondValues(field)) return true;
+    return false;
+}
+
 // Says what is wrong with a copy, or nothing when it can be pasted.
 std::string problemWith(const Clip& clip)
 {
@@ -194,6 +207,8 @@ std::string problemWith(const Clip& clip)
         if (!isTopLevel(snapshot.getPath())) return "Only the nodes at the top of a scene can be pasted.";
         if (!std::isfinite(snapshot.getPosition().x()) || !std::isfinite(snapshot.getPosition().y()))
             return "A node of the copy has no position.";
+        for (const ParameterSerializable& parameter : snapshot.parameters())
+            if (hasExpressionBeyondValues(parameter)) return "A parameter of the copy has an expression it cannot hold.";
         types.push_back(type);
     }
 
@@ -392,8 +407,11 @@ PasteNodesResult pasteNodes(const std::string& text, float offsetX, float offset
                 const nt::NodeSnapshot& snapshot = clip.nodes[index];
                 const NodeId id = manager.network().reserveNodeId();
                 const Vector2 position(snapshot.getPosition().x() + offsetX, snapshot.getPosition().y() + offsetY);
-                snapshot.restore(id, Path("/" + names[index]), position);
+                // The id is listed before the restore: a restore that throws after the node was
+                // made (a component of an expression the parameter does not have) leaves a node
+                // that the rollback below has to delete. It checks that the node exists.
                 created.push_back(id);
+                snapshot.restore(id, Path("/" + names[index]), position);
             }
 
             for (const ClipLink& link : clip.links)
@@ -409,7 +427,10 @@ PasteNodesResult pasteNodes(const std::string& text, float offsetX, float offset
                 if (track.component >= parameter->getVectorSize()) continue;
                 sim::KeyframeStore::TrackCopy copy;
                 copy.baseValue = track.baseValue;
-                if (track.hasBaseExpression) copy.baseExpression = track.baseExpression;
+                // The expression the parameter held before it was animated reads the copied nodes
+                // too, so it is pointed at their copies as the live expressions were.
+                if (track.hasBaseExpression)
+                    copy.baseExpression = nt::rewriteNodeReferences(track.baseExpression, Path("/"), renames);
                 copy.keyframes = track.keyframes;
                 sim::KeyframeStore::instance().pasteTrack(
                     sim::KeyframeTarget{created[track.node], track.parameter, track.component}, copy

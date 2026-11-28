@@ -6,6 +6,7 @@
 #include <cereal/types/map.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/vector.hpp>
+#include <functional>
 #include <map>
 #include <optional>
 #include <string>
@@ -144,6 +145,13 @@ class KeyframeStore
 
     /// @brief Returns a copy of a track, or nothing when the value holds no keyframes.
     std::optional<TrackCopy> copyTrack(const KeyframeTarget& target) const;
+
+    /// @brief Gives every stored base expression to a function, which returns the text to keep.
+    /// @note A parameter that holds keyframes does not hold its expression: it is kept here until
+    /// the last keyframe goes, so what rewrites the expressions of a scene (a rename) has to
+    /// come here too, or the expression that comes back reads what no longer exists.
+    /// @return Whether any expression changed.
+    bool rewriteBaseExpressions(const std::function<String(const KeyframeTarget&, const String&)>& rewrite);
 
     /// @brief Gives a value the keyframes of a copied track, replacing the ones it had.
     /// @note The parameter takes the value of the track at the current frame, as it does when

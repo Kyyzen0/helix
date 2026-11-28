@@ -2414,6 +2414,23 @@
           }
         }
       }
+    },
+    "A parameter of the copy has an expression it cannot hold.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A parameter of the copy has an expression it cannot hold."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un paramètre de la copie a une expression qu'il ne peut pas contenir."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

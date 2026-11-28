@@ -13,6 +13,7 @@
 #include "Engine/Network/UpdateLock.h"
 #include "Engine/Parameter/NodeParameter.h"
 #include "Engine/Parameter/Ramp.h"
+#include "Engine/Simulation/KeyframeStore.h"
 #include "Engine/Serializer/ParameterSerializable.h"
 #include "Engine/UndoRedo/ChangeNodeLinkCommand.h"
 #include "Engine/UndoRedo/CreateNodeCommand.h"
@@ -133,7 +134,18 @@ void nt::NetworkManager::renameNode(NodeId nodeId, const std::string& newName)
 
     auto updateLock = lockUpdates();
     node.setPath(newPath);
-    rewriteNodeReferences(network_, {{oldPath.getString(), newPath.getString()}});
+    const NodeRenames renames{{oldPath.getString(), newPath.getString()}};
+    rewriteNodeReferences(network_, renames);
+
+    // A parameter that holds keyframes keeps its expression in the store of keyframes until the
+    // last key goes, so the live parameters above do not show it. It is read from the scope of
+    // the node that owns the parameter, as the live expression is.
+    sim::KeyframeStore::instance().rewriteBaseExpressions(
+        [&](const sim::KeyframeTarget& target, const String& expression) -> String {
+            if (!network_.isValidNode(target.nodeId)) return expression;
+            return rewriteNodeReferences(expression, network_.getNode(target.nodeId).getPath().getParent(), renames);
+        }
+    );
 }
 
 void nt::NetworkManager::createNodeWithId(

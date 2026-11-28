@@ -498,3 +498,77 @@ TEST_CASE_METHOD(Fixture, "A pasted copy is a scene that saves and opens", "[cop
     CHECK(core::listNodes().size() == 2);
     for (const core::NodeInfo& info : core::listNodes()) CHECK(core::listKeyframes(info.id).size() == 1);
 }
+
+TEST_CASE_METHOD(Fixture, "A rename reaches the expression kept under a keyframe", "[rename]")
+{
+    const core::NodeId grid = makeNode("helix::grid");
+    const core::NodeId transform = makeNode("helix::transform");
+    REQUIRE(core::setExpression(transform, "uniform_scale", 0, "prm(\"grid1.size\")").ok);
+    // The first key moves the expression into the store of keyframes.
+    REQUIRE(core::setKeyframe(transform, "uniform_scale", 0, 1.f, 2.f, core::Interpolation::Linear).ok);
+
+    REQUIRE(core::renameNode(grid, "sol").ok);
+    REQUIRE(core::removeKeyframe(transform, "uniform_scale", 0, 1.f).ok);
+
+    CHECK(expressionOf(transform, "uniform_scale") == "prm(\"sol.size\")");
+}
+
+TEST_CASE_METHOD(Fixture, "A paste sends the expression kept under a keyframe to the copies", "[copy]")
+{
+    const core::NodeId grid = makeNode("helix::grid");
+    const core::NodeId transform = makeNode("helix::transform");
+    REQUIRE(core::setExpression(transform, "uniform_scale", 0, "prm(\"grid1.size\")").ok);
+    REQUIRE(core::setKeyframe(transform, "uniform_scale", 0, 1.f, 2.f, core::Interpolation::Linear).ok);
+
+    const core::PasteNodesResult pasted = core::pasteNodes(core::copyNodes({grid, transform}).text, 0.f, 0.f);
+    REQUIRE(pasted.status.ok);
+    REQUIRE(pasted.names == std::vector<std::string>{"grid2", "transform2"});
+    REQUIRE(core::removeKeyframe(pasted.nodes[1], "uniform_scale", 0, 1.f).ok);
+
+    CHECK(expressionOf(pasted.nodes[1], "uniform_scale") == "prm(\"grid2.size\")");
+    // The original keeps reading the original.
+    REQUIRE(core::removeKeyframe(transform, "uniform_scale", 0, 1.f).ok);
+    CHECK(expressionOf(transform, "uniform_scale") == "prm(\"grid1.size\")");
+}
+
+TEST_CASE_METHOD(Fixture, "A paste whose parameter cannot be restored leaves nothing behind", "[copy]")
+{
+    const core::NodeId grid = makeNode("helix::grid");
+    const core::NodeId transform = makeNode("helix::transform");
+    REQUIRE(core::connectNodes(grid, 0, transform, 0).ok);
+    const std::string good = core::copyNodes({transform}).text;
+
+    // An expression for a second component of a scalar parameter, in the block of uniform_scale.
+    const std::string expressions =
+        "(\"uniform_scale\"[\\s\\S]*?\"expressions\"\\s*:\\s*)\\[\\s*\\{\\s*\"nullopt\"\\s*:\\s*true\\s*\\}\\s*\\]";
+    const std::string malformed = std::regex_replace(
+        good, std::regex(expressions), "$1[{\"nullopt\": true}, {\"nullopt\": false, \"data\": \"1.0\"}]", std::regex_constants::format_first_only
+    );
+    REQUIRE(malformed != good);
+    // The same, with the values of the parameter gone, so the check on the values has nothing to
+    // compare with and only the rollback is left to catch the restore that throws.
+    const std::string bare = std::regex_replace(
+        malformed,
+        std::regex("(\"uniform_scale\"\\s*,\\s*\"floatValues\"\\s*:\\s*)\\[[^\\]]*\\]"),
+        "$1[]",
+        std::regex_constants::format_first_only
+    );
+    REQUIRE(bare != malformed);
+
+    const std::vector<std::string> namesBefore = namesOf();
+    const std::size_t linksBefore = core::listLinks().size();
+    const bool modifiedBefore = core::isSceneModified();
+
+    // Refused by the check, with a message of its own, before any node is made.
+    const core::PasteNodesResult refused = core::pasteNodes(malformed, 0.f, 0.f);
+    CHECK_FALSE(refused.status.ok);
+    CHECK(refused.status.error == "A parameter of the copy has an expression it cannot hold.");
+    const core::PasteNodesResult result = core::pasteNodes(bare, 0.f, 0.f);
+    CHECK_FALSE(result.status.ok);
+    CHECK(result.nodes.empty());
+
+    CHECK(namesOf() == namesBefore);
+    CHECK(core::listLinks().size() == linksBefore);
+    // The revision may grow while the node is made and taken away, the saved state does not.
+    CHECK(core::isSceneModified() == modifiedBefore);
+}

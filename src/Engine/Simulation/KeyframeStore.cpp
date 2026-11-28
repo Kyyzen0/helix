@@ -267,6 +267,20 @@ std::optional<KeyframeStore::TrackCopy> KeyframeStore::copyTrack(const KeyframeT
     return copy;
 }
 
+bool KeyframeStore::rewriteBaseExpressions(const std::function<String(const KeyframeTarget&, const String&)>& rewrite)
+{
+    bool changed = false;
+    for (auto& [target, expression] : baseExpressions_)
+    {
+        if (!expression) continue;
+        String rewritten = rewrite(target, *expression);
+        if (rewritten == *expression) continue;
+        expression = std::move(rewritten);
+        changed = true;
+    }
+    return changed;
+}
+
 void KeyframeStore::pasteTrack(const KeyframeTarget& target, const TrackCopy& copy)
 {
     if (copy.keyframes.empty()) return;

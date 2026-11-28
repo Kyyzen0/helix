@@ -51,6 +51,7 @@ class NodeSnapshot
     /// @brief Returns the parameters, for a caller that has to change what they say before the
     /// node is rebuilt (a copy points its expressions at the copies of the nodes they read).
     std::vector<ParameterSerializable>& parameters() { return parameters_; }
+    const std::vector<ParameterSerializable>& parameters() const { return parameters_; }
 
   private:
     friend class cereal::access;

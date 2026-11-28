@@ -144,6 +144,7 @@ enum EngineMessages {
         "A keyframe of the copy belongs to no node of it.",
         "A keyframe of the copy has no value.",
         "A keyframe of the copy has an unknown interpolation.",
+        "A parameter of the copy has an expression it cannot hold.",
         // The facade: parameters, expressions, ramps.
         "The node has no parameter named '%@'.",
         "Component %@ is out of range, the parameter holds %@.",
