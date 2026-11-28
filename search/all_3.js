@@ -53,13 +53,14 @@ var searchData=
   ['cookresult_50',['CookResult',['../classhelix_1_1async_1_1CookResult.html',1,'helix::async']]],
   ['cookscheduler_51',['CookScheduler',['../classhelix_1_1async_1_1CookScheduler.html',1,'helix::async::CookScheduler'],['../classhelix_1_1async_1_1CookScheduler.html#a3ee9a05b39f45dadc692caa1d88bf556',1,'helix::async::CookScheduler::CookScheduler()']]],
   ['cooksnapshot_52',['CookSnapshot',['../classhelix_1_1async_1_1CookSnapshot.html',1,'helix::async']]],
-  ['count_53',['count',['../structhelix_1_1sim_1_1ParticleSettings.html#a686097ffd8f214eef3284a3870a20211',1,'helix::sim::ParticleSettings']]],
-  ['cppimplementation_54',['CppImplementation',['../structhelix_1_1nt_1_1CppImplementation.html',1,'helix::nt']]],
-  ['createnode_55',['createNode',['../classhelix_1_1nt_1_1Network.html#aa0541339bc4df9f54f898fc757499531',1,'helix::nt::Network::createNode()'],['../classhelix_1_1nt_1_1NetworkManager.html#a7ce86d08a7c3f01ee26fc5dfad4ec583',1,'helix::nt::NetworkManager::createNode()']]],
-  ['createnodecommand_56',['CreateNodeCommand',['../classhelix_1_1nt_1_1CreateNodeCommand.html',1,'helix::nt']]],
-  ['createnodewithid_57',['createNodeWithId',['../classhelix_1_1nt_1_1NetworkManager.html#aada75296d10322b754e656393003bc53',1,'helix::nt::NetworkManager']]],
-  ['credits_20and_20origin_58',['Credits and origin',['../index.html#autotoc_md2',1,'']]],
-  ['cubictracks_59',['cubicTracks',['../structhelix_1_1import_1_1ImportSummary.html#acbf28d469574b71a852a653f0ffe908f',1,'helix::import::ImportSummary::cubicTracks'],['../structhelix_1_1import_1_1RawSkeleton.html#a2cca07fe82c2b77ad143b29e9661c2a1',1,'helix::import::RawSkeleton::cubicTracks']]],
-  ['currentnode_60',['currentNode',['../classhelix_1_1expr_1_1ExpressionContext.html#a0b9199012ee1b4df116f3d140a3640b0',1,'helix::expr::ExpressionContext']]],
-  ['cutedges_61',['cutEdges',['../structhelix_1_1utils_1_1PlaneCut.html#a1eeb21bd341afd5834a2ecc12cdf0228',1,'helix::utils::PlaneCut']]]
+  ['copytrack_53',['copyTrack',['../classhelix_1_1sim_1_1KeyframeStore.html#a232f5139b6032918efe7aac66e11f18b',1,'helix::sim::KeyframeStore']]],
+  ['count_54',['count',['../structhelix_1_1sim_1_1ParticleSettings.html#a686097ffd8f214eef3284a3870a20211',1,'helix::sim::ParticleSettings']]],
+  ['cppimplementation_55',['CppImplementation',['../structhelix_1_1nt_1_1CppImplementation.html',1,'helix::nt']]],
+  ['createnode_56',['createNode',['../classhelix_1_1nt_1_1Network.html#aa0541339bc4df9f54f898fc757499531',1,'helix::nt::Network::createNode()'],['../classhelix_1_1nt_1_1NetworkManager.html#a7ce86d08a7c3f01ee26fc5dfad4ec583',1,'helix::nt::NetworkManager::createNode()']]],
+  ['createnodecommand_57',['CreateNodeCommand',['../classhelix_1_1nt_1_1CreateNodeCommand.html',1,'helix::nt']]],
+  ['createnodewithid_58',['createNodeWithId',['../classhelix_1_1nt_1_1NetworkManager.html#aada75296d10322b754e656393003bc53',1,'helix::nt::NetworkManager']]],
+  ['credits_20and_20origin_59',['Credits and origin',['../index.html#autotoc_md2',1,'']]],
+  ['cubictracks_60',['cubicTracks',['../structhelix_1_1import_1_1ImportSummary.html#acbf28d469574b71a852a653f0ffe908f',1,'helix::import::ImportSummary::cubicTracks'],['../structhelix_1_1import_1_1RawSkeleton.html#a2cca07fe82c2b77ad143b29e9661c2a1',1,'helix::import::RawSkeleton::cubicTracks']]],
+  ['currentnode_61',['currentNode',['../classhelix_1_1expr_1_1ExpressionContext.html#a0b9199012ee1b4df116f3d140a3640b0',1,'helix::expr::ExpressionContext']]],
+  ['cutedges_62',['cutEdges',['../structhelix_1_1utils_1_1PlaneCut.html#a1eeb21bd341afd5834a2ecc12cdf0228',1,'helix::utils::PlaneCut']]]
 ];

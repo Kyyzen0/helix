@@ -10,13 +10,14 @@ var searchData=
   ['deletenode_7',['deleteNode',['../classhelix_1_1nt_1_1Network.html#a6a84340cdd94c0c0c48d791fa2dee296',1,'helix::nt::Network::deleteNode()'],['../classhelix_1_1nt_1_1NetworkManager.html#a18afed49acc8f5dcc3beb79107fe6210',1,'helix::nt::NetworkManager::deleteNode()']]],
   ['deletenodecommand_8',['DeleteNodeCommand',['../classhelix_1_1nt_1_1DeleteNodeCommand.html',1,'helix::nt']]],
   ['dependsontime_9',['dependsOnTime',['../classhelix_1_1expr_1_1ExpressionContext.html#a4c39e0f642164467204a12cdc1f805f5',1,'helix::expr::ExpressionContext']]],
-  ['detach_10',['detach',['../classhelix_1_1attr_1_1Attribute.html#aa58557bff97c95b304d9b14b6096d634',1,'helix::attr::Attribute']]],
-  ['dirtynode_11',['dirtyNode',['../classhelix_1_1nt_1_1Node.html#a2f415297ae1a7bc3ee5946bddcf282b9',1,'helix::nt::Node']]],
-  ['disconnect_12',['disconnect',['../classhelix_1_1nt_1_1NetworkGraph.html#aa86ae611aff19cbf2a522c385c8219e6',1,'helix::nt::NetworkGraph']]],
-  ['disconnectnodes_13',['disconnectNodes',['../classhelix_1_1nt_1_1NetworkManager.html#ac5535b587fb013eb33e22d14cab320cf',1,'helix::nt::NetworkManager']]],
-  ['displaynodeindex_14',['displayNodeIndex',['../structNetworkSerializable.html#a2d6a206d9b255508b76026599f5b0640',1,'NetworkSerializable']]],
-  ['docspath_15',['docsPath',['../structhelix_1_1nt_1_1NodeType.html#a810147d24ed3f96bfac7c82516ccc9e7',1,'helix::nt::NodeType']]],
-  ['drag_16',['drag',['../structhelix_1_1sim_1_1ParticleSettings.html#ad3aff0dde879ccc97eea32ef015eb15c',1,'helix::sim::ParticleSettings']]],
-  ['duplicatepoints_17',['duplicatePoints',['../classhelix_1_1geo_1_1Mesh.html#ad8d917a75d4028b2db9f534a882cbfba',1,'helix::geo::Mesh']]],
-  ['duration_18',['duration',['../structhelix_1_1geo_1_1AnimationClip.html#a7475a6c988c838ff3f67e2f3692b01e3',1,'helix::geo::AnimationClip']]]
+  ['description_10',['description',['../structhelix_1_1nt_1_1NodeAlias.html#a660b6ccc679ad532f1c0894e96392663',1,'helix::nt::NodeAlias::description'],['../structhelix_1_1nt_1_1NodeType.html#a71050bad248695d95f9dbb5fb1050496',1,'helix::nt::NodeType::description']]],
+  ['detach_11',['detach',['../classhelix_1_1attr_1_1Attribute.html#aa58557bff97c95b304d9b14b6096d634',1,'helix::attr::Attribute']]],
+  ['dirtynode_12',['dirtyNode',['../classhelix_1_1nt_1_1Node.html#a2f415297ae1a7bc3ee5946bddcf282b9',1,'helix::nt::Node']]],
+  ['disconnect_13',['disconnect',['../classhelix_1_1nt_1_1NetworkGraph.html#aa86ae611aff19cbf2a522c385c8219e6',1,'helix::nt::NetworkGraph']]],
+  ['disconnectnodes_14',['disconnectNodes',['../classhelix_1_1nt_1_1NetworkManager.html#ac5535b587fb013eb33e22d14cab320cf',1,'helix::nt::NetworkManager']]],
+  ['displaynodeindex_15',['displayNodeIndex',['../structNetworkSerializable.html#a2d6a206d9b255508b76026599f5b0640',1,'NetworkSerializable']]],
+  ['docspath_16',['docsPath',['../structhelix_1_1nt_1_1NodeType.html#a810147d24ed3f96bfac7c82516ccc9e7',1,'helix::nt::NodeType']]],
+  ['drag_17',['drag',['../structhelix_1_1sim_1_1ParticleSettings.html#ad3aff0dde879ccc97eea32ef015eb15c',1,'helix::sim::ParticleSettings']]],
+  ['duplicatepoints_18',['duplicatePoints',['../classhelix_1_1geo_1_1Mesh.html#ad8d917a75d4028b2db9f534a882cbfba',1,'helix::geo::Mesh']]],
+  ['duration_19',['duration',['../structhelix_1_1geo_1_1AnimationClip.html#a7475a6c988c838ff3f67e2f3692b01e3',1,'helix::geo::AnimationClip']]]
 ];

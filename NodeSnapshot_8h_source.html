@@ -121,53 +121,84 @@ $(function(){ initResizable(false); });
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classhelix_1_1nt_1_1NodeSnapshot.html#a002d8008937ad301f4991ccf8694a207">restore</a>(<a class="code hl_typedef" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">NodeId</a> nodeId) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classhelix_1_1nt_1_1NodeSnapshot.html#a09af92d4a48916435a1e28f71c4c6d53">   36</a></span>    <span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1Path.html">Path</a>&amp; <a class="code hl_function" href="classhelix_1_1nt_1_1NodeSnapshot.html#a09af92d4a48916435a1e28f71c4c6d53">getPath</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> path_; }</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">friend</span> <span class="keyword">class </span>cereal::access;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> Archive&gt; <span class="keywordtype">void</span> save(Archive&amp; archive)<span class="keyword"> const</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="keyword">    </span>{</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        archive(</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>            cereal::make_nvp(<span class="stringliteral">&quot;typeName&quot;</span>, typeName_),</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>            cereal::make_nvp(<span class="stringliteral">&quot;path&quot;</span>, path_.<a class="code hl_function" href="classhelix_1_1Path.html#a33de0bfd279c34a4fc140482d941acf7">getString</a>()),</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>            cereal::make_nvp(<span class="stringliteral">&quot;posX&quot;</span>, position_.x()),</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>            cereal::make_nvp(<span class="stringliteral">&quot;posY&quot;</span>, position_.y()),</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>            cereal::make_nvp(<span class="stringliteral">&quot;parameters&quot;</span>, parameters_)</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        );</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    }</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> Archive&gt; <span class="keywordtype">void</span> load(Archive&amp; archive)</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    {</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        std::string path;</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        <span class="keywordtype">float</span> posX = 0;</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        <span class="keywordtype">float</span> posY = 0;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        archive(</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>            cereal::make_nvp(<span class="stringliteral">&quot;typeName&quot;</span>, typeName_),</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>            cereal::make_nvp(<span class="stringliteral">&quot;path&quot;</span>, path),</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>            cereal::make_nvp(<span class="stringliteral">&quot;posX&quot;</span>, posX),</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>            cereal::make_nvp(<span class="stringliteral">&quot;posY&quot;</span>, posY),</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>            cereal::make_nvp(<span class="stringliteral">&quot;parameters&quot;</span>, parameters_)</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        );</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        path_ = <a class="code hl_class" href="classhelix_1_1Path.html">Path</a>(path);</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        position_ = {posX, posY};</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    }</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    std::string typeName_;</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    Path path_;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    Vector2 position_ = {0.f, 0.f};</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    std::vector&lt;ParameterSerializable&gt; parameters_;</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>};</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classhelix_1_1nt_1_1NodeSnapshot.html#a002d8008937ad301f4991ccf8694a207">restore</a>(<a class="code hl_typedef" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">NodeId</a> nodeId, <span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1Path.html">Path</a>&amp; path, Vector2 position) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="classhelix_1_1nt_1_1NodeSnapshot.html#a09af92d4a48916435a1e28f71c4c6d53">   40</a></span>    <span class="keyword">const</span> <a class="code hl_class" href="classhelix_1_1Path.html">Path</a>&amp; <a class="code hl_function" href="classhelix_1_1nt_1_1NodeSnapshot.html#a09af92d4a48916435a1e28f71c4c6d53">getPath</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> path_; }</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="classhelix_1_1nt_1_1NodeSnapshot.html#a23c036f697953fb8842dabde12a1b8ce">   43</a></span>    Vector2 <a class="code hl_function" href="classhelix_1_1nt_1_1NodeSnapshot.html#a23c036f697953fb8842dabde12a1b8ce">getPosition</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> position_; }</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classhelix_1_1nt_1_1NodeSnapshot.html#a6096fd9806ba4566897a1d9f77ef5122">   46</a></span>    <span class="keyword">const</span> std::string&amp; <a class="code hl_function" href="classhelix_1_1nt_1_1NodeSnapshot.html#a6096fd9806ba4566897a1d9f77ef5122">getTypeName</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> typeName_; }</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="classhelix_1_1nt_1_1NodeSnapshot.html#a7c94c1f3132ea855115ac532e4391122">   49</a></span>    <span class="keyword">const</span> std::string&amp; <a class="code hl_function" href="classhelix_1_1nt_1_1NodeSnapshot.html#a7c94c1f3132ea855115ac532e4391122">getAliasType</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> aliasType_; }</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="classhelix_1_1nt_1_1NodeSnapshot.html#a471a8608abd41d2eef4d120e23a43c97">   53</a></span>    std::vector&lt;ParameterSerializable&gt;&amp; <a class="code hl_function" href="classhelix_1_1nt_1_1NodeSnapshot.html#a471a8608abd41d2eef4d120e23a43c97">parameters</a>() { <span class="keywordflow">return</span> parameters_; }</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keyword">const</span> std::vector&lt;ParameterSerializable&gt;&amp; <a class="code hl_function" href="classhelix_1_1nt_1_1NodeSnapshot.html#a471a8608abd41d2eef4d120e23a43c97">parameters</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> parameters_; }</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keyword">friend</span> <span class="keyword">class </span>cereal::access;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> Archive&gt; <span class="keywordtype">void</span> save(Archive&amp; archive)<span class="keyword"> const</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        archive(</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>            cereal::make_nvp(<span class="stringliteral">&quot;typeName&quot;</span>, typeName_),</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>            cereal::make_nvp(<span class="stringliteral">&quot;path&quot;</span>, path_.<a class="code hl_function" href="classhelix_1_1Path.html#a33de0bfd279c34a4fc140482d941acf7">getString</a>()),</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>            cereal::make_nvp(<span class="stringliteral">&quot;posX&quot;</span>, position_.x()),</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>            cereal::make_nvp(<span class="stringliteral">&quot;posY&quot;</span>, position_.y()),</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>            cereal::make_nvp(<span class="stringliteral">&quot;parameters&quot;</span>, parameters_)</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        );</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="comment">// Written last and only when there is one, so a file of a node made from its type is</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="comment">// what it always was.</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordflow">if</span> (!aliasType_.empty()) archive(cereal::make_nvp(<span class="stringliteral">&quot;alias&quot;</span>, aliasType_));</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    }</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> Archive&gt; <span class="keywordtype">void</span> load(Archive&amp; archive)</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    {</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        std::string path;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <span class="keywordtype">float</span> posX = 0;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordtype">float</span> posY = 0;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        archive(</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>            cereal::make_nvp(<span class="stringliteral">&quot;typeName&quot;</span>, typeName_),</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>            cereal::make_nvp(<span class="stringliteral">&quot;path&quot;</span>, path),</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>            cereal::make_nvp(<span class="stringliteral">&quot;posX&quot;</span>, posX),</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>            cereal::make_nvp(<span class="stringliteral">&quot;posY&quot;</span>, posY),</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>            cereal::make_nvp(<span class="stringliteral">&quot;parameters&quot;</span>, parameters_)</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        );</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        path_ = Path(path);</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        position_ = {posX, posY};</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        <span class="comment">// A file written before nodes remembered their alias has no such field, and still</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        <span class="comment">// opens: the field comes last, so a missing one leaves the archive where it was.</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        aliasType_.clear();</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        <span class="keywordflow">try</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        {</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>            archive(cereal::make_nvp(<span class="stringliteral">&quot;alias&quot;</span>, aliasType_));</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        }</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <span class="keywordflow">catch</span> (<span class="keyword">const</span> cereal::Exception&amp;)</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        {</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>            aliasType_.clear();</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        }</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    }</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    std::string typeName_;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    std::string aliasType_;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    Path path_;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    Vector2 position_ = {0.f, 0.f};</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    std::vector&lt;ParameterSerializable&gt; parameters_;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>};</div>
 </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>} <span class="comment">// namespace helix::nt</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>} <span class="comment">// namespace helix::nt</span></div>
 <div class="ttc" id="aTypes_8h_html"><div class="ttname"><a href="Types_8h.html">Types.h</a></div><div class="ttdoc">Basic attribute, parameter, and node types for Helix.</div></div>
 <div class="ttc" id="aTypes_8h_html_a7ee202d2a627624f0575ccd8434d6968"><div class="ttname"><a href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">helix::nt::NodeId</a></div><div class="ttdeci">uint64_t NodeId</div><div class="ttdoc">The unique ID assigned to each node in the network.</div><div class="ttdef"><b>Definition</b> Types.h:334</div></div>
 <div class="ttc" id="aclasshelix_1_1Path_html"><div class="ttname"><a href="classhelix_1_1Path.html">helix::Path</a></div><div class="ttdoc">A default path class for creation and manipulation of tree-based paths.</div><div class="ttdef"><b>Definition</b> Path.h:14</div></div>
 <div class="ttc" id="aclasshelix_1_1Path_html_a33de0bfd279c34a4fc140482d941acf7"><div class="ttname"><a href="classhelix_1_1Path.html#a33de0bfd279c34a4fc140482d941acf7">helix::Path::getString</a></div><div class="ttdeci">const std::string &amp; getString() const</div><div class="ttdoc">Return the path of the Path as an std::string.</div><div class="ttdef"><b>Definition</b> Path.cpp:161</div></div>
 <div class="ttc" id="aclasshelix_1_1nt_1_1NodeSnapshot_html"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeSnapshot.html">helix::nt::NodeSnapshot</a></div><div class="ttdoc">Everything one node carries, held apart from the network so it can be rebuilt.</div><div class="ttdef"><b>Definition</b> NodeSnapshot.h:25</div></div>
-<div class="ttc" id="aclasshelix_1_1nt_1_1NodeSnapshot_html_a002d8008937ad301f4991ccf8694a207"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeSnapshot.html#a002d8008937ad301f4991ccf8694a207">helix::nt::NodeSnapshot::restore</a></div><div class="ttdeci">void restore(NodeId nodeId) const</div><div class="ttdoc">Rebuilds the node under the given id with the path, position, and parameters it had.</div><div class="ttdef"><b>Definition</b> NodeSnapshot.cpp:22</div></div>
-<div class="ttc" id="aclasshelix_1_1nt_1_1NodeSnapshot_html_a09af92d4a48916435a1e28f71c4c6d53"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeSnapshot.html#a09af92d4a48916435a1e28f71c4c6d53">helix::nt::NodeSnapshot::getPath</a></div><div class="ttdeci">const Path &amp; getPath() const</div><div class="ttdoc">Returns the path the node sat at, whose leaf is the node name.</div><div class="ttdef"><b>Definition</b> NodeSnapshot.h:36</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1NodeSnapshot_html_a002d8008937ad301f4991ccf8694a207"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeSnapshot.html#a002d8008937ad301f4991ccf8694a207">helix::nt::NodeSnapshot::restore</a></div><div class="ttdeci">void restore(NodeId nodeId) const</div><div class="ttdoc">Rebuilds the node under the given id with the path, position, and parameters it had.</div><div class="ttdef"><b>Definition</b> NodeSnapshot.cpp:23</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1NodeSnapshot_html_a09af92d4a48916435a1e28f71c4c6d53"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeSnapshot.html#a09af92d4a48916435a1e28f71c4c6d53">helix::nt::NodeSnapshot::getPath</a></div><div class="ttdeci">const Path &amp; getPath() const</div><div class="ttdoc">Returns the path the node sat at, whose leaf is the node name.</div><div class="ttdef"><b>Definition</b> NodeSnapshot.h:40</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1NodeSnapshot_html_a23c036f697953fb8842dabde12a1b8ce"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeSnapshot.html#a23c036f697953fb8842dabde12a1b8ce">helix::nt::NodeSnapshot::getPosition</a></div><div class="ttdeci">Vector2 getPosition() const</div><div class="ttdoc">Returns where the node sat.</div><div class="ttdef"><b>Definition</b> NodeSnapshot.h:43</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1NodeSnapshot_html_a471a8608abd41d2eef4d120e23a43c97"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeSnapshot.html#a471a8608abd41d2eef4d120e23a43c97">helix::nt::NodeSnapshot::parameters</a></div><div class="ttdeci">std::vector&lt; ParameterSerializable &gt; &amp; parameters()</div><div class="ttdoc">Returns the parameters, for a caller that has to change what they say before the node is rebuilt (a c...</div><div class="ttdef"><b>Definition</b> NodeSnapshot.h:53</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1NodeSnapshot_html_a6096fd9806ba4566897a1d9f77ef5122"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeSnapshot.html#a6096fd9806ba4566897a1d9f77ef5122">helix::nt::NodeSnapshot::getTypeName</a></div><div class="ttdeci">const std::string &amp; getTypeName() const</div><div class="ttdoc">Returns the full name of the node's type, an alias's own type included.</div><div class="ttdef"><b>Definition</b> NodeSnapshot.h:46</div></div>
 <div class="ttc" id="aclasshelix_1_1nt_1_1NodeSnapshot_html_a77a0a5d971832af3f4b1c846baba328f"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeSnapshot.html#a77a0a5d971832af3f4b1c846baba328f">helix::nt::NodeSnapshot::capture</a></div><div class="ttdeci">static NodeSnapshot capture(Node &amp;node)</div><div class="ttdoc">Returns a snapshot of the node as it stands.</div><div class="ttdef"><b>Definition</b> NodeSnapshot.cpp:8</div></div>
+<div class="ttc" id="aclasshelix_1_1nt_1_1NodeSnapshot_html_a7c94c1f3132ea855115ac532e4391122"><div class="ttname"><a href="classhelix_1_1nt_1_1NodeSnapshot.html#a7c94c1f3132ea855115ac532e4391122">helix::nt::NodeSnapshot::getAliasType</a></div><div class="ttdeci">const std::string &amp; getAliasType() const</div><div class="ttdoc">Returns the alias the node was created from, empty when there was none.</div><div class="ttdef"><b>Definition</b> NodeSnapshot.h:49</div></div>
 <div class="ttc" id="aclasshelix_1_1nt_1_1Node_html"><div class="ttname"><a href="classhelix_1_1nt_1_1Node.html">helix::nt::Node</a></div><div class="ttdoc">The unique runtime representation of a node.</div><div class="ttdef"><b>Definition</b> Node.h:23</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

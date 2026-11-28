@@ -22,13 +22,14 @@ var searchData=
   ['tovaluetype_19',['toValueType',['../Types_8h.html#a903a1491c560624d3fc21ca7d942107e',1,'helix::prm']]],
   ['tovector_20',['toVector',['../structhelix_1_1geo_1_1Mesh_1_1FaceOffsets.html#acedf43c29299f5665fa508b53ac6202f',1,'helix::geo::Mesh::FaceOffsets']]],
   ['trackchanged_21',['trackChanged',['../classhelix_1_1sim_1_1KeyframeStore.html#a53cb27ccb282ab7dab8664c8c68df582',1,'helix::sim::KeyframeStore']]],
-  ['trackschanged_22',['tracksChanged',['../classhelix_1_1sim_1_1KeyframeStore.html#a3c677949bd76c32dcd1eea4849e47ee7',1,'helix::sim::KeyframeStore']]],
-  ['transform_23',['Transform',['../classhelix_1_1Transform.html',1,'helix::Transform'],['../classhelix_1_1Transform.html#a8186397d2cb1e6375382a26b79eb35dc',1,'helix::Transform::Transform()'],['../classhelix_1_1Transform.html#a0e037a4cd39b5918ac8365c827f296e5',1,'helix::Transform::Transform(const Matrix4 &amp;matrix)']]],
-  ['transforms_24',['Transforms',['../structhelix_1_1NodePacket_1_1Transforms.html',1,'helix::NodePacket']]],
-  ['translate_25',['translate',['../classhelix_1_1Transform.html#a079e65ecdf04b5367fc815c1392713d1',1,'helix::Transform']]],
-  ['triangulatedmesh_26',['TriangulatedMesh',['../structhelix_1_1utils_1_1TriangulatedMesh.html',1,'helix::utils']]],
-  ['tryaddattribute_27',['tryAddAttribute',['../classhelix_1_1geo_1_1Primitive.html#a517fd7485b1bac3e5f6f7ad6e274d901',1,'helix::geo::Primitive::tryAddAttribute(attr::AttributeOwner owner, std::string name, attr::AttributeType type, bool intrinsic=false, bool isInternal=false)'],['../classhelix_1_1geo_1_1Primitive.html#a8735f8b273c526e002a1fc2324262b54',1,'helix::geo::Primitive::tryAddAttribute(attr::AttributeOwner owner, std::string name, bool intrinsic=false, bool isInternal=false)']]],
-  ['tryrestore_28',['tryRestore',['../classhelix_1_1nt_1_1CookCacheAttempt.html#a83a3ff0695c22f7be608534b7a5f102a',1,'helix::nt::CookCacheAttempt']]],
-  ['typenamespace_29',['typeNamespace',['../structhelix_1_1nt_1_1NodeAlias.html#ab38abc1d210885f606af3dd8b54ae51e',1,'helix::nt::NodeAlias::typeNamespace'],['../structhelix_1_1nt_1_1NodeType.html#af8f1fdec9aa7673e07035668aac34837',1,'helix::nt::NodeType::typeNamespace']]],
-  ['types_2eh_30',['Types.h',['../Types_8h.html',1,'']]]
+  ['trackcopy_22',['TrackCopy',['../structhelix_1_1sim_1_1KeyframeStore_1_1TrackCopy.html',1,'helix::sim::KeyframeStore']]],
+  ['trackschanged_23',['tracksChanged',['../classhelix_1_1sim_1_1KeyframeStore.html#a3c677949bd76c32dcd1eea4849e47ee7',1,'helix::sim::KeyframeStore']]],
+  ['transform_24',['Transform',['../classhelix_1_1Transform.html',1,'helix::Transform'],['../classhelix_1_1Transform.html#a8186397d2cb1e6375382a26b79eb35dc',1,'helix::Transform::Transform()'],['../classhelix_1_1Transform.html#a0e037a4cd39b5918ac8365c827f296e5',1,'helix::Transform::Transform(const Matrix4 &amp;matrix)']]],
+  ['transforms_25',['Transforms',['../structhelix_1_1NodePacket_1_1Transforms.html',1,'helix::NodePacket']]],
+  ['translate_26',['translate',['../classhelix_1_1Transform.html#a079e65ecdf04b5367fc815c1392713d1',1,'helix::Transform']]],
+  ['triangulatedmesh_27',['TriangulatedMesh',['../structhelix_1_1utils_1_1TriangulatedMesh.html',1,'helix::utils']]],
+  ['tryaddattribute_28',['tryAddAttribute',['../classhelix_1_1geo_1_1Primitive.html#a517fd7485b1bac3e5f6f7ad6e274d901',1,'helix::geo::Primitive::tryAddAttribute(attr::AttributeOwner owner, std::string name, attr::AttributeType type, bool intrinsic=false, bool isInternal=false)'],['../classhelix_1_1geo_1_1Primitive.html#a8735f8b273c526e002a1fc2324262b54',1,'helix::geo::Primitive::tryAddAttribute(attr::AttributeOwner owner, std::string name, bool intrinsic=false, bool isInternal=false)']]],
+  ['tryrestore_29',['tryRestore',['../classhelix_1_1nt_1_1CookCacheAttempt.html#a83a3ff0695c22f7be608534b7a5f102a',1,'helix::nt::CookCacheAttempt']]],
+  ['typenamespace_30',['typeNamespace',['../structhelix_1_1nt_1_1NodeAlias.html#ab38abc1d210885f606af3dd8b54ae51e',1,'helix::nt::NodeAlias::typeNamespace'],['../structhelix_1_1nt_1_1NodeType.html#af8f1fdec9aa7673e07035668aac34837',1,'helix::nt::NodeType::typeNamespace']]],
+  ['types_2eh_31',['Types.h',['../Types_8h.html',1,'']]]
 ];

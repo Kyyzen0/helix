@@ -223,6 +223,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setSelectedNodes</b> 
 <tr class="memitem:a18afed49acc8f5dcc3beb79107fe6210" id="r_a18afed49acc8f5dcc3beb79107fe6210"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a18afed49acc8f5dcc3beb79107fe6210">deleteNode</a> (<a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">NodeId</a> nodeId)</td></tr>
 <tr class="memdesc:a18afed49acc8f5dcc3beb79107fe6210"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deletes a node, pushing an undo command.  <br /></td></tr>
 <tr class="separator:a18afed49acc8f5dcc3beb79107fe6210"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f130a34279f87710c56d9d40a74f5a6" id="r_a9f130a34279f87710c56d9d40a74f5a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9f130a34279f87710c56d9d40a74f5a6">renameNode</a> (<a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">NodeId</a> nodeId, const std::string &amp;newName)</td></tr>
+<tr class="memdesc:a9f130a34279f87710c56d9d40a74f5a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gives a node another name, and every reference to it the new one.  <br /></td></tr>
+<tr class="separator:a9f130a34279f87710c56d9d40a74f5a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aada75296d10322b754e656393003bc53" id="r_aada75296d10322b754e656393003bc53"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aada75296d10322b754e656393003bc53">createNodeWithId</a> (<a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">NodeId</a> nodeId, const <a class="el" href="structhelix_1_1nt_1_1NodeType.html">nt::NodeType</a> &amp;nodeType, const <a class="el" href="classhelix_1_1Path.html">Path</a> &amp;path, Vector2 position)</td></tr>
 <tr class="memdesc:aada75296d10322b754e656393003bc53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a node with an identity the caller dictates rather than one picked here.  <br /></td></tr>
 <tr class="separator:aada75296d10322b754e656393003bc53"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -936,6 +939,38 @@ A multi input port makes room, moving the node links from the index onward up on
 
 <p>Starts the cook that was asked for and publishes the one that finished. </p>
 <p>The interface calls this once a frame, so a finished cook is put on screen and a cook that was asked for gets going. </p>
+
+</div>
+</div>
+<a id="a9f130a34279f87710c56d9d40a74f5a6" name="a9f130a34279f87710c56d9d40a74f5a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f130a34279f87710c56d9d40a74f5a6">&#9670;&#160;</a></span>renameNode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void helix::nt::NetworkManager::renameNode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">NodeId</a></td>          <td class="paramname"><span class="paramname"><em>nodeId</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>newName</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gives a node another name, and every reference to it the new one. </p>
+<p>A node is read by its path from the expressions and the scripts of other nodes, so the references in every parameter of the network are rewritten to the new name (see rewriteNodeReferences). Keyframes, links, the display node and the selection hold the node by id and need nothing.</p>
+<dl class="section note"><dt>Note</dt><dd>Does nothing when the node already has that name. The change is not pushed on the undo stack of the engine.</dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>when the name is not valid or another node of the scope has it, or when the node holds a scope (the nodes inside would have to move with it). </td></tr>
+    <tr><td class="paramname">std::out_of_range</td><td>when there is no such node. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

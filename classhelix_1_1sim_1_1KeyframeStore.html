@@ -99,6 +99,7 @@ $(function(){ initResizable(false); });
 <div id="doc-content">
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
@@ -112,6 +113,12 @@ $(function(){ initResizable(false); });
 
 <p><code>#include &lt;<a class="el" href="KeyframeStore_8h_source.html">KeyframeStore.h</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhelix_1_1sim_1_1KeyframeStore_1_1TrackCopy.html">TrackCopy</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Everything one track holds, to carry it to another node.  <a href="structhelix_1_1sim_1_1KeyframeStore_1_1TrackCopy.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ad66a5a0672c1bcd790d7c2be11852374" id="r_ad66a5a0672c1bcd790d7c2be11852374"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad66a5a0672c1bcd790d7c2be11852374">setKeyframe</a> (const <a class="el" href="structhelix_1_1sim_1_1KeyframeTarget.html">KeyframeTarget</a> &amp;target, floatT frame, floatT value, Interpolation interpolation=Interpolation::Linear)</td></tr>
@@ -158,6 +165,16 @@ std::vector&lt; <a class="el" href="structhelix_1_1sim_1_1KeyframeTarget.html">K
 std::optional&lt; floatT &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>getBaseValue</b> (const <a class="el" href="structhelix_1_1sim_1_1KeyframeTarget.html">KeyframeTarget</a> &amp;target) const</td></tr>
 <tr class="memdesc:acf0fbc13521309880f97c34c32cb39c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The value a parameter held before its track was made. <br /></td></tr>
 <tr class="separator:acf0fbc13521309880f97c34c32cb39c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a232f5139b6032918efe7aac66e11f18b" id="r_a232f5139b6032918efe7aac66e11f18b"><td class="memItemLeft" align="right" valign="top"><a id="a232f5139b6032918efe7aac66e11f18b" name="a232f5139b6032918efe7aac66e11f18b"></a>
+std::optional&lt; <a class="el" href="structhelix_1_1sim_1_1KeyframeStore_1_1TrackCopy.html">TrackCopy</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>copyTrack</b> (const <a class="el" href="structhelix_1_1sim_1_1KeyframeTarget.html">KeyframeTarget</a> &amp;target) const</td></tr>
+<tr class="memdesc:a232f5139b6032918efe7aac66e11f18b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a copy of a track, or nothing when the value holds no keyframes. <br /></td></tr>
+<tr class="separator:a232f5139b6032918efe7aac66e11f18b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0688956dc1bc3eb3d3ea465e9d5f8303" id="r_a0688956dc1bc3eb3d3ea465e9d5f8303"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0688956dc1bc3eb3d3ea465e9d5f8303">rewriteBaseExpressions</a> (const std::function&lt; String(const <a class="el" href="structhelix_1_1sim_1_1KeyframeTarget.html">KeyframeTarget</a> &amp;, const String &amp;)&gt; &amp;rewrite)</td></tr>
+<tr class="memdesc:a0688956dc1bc3eb3d3ea465e9d5f8303"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gives every stored base expression to a function, which returns the text to keep.  <br /></td></tr>
+<tr class="separator:a0688956dc1bc3eb3d3ea465e9d5f8303"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e7b6e3bc5fc74edc4f4db30e5d3d6f5" id="r_a6e7b6e3bc5fc74edc4f4db30e5d3d6f5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6e7b6e3bc5fc74edc4f4db30e5d3d6f5">pasteTrack</a> (const <a class="el" href="structhelix_1_1sim_1_1KeyframeTarget.html">KeyframeTarget</a> &amp;target, const <a class="el" href="structhelix_1_1sim_1_1KeyframeStore_1_1TrackCopy.html">TrackCopy</a> &amp;copy)</td></tr>
+<tr class="memdesc:a6e7b6e3bc5fc74edc4f4db30e5d3d6f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gives a value the keyframes of a copied track, replacing the ones it had.  <br /></td></tr>
+<tr class="separator:a6e7b6e3bc5fc74edc4f4db30e5d3d6f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82f13a959bcdc96eb8718ca114c87699" id="r_a82f13a959bcdc96eb8718ca114c87699"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a82f13a959bcdc96eb8718ca114c87699">applyToParameters</a> (floatT frame)</td></tr>
 <tr class="memdesc:a82f13a959bcdc96eb8718ca114c87699"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolves every track at a frame and writes the results into the parameters they belong to.  <br /></td></tr>
 <tr class="separator:a82f13a959bcdc96eb8718ca114c87699"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -267,6 +284,30 @@ boost::signals2::signal&lt; void(const <a class="el" href="structhelix_1_1sim_1_
 
 </div>
 </div>
+<a id="a6e7b6e3bc5fc74edc4f4db30e5d3d6f5" name="a6e7b6e3bc5fc74edc4f4db30e5d3d6f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e7b6e3bc5fc74edc4f4db30e5d3d6f5">&#9670;&#160;</a></span>pasteTrack()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void helix::sim::KeyframeStore::pasteTrack </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structhelix_1_1sim_1_1KeyframeTarget.html">KeyframeTarget</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>target</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structhelix_1_1sim_1_1KeyframeStore_1_1TrackCopy.html">TrackCopy</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>copy</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gives a value the keyframes of a copied track, replacing the ones it had. </p>
+<dl class="section note"><dt>Note</dt><dd>The parameter takes the value of the track at the current frame, as it does when a keyframe is set. </dd></dl>
+
+</div>
+</div>
 <a id="aa3632a60e1556347b037cf079d766b9d" name="aa3632a60e1556347b037cf079d766b9d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa3632a60e1556347b037cf079d766b9d">&#9670;&#160;</a></span>removeKeyframe()</h2>
 
@@ -288,6 +329,27 @@ boost::signals2::signal&lt; void(const <a class="el" href="structhelix_1_1sim_1_
 
 <p>Removes the keyframe sitting on a frame. </p>
 <dl class="section return"><dt>Returns</dt><dd>True when a keyframe was there to remove. </dd></dl>
+
+</div>
+</div>
+<a id="a0688956dc1bc3eb3d3ea465e9d5f8303" name="a0688956dc1bc3eb3d3ea465e9d5f8303"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0688956dc1bc3eb3d3ea465e9d5f8303">&#9670;&#160;</a></span>rewriteBaseExpressions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool helix::sim::KeyframeStore::rewriteBaseExpressions </td>
+          <td>(</td>
+          <td class="paramtype">const std::function&lt; String(const <a class="el" href="structhelix_1_1sim_1_1KeyframeTarget.html">KeyframeTarget</a> &amp;, const String &amp;)&gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rewrite</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gives every stored base expression to a function, which returns the text to keep. </p>
+<dl class="section note"><dt>Note</dt><dd>A parameter that holds keyframes does not hold its expression: it is kept here until the last keyframe goes, so what rewrites the expressions of a scene (a rename) has to come here too, or the expression that comes back reads what no longer exists. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Whether any expression changed. </dd></dl>
 
 </div>
 </div>

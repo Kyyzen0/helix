@@ -117,10 +117,32 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a002d8008937ad301f4991ccf8694a207" id="r_a002d8008937ad301f4991ccf8694a207"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a002d8008937ad301f4991ccf8694a207">restore</a> (<a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">NodeId</a> nodeId) const</td></tr>
 <tr class="memdesc:a002d8008937ad301f4991ccf8694a207"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rebuilds the node under the given id with the path, position, and parameters it had.  <br /></td></tr>
 <tr class="separator:a002d8008937ad301f4991ccf8694a207"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79267b0a3b7bf24732d29c5cecae38f2" id="r_a79267b0a3b7bf24732d29c5cecae38f2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a79267b0a3b7bf24732d29c5cecae38f2">restore</a> (<a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">NodeId</a> nodeId, const <a class="el" href="classhelix_1_1Path.html">Path</a> &amp;path, Vector2 position) const</td></tr>
+<tr class="memdesc:a79267b0a3b7bf24732d29c5cecae38f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rebuilds the node under another path and position than the ones it had.  <br /></td></tr>
+<tr class="separator:a79267b0a3b7bf24732d29c5cecae38f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09af92d4a48916435a1e28f71c4c6d53" id="r_a09af92d4a48916435a1e28f71c4c6d53"><td class="memItemLeft" align="right" valign="top"><a id="a09af92d4a48916435a1e28f71c4c6d53" name="a09af92d4a48916435a1e28f71c4c6d53"></a>
 const <a class="el" href="classhelix_1_1Path.html">Path</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getPath</b> () const</td></tr>
 <tr class="memdesc:a09af92d4a48916435a1e28f71c4c6d53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the path the node sat at, whose leaf is the node name. <br /></td></tr>
 <tr class="separator:a09af92d4a48916435a1e28f71c4c6d53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23c036f697953fb8842dabde12a1b8ce" id="r_a23c036f697953fb8842dabde12a1b8ce"><td class="memItemLeft" align="right" valign="top"><a id="a23c036f697953fb8842dabde12a1b8ce" name="a23c036f697953fb8842dabde12a1b8ce"></a>
+Vector2&#160;</td><td class="memItemRight" valign="bottom"><b>getPosition</b> () const</td></tr>
+<tr class="memdesc:a23c036f697953fb8842dabde12a1b8ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns where the node sat. <br /></td></tr>
+<tr class="separator:a23c036f697953fb8842dabde12a1b8ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6096fd9806ba4566897a1d9f77ef5122" id="r_a6096fd9806ba4566897a1d9f77ef5122"><td class="memItemLeft" align="right" valign="top"><a id="a6096fd9806ba4566897a1d9f77ef5122" name="a6096fd9806ba4566897a1d9f77ef5122"></a>
+const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getTypeName</b> () const</td></tr>
+<tr class="memdesc:a6096fd9806ba4566897a1d9f77ef5122"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the full name of the node's type, an alias's own type included. <br /></td></tr>
+<tr class="separator:a6096fd9806ba4566897a1d9f77ef5122"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c94c1f3132ea855115ac532e4391122" id="r_a7c94c1f3132ea855115ac532e4391122"><td class="memItemLeft" align="right" valign="top"><a id="a7c94c1f3132ea855115ac532e4391122" name="a7c94c1f3132ea855115ac532e4391122"></a>
+const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getAliasType</b> () const</td></tr>
+<tr class="memdesc:a7c94c1f3132ea855115ac532e4391122"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the alias the node was created from, empty when there was none. <br /></td></tr>
+<tr class="separator:a7c94c1f3132ea855115ac532e4391122"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a471a8608abd41d2eef4d120e23a43c97" id="r_a471a8608abd41d2eef4d120e23a43c97"><td class="memItemLeft" align="right" valign="top"><a id="a471a8608abd41d2eef4d120e23a43c97" name="a471a8608abd41d2eef4d120e23a43c97"></a>
+std::vector&lt; <a class="el" href="structParameterSerializable.html">ParameterSerializable</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>parameters</b> ()</td></tr>
+<tr class="memdesc:a471a8608abd41d2eef4d120e23a43c97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the parameters, for a caller that has to change what they say before the node is rebuilt (a copy points its expressions at the copies of the nodes they read). <br /></td></tr>
+<tr class="separator:a471a8608abd41d2eef4d120e23a43c97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d342d01bf2ae059d250846842410634" id="r_a9d342d01bf2ae059d250846842410634"><td class="memItemLeft" align="right" valign="top"><a id="a9d342d01bf2ae059d250846842410634" name="a9d342d01bf2ae059d250846842410634"></a>
+const std::vector&lt; <a class="el" href="structParameterSerializable.html">ParameterSerializable</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>parameters</b> () const</td></tr>
+<tr class="separator:a9d342d01bf2ae059d250846842410634"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -141,7 +163,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>cereal::access</b></
 <dl class="section note"><dt>Note</dt><dd><a class="el" href="classhelix_1_1nt_1_1Node.html" title="The unique runtime representation of a node.">Node</a> links and the nodes living in a child scope are not part of a snapshot. Wiring belongs to the graph, and children are nodes in their own right, each snapshotted on their own. </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a002d8008937ad301f4991ccf8694a207" name="a002d8008937ad301f4991ccf8694a207"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a002d8008937ad301f4991ccf8694a207">&#9670;&#160;</a></span>restore()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a002d8008937ad301f4991ccf8694a207">&#9670;&#160;</a></span>restore() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -157,6 +179,35 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>cereal::access</b></
 
 <p>Rebuilds the node under the given id with the path, position, and parameters it had. </p>
 <dl class="section note"><dt>Note</dt><dd>The scope the path sits in has to exist already, so a node holding other nodes is restored before the nodes living inside it. </dd></dl>
+
+</div>
+</div>
+<a id="a79267b0a3b7bf24732d29c5cecae38f2" name="a79267b0a3b7bf24732d29c5cecae38f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79267b0a3b7bf24732d29c5cecae38f2">&#9670;&#160;</a></span>restore() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void helix::nt::NodeSnapshot::restore </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="Types_8h.html#a7ee202d2a627624f0575ccd8434d6968">nt::NodeId</a></td>          <td class="paramname"><span class="paramname"><em>nodeId</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classhelix_1_1Path.html">Path</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Vector2</td>          <td class="paramname"><span class="paramname"><em>position</em></span>&#160;) const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Rebuilds the node under another path and position than the ones it had. </p>
+<dl class="section note"><dt>Note</dt><dd>Pasting a copy uses it, to make the node under a name that is free. </dd></dl>
 
 </div>
 </div>
