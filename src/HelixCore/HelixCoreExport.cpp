@@ -6,12 +6,14 @@
 #include "Engine/Primitives/Mesh.h"
 #include "HelixCore/HelixCore.h"
 #include "HelixCore/HelixCoreInternal.h"
-#include <atomic>
 #include <filesystem>
 #include <fstream>
 #include <locale>
 #include <memory>
 #include <system_error>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 namespace helix::core {
 
@@ -41,13 +43,25 @@ GeometryExportResult exportGeometry(const std::string& path)
             return failure(destination.string() + " is a folder, not a file.");
 
         // Written next to the destination and renamed over it, so a failure half way never leaves a
-        // broken file in the place of a good one.
-        static std::atomic<unsigned> counter{0};
-        const fs::path temporary = directory / (destination.filename().string() + ".tmp" + std::to_string(counter++));
+        // broken file in the place of a good one. The file is made by mkstemp, which creates it
+        // exclusively under a name nobody else holds: a "model.obj.tmp0" that was already in the
+        // folder (another program's, or another Helix exporting to the same destination) is never
+        // opened, truncated or deleted here.
+        std::string pattern = (directory / (destination.filename().string() + ".tmpXXXXXX")).string();
+        const int descriptor = ::mkstemp(pattern.data());
+        if (descriptor < 0) return failure("Couldn't write to " + destination.string() + ".");
+        // mkstemp makes the file private to its owner; the exported file gets the usual mode.
+        ::fchmod(descriptor, 0644);
+        ::close(descriptor);
+        const fs::path temporary(pattern);
         exporter::ObjStats stats;
         {
             std::ofstream file(temporary, std::ios::binary | std::ios::trunc);
-            if (!file) return failure("Couldn't write to " + destination.string() + ".");
+            if (!file)
+            {
+                fs::remove(temporary, ignored);
+                return failure("Couldn't write to " + destination.string() + ".");
+            }
             file.imbue(std::locale::classic());
             stats = exporter::writeObj(*packet, file);
             file.flush();

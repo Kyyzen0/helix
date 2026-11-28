@@ -2,6 +2,7 @@
 #include "HelixCore/HelixCoreInternal.h"
 #include "Engine/Core/Path.h"
 #include "Engine/Daslang/Runtime.h"
+#include "Engine/Import/BlenderConverter.h"
 #include "Engine/Import/ImportFile.h"
 #include "Engine/Network/NetworkManager.h"
 #include "Engine/Network/Node.h"
@@ -765,6 +766,12 @@ Status reloadImport(NodeId node)
         path = path.substr(first, path.find_last_not_of(" \t\r\n") - first + 1);
 
         import::forgetImportedFile(std::filesystem::path(path));
+        // A .blend file also has a converted copy on disk, keyed on its size and date: Reload must
+        // not be answered by it, or a file edited in place would keep its old geometry.
+        std::string extension = std::filesystem::path(path).extension().string();
+        std::transform(extension.begin(), extension.end(), extension.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        if (extension == ".blend")
+            import::forgetBlendConversion(std::filesystem::path(path));
         target.dirtyNode();
         bumpRevision();
         return success();

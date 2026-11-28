@@ -16,6 +16,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <unistd.h>
 #include <vector>
 
 namespace core = helix::core;
@@ -129,6 +130,40 @@ TEST_CASE_METHOD(Fixture, "An export refuses a path it cannot write and leaves t
     REQUIRE(core::exportGeometry(path).status.ok);
     REQUIRE(readAll(path).find("old") == std::string::npos);
     fs::remove(path);
+}
+
+TEST_CASE_METHOD(Fixture, "An export never touches a file that looks like its temporary one", "[export]")
+{
+    const core::NodeId cube = makeNode("helix::cube");
+    REQUIRE(core::setDisplayNode(cube).ok);
+
+    const fs::path folder = fs::path(helix::test::tempPath("helix_export_tmp_folder"));
+    fs::remove_all(folder);
+    fs::create_directories(folder);
+    const fs::path destination = folder / "model.obj";
+    // Unrelated files named like the old "<destination>.tmp<counter>" pattern, whatever number the
+    // counter was at.
+    for (int i = 0; i < 300; ++i) std::ofstream(destination.string() + ".tmp" + std::to_string(i)) << "precious " << i << "\n";
+
+    REQUIRE(core::exportGeometry(destination.string()).status.ok);
+    REQUIRE(readAll(destination.string()).find("v ") != std::string::npos);
+    for (int i = 0; i < 300; ++i)
+        REQUIRE(readAll(destination.string() + ".tmp" + std::to_string(i)) == "precious " + std::to_string(i) + "\n");
+
+    // Nothing else is left behind: the destination and the 300 decoys.
+    std::size_t files = 0;
+    for ([[maybe_unused]] const auto& entry : fs::directory_iterator(folder)) ++files;
+    REQUIRE(files == 301);
+
+    // A folder that cannot be written to fails without leaving a temporary file.
+    fs::permissions(folder, fs::perms::owner_read | fs::perms::owner_exec, fs::perm_options::replace);
+    const bool failed = !core::exportGeometry(destination.string()).status.ok;
+    fs::permissions(folder, fs::perms::owner_all, fs::perm_options::replace);
+    if (::access(folder.c_str(), W_OK) == 0 && ::geteuid() != 0) REQUIRE(failed);
+    files = 0;
+    for ([[maybe_unused]] const auto& entry : fs::directory_iterator(folder)) ++files;
+    REQUIRE(files == 301);
+    fs::remove_all(folder);
 }
 
 TEST_CASE_METHOD(Fixture, "An export with nothing displayed says so", "[export]")

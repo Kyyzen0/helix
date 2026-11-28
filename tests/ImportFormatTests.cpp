@@ -436,6 +436,52 @@ TEST_CASE("A usd file reads through Model I/O, as text and as an archive")
     }
 }
 
+TEST_CASE("Reload deletes the converted copy of a blend file and no other")
+{
+    // No Blender is needed: the entries are made by hand, named the way the converter names them.
+    TempFolder cacheFolder;
+    import::setBlendCacheDirectory(cacheFolder.path);
+    const fs::path blend = cacheFolder.path / "scene.blend";
+    const fs::path other = cacheFolder.path / "other.blend";
+    const auto make = [&](const fs::path& file, const std::string& rest) {
+        std::ofstream(cacheFolder.path / (import::blendCachePrefix(file) + rest)) << "glb";
+    };
+    make(blend, "1111.glb");
+    make(blend, "2222.glb");
+    make(blend, "3333.partial-42.glb"); // a conversion running now
+    make(other, "1111.glb");
+
+    const auto exists = [&](const fs::path& file, const std::string& rest) {
+        return fs::exists(cacheFolder.path / (import::blendCachePrefix(file) + rest));
+    };
+    REQUIRE(import::blendCachePrefix(blend) != import::blendCachePrefix(other));
+    REQUIRE(import::forgetBlendConversion(blend) == 2);
+    REQUIRE_FALSE(exists(blend, "1111.glb"));
+    REQUIRE_FALSE(exists(blend, "2222.glb"));
+    REQUIRE(exists(blend, "3333.partial-42.glb"));
+    REQUIRE(exists(other, "1111.glb"));
+    REQUIRE(import::forgetBlendConversion(blend) == 0);
+    REQUIRE(import::forgetBlendConversion(cacheFolder.path / "missing.blend") == 0);
+}
+
+TEST_CASE("Reload of a blend import node deletes its converted copy")
+{
+    TempFolder cacheFolder;
+    import::setBlendCacheDirectory(cacheFolder.path);
+    REQUIRE(core::initialize({}).ok);
+    REQUIRE(core::newScene().ok);
+    const fs::path blend = cacheFolder.path / "Scene.BLEND";
+    std::ofstream(blend) << "x";
+    const fs::path entry = cacheFolder.path / (import::blendCachePrefix(blend) + "1111.glb");
+    std::ofstream(entry) << "glb";
+
+    const core::CreateNodeResult node = core::createNode("helix::geometryImport", "", 0.f, 0.f);
+    REQUIRE(node.status.ok);
+    REQUIRE(core::setString(node.id, "filePath", 0, blend.string()).ok);
+    REQUIRE(core::reloadImport(node.id).ok);
+    REQUIRE_FALSE(fs::exists(entry));
+}
+
 TEST_CASE("A blend file is converted by Blender, once")
 {
     const fs::path blender = import::findBlender("");
