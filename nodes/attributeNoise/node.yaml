@@ -3,6 +3,7 @@ version: 1
 name: attributeNoise
 namespace: helix
 label: Attribute Noise
+description: "Roughens the geometry by pushing its points along their normals with noise."
 tags: [attribute, noise]
 
 inputs:
@@ -25,7 +26,7 @@ parameters:
   - name: name
     label: Attribute Name
     type: string
-    default: noise
+    default: Position
     style: attribute
     styleOptions:
       owners: point
@@ -37,7 +38,7 @@ parameters:
   - name: type
     label: Type
     type: dropdown
-    default: float
+    default: vector
     tooltip: >
       The kind of value the attribute stores. A vector gets separate noise on each
       axis.
@@ -56,6 +57,7 @@ parameters:
       - name: alongVector
         label: Noise Along Vector
         type: bool
+        default: true
         labelHidden: true
         tooltip: Moves the value along a vector attribute scaled by one noise value.
 
@@ -118,7 +120,7 @@ parameters:
   - name: amplitude
     label: Amplitude
     type: float
-    default: 1
+    default: 0.2
     tooltip: Scales the noise, which otherwise runs from minus one to one.
 
   - name: frequency

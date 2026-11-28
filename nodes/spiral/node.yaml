@@ -3,6 +3,7 @@ version: 1
 name: spiral
 namespace: helix
 label: Spiral
+description: "Makes a spiral drawn as a curve."
 tags: [primitive, curve, helix]
 
 outputs: 1

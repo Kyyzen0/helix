@@ -11,13 +11,20 @@ enum InspectorLoader {
         let warnings = info.warnings.map { String(engineMessage: $0) }
         let error = String(engineMessage: info.error)
 
+        // A node made from an alias shows the entry the person picked, and what it is based on.
+        let catalog = NodeTypeCatalog.byName
+        let typeLabel = catalog[typeName]?.label ?? typeName
+        let aliasLabel = catalog[String(engine: info.aliasType)]?.label
+
         let parameters = Array(helix.core.listParameters(id)).map { convert($0, of: id, type: typeName) }
         let layout = Array(helix.core.listParameterLayout(id)).map { convert($0, type: typeName) }
         return InspectorNode(
             id: id,
             name: String(engine: info.name),
             path: String(engine: info.path),
-            typeLabel: NodeTypeCatalog.byName[typeName]?.label ?? typeName,
+            type: typeName,
+            typeLabel: aliasLabel ?? typeLabel,
+            basedOn: aliasLabel == nil ? nil : typeLabel,
             isDisplay: helix.core.displayNode() == id,
             error: error.isEmpty ? nil : error,
             warnings: warnings,

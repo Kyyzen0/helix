@@ -22,7 +22,8 @@ enum OffscreenRender {
             host.layoutSubtreeIfNeeded()
             RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.15))
         }
-        let natural = NSHostingController(rootView: content).sizeThatFits(in: CGSize(width: width, height: 20_000)).height
+        let natural = NSHostingController(rootView: content.fixedSize(horizontal: false, vertical: true))
+            .sizeThatFits(in: CGSize(width: width, height: 20_000)).height
         let size = NSSize(width: width, height: height ?? ceil(natural))
         window.setContentSize(size)
         host.frame = NSRect(origin: .zero, size: size)

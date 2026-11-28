@@ -224,7 +224,48 @@ text field is being edited, so typing an "f" in the palette search or the inspec
   is disconnected, dropped on another input it is moved. A refusal of the engine (a link that would
   close a loop, a bad port) shows as a message over the editor for a few seconds.
 - **Delete.** Backspace or Delete removes the selected nodes and links (with the links of the nodes).
-- **Display.** Double-click a node, or right-click it and choose Set Display Node.
+- **Display.** Double-click a node, or right-click it and choose Show This Result (Node > Show This
+  Result when one node is selected).
+- **Names.** A node made from the editor is named from the label the person reads, in the language of
+  the app, and numbered by the engine: « Grille » gives `grille1`, « Onde sinusoïdale »
+  `ondeSinusoidale1`, « Bruit d'attribut » `bruitAttribut1`, "Sine Wave" `sineWave1`
+  (`NodeNaming.baseName`: accents and ligatures spelled out, `d'` and `l'` and the words de, du, des,
+  la, le, les, of, the left out, the rest in lowerCamelCase; an empty result leaves the naming to the
+  engine). The engine refuses a name that is taken, so the editor asks `freeNodeName` of the facade
+  for the first free number before it creates the node. The MCP tools keep naming nodes as they are
+  told to. A node made from an alias ("Mountain") shows the alias on its card and in the inspector,
+  with « basé sur Bruit d'attribut » under it: the node keeps `aliasType` (written in the `.kut` as
+  `alias` after the parameters of the node, absent from a node made from its type and from older
+  files).
+- **Rename.** Select one node and press Return, or right-click it and choose Rename…, or Node >
+  Rename…: the name is typed over the card. Or click the name in the inspector. Return takes it,
+  Escape or a click elsewhere keeps the old one, and a name that cannot be taken (empty, not letters
+  digits and underscores, longer than 64 characters, or another node has it) stays in the field with
+  the reason beside it. `renameNode` of the facade rewrites every reference to the node in the
+  parameters of all the nodes: the `prm("grid1.size")`, `prmI` and `prmS` calls of expressions and
+  scripts are matched as whole names and resolved from the scope of the reader, so `grid1` does not
+  touch `grid10`, and the form of the reference (`grid1.x`, `/grid1.x`, `../grid1.x`) is kept.
+  Keyframes, links, the display node and the selection hold the node by id and need nothing. One
+  step of undo, "Rename Node"; undoing it keeps the node selected (`PathChange`).
+- **Copy, cut, paste, duplicate.** `Command C`, `X` and `V` of the Edit menu reach the editor through
+  the responder chain (`copy:`, `cut:`, `paste:`), so a text field that has the keys keeps its own.
+  The copy is made by the engine (`copyNodes`): JSON with a format tag (`helix.nodes`) and a version,
+  holding each node (type, alias, name, position, parameters with their expressions), the keyframes
+  of those nodes and the links between them; a link to a node that is not copied is left out. It goes
+  on the pasteboard as `app.helix.nodes` and as plain text. `pasteNodes` refuses what is not such a
+  copy before it makes anything (text of another format or version, an unknown node type, links to
+  nodes or ports that do not exist, a loop, text over 32 MB), gives each node a free name (its own,
+  or the next number up), points the expressions that read a copied node at its copy (and keeps a
+  reference to a node that was not copied), and makes the links and the keys again. The nodes go
+  under the pointer when it is over the editor, and one step down and to the right of the originals
+  otherwise, moved on while they would land on a card (`NodeClipboard.offset`); the pasted nodes
+  become the selection. `Command D` (Node > Duplicate) copies and pastes without touching the
+  pasteboard. Cut, Paste and Duplicate are one step of undo each. The context menu of a node has
+  Rename…, Duplicate, Copy, Cut, Show This Result and Delete; the one of the empty canvas has Paste.
+- **Menus.** Node holds Add Node… (`Command K`), the node categories, Rename…, Duplicate (`Command D`),
+  Show This Result, Delete and Frame Nodes (`H`); its items are greyed when no node is selected.
+  Import a 3D Model… (`Command I`) is in the File menu. There is no Add menu in the menu bar; the
+  Add button of the toolbar stays.
 - **Add.** `Tab` in the editor, Node > Add Node… (`Command K`), the + button of the toolbar, or
   right-click on empty space opens the search palette. Type to filter (a prefix, a part or the
   letters in order of the label or the name, `attrn` for Attribute Noise; the tags count too),
@@ -241,8 +282,16 @@ text field is being edited, so typing an "f" in the palette search or the inspec
 
 Selection, pan and zoom are not saved in the file.
 
+**Reading a large graph.** The zoom stops at 0.25, and framing never goes below 0.6: a graph that does not fit at 0.6 is shown at 0.6 around the display node (the selection when framing it) and the rest is a scroll away. The name of a card shows down to the smallest zoom, its type from 0.4, and the error badge at every zoom. A port the pointer rests on grows and names itself in a bubble (the label of an input, "Output" or "Output N" for an output); a node with several inputs also names them above the card from zoom 1. **Node ▸ Tidy Graph** (⇧L, also in the context menu of the canvas) lays the nodes in rows from the sources down (`GraphTidy`: rows by longest path, order by the average place of the neighbours, pieces side by side, anchored at the top left of where the nodes were), the selection when two or more are selected, as one step of undo, then frames. The strip at the left of each card is the eye: it shows the node in the 3D view with a click (a drag from it still moves the card), and a double click works as before.
+
+**Descriptions.** `node.yaml` takes an optional `description:` (one plain sentence; an alias takes one too). It reaches the app through `NodeTypeInfo.description`, `extract-node-strings.py` syncs it as `node.<type>.description`, and the palette rows, the shelf and the Add menus show it (the internal type name is the tooltip of a palette row). A type tagged `test` is not offered anywhere (`EditorNodeType.isTest`), and a scene that holds one still loads. A scene file stores the value of every parameter, so a node can change its defaults without changing old scenes (`attributeNoise` now starts on Position, as a vector, along the normals, with an amplitude of 0.2). The inspector tells a node that writes an attribute other than Position (`attributeNoise`, `normal`, `attributeCreate`) that it changes no shape, and offers the spreadsheet.
+
+`--render-node-editor` also takes `--tidy`, `--hover <node>:<card|eye|in:N|out:N>` and `--rename <node>` (the name field over a card).
+
 `Helix --render-node-editor <in.kut | --new-scene> <out.png> [width height] [--select <name>]...
-[--dark]` draws the editor of a scene, every node framed, to a PNG with no window (SwiftUI's
+[--add <type>]... [--save <out.kut>] [--dark]` draws the editor of a scene, every node framed, to a
+PNG with no window (`--add helix::grid` starts from an empty scene and adds the nodes as the window
+does, so `--language fr` shows the French names; `--save` writes the scene; SwiftUI's
 `ImageRenderer`). The tests of the editor's logic (view transform, geometry, hit testing, search,
 placement, and the gestures through a model with no engine; and the inspector's number text, slider
 mapping, scrub, tree, drag-as-one-step state machine and model) are in a bundle that needs no host app:
@@ -256,8 +305,9 @@ xcodebuild test -project apple/Helix/Helix.xcodeproj -scheme HelixNodeEditorTest
 The window shows a column on its right, the inspector (View > Show Inspector, `⌥⌘I`, or the
 toolbar button; shown by default, and remembered). It shows the parameters of the node selected in
 the node editor: one node at a time ("N nodes selected" and "No node selected" otherwise). The
-header gives the node name and type, a button for the display flag, and the error or warnings of
-the node's last cook.
+header gives the node name (a click renames it), its type (or the alias it was made from, with "based
+on" the type under it), a button for the display flag, and the error or warnings of the node's last
+cook.
 
 **Layout.** The rows come in the order the node declares them, through `listParameterLayout`:
 dividers are headings, a horizontal group is one row (its label, then its members side by side),
@@ -478,7 +528,7 @@ draws the table of one node to a PNG with no window.
 
 **The welcome screen.** While the scene holds no node the viewport shows the welcome (`Sources/Welcome`): the logo, « Nouvelle scène », and the buttons *Importer un modèle 3D…* (⌘I), *Ajouter un nœud…* (⌘K) and *Ouvrir une scène…* (⌘O), then three examples (Cube, Waves, Terrain) that build a small graph into the scene through the facade, as one step of undo (`StarterExample`). On a short pane it gives up its logo and its subtitle, then its examples. A 3D file dropped on the window imports as before.
 
-**Making nodes.** The node categories (Primitives, Modify, Animation, Simulation, Others) come from the tags and the names of the types (`NodeCategory`, in `NodeEditor/NodeCategories.swift`); the import node is not in one, choosing it asks for the file. They show as a shelf of menu buttons beside the Network/Spreadsheet switch, as the *Add* menu of the toolbar and of the menu bar (*Ajouter*), and as the context menu of the empty canvas, which puts the node where the pointer is. A node made this way goes under the selected node and is wired to it, or in the middle of the view, becomes the node the viewport shows, and is selected, so the inspector shows its parameters. An empty network says how to start. The node editor frames the graph when a scene opens, when a file is imported or an example added, and when the first node is made, and keeps it framed as the window settles until the person pans or zooms.
+**Making nodes.** The node categories (Primitives, Modify, Animation, Simulation, Others) come from the tags and the names of the types (`NodeCategory`, in `NodeEditor/NodeCategories.swift`); the import node is not in one, choosing it asks for the file. They show as a shelf of menu buttons beside the Network/Spreadsheet switch, as the *Add* menu of the toolbar, as the *Node* menu of the menu bar (*Nœud*), and as the context menu of the empty canvas, which puts the node where the pointer is. A node made this way goes under the selected node and is wired to it, or in the middle of the view, becomes the node the viewport shows, and is selected, so the inspector shows its parameters. An empty network says how to start. The node editor frames the graph when a scene opens, when a file is imported or an example added, and when the first node is made, and keeps it framed as the window settles until the person pans or zooms.
 
 **Interface size.** *Settings > General > Interface Size* (Small, Medium, Large; Medium is the standard size of macOS) scales the drawing of the node editor, the timeline, the spreadsheet (row height and font) and the inspector (text and controls), live and in every window. It is `interfaceSize` in the user defaults (`Sources/InterfaceSize.swift`: `InterfaceSize`, the `uiFont` text styles and `CountFormat`). Counts in the toolbar and the spreadsheet tabs are abbreviated (« 1,03 M points · 1,95 M triangles »).
 
@@ -533,6 +583,7 @@ The tools:
   unsaved changes, unless `discard_changes` is true.
 - `list_node_types`: the type names `create_node` accepts.
 - `create_node`, `delete_node`, `connect_nodes`, `disconnect_nodes`, `set_display_node`: the graph.
+  `create_node` takes the name it is given, or the engine's own (`grid1`), and refuses a taken one.
 - `list_parameters`, `set_parameter`: the parameters of a node, and one to write (a number, an
   integer, a boolean, a string, or an array such as `[1, 2, 3]`), read back after the write.
 - `import_file`: imports a 3D file as a node (see Importing 3D files).

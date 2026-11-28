@@ -3,6 +3,7 @@ version: 1
 name: path
 namespace: helix
 label: Path
+description: "Gives a name path to the shapes passing through, so the nodes after it can find them."
 tags: [utility, naming]
 
 inputs:

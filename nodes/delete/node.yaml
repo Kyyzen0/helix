@@ -3,6 +3,7 @@ version: 1
 name: delete
 namespace: helix
 label: Delete
+description: "Removes the chosen points, faces or other parts of the geometry."
 tags: [delete, group, selection]
 
 inputs:

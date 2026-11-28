@@ -3,6 +3,7 @@ version: 1
 name: boolean
 namespace: helix
 label: Boolean
+description: "Combines two shapes by joining them, cutting one out of the other, or keeping where they overlap."
 tags: [boolean, combine, polygon]
 
 inputs:

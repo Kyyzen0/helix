@@ -187,6 +187,7 @@ final class HelixDocument: ReferenceFileDocument {
         if !pendingOpenedImport { Self.logLaunchDebug() }
         scheduleDebugOpenSecondScene()
         scheduleDebugFramingCheck()
+        scheduleDebugNodeEditCheck()
     }
 
     /// Imports the 3D file this scene was opened for, from where it really is: `url` is what

@@ -339,6 +339,7 @@ void validateKeysForKind(
         "name",
         "namespace",
         "label",
+        "description",
         "tags",
         "implementation",
         "icon",
@@ -354,6 +355,7 @@ void validateKeysForKind(
         "name",
         "namespace",
         "label",
+        "description",
         "tags",
         "implementation",
         "parameterValues",
@@ -426,6 +428,7 @@ NodeManifest NodeManifest::loadFromString(const std::string& yaml)
     nodeType.templates = readParameters(document["parameters"]);
     validateStyles(nodeType.templates);
     nodeType.tags = readTags(document["tags"]);
+    nodeType.description = readString(document, "description");
     nodeType.iconPath = readString(document, "icon");
     nodeType.docsPath = readString(document, "docs");
     nodeType.childScopeType = readString(document, "childScopeType");
@@ -446,6 +449,7 @@ NodeAlias NodeManifest::getNodeAlias(const NodeType& aliasedType) const
     alias.typeNamespace = nodeType_.typeNamespace;
     alias.displayName = nodeType_.displayName;
     alias.tags = nodeType_.tags;
+    alias.description = nodeType_.description;
     alias.aliasedType = std::get<AliasImplementation>(implementation_).aliasedType;
 
     for (const auto& [parameterName, componentValues] : parameterValues_)

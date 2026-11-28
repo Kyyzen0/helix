@@ -6,12 +6,14 @@
 #include "Engine/Async/CookTypes.h"
 #include "Engine/Core/Types.h"
 #include "Engine/Network/NetworkPath.h"
+#include "Engine/Network/NodeReferences.h"
 #include "Engine/Network/Node.h"
 #include "Engine/Network/NodeType.h"
 #include "Engine/Network/NodeTypeTable.h"
 #include "Engine/Network/UpdateLock.h"
 #include "Engine/Parameter/NodeParameter.h"
 #include "Engine/Parameter/Ramp.h"
+#include "Engine/Simulation/KeyframeStore.h"
 #include "Engine/Serializer/ParameterSerializable.h"
 #include "Engine/UndoRedo/ChangeNodeLinkCommand.h"
 #include "Engine/UndoRedo/CreateNodeCommand.h"
@@ -46,7 +48,11 @@ nt::NodeId nt::NetworkManager::createNode(
     NodeId nodeId = network_.reserveNodeId();
     createNodeWithId(nodeId, nodeType, path, position);
 
-    if (alias) applySerializable(getNode(nodeId), alias->parameterValues);
+    if (alias)
+    {
+        applySerializable(getNode(nodeId), alias->parameterValues);
+        getNode(nodeId).setAliasType(alias->getFullName());
+    }
 
     return nodeId;
 }
@@ -103,6 +109,43 @@ void nt::NetworkManager::deleteNode(NodeId nodeId)
 
     network_.deleteNode(nodeId);
     cookCache().purgeNode(nodeId);
+}
+
+void nt::NetworkManager::renameNode(NodeId nodeId, const std::string& newName)
+{
+    Node& node = getNode(nodeId);
+    const Path oldPath = node.getPath();
+    if (oldPath.getName() == newName) return;
+
+    if (!Path::isValidName(newName))
+        throw std::invalid_argument("'" + newName + "' cannot name a node");
+    const Path newPath = oldPath.getParent().append(Path(newName));
+    if (getNodeAtPath(newPath))
+        throw std::invalid_argument("A node named '" + newName + "' already exists");
+    if (getScope(oldPath))
+        throw std::invalid_argument("A node that holds other nodes cannot be renamed");
+
+    // A worker may be reading the paths of the network, so the cook is abandoned first.
+    if (cookSchedulerPtr_)
+    {
+        cookSchedulerPtr_->cancel();
+        waitForCookIdle_();
+    }
+
+    auto updateLock = lockUpdates();
+    node.setPath(newPath);
+    const NodeRenames renames{{oldPath.getString(), newPath.getString()}};
+    rewriteNodeReferences(network_, renames);
+
+    // A parameter that holds keyframes keeps its expression in the store of keyframes until the
+    // last key goes, so the live parameters above do not show it. It is read from the scope of
+    // the node that owns the parameter, as the live expression is.
+    sim::KeyframeStore::instance().rewriteBaseExpressions(
+        [&](const sim::KeyframeTarget& target, const String& expression) -> String {
+            if (!network_.isValidNode(target.nodeId)) return expression;
+            return rewriteNodeReferences(expression, network_.getNode(target.nodeId).getPath().getParent(), renames);
+        }
+    );
 }
 
 void nt::NetworkManager::createNodeWithId(

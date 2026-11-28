@@ -3,6 +3,7 @@ version: 1
 name: copyToPoints
 namespace: helix
 label: Copy To Points
+description: "Places a copy of a shape on every point of another shape."
 tags: [copy, instance, scatter]
 
 inputs:

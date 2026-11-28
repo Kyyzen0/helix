@@ -45,7 +45,7 @@ final class NodeEditorEventView: NSView, NSViewToolTipOwner {
         for area in trackingAreas { removeTrackingArea(area) }
         addTrackingArea(NSTrackingArea(
             rect: .zero,
-            options: [.mouseMoved, .activeInKeyWindow, .inVisibleRect],
+            options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect],
             owner: self
         ))
     }
@@ -89,6 +89,7 @@ final class NodeEditorEventView: NSView, NSViewToolTipOwner {
     private func updateToolTips() {
         removeAllToolTips()
         guard let model else { return }
+        for rect in model.eyeAreas() { addToolTip(rect, owner: self, userData: nil) }
         for area in model.diagnosticAreas() {
             addToolTip(area.rect, owner: self, userData: nil)
         }
@@ -97,6 +98,8 @@ final class NodeEditorEventView: NSView, NSViewToolTipOwner {
     // NSViewToolTipOwner
     func view(_ view: NSView, stringForToolTip tag: NSView.ToolTipTag, point: NSPoint, userData data: UnsafeMutableRawPointer?) -> String {
         guard let model else { return "" }
+        // The eye comes first: it sits on the card, which may carry a message of its own.
+        if model.eyeAreas().contains(where: { $0.contains(point) }) { return String(localized: "Show this result in the 3D view") }
         return model.diagnosticAreas().first { $0.rect.contains(point) }?.text ?? ""
     }
 
@@ -133,6 +136,15 @@ final class NodeEditorEventView: NSView, NSViewToolTipOwner {
 
     override func mouseMoved(with event: NSEvent) {
         model?.mouseMoved(to: point(of: event))
+    }
+
+    // A paste goes under the pointer only while it is over the editor.
+    override func mouseEntered(with event: NSEvent) {
+        model?.pointerInside = true
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        model?.mouseExited()
     }
 
     // The middle button pans.
@@ -183,6 +195,8 @@ final class NodeEditorEventView: NSView, NSViewToolTipOwner {
             model?.deleteSelection()
         case 48 where flags.isEmpty: // tab
             model?.openPalette()
+        case 36 where flags.isEmpty, 76 where flags.isEmpty: // return, enter
+            if model?.soleSelectedNode != nil { model?.beginRename() } else { super.keyDown(with: event) }
         default:
             if flags.isEmpty, event.charactersIgnoringModifiers?.lowercased() == "h" {
                 model?.frameSelection()
@@ -211,28 +225,62 @@ final class NodeEditorEventView: NSView, NSViewToolTipOwner {
         model?.deleteSelection()
     }
 
+    // Copy, Cut and Paste of the Edit menu reach the nodes here, and the text fields keep their
+    // own while they have the keys: the responder chain gives them the command first.
+    @objc func copy(_ sender: Any?) {
+        model?.copySelection()
+    }
+
+    @objc func cut(_ sender: Any?) {
+        model?.cutSelection()
+    }
+
+    @objc func paste(_ sender: Any?) {
+        model?.pasteFromPasteboard()
+    }
+
+    @objc func duplicate(_ sender: Any?) {
+        model?.duplicateSelection()
+    }
+
     // MARK: Context menu
 
     override func menu(for event: NSEvent) -> NSMenu? {
         guard let model else { return nil }
         window?.makeFirstResponder(self)
         let menu = NSMenu()
+        // An item that cannot apply (Paste with nothing to paste) is greyed by the code above, not
+        // by asking the target, which would find the action and enable it.
+        menu.autoenablesItems = false
         switch model.context(at: point(of: event)) {
         case .node(let id):
-            menu.addItem(item(String(localized: "Set Display Node")) { model.setDisplay(id) })
+            menu.addItem(item(String(localized: "Rename…")) { model.beginRename(id) })
+            menu.addItem(item(String(localized: "Duplicate")) { model.duplicateSelection() })
+            menu.addItem(.separator())
+            menu.addItem(item(String(localized: "Copy")) { model.copySelection() })
+            menu.addItem(item(String(localized: "Cut")) { model.cutSelection() })
+            menu.addItem(.separator())
+            menu.addItem(item(String(localized: "Show This Result")) { model.setDisplay(id) })
             menu.addItem(.separator())
             menu.addItem(item(String(localized: "Delete")) { model.deleteSelection() })
         case .link:
             menu.addItem(item(String(localized: "Delete Link")) { model.deleteSelection() })
         case .canvas:
             let anchor = point(of: event)
+            let paste = item(String(localized: "Paste")) { model.pasteFromPasteboard() }
+            paste.isEnabled = model.canPaste
+            menu.addItem(paste)
             menu.addItem(item(String(localized: "Add Node…")) { model.openPalette(at: anchor) })
+            let tidy = item(String(localized: "Tidy Graph")) { model.tidyGraph() }
+            tidy.isEnabled = model.canTidy
+            menu.addItem(tidy)
             menu.addItem(.separator())
             for group in NodeCategory.groups(of: model.paletteTypes) {
                 let submenu = NSMenu()
                 for type in group.types {
                     let entry = item(type.label) { model.addNode(type, at: anchor) }
                     entry.image = NSImage(systemSymbolName: NodeCategory.symbol(of: type), accessibilityDescription: nil)
+                    entry.toolTip = type.description.isEmpty ? nil : type.description
                     submenu.addItem(entry)
                 }
                 let parent = NSMenuItem(title: group.category.title, action: nil, keyEquivalent: "")
@@ -253,5 +301,23 @@ final class NodeEditorEventView: NSView, NSViewToolTipOwner {
 
     @objc private func runMenuAction(_ sender: NSMenuItem) {
         (sender.representedObject as? () -> Void)?()
+    }
+}
+
+// What the Edit menu may do while the editor has the keys: copy and cut need nodes selected, and
+// paste needs nodes on the pasteboard.
+extension NodeEditorEventView: NSUserInterfaceValidations {
+    func validateUserInterfaceItem(_ item: any NSValidatedUserInterfaceItem) -> Bool {
+        guard let model else { return false }
+        switch item.action {
+        case #selector(copy(_:)), #selector(cut(_:)), #selector(delete(_:)), #selector(duplicate(_:)):
+            return !model.selectedNodes.isEmpty
+        case #selector(paste(_:)):
+            return model.canPaste
+        case #selector(selectAll(_:)):
+            return !model.graph.nodes.isEmpty
+        default:
+            return true
+        }
     }
 }

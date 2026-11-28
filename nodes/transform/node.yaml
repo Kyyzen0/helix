@@ -3,6 +3,7 @@ version: 1
 name: transform
 namespace: helix
 label: Transform
+description: "Moves, turns and scales a shape."
 tags: [transform, utility]
 
 inputs:

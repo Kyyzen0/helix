@@ -2023,6 +2023,414 @@
           }
         }
       }
+    },
+    "A name has at most %@ characters.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A name has at most %@ characters."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nom compte au plus %@ caractères."
+          }
+        }
+      }
+    },
+    "A node that holds other nodes cannot be renamed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A node that holds other nodes cannot be renamed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nœud qui contient d’autres nœuds ne peut pas être renommé."
+          }
+        }
+      }
+    },
+    "A node that holds other nodes cannot be copied.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A node that holds other nodes cannot be copied."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nœud qui contient d’autres nœuds ne peut pas être copié."
+          }
+        }
+      }
+    },
+    "Only the nodes at the top of a scene can be copied.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only the nodes at the top of a scene can be copied."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seuls les nœuds du niveau supérieur d’une scène peuvent être copiés."
+          }
+        }
+      }
+    },
+    "There are no nodes to copy.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There are no nodes to copy."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il n’y a aucun nœud à copier."
+          }
+        }
+      }
+    },
+    "There are too many nodes to copy at once.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There are too many nodes to copy at once."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il y a trop de nœuds à copier d’un coup."
+          }
+        }
+      }
+    },
+    "The offset is not a number.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The offset is not a number."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le décalage n’est pas un nombre."
+          }
+        }
+      }
+    },
+    "The text is too large to be a copy of nodes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The text is too large to be a copy of nodes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le texte est trop volumineux pour être une copie de nœuds."
+          }
+        }
+      }
+    },
+    "The text is not a copy of Helix nodes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The text is not a copy of Helix nodes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le texte n’est pas une copie de nœuds Helix."
+          }
+        }
+      }
+    },
+    "The copy was made by another version of Helix and cannot be pasted here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The copy was made by another version of Helix and cannot be pasted here."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La copie a été faite par une autre version de Helix et ne peut pas être collée ici."
+          }
+        }
+      }
+    },
+    "The copy holds no node.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The copy holds no node."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La copie ne contient aucun nœud."
+          }
+        }
+      }
+    },
+    "The copy holds too many nodes to paste.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The copy holds too many nodes to paste."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La copie contient trop de nœuds pour être collée."
+          }
+        }
+      }
+    },
+    "A node that holds other nodes cannot be pasted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A node that holds other nodes cannot be pasted."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nœud qui contient d’autres nœuds ne peut pas être collé."
+          }
+        }
+      }
+    },
+    "Only the nodes at the top of a scene can be pasted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only the nodes at the top of a scene can be pasted."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seuls les nœuds du niveau supérieur d’une scène peuvent être collés."
+          }
+        }
+      }
+    },
+    "A node of the copy has no position.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A node of the copy has no position."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un nœud de la copie n’a pas de position."
+          }
+        }
+      }
+    },
+    "A link of the copy joins nodes that are not in it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A link of the copy joins nodes that are not in it."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un lien de la copie relie des nœuds qui n’en font pas partie."
+          }
+        }
+      }
+    },
+    "A link of the copy leaves an output that does not exist.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A link of the copy leaves an output that does not exist."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un lien de la copie part d’une sortie qui n’existe pas."
+          }
+        }
+      }
+    },
+    "A link of the copy enters an input that does not exist.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A link of the copy enters an input that does not exist."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un lien de la copie arrive sur une entrée qui n’existe pas."
+          }
+        }
+      }
+    },
+    "Two links of the copy enter the same input.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Two links of the copy enter the same input."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deux liens de la copie arrivent sur la même entrée."
+          }
+        }
+      }
+    },
+    "The links of the copy make a loop.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The links of the copy make a loop."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les liens de la copie forment une boucle."
+          }
+        }
+      }
+    },
+    "A keyframe of the copy belongs to no node of it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A keyframe of the copy belongs to no node of it."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une image clé de la copie n’appartient à aucun de ses nœuds."
+          }
+        }
+      }
+    },
+    "A keyframe of the copy has no value.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A keyframe of the copy has no value."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une image clé de la copie n’a pas de valeur."
+          }
+        }
+      }
+    },
+    "A keyframe of the copy has an unknown interpolation.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A keyframe of the copy has an unknown interpolation."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une image clé de la copie a une interpolation inconnue."
+          }
+        }
+      }
+    },
+    "A parameter of the copy has an expression it cannot hold.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A parameter of the copy has an expression it cannot hold."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un paramètre de la copie a une expression qu'il ne peut pas contenir."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

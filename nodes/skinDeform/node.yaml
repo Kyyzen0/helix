@@ -3,6 +3,7 @@ version: 1
 name: skinDeform
 namespace: helix
 label: Skin Deform
+description: "Bends a model to follow the pose of its skeleton."
 tags: [skeleton, skin, deform, animation, rig]
 
 inputs:

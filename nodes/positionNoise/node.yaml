@@ -3,6 +3,7 @@ version: 1
 name: positionNoise
 namespace: helix
 label: Position Noise
+description: "Moves the points of a shape with noise along their normals."
 
 implementation:
   kind: alias
@@ -11,4 +12,5 @@ implementation:
 parameterValues:
   name: Position
   type: vector
+  amplitude: 1
   alongVector: true

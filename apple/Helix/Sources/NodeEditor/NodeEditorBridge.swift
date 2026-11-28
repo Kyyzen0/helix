@@ -27,6 +27,7 @@ enum NodeTypeCatalog {
                 name: name,
                 label: label,
                 tags: tags,
+                description: NodeText.typeDescription(name, fallback: String(engine: info.description)),
                 searchLabels: label == english ? [] : [english],
                 searchTags: tags == englishTags ? [] : englishTags,
                 inputs: info.inputs.enumerated().map { index, port in
@@ -42,6 +43,12 @@ enum NodeTypeCatalog {
         return types
     }
 
+    /// The types a person is offered to add: every type but the test ones. `all` still has them, since
+    /// a scene that holds one has to draw it.
+    static var offered: [EditorNodeType] {
+        all.filter { !$0.isTest }
+    }
+
     static var byName: [String: EditorNodeType] {
         Dictionary(all.map { ($0.name, $0) }, uniquingKeysWith: { first, _ in first })
     }
@@ -55,6 +62,7 @@ enum EditorGraphLoader {
             EditorNode(
                 id: node.id,
                 type: String(engine: node.type),
+                aliasType: String(engine: node.aliasType),
                 name: String(engine: node.name),
                 path: String(engine: node.path),
                 position: CGPoint(x: CGFloat(node.x), y: CGFloat(node.y)),

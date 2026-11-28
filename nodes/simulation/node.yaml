@@ -3,6 +3,7 @@ version: 1
 name: simulation
 namespace: helix
 label: Simulation
+description: "Moves particles over time with forces and springs, frame after frame."
 tags: [simulation, particles, spring, animation]
 
 outputs: 2

@@ -3,6 +3,7 @@ version: 1
 name: cellFracture
 namespace: helix
 label: Cell Fracture
+description: "Breaks a shape into pieces around seed points, like shattered glass."
 tags: [fracture, cell, voronoi, shatter, break, destruction, polygon]
 
 inputs:

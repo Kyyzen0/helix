@@ -11,8 +11,9 @@ namespace helix::nt {
  * A node created from the "helix::mountain" alias is an "helix::attributeNoise" node whose
  * parameters start at the values the alias gives them.
  *
- * @note The node keeps no record of the alias, so its parameters reset to the defaults of
- * its own type.
+ * @note The node keeps the name of the alias it came from (Node::getAliasType), so a person still
+ * sees the entry they picked. Its parameters reset to the defaults of its own type, not to the
+ * alias's values.
  */
 struct NodeAlias
 {
@@ -25,6 +26,9 @@ struct NodeAlias
 
     /// @brief The words the tab menu searches on.
     std::vector<std::string> tags;
+
+    /// @brief One plain sentence saying what the entry makes, empty when there is none.
+    std::string description;
 
     /// @brief The full name of the node type the alias creates, such as "helix::attributeNoise".
     std::string aliasedType;

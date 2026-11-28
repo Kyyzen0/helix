@@ -3,6 +3,7 @@ version: 1
 name: script
 namespace: helix
 label: Script
+description: "Runs a short piece of code on every point, to change the shape in your own way."
 tags: [script, attribute, expression]
 
 inputs:

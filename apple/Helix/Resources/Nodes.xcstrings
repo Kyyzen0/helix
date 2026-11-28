@@ -18,6 +18,23 @@
         }
       }
     },
+    "node.helix::attributeCreate.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adds a named piece of data with a fixed value to the geometry, without changing its shape."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoute à la géométrie une donnée nommée, avec une valeur fixe, sans changer sa forme."
+          }
+        }
+      }
+    },
     "node.helix::attributeCreate.input.0": {
       "extractionState": "manual",
       "localizations": {
@@ -490,6 +507,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bruit d’attribut"
+          }
+        }
+      }
+    },
+    "node.helix::attributeNoise.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roughens the geometry by pushing its points along their normals with noise."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rend la géométrie irrégulière en poussant ses points le long de leurs normales avec du bruit."
           }
         }
       }
@@ -1480,6 +1514,23 @@
         }
       }
     },
+    "node.helix::boolean.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Combines two shapes by joining them, cutting one out of the other, or keeping where they overlap."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Combine deux formes en les réunissant, en retirant l’une de l’autre, ou en gardant leur zone commune."
+          }
+        }
+      }
+    },
     "node.helix::boolean.input.0": {
       "extractionState": "manual",
       "localizations": {
@@ -1650,6 +1701,23 @@
         }
       }
     },
+    "node.helix::camera.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makes a camera that looks at the scene."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crée une caméra qui regarde la scène."
+          }
+        }
+      }
+    },
     "tag.primitive": {
       "extractionState": "manual",
       "localizations": {
@@ -1748,6 +1816,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fracture cellulaire"
+          }
+        }
+      }
+    },
+    "node.helix::cellFracture.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Breaks a shape into pieces around seed points, like shattered glass."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brise une forme en morceaux autour de points de départ, comme du verre qui éclate."
           }
         }
       }
@@ -1969,6 +2054,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cercle"
+          }
+        }
+      }
+    },
+    "node.helix::circle.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makes a circle drawn as a curve."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crée un cercle tracé comme une courbe."
           }
         }
       }
@@ -2347,6 +2449,23 @@
         }
       }
     },
+    "node.helix::copyToPoints.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Places a copy of a shape on every point of another shape."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Place une copie d’une forme sur chaque point d’une autre forme."
+          }
+        }
+      }
+    },
     "node.helix::copyToPoints.input.0": {
       "extractionState": "manual",
       "localizations": {
@@ -2449,6 +2568,23 @@
         }
       }
     },
+    "node.helix::cube.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makes a box."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crée une boîte."
+          }
+        }
+      }
+    },
     "tag.surface": {
       "extractionState": "manual",
       "localizations": {
@@ -2547,6 +2683,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cylindre"
+          }
+        }
+      }
+    },
+    "node.helix::cylinder.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makes a cylinder with a radius and a height."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crée un cylindre avec un rayon et une hauteur."
           }
         }
       }
@@ -3265,6 +3418,23 @@
         }
       }
     },
+    "node.helix::delete.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removes the chosen points, faces or other parts of the geometry."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprime de la géométrie les points, les faces ou les autres éléments choisis."
+          }
+        }
+      }
+    },
     "node.helix::delete.input.0": {
       "extractionState": "manual",
       "localizations": {
@@ -3397,6 +3567,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dupliquer"
+          }
+        }
+      }
+    },
+    "node.helix::duplicate.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makes several copies of a shape, each moved, turned or scaled a little more than the last."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fait plusieurs copies d’une forme, chacune un peu plus déplacée, tournée ou agrandie que la précédente."
           }
         }
       }
@@ -3822,6 +4009,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Extruder"
+          }
+        }
+      }
+    },
+    "node.helix::extrude.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pushes the faces of a shape outward to give it thickness."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pousse les faces d’une forme vers l’extérieur pour lui donner de l’épaisseur."
           }
         }
       }
@@ -4523,6 +4727,23 @@
         }
       }
     },
+    "node.helix::geometryImport.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loads a 3D model from a file on your Mac."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge un modèle 3D depuis un fichier de votre Mac."
+          }
+        }
+      }
+    },
     "tag.import": {
       "extractionState": "manual",
       "localizations": {
@@ -4778,6 +4999,23 @@
         }
       }
     },
+    "node.helix::grid.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makes a flat grid of squares."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crée une grille plane de carrés."
+          }
+        }
+      }
+    },
     "param.helix::grid.size.label": {
       "extractionState": "manual",
       "localizations": {
@@ -4842,6 +5080,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ligne"
+          }
+        }
+      }
+    },
+    "node.helix::line.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makes a straight line between two points."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crée une ligne droite entre deux points."
           }
         }
       }
@@ -5033,6 +5288,23 @@
         }
       }
     },
+    "node.helix::merge.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Joins several shapes into one."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réunit plusieurs formes en une seule."
+          }
+        }
+      }
+    },
     "node.helix::merge.input.0": {
       "extractionState": "manual",
       "localizations": {
@@ -5063,6 +5335,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Modèle : rat"
+          }
+        }
+      }
+    },
+    "node.helix::modelRat.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A test model of a rat, only for checking that models load."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un modèle de rat de test, pour vérifier seulement le chargement des modèles."
           }
         }
       }
@@ -5322,6 +5611,23 @@
         }
       }
     },
+    "node.helix::mountain.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raises hills and mountains on a surface with layered noise."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fait naître des collines et des montagnes sur une surface avec du bruit en couches."
+          }
+        }
+      }
+    },
     "tag.mountain": {
       "extractionState": "manual",
       "localizations": {
@@ -5369,6 +5675,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Normales"
+          }
+        }
+      }
+    },
+    "node.helix::normal.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Works out which way each point faces and stores it as data, without changing the shape."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calcule la direction vers laquelle chaque point est tourné et la garde comme donnée, sans changer la forme."
           }
         }
       }
@@ -5543,6 +5866,23 @@
         }
       }
     },
+    "node.helix::path.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gives a name path to the shapes passing through, so the nodes after it can find them."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Donne un chemin nommé aux formes qui passent, pour que les nœuds suivants les retrouvent."
+          }
+        }
+      }
+    },
     "node.helix::path.input.0": {
       "extractionState": "manual",
       "localizations": {
@@ -5611,6 +5951,23 @@
         }
       }
     },
+    "node.helix::positionNoise.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moves the points of a shape with noise along their normals."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déplace les points d’une forme avec du bruit, le long de leurs normales."
+          }
+        }
+      }
+    },
     "node.helix::script.label": {
       "extractionState": "manual",
       "localizations": {
@@ -5624,6 +5981,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Script"
+          }
+        }
+      }
+    },
+    "node.helix::script.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runs a short piece of code on every point, to change the shape in your own way."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exécute un court morceau de code sur chaque point, pour changer la forme à votre façon."
           }
         }
       }
@@ -5726,6 +6100,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Simulation"
+          }
+        }
+      }
+    },
+    "node.helix::simulation.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moves particles over time with forces and springs, frame after frame."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fait bouger des particules au fil du temps avec des forces et des ressorts, image après image."
           }
         }
       }
@@ -6423,6 +6814,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Onde sinusoïdale"
+          }
+        }
+      }
+    },
+    "node.helix::sineWave.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ripples a surface with a moving sine wave."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fait onduler une surface avec une onde sinusoïdale qui se déplace."
           }
         }
       }
@@ -7141,6 +7549,23 @@
         }
       }
     },
+    "node.helix::skeletonPose.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poses a skeleton by playing one of its animation clips."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Met un squelette en pose en jouant l’un de ses clips d’animation."
+          }
+        }
+      }
+    },
     "node.helix::skeletonPose.input.0": {
       "extractionState": "manual",
       "localizations": {
@@ -7447,6 +7872,23 @@
         }
       }
     },
+    "node.helix::skinDeform.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bends a model to follow the pose of its skeleton."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plie un modèle pour qu’il suive la pose de son squelette."
+          }
+        }
+      }
+    },
     "node.helix::skinDeform.input.0": {
       "extractionState": "manual",
       "localizations": {
@@ -7545,6 +7987,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sphère"
+          }
+        }
+      }
+    },
+    "node.helix::sphere.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makes a ball."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crée une sphère."
           }
         }
       }
@@ -7957,6 +8416,23 @@
         }
       }
     },
+    "node.helix::spiral.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makes a spiral drawn as a curve."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crée une spirale tracée comme une courbe."
+          }
+        }
+      }
+    },
     "tag.helix": {
       "extractionState": "manual",
       "localizations": {
@@ -8361,6 +8837,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Balayage"
+          }
+        }
+      }
+    },
+    "node.helix::sweep.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drags a profile along a curve to make a surface, like a pipe or a rail."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fait glisser un profil le long d’une courbe pour créer une surface, comme un tuyau ou un rail."
           }
         }
       }
@@ -8892,6 +9385,23 @@
         }
       }
     },
+    "node.helix::torus.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makes a ring shaped like a doughnut."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crée un anneau en forme de beignet."
+          }
+        }
+      }
+    },
     "param.helix::torus.placement_divider.label": {
       "extractionState": "manual",
       "localizations": {
@@ -9194,6 +9704,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Transformer"
+          }
+        }
+      }
+    },
+    "node.helix::transform.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moves, turns and scales a shape."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déplace, tourne et change l’échelle d’une forme."
           }
         }
       }

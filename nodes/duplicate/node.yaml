@@ -3,6 +3,7 @@ version: 1
 name: duplicate
 namespace: helix
 label: Duplicate
+description: "Makes several copies of a shape, each moved, turned or scaled a little more than the last."
 tags: [copy, duplicate, transform]
 
 inputs:

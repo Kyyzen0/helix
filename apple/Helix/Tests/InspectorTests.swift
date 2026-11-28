@@ -325,6 +325,8 @@ private final class FakeEditing: InspectorEditing {
     func beginContinuousEdit(named name: String) { calls.append("begin " + name) }
     func endContinuousEdit() { calls.append("end") }
     func setDisplay(_ node: UInt64) -> EditOutcome { calls.append("display"); return .done }
+    var renameError: String?
+    func rename(_ node: UInt64, to name: String) -> EditOutcome { calls.append("rename \(name)"); return EditOutcome(error: renameError) }
 
     private func write(_ edit: InspectorEdit, _ node: UInt64) {
         guard var info = nodes[node]?.parameters[edit.parameter] else { return }
@@ -401,6 +403,51 @@ final class InspectorModelTests: XCTestCase {
         XCTAssertEqual(model.content, .none, "a node that is gone shows nothing")
         model.select(nodes: [8])
         XCTAssertEqual(model.node?.error, "broken")
+    }
+
+    func testTheNameIsEditedInTheHeaderAndTakenWithReturn() {
+        model.select(nodes: [7])
+        model.beginRename()
+        XCTAssertEqual(model.renameDraft, "box")
+        model.renameDraft = "sol"
+        model.commitRename()
+        XCTAssertEqual(editing.calls, ["rename sol"])
+        XCTAssertNil(model.renameDraft)
+        XCTAssertNil(model.renameError)
+    }
+
+    func testEscapeLeavesTheOldName() {
+        model.select(nodes: [7])
+        model.beginRename()
+        model.renameDraft = "sol"
+        model.cancelRename()
+        XCTAssertNil(model.renameDraft)
+        XCTAssertEqual(editing.calls, [])
+    }
+
+    func testANameThatCannotBeTakenStaysWithItsReason() {
+        model.select(nodes: [7])
+        model.beginRename()
+        model.renameDraft = "mon nœud"
+        model.commitRename()
+        XCTAssertEqual(editing.calls, [])
+        XCTAssertNotNil(model.renameError)
+        XCTAssertEqual(model.renameDraft, "mon nœud", "the field keeps what was typed")
+
+        editing.renameError = "A node named 'other' already exists."
+        model.renameDraft = "other"
+        model.renameDraftChanged()
+        XCTAssertNil(model.renameError)
+        model.commitRename()
+        XCTAssertEqual(model.renameError, "A node named 'other' already exists.")
+        XCTAssertEqual(model.renameDraft, "other")
+    }
+
+    func testChangingTheSelectionEndsTheEditing() {
+        model.select(nodes: [7])
+        model.beginRename()
+        model.select(nodes: [8])
+        XCTAssertNil(model.renameDraft)
     }
 
     func testACommittedValueIsOneNamedStep() {

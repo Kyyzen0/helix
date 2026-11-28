@@ -36,6 +36,7 @@
  * how long.
  */
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -171,6 +172,10 @@ struct NodeInfo
     std::string error;
     /// @brief What the last cook of the node warned about. The cook went on in spite of it.
     std::vector<std::string> warnings;
+    /// @brief The alias the node was created from, such as "helix::mountain", or empty when it
+    /// was created from its type. The type above is the type the alias stands for, so a caller
+    /// that wants to show what the person picked reads this first.
+    std::string aliasType;
 };
 
 /// @brief One link, from the output of a node into the input of another.
@@ -221,6 +226,8 @@ struct NodeTypeInfo
     std::string label;
     /// @brief The words a search matches, such as "primitive".
     std::vector<std::string> tags;
+    /// @brief One plain sentence saying what the node does, empty when its node.yaml gives none.
+    std::string description;
     /// @brief The input ports, in the order their inputs run.
     std::vector<PortInfo> inputs;
     /// @brief The number of outputs the node has.
@@ -250,6 +257,71 @@ CreateNodeResult createNode(const std::string& type, const std::string& name, fl
 
 /// @brief Deletes a node and the links it has.
 Status deleteNode(NodeId node);
+
+/// @brief Returns the name a node would get for a wanted name: the wanted name when no node has
+/// it, else the wanted name with the next free number ("grid1" gives "grid2").
+/// @note The one numbering the engine uses (Path::increment) is what a node left unnamed gets,
+/// and createNode refuses a taken name rather than numbering it, so a caller that wants the
+/// numbering of a name it chose asks here first.
+std::string freeNodeName(const std::string& wanted);
+
+/// @brief Gives a node another name.
+///
+/// The name has to be one createNode accepts and no other node may carry it, or the call fails
+/// and nothing changes. Every reference to the node is rewritten, so the scene keeps working:
+/// the prm("name.parameter") calls of the expressions and the scripts of all the nodes, matched
+/// as whole names (renaming "grid1" leaves "grid10" alone). Links, keyframes, the display node
+/// and the ids do not change. Renaming a node to the name it has is a success that does nothing.
+Status renameNode(NodeId node, const std::string& newName);
+
+/// @brief A list of node ids, which gives Swift a name for the vector it hands to copyNodes.
+using NodeIdList = std::vector<NodeId>;
+
+/// @brief The longest name renameNode accepts.
+constexpr std::size_t maxNodeNameLength = 64;
+
+/// @brief The result of copyNodes.
+struct CopyNodesResult
+{
+    Status status;
+    /// @brief The copy, as text a caller can put on a clipboard and give to pasteNodes. The text
+    /// is JSON that starts with a format tag and a version.
+    std::string text;
+};
+
+/// @brief Copies nodes, with what they carry, into text.
+///
+/// The copy holds each node's type (and the alias it was made from), name, position, parameters
+/// (expressions included) and keyframes, and the links between the copied nodes. A link to a
+/// node that is not copied is left out. The scene is not touched. A node that holds other nodes
+/// cannot be copied. At most maxCopiedNodes nodes are copied at once.
+CopyNodesResult copyNodes(const std::vector<NodeId>& nodes);
+
+/// @brief The most nodes copyNodes and pasteNodes handle at once.
+constexpr std::size_t maxCopiedNodes = 2000;
+
+/// @brief The result of pasteNodes.
+struct PasteNodesResult
+{
+    Status status;
+    /// @brief The nodes made, in the order they were copied.
+    std::vector<NodeId> nodes;
+    /// @brief Their names, in the same order.
+    std::vector<std::string> names;
+};
+
+/// @brief Makes the nodes of a copy, at the root of the scene, and selects nothing.
+///
+/// Each node gets a name that is free (the one it had, or the next number up when that is taken),
+/// the position it had moved by the offset, and its parameters and keyframes. The links between
+/// the copied nodes are made again between the new ones, and an expression that read one of the
+/// copied nodes reads its copy. A reference to a node that was not copied is kept as it is. The
+/// display node is not changed.
+///
+/// The paste is all or nothing: text that is not a copy made by copyNodes, that was made by a
+/// newer version, that holds a node type this build does not have, or whose links do not make
+/// sense is refused before anything is made.
+PasteNodesResult pasteNodes(const std::string& text, float offsetX, float offsetY);
 
 /// @brief Wires the output of one node into the input of another.
 /// @note An input that was already wired is rewired.

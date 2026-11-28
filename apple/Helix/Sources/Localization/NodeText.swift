@@ -24,6 +24,11 @@ enum NodeText {
         localized("node.\(type).label", fallback: fallback, in: bundle)
     }
 
+    /// The sentence that says what a node type does.
+    static func typeDescription(_ type: String, fallback: String, in bundle: Bundle = .main) -> String {
+        localized("node.\(type).description", fallback: fallback, in: bundle)
+    }
+
     /// The label of an input port.
     static func inputLabel(_ type: String, index: Int, fallback: String, in bundle: Bundle = .main) -> String {
         localized("node.\(type).input.\(index)", fallback: fallback, in: bundle)

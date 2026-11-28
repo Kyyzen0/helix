@@ -8,6 +8,8 @@ struct EditOutcome {
     var error: String?
     /// The node an edit made, when it made one.
     var createdNode: UInt64?
+    /// The nodes a paste or a duplicate made, in the order they were copied, to be selected.
+    var createdNodes: [UInt64] = []
     /// True when the edit was not made yet: the person is being asked first (see
     /// `GeometryLimits`), and it is made, or not, from the answer. It is no failure.
     var deferred = false
@@ -22,6 +24,27 @@ struct NodeMove: Equatable {
     var position: CGPoint
 }
 
+/// The change a rename makes to the path of a node, which an undo step has to know: the nodes of
+/// a restored scene are found again by path, and the path of the selected node is not the same
+/// before and after the step.
+struct PathChange: Equatable {
+    var from: String
+    var to: String
+
+    /// The path a node has once the change is made.
+    func apply(to path: String) -> String { path == from ? to : path }
+
+    var reversed: PathChange { PathChange(from: to, to: from) }
+}
+
+/// A name being typed for a node, which is not the node's until it is accepted.
+struct RenameSession: Equatable {
+    var node: UInt64
+    var text: String
+    /// Why the name typed cannot be taken, shown beside the field. Nil until a name is refused.
+    var error: String?
+}
+
 /// What the editor asks of the document. Each call is one step of undo, and the document gives
 /// the editor the graph back, through `NodeEditorModel.reload`, before the call returns.
 @MainActor
@@ -34,6 +57,19 @@ protocol NodeEditorEditing: AnyObject {
     func delete(nodes: [UInt64], links: [EditorLink]) -> EditOutcome
     func create(_ type: EditorNodeType, at position: CGPoint, wiredFrom: (node: UInt64, output: Int)?) -> EditOutcome
     func setDisplay(_ node: UInt64) -> EditOutcome
+    /// Gives a node another name, and what reads it by name follows.
+    func rename(_ node: UInt64, to name: String) -> EditOutcome
+    /// Puts the nodes, with the links between them, on the pasteboard.
+    func copy(nodes: [UInt64]) -> EditOutcome
+    /// Copies the nodes and takes them off the scene, as one step.
+    func cut(nodes: [UInt64]) -> EditOutcome
+    /// Makes the nodes of the pasteboard. They go where `canvasPoint` is, or next to where they
+    /// were when it is nil. The outcome says which nodes were made.
+    func paste(at canvasPoint: CGPoint?) -> EditOutcome
+    /// Makes a copy of the nodes next to them, without using the pasteboard.
+    func duplicate(nodes: [UInt64]) -> EditOutcome
+    /// Whether the pasteboard holds nodes.
+    var canPaste: Bool { get }
 }
 
 /// Which keys are held with a click that extends the selection.
@@ -106,6 +142,10 @@ final class NodeEditorModel: ObservableObject {
     /// A refusal of the engine, shown for a few seconds over the editor.
     @Published private(set) var message: String?
     @Published private(set) var palette: PaletteRequest?
+    /// What the pointer rests on: the port whose label shows, the card whose eye shows.
+    @Published var hover = EditorHover()
+    /// The name being typed over a card, when a rename is under way.
+    @Published var renaming: RenameSession?
     /// Every type the palette offers, aliases included.
     @Published var paletteTypes: [EditorNodeType] = []
 
@@ -116,6 +156,9 @@ final class NodeEditorModel: ObservableObject {
     private(set) var viewSize = CGSize.zero
     /// The last place of the pointer in the view, for the palette to open at.
     var pointer: CGPoint?
+    /// Whether the pointer is over the editor now, so a paste goes under it and not next to the
+    /// nodes it was copied from.
+    var pointerInside = false
     /// Whether the graph is to be framed as soon as the view has a size, as a window opens.
     private var framePending = false
     /// Whether the view keeps showing the whole graph as its size settles (a window opening, a
@@ -126,6 +169,9 @@ final class NodeEditorModel: ObservableObject {
     var interfaceScale: CGFloat = 1
 
     private var messageGeneration = 0
+    /// The node whose eye the button went down on, which a click that does not move shows. The
+    /// press is still a press on the card, so a drag from the eye moves the node.
+    private var pressedEye: UInt64?
 
     nonisolated init() {}
 
@@ -241,7 +287,10 @@ final class NodeEditorModel: ObservableObject {
             transform = ViewTransform(offset: CGPoint(x: viewSize.width / 2, y: viewSize.height / 2), zoom: 1)
             return
         }
-        transform = .framing(bounds, in: viewSize, maxFramedZoom: 1.5 * max(interfaceScale, 1))
+        // A graph too large to read whole is shown at the smallest zoom that reads, around the node
+        // the person is looking at: the one shown in the 3D view, or the middle of the selection.
+        let focus = ids == nil ? graph.displayNode.flatMap(graph.node).map(\.position) : nil
+        transform = .framing(bounds, in: viewSize, maxFramedZoom: 1.5 * max(interfaceScale, 1), focus: focus)
     }
 
     /// Pans, if it has to, so the card of a node is in the view.
@@ -259,6 +308,8 @@ final class NodeEditorModel: ObservableObject {
     func mouseDown(at point: CGPoint, clickCount: Int, modifiers: EditorModifiers) {
         pointer = point
         closePalette()
+        hover = EditorHover()
+        pressedEye = nil
         let canvas = transform.canvasPoint(point)
         let extend = modifiers.extendsSelection
 
@@ -279,6 +330,9 @@ final class NodeEditorModel: ObservableObject {
                 return
             }
             let wasSelected = selectedNodes.contains(id)
+            if !extend, let node = graph.node(id), EditorLayout.isOverEye(canvas, of: node, zoom: transform.zoom) {
+                pressedEye = id
+            }
             selectedLinks = []
             if extend {
                 if wasSelected { selectedNodes.remove(id) } else { selectedNodes.insert(id) }
@@ -332,11 +386,17 @@ final class NodeEditorModel: ObservableObject {
         pointer = point
         let ended = interaction
         interaction = .idle
+        defer {
+            pressedEye = nil
+            updateHover(at: point)
+        }
         switch ended {
         case .pressedNode(let id, _, let extend, let wasSelected):
             // A click on one of several selected nodes picks that one alone, once it is clear
             // it was not the start of a drag.
             if !extend, wasSelected, selectedNodes.count > 1 { selectedNodes = [id] }
+            // A click on the eye shows the node, as a double click does.
+            if pressedEye == id, !extend { finish(editing?.setDisplay(id) ?? .done) }
         case .movingNodes(_, let delta):
             guard delta != .zero else { return }
             let moves = graph.nodes.filter { selectedNodes.contains($0.id) }.map {
@@ -352,6 +412,13 @@ final class NodeEditorModel: ObservableObject {
 
     func mouseMoved(to point: CGPoint) {
         pointer = point
+        updateHover(at: point)
+    }
+
+    /// The pointer left the editor, so nothing is hovered any more.
+    func mouseExited() {
+        pointerInside = false
+        updateHover(at: nil)
     }
 
     /// Starts a pan that follows the pointer, for the middle button.

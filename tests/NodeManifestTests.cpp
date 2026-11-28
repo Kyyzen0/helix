@@ -296,6 +296,21 @@ implementation:
     REQUIRE(nodeType.docsPath == "docs.md");
 }
 
+TEST_CASE("A node says in one sentence what it does, and an alias carries the same sentence")
+{
+    const nt::NodeManifest manifest =
+        nt::NodeManifest::loadFromString(kMinimalManifest + "description: Makes a cube.\n");
+    REQUIRE(manifest.getNodeType().description == "Makes a cube.");
+
+    // A manifest without one leaves it empty.
+    REQUIRE(nt::NodeManifest::loadFromString(kMinimalManifest).getNodeType().description.empty());
+
+    const nt::NodeManifest aliasedManifest = nt::NodeManifest::loadFromString(kAliasedManifest);
+    const nt::NodeManifest aliasManifest =
+        nt::NodeManifest::loadFromString(kAliasManifest + "description: Makes hills.\n");
+    REQUIRE(aliasManifest.getNodeAlias(aliasedManifest.getNodeType()).description == "Makes hills.");
+}
+
 TEST_CASE("A node declares the scope it holds inside it")
 {
     const nt::NodeManifest manifest =

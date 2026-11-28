@@ -22,7 +22,7 @@ final class ViewTransformTests: XCTestCase {
     func testZoomIsClamped() {
         let t = ViewTransform()
         XCTAssertEqual(t.zoomed(by: 1000, around: .zero).zoom, 5)
-        XCTAssertEqual(t.zoomed(by: 0.0001, around: .zero).zoom, 0.1, accuracy: 1e-12)
+        XCTAssertEqual(t.zoomed(by: 0.0001, around: .zero).zoom, 0.25, accuracy: 1e-12)
         XCTAssertEqual(t.zoomed(by: -1, around: .zero), t)
     }
 
@@ -228,6 +228,23 @@ final class NodeEditorModelTests: XCTestCase {
             calls.append("create \(t.name) \(at.x),\(at.y) \(wiredFrom?.node ?? 0)"); return EditOutcome(error: nil, createdNode: 99)
         }
         func setDisplay(_ n: UInt64) -> EditOutcome { calls.append("display \(n)"); return .done }
+        var renameError: String?
+        var canPaste = true
+        func rename(_ n: UInt64, to name: String) -> EditOutcome { calls.append("rename \(n) \(name)"); return EditOutcome(error: renameError) }
+        func copy(nodes: [UInt64]) -> EditOutcome { calls.append("copy \(nodes)"); return .done }
+        func cut(nodes: [UInt64]) -> EditOutcome { calls.append("cut \(nodes)"); return .done }
+        func paste(at canvasPoint: CGPoint?) -> EditOutcome {
+            calls.append("paste \(canvasPoint.map { "\($0.x),\($0.y)" } ?? "none")")
+            afterMaking?()
+            return EditOutcome(createdNodes: [41, 42])
+        }
+        /// What the document does before it returns: the editor gets the graph back with the new nodes.
+        var afterMaking: (() -> Void)?
+        func duplicate(nodes: [UInt64]) -> EditOutcome {
+            calls.append("duplicate \(nodes)")
+            afterMaking?()
+            return EditOutcome(createdNodes: [51])
+        }
     }
 
     let cube = EditorNodeType(name: "helix::cube", label: "Cube")
